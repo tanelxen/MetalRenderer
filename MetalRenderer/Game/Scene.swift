@@ -65,15 +65,14 @@ class SandboxScene: Scene
         camera.transform.position.z = 5
 //        camera.transform.position.y = 5
         
-        cruiser = makeSkull()
-        cruiser.transform.rotation.x = Float(-90).radians
-        cruiser.transform.scale = float3(repeating: 0.05)
+        cruiser = makeChest()
+        cruiser.transform.scale = float3(repeating: 0.02)
         cruiser.transform.position.y = -1
         
         sphere = makeSphere()
         sphere.transform.scale = float3(repeating: 0.1)
         
-        light.transform.position = float3(0, 1, 1.5)
+        light.transform.position = float3(0, 2, 2)
         light.setLight(color: float3(0.8, 0.8, 0.2))
         light.setLight(ambientIntensity: 0.4)
         
@@ -110,7 +109,7 @@ class SandboxScene: Scene
     
     private func makeCruiser() -> GameObject
     {
-        let mesh = ModelMesh(modelName: "cruiser")
+        let mesh = Mesh(modelName: "cruiser")
 
         mesh.material.setTexture(.cruiser)
         mesh.material.setMaterial(isLit: true)
@@ -120,7 +119,7 @@ class SandboxScene: Scene
     
     private func makeSkull() -> GameObject
     {
-        let mesh = ModelMesh(modelName: "skull")
+        let mesh = Mesh(modelName: "skull")
 
         mesh.material.setTexture(.skull)
         mesh.material.setMaterial(isLit: true)
@@ -131,10 +130,20 @@ class SandboxScene: Scene
     
     private func makeSphere() -> GameObject
     {
-        let mesh = ModelMesh(modelName: "sphere")
+        let mesh = Mesh(modelName: "sphere")
 
         mesh.material.setMaterial(isLit: false)
         mesh.material.setColor(float4(0.8, 0.8, 0.2, 1.0))
+        
+        return GameObject(mesh: mesh)
+    }
+    
+    private func makeChest() -> GameObject
+    {
+        let mesh = Mesh(modelName: "chest")
+
+        mesh.material.setMaterial(isLit: true)
+        mesh.material.setMaterial(ambient: float3(0.1, 0.1, 0.1))
         
         return GameObject(mesh: mesh)
     }

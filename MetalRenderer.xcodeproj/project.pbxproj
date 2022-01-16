@@ -25,7 +25,6 @@
 		8A0D273B2790BA3900F2D9E6 /* skull.obj in Resources */ = {isa = PBXBuildFile; fileRef = 8A0D27382790BA3900F2D9E6 /* skull.obj */; };
 		8A0D273C2790BA3900F2D9E6 /* skull.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 8A0D27392790BA3900F2D9E6 /* skull.jpg */; };
 		8A0D273D2790BA3900F2D9E6 /* skull.mtl in Resources */ = {isa = PBXBuildFile; fileRef = 8A0D273A2790BA3900F2D9E6 /* skull.mtl */; };
-		8A0D27402790BE9000F2D9E6 /* Mesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A0D273F2790BE9000F2D9E6 /* Mesh.swift */; };
 		8A0D27422790C88300F2D9E6 /* LightNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A0D27412790C88300F2D9E6 /* LightNode.swift */; };
 		8A22EAB3278F735D00A8CD7D /* Engine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A22EAB2278F735D00A8CD7D /* Engine.swift */; };
 		8A22EAB7278F77DC00A8CD7D /* ShaderLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A22EAB6278F77DC00A8CD7D /* ShaderLibrary.swift */; };
@@ -43,6 +42,7 @@
 		8A56D728278E091900D3FE2B /* GameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A56D727278E091900D3FE2B /* GameView.swift */; };
 		8A56D72A278E10F600D3FE2B /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8A56D729278E10F600D3FE2B /* Shaders.metal */; };
 		8A56D72C278E61CD00D3FE2B /* MetalTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A56D72B278E61CD00D3FE2B /* MetalTypes.swift */; };
+		8A672E7B279472DC00703001 /* chest.obj in Resources */ = {isa = PBXBuildFile; fileRef = 8A672E7A279472DC00703001 /* chest.obj */; };
 		8AA6C3EB2792EBB300DCB7B7 /* Transform.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AA6C3EA2792EBB300DCB7B7 /* Transform.swift */; };
 		8AA6C3ED2793111100DCB7B7 /* Material.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AA6C3EC2793111100DCB7B7 /* Material.swift */; };
 		8AA6C3EF27935AC600DCB7B7 /* sphere.obj in Resources */ = {isa = PBXBuildFile; fileRef = 8AA6C3EE27935AC600DCB7B7 /* sphere.obj */; };
@@ -68,7 +68,6 @@
 		8A0D27382790BA3900F2D9E6 /* skull.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = skull.obj; sourceTree = "<group>"; };
 		8A0D27392790BA3900F2D9E6 /* skull.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = skull.jpg; sourceTree = "<group>"; };
 		8A0D273A2790BA3900F2D9E6 /* skull.mtl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = skull.mtl; sourceTree = "<group>"; };
-		8A0D273F2790BE9000F2D9E6 /* Mesh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mesh.swift; sourceTree = "<group>"; };
 		8A0D27412790C88300F2D9E6 /* LightNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LightNode.swift; sourceTree = "<group>"; };
 		8A22EAB2278F735D00A8CD7D /* Engine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Engine.swift; sourceTree = "<group>"; };
 		8A22EAB6278F77DC00A8CD7D /* ShaderLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShaderLibrary.swift; sourceTree = "<group>"; };
@@ -89,6 +88,7 @@
 		8A56D727278E091900D3FE2B /* GameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameView.swift; sourceTree = "<group>"; };
 		8A56D729278E10F600D3FE2B /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		8A56D72B278E61CD00D3FE2B /* MetalTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalTypes.swift; sourceTree = "<group>"; };
+		8A672E7A279472DC00703001 /* chest.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = chest.obj; sourceTree = "<group>"; };
 		8AA6C3EA2792EBB300DCB7B7 /* Transform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transform.swift; sourceTree = "<group>"; };
 		8AA6C3EC2793111100DCB7B7 /* Material.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Material.swift; sourceTree = "<group>"; };
 		8AA6C3EE27935AC600DCB7B7 /* sphere.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = sphere.obj; sourceTree = "<group>"; };
@@ -118,6 +118,7 @@
 		8A0D272C2790A0E900F2D9E6 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				8A672E79279472D200703001 /* Chest */,
 				8A0D273E2790BAC700F2D9E6 /* Cruiser */,
 				8A0D27372790BA1D00F2D9E6 /* Skull */,
 				8A0D272D2790A0FB00F2D9E6 /* PartyPirateParot.png */,
@@ -173,7 +174,6 @@
 			isa = PBXGroup;
 			children = (
 				8A22EAC5278F940600A8CD7D /* Renderable.swift */,
-				8A0D273F2790BE9000F2D9E6 /* Mesh.swift */,
 				8A0D27352790A7A200F2D9E6 /* ModelMesh.swift */,
 				8A22EABF278F880700A8CD7D /* GameObject.swift */,
 				8A22EAC3278F92CD00A8CD7D /* Node.swift */,
@@ -259,6 +259,14 @@
 			path = Library;
 			sourceTree = "<group>";
 		};
+		8A672E79279472D200703001 /* Chest */ = {
+			isa = PBXGroup;
+			children = (
+				8A672E7A279472DC00703001 /* chest.obj */,
+			);
+			path = Chest;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -316,6 +324,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8A672E7B279472DC00703001 /* chest.obj in Resources */,
 				8A0D27332790A56C00F2D9E6 /* cruiser.obj in Resources */,
 				8A0D273D2790BA3900F2D9E6 /* skull.mtl in Resources */,
 				8A0D273B2790BA3900F2D9E6 /* skull.obj in Resources */,
@@ -359,7 +368,6 @@
 				8A56D72C278E61CD00D3FE2B /* MetalTypes.swift in Sources */,
 				8AA6C3EB2792EBB300DCB7B7 /* Transform.swift in Sources */,
 				8A0D272727908D5A00F2D9E6 /* GameTime.swift in Sources */,
-				8A0D27402790BE9000F2D9E6 /* Mesh.swift in Sources */,
 				8A0D27242790808400F2D9E6 /* Sizeable.swift in Sources */,
 				8A0D27422790C88300F2D9E6 /* LightNode.swift in Sources */,
 				8A0D271827901DF100F2D9E6 /* Input.swift in Sources */,
