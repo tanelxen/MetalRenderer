@@ -1,0 +1,52 @@
+//
+//  Types.swift
+//  MetalRenderer
+//
+//  Created by Fedor Artemenkov on 12.01.2022.
+//
+
+import simd
+
+typealias float2 = SIMD2<Float>
+typealias float3 = SIMD3<Float>
+typealias float4 = SIMD4<Float>
+
+struct Vertex: sizeable
+{
+    let position: float3
+    let normal: float3
+    let uv: float2
+}
+
+struct ModelConstants: sizeable
+{
+    var modelMatrix = matrix_identity_float4x4
+}
+
+struct SceneConstants: sizeable
+{
+    var viewMatrix = matrix_identity_float4x4
+    var projectionMatrix = matrix_identity_float4x4
+    var cameraPosition: float3 = .zero
+}
+
+struct MaterialConstants: sizeable
+{
+    var useColor = false
+    var useTexture = false
+    var isLit = false
+    
+    var color: float4 = float4(1.0, 1.0, 1.0, 1.0)
+    var ambient: float3 = float3(0.01, 0.01, 0.01)
+    var diffuse: float3 = float3(1.0, 1.0, 1.0)
+}
+
+struct LightData: sizeable
+{
+    var position: float3 = .zero
+    var color: float3 = float3(1.0, 1.0, 1.0)
+    var brightness: Float = 1.0
+    
+    var ambientIntensity: Float = 1.0
+    var diffuseIntensity: Float = 0.2
+}
