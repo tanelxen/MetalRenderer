@@ -14,8 +14,10 @@ typealias float4 = SIMD4<Float>
 struct Vertex: sizeable
 {
     let position: float3
-    let normal: float3
     let uv: float2
+    
+    let normal: float3
+    let tangent: float3
 }
 
 struct ModelConstants: sizeable
@@ -32,13 +34,13 @@ struct SceneConstants: sizeable
 
 struct MaterialConstants: sizeable
 {
-    var useColor = false
-    var useTexture = false
     var isLit = false
     
     var color: float4 = float4(1.0, 1.0, 1.0, 1.0)
     var ambient: float3 = float3(0.01, 0.01, 0.01)
     var diffuse: float3 = float3(1.0, 1.0, 1.0)
+    var specular: float3 = float3(1.0, 1.0, 1.0)
+    var shininess: Float = 3
 }
 
 struct LightData: sizeable
@@ -47,6 +49,6 @@ struct LightData: sizeable
     var color: float3 = float3(1.0, 1.0, 1.0)
     var brightness: Float = 1.0
     
-    var ambientIntensity: Float = 1.0
-    var diffuseIntensity: Float = 0.2
+    var ambientIntensity: Float = 0.1
+    var diffuseIntensity: Float = 0.5
 }

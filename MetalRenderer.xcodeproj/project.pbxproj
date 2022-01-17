@@ -21,7 +21,7 @@
 		8A0D27322790A56C00F2D9E6 /* cruiser.mtl in Resources */ = {isa = PBXBuildFile; fileRef = 8A0D272F2790A56C00F2D9E6 /* cruiser.mtl */; };
 		8A0D27332790A56C00F2D9E6 /* cruiser.obj in Resources */ = {isa = PBXBuildFile; fileRef = 8A0D27302790A56C00F2D9E6 /* cruiser.obj */; };
 		8A0D27342790A56C00F2D9E6 /* cruiser.bmp in Resources */ = {isa = PBXBuildFile; fileRef = 8A0D27312790A56C00F2D9E6 /* cruiser.bmp */; };
-		8A0D27362790A7A200F2D9E6 /* ModelMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A0D27352790A7A200F2D9E6 /* ModelMesh.swift */; };
+		8A0D27362790A7A200F2D9E6 /* Mesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A0D27352790A7A200F2D9E6 /* Mesh.swift */; };
 		8A0D273B2790BA3900F2D9E6 /* skull.obj in Resources */ = {isa = PBXBuildFile; fileRef = 8A0D27382790BA3900F2D9E6 /* skull.obj */; };
 		8A0D273C2790BA3900F2D9E6 /* skull.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 8A0D27392790BA3900F2D9E6 /* skull.jpg */; };
 		8A0D273D2790BA3900F2D9E6 /* skull.mtl in Resources */ = {isa = PBXBuildFile; fileRef = 8A0D273A2790BA3900F2D9E6 /* skull.mtl */; };
@@ -42,7 +42,14 @@
 		8A56D728278E091900D3FE2B /* GameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A56D727278E091900D3FE2B /* GameView.swift */; };
 		8A56D72A278E10F600D3FE2B /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8A56D729278E10F600D3FE2B /* Shaders.metal */; };
 		8A56D72C278E61CD00D3FE2B /* MetalTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A56D72B278E61CD00D3FE2B /* MetalTypes.swift */; };
+		8A62320F2795BC2B00B1757C /* well-diff.png in Resources */ = {isa = PBXBuildFile; fileRef = 8A62320B2795BC2B00B1757C /* well-diff.png */; };
+		8A6232102795BC2B00B1757C /* well.obj in Resources */ = {isa = PBXBuildFile; fileRef = 8A62320C2795BC2B00B1757C /* well.obj */; };
+		8A6232112795BC2B00B1757C /* well-normal.png in Resources */ = {isa = PBXBuildFile; fileRef = 8A62320D2795BC2B00B1757C /* well-normal.png */; };
+		8A6232132795BC5000B1757C /* well.mtl in Resources */ = {isa = PBXBuildFile; fileRef = 8A6232122795BC5000B1757C /* well.mtl */; };
 		8A672E7B279472DC00703001 /* chest.obj in Resources */ = {isa = PBXBuildFile; fileRef = 8A672E7A279472DC00703001 /* chest.obj */; };
+		8A672E802794CA5900703001 /* Chest_Metal_Base_Color.png in Resources */ = {isa = PBXBuildFile; fileRef = 8A672E7D2794CA5900703001 /* Chest_Metal_Base_Color.png */; };
+		8A672E812794CA5900703001 /* Chest_Wood_Base_Color.png in Resources */ = {isa = PBXBuildFile; fileRef = 8A672E7E2794CA5900703001 /* Chest_Wood_Base_Color.png */; };
+		8A672E852794D5B800703001 /* chest.mtl in Resources */ = {isa = PBXBuildFile; fileRef = 8A672E842794D5B800703001 /* chest.mtl */; };
 		8AA6C3EB2792EBB300DCB7B7 /* Transform.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AA6C3EA2792EBB300DCB7B7 /* Transform.swift */; };
 		8AA6C3ED2793111100DCB7B7 /* Material.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AA6C3EC2793111100DCB7B7 /* Material.swift */; };
 		8AA6C3EF27935AC600DCB7B7 /* sphere.obj in Resources */ = {isa = PBXBuildFile; fileRef = 8AA6C3EE27935AC600DCB7B7 /* sphere.obj */; };
@@ -64,7 +71,7 @@
 		8A0D272F2790A56C00F2D9E6 /* cruiser.mtl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = cruiser.mtl; sourceTree = "<group>"; };
 		8A0D27302790A56C00F2D9E6 /* cruiser.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = cruiser.obj; sourceTree = "<group>"; };
 		8A0D27312790A56C00F2D9E6 /* cruiser.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; path = cruiser.bmp; sourceTree = "<group>"; };
-		8A0D27352790A7A200F2D9E6 /* ModelMesh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelMesh.swift; sourceTree = "<group>"; };
+		8A0D27352790A7A200F2D9E6 /* Mesh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mesh.swift; sourceTree = "<group>"; };
 		8A0D27382790BA3900F2D9E6 /* skull.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = skull.obj; sourceTree = "<group>"; };
 		8A0D27392790BA3900F2D9E6 /* skull.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = skull.jpg; sourceTree = "<group>"; };
 		8A0D273A2790BA3900F2D9E6 /* skull.mtl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = skull.mtl; sourceTree = "<group>"; };
@@ -88,7 +95,14 @@
 		8A56D727278E091900D3FE2B /* GameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameView.swift; sourceTree = "<group>"; };
 		8A56D729278E10F600D3FE2B /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		8A56D72B278E61CD00D3FE2B /* MetalTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalTypes.swift; sourceTree = "<group>"; };
+		8A62320B2795BC2B00B1757C /* well-diff.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "well-diff.png"; sourceTree = "<group>"; };
+		8A62320C2795BC2B00B1757C /* well.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = well.obj; sourceTree = "<group>"; };
+		8A62320D2795BC2B00B1757C /* well-normal.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "well-normal.png"; sourceTree = "<group>"; };
+		8A6232122795BC5000B1757C /* well.mtl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = well.mtl; sourceTree = "<group>"; };
 		8A672E7A279472DC00703001 /* chest.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = chest.obj; sourceTree = "<group>"; };
+		8A672E7D2794CA5900703001 /* Chest_Metal_Base_Color.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Chest_Metal_Base_Color.png; sourceTree = "<group>"; };
+		8A672E7E2794CA5900703001 /* Chest_Wood_Base_Color.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Chest_Wood_Base_Color.png; sourceTree = "<group>"; };
+		8A672E842794D5B800703001 /* chest.mtl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = chest.mtl; sourceTree = "<group>"; };
 		8AA6C3EA2792EBB300DCB7B7 /* Transform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transform.swift; sourceTree = "<group>"; };
 		8AA6C3EC2793111100DCB7B7 /* Material.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Material.swift; sourceTree = "<group>"; };
 		8AA6C3EE27935AC600DCB7B7 /* sphere.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = sphere.obj; sourceTree = "<group>"; };
@@ -118,6 +132,7 @@
 		8A0D272C2790A0E900F2D9E6 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				8A6232092795BC1700B1757C /* Well */,
 				8A672E79279472D200703001 /* Chest */,
 				8A0D273E2790BAC700F2D9E6 /* Cruiser */,
 				8A0D27372790BA1D00F2D9E6 /* Skull */,
@@ -174,7 +189,7 @@
 			isa = PBXGroup;
 			children = (
 				8A22EAC5278F940600A8CD7D /* Renderable.swift */,
-				8A0D27352790A7A200F2D9E6 /* ModelMesh.swift */,
+				8A0D27352790A7A200F2D9E6 /* Mesh.swift */,
 				8A22EABF278F880700A8CD7D /* GameObject.swift */,
 				8A22EAC3278F92CD00A8CD7D /* Node.swift */,
 				8AC1658B278FBB8B00E1816A /* Scene.swift */,
@@ -259,9 +274,23 @@
 			path = Library;
 			sourceTree = "<group>";
 		};
+		8A6232092795BC1700B1757C /* Well */ = {
+			isa = PBXGroup;
+			children = (
+				8A62320B2795BC2B00B1757C /* well-diff.png */,
+				8A62320D2795BC2B00B1757C /* well-normal.png */,
+				8A6232122795BC5000B1757C /* well.mtl */,
+				8A62320C2795BC2B00B1757C /* well.obj */,
+			);
+			path = Well;
+			sourceTree = "<group>";
+		};
 		8A672E79279472D200703001 /* Chest */ = {
 			isa = PBXGroup;
 			children = (
+				8A672E7D2794CA5900703001 /* Chest_Metal_Base_Color.png */,
+				8A672E7E2794CA5900703001 /* Chest_Wood_Base_Color.png */,
+				8A672E842794D5B800703001 /* chest.mtl */,
 				8A672E7A279472DC00703001 /* chest.obj */,
 			);
 			path = Chest;
@@ -325,15 +354,22 @@
 			buildActionMask = 2147483647;
 			files = (
 				8A672E7B279472DC00703001 /* chest.obj in Resources */,
+				8A672E812794CA5900703001 /* Chest_Wood_Base_Color.png in Resources */,
 				8A0D27332790A56C00F2D9E6 /* cruiser.obj in Resources */,
 				8A0D273D2790BA3900F2D9E6 /* skull.mtl in Resources */,
 				8A0D273B2790BA3900F2D9E6 /* skull.obj in Resources */,
 				8A56D71A278E058400D3FE2B /* Assets.xcassets in Resources */,
 				8AA6C3EF27935AC600DCB7B7 /* sphere.obj in Resources */,
+				8A6232102795BC2B00B1757C /* well.obj in Resources */,
 				8A0D273C2790BA3900F2D9E6 /* skull.jpg in Resources */,
+				8A6232132795BC5000B1757C /* well.mtl in Resources */,
 				8A56D71D278E058400D3FE2B /* Main.storyboard in Resources */,
+				8A672E852794D5B800703001 /* chest.mtl in Resources */,
+				8A62320F2795BC2B00B1757C /* well-diff.png in Resources */,
+				8A6232112795BC2B00B1757C /* well-normal.png in Resources */,
 				8A0D272E2790A0FB00F2D9E6 /* PartyPirateParot.png in Resources */,
 				8A0D27322790A56C00F2D9E6 /* cruiser.mtl in Resources */,
+				8A672E802794CA5900703001 /* Chest_Metal_Base_Color.png in Resources */,
 				8A0D27342790A56C00F2D9E6 /* cruiser.bmp in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -356,7 +392,7 @@
 				8A0D271E279043DD00F2D9E6 /* MeshLibrary.swift in Sources */,
 				8A22EAC2278F8BE000A8CD7D /* Renderer.swift in Sources */,
 				8A22EAC4278F92CD00A8CD7D /* Node.swift in Sources */,
-				8A0D27362790A7A200F2D9E6 /* ModelMesh.swift in Sources */,
+				8A0D27362790A7A200F2D9E6 /* Mesh.swift in Sources */,
 				8A56D728278E091900D3FE2B /* GameView.swift in Sources */,
 				8A22EABD278F849D00A8CD7D /* RenderPipelineStateLibrary.swift in Sources */,
 				8A56D718278E058200D3FE2B /* MetalRenderer.xcdatamodeld in Sources */,

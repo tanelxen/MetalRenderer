@@ -50,17 +50,23 @@ struct BasicVertexDescriptor: VertexDescriptor
         descriptor.attributes[0].offset = offset
         offset += float3.size
         
-        // Normal
-        descriptor.attributes[1].format = .float3
+        // UV
+        descriptor.attributes[1].format = .float2
         descriptor.attributes[1].bufferIndex = 0
         descriptor.attributes[1].offset = offset
-        offset += float3.size
+        offset += float2.size
         
-        // UV
-        descriptor.attributes[2].format = .float2
+        // Normal
+        descriptor.attributes[2].format = .float3
         descriptor.attributes[2].bufferIndex = 0
         descriptor.attributes[2].offset = offset
-        offset += float2.size
+        offset += float3.size
+        
+        // Tangent
+        descriptor.attributes[3].format = .float3
+        descriptor.attributes[3].bufferIndex = 0
+        descriptor.attributes[3].offset = offset
+        offset += float3.size
         
         descriptor.layouts[0].stride = Vertex.stride
     }

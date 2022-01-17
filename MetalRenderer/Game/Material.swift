@@ -11,7 +11,17 @@ class Material
 {
     var pipelineStateType: RenderPipelineStateTypes = .basic
     var materialConstants = MaterialConstants()
+    
     var textureType: TextureTypes = .none
+    
+    var baseColorMap: MTLTexture?
+    var normalMap: MTLTexture?
+    
+//    private let vertexFunction: MTLFunction!
+//    private let fragmentFunction: MTLFunction!
+    private var texturesBuffer: MTLBuffer!
+    private var colorTexture: MTLTexture?
+    private var normalTexture: MTLTexture?
 }
 
 extension Material
@@ -19,15 +29,21 @@ extension Material
     func setColor(_ color: float4)
     {
         materialConstants.color = color
-        materialConstants.useColor = true
-        materialConstants.useTexture = false
     }
     
     func setTexture(_ textureType: TextureTypes)
     {
-        materialConstants.useColor = false
-        materialConstants.useTexture = true
         self.textureType = textureType
+    }
+    
+    func setBaseColorMap(_ texture: MTLTexture)
+    {
+        self.baseColorMap = texture
+    }
+    
+    func setNormalMap(_ texture: MTLTexture)
+    {
+        self.normalMap = texture
     }
     
     func setMaterial(isLit: Bool)
@@ -48,12 +64,21 @@ extension Material
         encoder?.setRenderPipelineState(RenderPipelineStateLibrary[pipelineStateType])
         
         // Fragment shader setup
-        encoder?.setFragmentSamplerState(SamplerStateLibrary[.linear], index: 0)
+//        encoder?.setFragmentSamplerState(SamplerStateLibrary[.linear], index: 0)
         encoder?.setFragmentBytes(&materialConstants, length: MaterialConstants.stride, index: 1)
         
-        if materialConstants.useTexture
+        if let texture = self.baseColorMap
+        {
+            encoder?.setFragmentTexture(texture, index: 0)
+        }
+        else if textureType != .none
         {
             encoder?.setFragmentTexture(TextureLibrary[textureType], index: 0)
+        }
+        
+        if let texture = self.normalMap
+        {
+            encoder?.setFragmentTexture(texture, index: 1)
         }
     }
 }

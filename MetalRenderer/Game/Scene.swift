@@ -55,7 +55,7 @@ class Scene: Node
 
 class SandboxScene: Scene
 {
-    var cruiser: GameObject!
+    var well: GameObject!
     var sphere: GameObject!
     
     let light = LightNode()
@@ -63,22 +63,38 @@ class SandboxScene: Scene
     override func build()
     {
         camera.transform.position.z = 5
-//        camera.transform.position.y = 5
+        camera.transform.position.y = 2
         
-        cruiser = makeChest()
-        cruiser.transform.scale = float3(repeating: 0.02)
-        cruiser.transform.position.y = -1
+        well = makeWell()
+        well.transform.position.z = -2
+        well.transform.rotation.y = Float(65).radians
+        
+        let chest = makeChest()
+        chest.transform.scale = float3(repeating: 0.02)
+        chest.transform.position = float3(2, 0, 2)
+        
+        let skull = makeSkull()
+//        skull.transform.scale = float3(repeating: 0.02)
+        skull.transform.rotation.x = Float(-90).radians
+        skull.transform.position = float3(0, 10, 0)
+        
+        chest.addChild(skull)
+        
+        well.addChild(chest)
+        
+//        cruiser.transform.scale = float3(repeating: 0.02)
+//        cruiser.transform.position.y = -1
         
         sphere = makeSphere()
         sphere.transform.scale = float3(repeating: 0.1)
         
-        light.transform.position = float3(0, 2, 2)
-        light.setLight(color: float3(0.8, 0.8, 0.2))
-        light.setLight(ambientIntensity: 0.4)
+        light.transform.position = float3(0, 2, 0)
+        light.setLight(color: float3(0.8, 0.8, 0.8))
+        light.setLight(ambientIntensity: 0.1)
         
         lights.append(light)
         
-        addChild(cruiser)
+        addChild(well)
         addChild(sphere)
         addChild(light)
     }
@@ -90,8 +106,8 @@ class SandboxScene: Scene
             let dx = Mouse.getDX()
             let dy = Mouse.getDY()
             
-            cruiser.transform.rotation.x += dy * GameTime.deltaTime
-            cruiser.transform.rotation.y += dx * GameTime.deltaTime
+            well.transform.rotation.x += dy * GameTime.deltaTime
+            well.transform.rotation.y += dx * GameTime.deltaTime
         }
         
         if Keyboard.isKeyPressed(.q)
@@ -141,6 +157,16 @@ class SandboxScene: Scene
     private func makeChest() -> GameObject
     {
         let mesh = Mesh(modelName: "chest")
+
+        mesh.material.setMaterial(isLit: true)
+        mesh.material.setMaterial(ambient: float3(0.1, 0.1, 0.1))
+        
+        return GameObject(mesh: mesh)
+    }
+    
+    private func makeWell() -> GameObject
+    {
+        let mesh = Mesh(modelName: "well")
 
         mesh.material.setMaterial(isLit: true)
         mesh.material.setMaterial(ambient: float3(0.1, 0.1, 0.1))

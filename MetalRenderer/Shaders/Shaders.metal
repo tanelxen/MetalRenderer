@@ -27,7 +27,12 @@ vertex RasterizerData basic_vertex_shader(
     data.uv = vIn.uv;
     
     data.worldPosition = worldPosition.xyz;
+    
     data.surfaceNormal = (modelConstants.modelMatrix * float4(vIn.normal, 0.0)).xyz;
+    data.surfaceTangent = (modelConstants.modelMatrix * float4(vIn.tangent, 0.0)).xyz;
+    data.surfaceBitangent = (modelConstants.modelMatrix * float4(cross(vIn.normal, vIn.tangent), 0.0)).xyz;
+    
+    
     data.eyeVector = normalize(viewConstants.cameraPosition - data.worldPosition);
     
     return data;
@@ -35,57 +40,65 @@ vertex RasterizerData basic_vertex_shader(
 
 // Fragment Shader
 fragment half4 basic_fragment_shader(
-                                     RasterizerData         data        [[ stage_in ]],
-                                     constant Material      &material   [[ buffer(1) ]],
-                                     constant LightData     *lights     [[ buffer(2) ]],
-                                     constant int           &lightCount [[ buffer(3) ]],
-                                     sampler                sampler2d   [[ sampler(0) ]],
-                                     texture2d<float>       texture     [[ texture(0) ]]
+                                     RasterizerData                     data            [[ stage_in ]],
+                                     constant MaterialConstants         &material       [[ buffer(1) ]],
+                                     constant LightData                 *lights         [[ buffer(2) ]],
+                                     constant int                       &lightCount     [[ buffer(3) ]],
+//                                     sampler                          sampler2d       [[ sampler(0) ]],
+                                     texture2d<float>                   baseColorMap    [[ texture(0) ]],
+                                     texture2d<float>                   normalMap       [[ texture(1) ]]
                                      )
 {
-    float4 color = float4(1,1,1,1);
+    float4 color = material.color;
     
-    if (material.useTexture)
+    constexpr sampler sampler2d(filter::linear, address::repeat);
+    
+    if (!is_null_texture(baseColorMap))
     {
-        color = texture.sample(sampler2d, data.uv);
-    }
-    else if (material.useColor)
-    {
-        color = material.color;
+        color = baseColorMap.sample(sampler2d, data.uv);
     }
     
     if (material.isLit)
     {
         float3 N = normalize(data.surfaceNormal);
-        
+
+        if (!is_null_texture(normalMap))
+        {
+            float3 sampleNormal = normalMap.sample(sampler2d, data.uv).rgb * 2 - 1;
+
+            float3x3 TBN = { data.surfaceTangent, data.surfaceBitangent, data.surfaceNormal };
+
+            N = TBN * sampleNormal;
+        }
+
         float3 totalAmbient = float3(0, 0, 0);
         float3 totalDiffuse = float3(0, 0, 0);
-        
+
         for (int i = 0; i < lightCount; i++)
         {
             LightData light = lights[i];
-            
+
             float3 ambientness = material.ambient * light.ambientIntensity;
             float3 ambientColor = ambientness * light.color * light.brightness;
             totalAmbient += clamp(ambientColor, 0.0, 1.0);
-            
+
             // Освещение по Ламберту в качестве диффузного освещения
             float3 L = normalize(light.position - data.worldPosition);
             float lambertComponent = max(dot(N, L), 0.0);
             float3 diffusiness = material.diffuse * light.diffuseIntensity;
             float3 diffuseLight = diffusiness * lambertComponent * light.color * light.brightness;
-            
-            float shininess = 10;
-            
+
+            float shininess = 30;
+
             // Блики
             float specular = pow(max(dot(reflect(-L, N), data.eyeVector), 0.0), shininess);
             float3 specularLight = light.color * specular;
-            
+
             totalDiffuse += diffuseLight + specularLight;
         }
-        
+
         float3 phongIntensity = clamp(totalAmbient + totalDiffuse, 0.0, 1.0);
-        
+
         color *= float4(phongIntensity, 1.0);
     }
     

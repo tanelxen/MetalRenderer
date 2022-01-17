@@ -11,8 +11,9 @@ using namespace metal;
 struct Vertex
 {
     float3 position [[ attribute(0) ]];
-    float3 normal   [[ attribute(1) ]];
-    float2 uv       [[ attribute(2) ]];
+    float2 uv       [[ attribute(1) ]];
+    float3 normal   [[ attribute(2) ]];
+    float3 tangent  [[ attribute(3) ]];
 };
 
 struct RasterizerData
@@ -22,6 +23,8 @@ struct RasterizerData
     
     float3 worldPosition;
     float3 surfaceNormal;
+    float3 surfaceTangent;
+    float3 surfaceBitangent;
     
     float3 eyeVector;
 };
@@ -38,15 +41,15 @@ struct ModelConstants
     float4x4 modelMatrix;
 };
 
-struct Material
+struct MaterialConstants
 {
-    bool useColor;
-    bool useTexture;
     bool isLit;
     
     float4 color;
     float3 ambient;
     float3 diffuse;
+    float3 specular;
+    float shininess;
 };
 
 struct LightData
