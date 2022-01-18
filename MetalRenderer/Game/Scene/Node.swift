@@ -12,9 +12,11 @@ class Node
     private let name: String
     private let id: String
     
-    let transform = Transform()
+    var transform = Transform()
     
     var children: [Node] = []
+    
+    var frustumTest = true
     
     init(name: String = "Node")
     {
@@ -43,6 +45,11 @@ class Node
     
     func render(with encoder: MTLRenderCommandEncoder?)
     {
+        if frustumTest && !DebugCamera.shared.isPointInFrustum(self.transform.position)
+        {
+            return
+        }
+        
         encoder?.pushDebugGroup("Rendering \(name)")
         
         (self as? Renderable)?.doRender(with: encoder)

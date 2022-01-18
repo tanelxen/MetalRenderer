@@ -10,8 +10,6 @@ import MetalKit
 enum TextureTypes
 {
     case none
-    case partyPirateParot
-    case cruiser
     case skull
 }
 
@@ -21,8 +19,6 @@ enum TextureLibrary
     
     static func initialize()
     {
-        textures.updateValue(Texture("PartyPirateParot"), forKey: .partyPirateParot)
-        textures.updateValue(Texture("cruiser", ext: "bmp"), forKey: .cruiser)
         textures.updateValue(Texture("skull", ext: "jpg", origin: .bottomLeft), forKey: .skull)
     }
     

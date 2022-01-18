@@ -1,0 +1,25 @@
+{
+  "playerPosition": [0.0, 0.7, 5.0],
+  "gameObjects": [
+      {
+        "name": "Well",
+        "mesh": "well",
+        "transform": {
+            "position": [0.0, 0.0, -2.0],
+            "rotation": [0.0, 1.13, 0.0],
+            "scale": [0.3, 0.3, 0.3]
+        },
+        "children": []
+      },
+      {
+          "name": "Terrain",
+          "mesh": "ground_grass",
+          "transform": {
+              "position": [0.0, 0.0, 0.0],
+              "rotation": [0.0, 0.0, 0.0],
+              "scale": [1000.0, 0.0, 1000.0]
+      },
+      "children": []
+    }
+  ]
+}

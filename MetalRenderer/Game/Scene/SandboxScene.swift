@@ -1,57 +1,9 @@
 //
-//  Scene.swift
+//  SandboxScene.swift
 //  MetalRenderer
 //
-//  Created by Fedor Artemenkov on 13.01.2022.
+//  Created by Fedor Artemenkov on 17.01.2022.
 //
-
-import MetalKit
-
-class Scene: Node
-{
-    private var sceneConstants = SceneConstants()
-    let camera = DebugCamera()
-    
-    internal var lights: [LightNode] = []
-    
-    init()
-    {
-        super.init(name: "Scene")
-        build()
-    }
-    
-    func build() { }
-    
-    override func update()
-    {
-        camera.update(deltaTime: GameTime.deltaTime)
-        
-        updateSceneConstants()
-        
-        super.update()
-    }
-    
-    override func render(with encoder: MTLRenderCommandEncoder?)
-    {
-        encoder?.setVertexBytes(&sceneConstants, length: SceneConstants.stride, index: 1)
-        
-        // Lights
-        var lightDatas: [LightData] = lights.map { $0.lightData }
-        var lightCount = lights.count
-        
-        encoder?.setFragmentBytes(&lightDatas, length: LightData.stride * lightCount, index: 2)
-        encoder?.setFragmentBytes(&lightCount, length: Int32.size, index: 3)
-        
-        super.render(with: encoder)
-    }
-    
-    private func updateSceneConstants()
-    {
-        sceneConstants.viewMatrix = camera.viewMatrix
-        sceneConstants.projectionMatrix = camera.projectionMatrix
-        sceneConstants.cameraPosition = camera.transform.position
-    }
-}
 
 class SandboxScene: Scene
 {
@@ -74,7 +26,6 @@ class SandboxScene: Scene
         chest.transform.position = float3(2, 0, 2)
         
         let skull = makeSkull()
-//        skull.transform.scale = float3(repeating: 0.02)
         skull.transform.rotation.x = Float(-90).radians
         skull.transform.position = float3(0, 10, 0)
         
@@ -82,13 +33,12 @@ class SandboxScene: Scene
         
         well.addChild(chest)
         
-//        cruiser.transform.scale = float3(repeating: 0.02)
-//        cruiser.transform.position.y = -1
-        
         sphere = makeSphere()
+        sphere.transform.position = float3(0, 2, 0)
         sphere.transform.scale = float3(repeating: 0.1)
+        sphere.addChild(light)
         
-        light.transform.position = float3(0, 2, 0)
+//        light.transform.position = float3(0, 2, 0)
         light.setLight(color: float3(0.8, 0.8, 0.8))
         light.setLight(ambientIntensity: 0.1)
         
@@ -96,7 +46,7 @@ class SandboxScene: Scene
         
         addChild(well)
         addChild(sphere)
-        addChild(light)
+//        addChild(light)
     }
     
     override func doUpdate()
@@ -112,25 +62,15 @@ class SandboxScene: Scene
         
         if Keyboard.isKeyPressed(.q)
         {
-            light.transform.position.x -= GameTime.deltaTime
+            sphere.transform.position.x -= GameTime.deltaTime
         }
         
         if Keyboard.isKeyPressed(.e)
         {
-            light.transform.position.x += GameTime.deltaTime
+            sphere.transform.position.x += GameTime.deltaTime
         }
         
-        sphere.transform.position = light.transform.position
-    }
-    
-    private func makeCruiser() -> GameObject
-    {
-        let mesh = Mesh(modelName: "cruiser")
-
-        mesh.material.setTexture(.cruiser)
-        mesh.material.setMaterial(isLit: true)
-        
-        return GameObject(mesh: mesh)
+//        sphere.transform.position = light.transform.position
     }
     
     private func makeSkull() -> GameObject
@@ -174,3 +114,4 @@ class SandboxScene: Scene
         return GameObject(mesh: mesh)
     }
 }
+

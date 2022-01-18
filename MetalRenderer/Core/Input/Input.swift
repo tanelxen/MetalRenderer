@@ -90,7 +90,7 @@ enum Mouse
     public static func getDY() -> Float
     {
         let result = mousePositionDelta.y
-//        mousePositionDelta.y = 0
+        mousePositionDelta.y = 0
         return result
     }
     
@@ -98,7 +98,7 @@ enum Mouse
     public static func getDX() -> Float
     {
         let result = mousePositionDelta.x
-//        mousePositionDelta.x = 0
+        mousePositionDelta.x = 0
         return result
     }
     

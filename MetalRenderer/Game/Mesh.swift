@@ -215,11 +215,13 @@ class Submesh
         if let base = texture(for: .baseColor, in: mdlMaterial, textureOrigin: .bottomLeft)
         {
             _material.setBaseColorMap(base)
+            _material.materialConstants.useBaseColorMap = true
         }
         
         if let normal = texture(for: .tangentSpaceNormal, in: mdlMaterial, textureOrigin: .bottomLeft)
         {
             _material.setNormalMap(normal)
+            _material.materialConstants.useNormalMap = true
         }
     }
     
@@ -245,7 +247,7 @@ class Submesh
         {
             _material.materialConstants.color = float4(color, 1.0)
         }
-        
+
         if let ambient = mdlMaterial.property(with: .emission)?.float3Value
         {
             _material.materialConstants.ambient = ambient

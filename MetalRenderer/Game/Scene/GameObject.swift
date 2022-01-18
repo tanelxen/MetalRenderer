@@ -11,9 +11,10 @@ class GameObject: Node
 {
     private var mesh: Mesh
     
-    init(mesh: Mesh)
+    init(name: String = "GameObject", mesh: Mesh)
     {
         self.mesh = mesh
+        super.init(name: name)
     }
 
     override func doUpdate()
@@ -26,6 +27,8 @@ extension GameObject: Renderable
 {
     func doRender(with encoder: MTLRenderCommandEncoder?)
     {
+        mesh.transform = transform.matrix
+        
         mesh.doRender(with: encoder)
     }
 }

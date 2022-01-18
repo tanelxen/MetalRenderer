@@ -28,9 +28,9 @@ vertex RasterizerData basic_vertex_shader(
     
     data.worldPosition = worldPosition.xyz;
     
-    data.surfaceNormal = (modelConstants.modelMatrix * float4(vIn.normal, 0.0)).xyz;
-    data.surfaceTangent = (modelConstants.modelMatrix * float4(vIn.tangent, 0.0)).xyz;
-    data.surfaceBitangent = (modelConstants.modelMatrix * float4(cross(vIn.normal, vIn.tangent), 0.0)).xyz;
+    data.surfaceNormal = normalize(modelConstants.modelMatrix * float4(vIn.normal, 0.0)).xyz;
+    data.surfaceTangent = normalize(modelConstants.modelMatrix * float4(vIn.tangent, 0.0)).xyz;
+    data.surfaceBitangent = normalize(modelConstants.modelMatrix * float4(cross(vIn.normal, vIn.tangent), 0.0)).xyz;
     
     
     data.eyeVector = normalize(viewConstants.cameraPosition - data.worldPosition);
@@ -53,7 +53,7 @@ fragment half4 basic_fragment_shader(
     
     constexpr sampler sampler2d(filter::linear, address::repeat);
     
-    if (!is_null_texture(baseColorMap))
+    if (material.useBaseColorMap)
     {
         color = baseColorMap.sample(sampler2d, data.uv);
     }
@@ -62,7 +62,7 @@ fragment half4 basic_fragment_shader(
     {
         float3 N = normalize(data.surfaceNormal);
 
-        if (!is_null_texture(normalMap))
+        if (material.useNormalMap)
         {
             float3 sampleNormal = normalMap.sample(sampler2d, data.uv).rgb * 2 - 1;
 

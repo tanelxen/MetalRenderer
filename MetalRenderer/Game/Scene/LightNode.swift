@@ -11,6 +11,8 @@ class LightNode: Node
 {
     private (set) var lightData = LightData()
     
+    private var my_matrix: matrix_float4x4 = matrix_identity_float4x4
+    
     override init(name: String = "Light")
     {
         super.init(name: name)

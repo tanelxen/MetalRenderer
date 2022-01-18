@@ -44,6 +44,8 @@ struct ModelConstants
 struct MaterialConstants
 {
     bool isLit;
+    bool useBaseColorMap;
+    bool useNormalMap;
     
     float4 color;
     float3 ambient;

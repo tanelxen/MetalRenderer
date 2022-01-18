@@ -13,6 +13,8 @@ class Camera: Node
         matrix_identity_float4x4
     }
     
+    var eyeHeight: Float = 0.8
+    
     var viewMatrix: matrix_float4x4 {
         var matrix = matrix_identity_float4x4
         
@@ -29,8 +31,10 @@ class Camera: Node
 class DebugCamera: Camera
 {
     override var projectionMatrix: matrix_float4x4 {
-        matrix_float4x4.perspective(degreesFov: 45, aspectRatio: Renderer.aspectRatio, near: 0.1, far: 1000)
+        matrix_float4x4.perspective(degreesFov: 45, aspectRatio: Renderer.aspectRatio, near: 0.01, far: 100)
     }
+    
+    static var shared = DebugCamera()
     
     var movementSpeed: Float = 3.0
     var rotateSpeed: Float = 20
@@ -50,6 +54,8 @@ class DebugCamera: Camera
 
         return normalize(dir)
     }
+    
+    private var frustumPlanes: [Plane] = []
     
     override var viewMatrix: matrix_float4x4 {
         return getViewMatrix()
@@ -90,15 +96,19 @@ class DebugCamera: Camera
         {
             pitch -= Mouse.getDY() * rotateSpeed * deltaTime
             yaw += Mouse.getDX() * rotateSpeed * deltaTime
-            
+
             if pitch > 89.0 {
                 pitch = 89.0
             }
-            
+
             if pitch < -89.0 {
                 pitch = -89.0
             }
         }
+        
+        transform.position.y = eyeHeight
+        
+        frustumPlanes = DebugCamera.frustumPlanes(from: (projectionMatrix * viewMatrix).transpose)
     }
     
     private func getViewMatrix() -> matrix_float4x4
@@ -106,6 +116,86 @@ class DebugCamera: Camera
 //        return lookAt(eye: transform.position, target: transform.position + direction, up: up)
         return lookAt(eye: transform.position, direction: direction, up: up)
     }
+    
+//    func isPointInFrustum(_ point: float3) -> Bool
+//    {
+//        let vecToPoint: float3 = normalize(point - transform.position)
+//        let forward = self.direction
+//
+//        let dot = simd_dot(vecToPoint, forward)
+//
+//        let angle = acos(dot).degrees
+//
+//        return angle < 45
+//    }
+    
+    func isPointInFrustum(_ point: float3) -> Bool
+    {
+        for plane in frustumPlanes
+        {
+            let distance = plane.normal.x * point.x + plane.normal.y * point.y + plane.normal.z * point.z + plane.distance
+            
+            if distance <= 0 { return false }
+        }
+
+       return true
+    }
+    
+    static func frustumPlanes(from mat: matrix_float4x4) -> [Plane]
+    {
+        let p: [Plane] = [
+            normalizePlane(
+                mat[3][0] + mat[0][0],
+                mat[3][1] + mat[0][1],
+                mat[3][2] + mat[0][2],
+                mat[3][3] + mat[0][3]), // left
+            
+            normalizePlane(
+                mat[3][0] - mat[0][0],
+                mat[3][1] - mat[0][1],
+                mat[3][2] - mat[0][2],
+                mat[3][3] - mat[0][3]), // right
+            
+            normalizePlane(
+                mat[3][0] - mat[1][0],
+                mat[3][1] - mat[1][1],
+                mat[3][2] - mat[1][2],
+                mat[3][3] - mat[1][3]), // top
+            
+            normalizePlane(
+                mat[3][0] + mat[1][0],
+                mat[3][1] + mat[1][1],
+                mat[3][2] + mat[1][2],
+                mat[3][3] + mat[1][3]), // bottom
+            
+            normalizePlane(
+                mat[3][0] + mat[2][0],
+                mat[3][1] + mat[2][1],
+                mat[3][2] + mat[2][2],
+                mat[3][3] + mat[2][3]), // near
+            
+            normalizePlane(
+                mat[3][0] - mat[2][0],
+                mat[3][1] - mat[2][1],
+                mat[3][2] - mat[2][2],
+                mat[3][3] - mat[2][3])  // far
+        ]
+        
+        return p
+    }
+    
+    static func normalizePlane(_ A: Float, _ B: Float, _ C: Float, _ D: Float) -> Plane
+    {
+        let nf: Float = 1.0 / sqrt(A * A + B * B + C * C)
+
+        return Plane(normal: float3(nf * A, nf * B, nf * C), distance: nf * D)
+    }
+}
+
+struct Plane
+{
+    var normal: float3
+    var distance: Float
 }
 
 /**

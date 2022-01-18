@@ -35,6 +35,8 @@ struct SceneConstants: sizeable
 struct MaterialConstants: sizeable
 {
     var isLit = false
+    var useBaseColorMap = false
+    var useNormalMap = false
     
     var color: float4 = float4(1.0, 1.0, 1.0, 1.0)
     var ambient: float3 = float3(0.01, 0.01, 0.01)
@@ -47,8 +49,8 @@ struct LightData: sizeable
 {
     var position: float3 = .zero
     var color: float3 = float3(1.0, 1.0, 1.0)
-    var brightness: Float = 1.0
+    var brightness: Float = 0.9
     
-    var ambientIntensity: Float = 0.1
-    var diffuseIntensity: Float = 0.5
+    var ambientIntensity: Float = 0.5
+    var diffuseIntensity: Float = 0.9
 }

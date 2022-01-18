@@ -16,7 +16,7 @@ class Renderer: NSObject
         return screenSize.x / screenSize.y
     }
     
-    private let scene = SandboxScene()
+    private let scene = ForestScene()
     
     init(view: MTKView)
     {
