@@ -34,13 +34,9 @@ class ForestScene: Scene
             gameObject.transform.rotation = node.transform.rotation
             gameObject.transform.scale = node.transform.scale
             
-            gameObject.frustumTest = false
-            
             addChild(gameObject)
         }
-        
-        
-//        let radius: Float = 10
+
         
         let pines: [Mesh] = [
             Mesh(modelName: "tree_pineTallA_detailed"),
@@ -48,7 +44,7 @@ class ForestScene: Scene
             Mesh(modelName: "tree_pineRoundC")
         ]
 
-        for i in 0..<1000
+        for i in 0..<5000
         {
             guard let mesh = pines.randomElement() else { continue }
             
@@ -74,7 +70,7 @@ class ForestScene: Scene
             Mesh(modelName: "flower_yellowA")
         ]
 
-        for i in 0..<2000
+        for i in 0..<5000
         {
             guard let mesh = flowers.randomElement() else { continue }
             
@@ -93,6 +89,18 @@ class ForestScene: Scene
         light.transform.position = float3(0, 100, 100)
         lights.append(light)
         addChild(light)
+        
+        updateTransform()
+    }
+    
+    override func update()
+    {
+        let start = CFAbsoluteTimeGetCurrent()
+        
+        super.update()
+
+        let diff = (CFAbsoluteTimeGetCurrent() - start) * 1000
+        print("Took \(diff) ms")
     }
     
     override func doUpdate()

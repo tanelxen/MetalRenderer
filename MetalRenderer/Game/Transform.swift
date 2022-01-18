@@ -15,17 +15,20 @@ class Transform
     
     var parent = matrix_identity_float4x4
     
-    var matrix: matrix_float4x4 {
-        var matrix = parent
+    private var _matrix: matrix_float4x4 = matrix_identity_float4x4
+    
+    var matrix: matrix_float4x4 { _matrix }
+    
+    func updateModelMatrix()
+    {
+        _matrix = parent
         
-        matrix.translate(direction: position)
+        _matrix.translate(direction: position)
         
-        matrix.rotate(angle: rotation.x, axis: .x_axis)
-        matrix.rotate(angle: rotation.y, axis: .y_axis)
-        matrix.rotate(angle: rotation.z, axis: .z_axis)
+        _matrix.rotate(angle: rotation.x, axis: .x_axis)
+        _matrix.rotate(angle: rotation.y, axis: .y_axis)
+        _matrix.rotate(angle: rotation.z, axis: .z_axis)
         
-        matrix.scale(axis: scale)
-        
-        return matrix
+        _matrix.scale(axis: scale)
     }
 }

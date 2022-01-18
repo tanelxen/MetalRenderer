@@ -31,8 +31,10 @@ class Camera: Node
 class DebugCamera: Camera
 {
     override var projectionMatrix: matrix_float4x4 {
-        matrix_float4x4.perspective(degreesFov: 45, aspectRatio: Renderer.aspectRatio, near: 0.01, far: 100)
+        _projectionMatrix
     }
+    
+    private var _projectionMatrix: matrix_float4x4 = matrix_identity_float4x4
     
     static var shared = DebugCamera()
     
@@ -86,11 +88,7 @@ class DebugCamera: Camera
             transform.position += right * (movementSpeed * deltaTime)
         }
         
-//        if Mouse.IsMouseButtonPressed(.right)
-//        {
-//            transform.rotation.y += Mouse.getDX() * rotateSpeed * deltaTime
-//            transform.rotation.x += Mouse.getDY() * rotateSpeed * deltaTime
-//        }
+        transform.position.y = eyeHeight
         
         if Mouse.IsMouseButtonPressed(.right)
         {
@@ -106,9 +104,9 @@ class DebugCamera: Camera
             }
         }
         
-        transform.position.y = eyeHeight
+        _projectionMatrix = matrix_float4x4.perspective(degreesFov: 45, aspectRatio: Renderer.aspectRatio, near: 0.01, far: 50)
         
-        frustumPlanes = DebugCamera.frustumPlanes(from: (projectionMatrix * viewMatrix).transpose)
+        frustumPlanes = DebugCamera.frustumPlanes(from: (_projectionMatrix * viewMatrix).transpose)
     }
     
     private func getViewMatrix() -> matrix_float4x4
@@ -117,19 +115,7 @@ class DebugCamera: Camera
         return lookAt(eye: transform.position, direction: direction, up: up)
     }
     
-//    func isPointInFrustum(_ point: float3) -> Bool
-//    {
-//        let vecToPoint: float3 = normalize(point - transform.position)
-//        let forward = self.direction
-//
-//        let dot = simd_dot(vecToPoint, forward)
-//
-//        let angle = acos(dot).degrees
-//
-//        return angle < 45
-//    }
-    
-    func isPointInFrustum(_ point: float3) -> Bool
+    func pointInFrustum(_ point: float3) -> Bool
     {
         for plane in frustumPlanes
         {
@@ -139,6 +125,54 @@ class DebugCamera: Camera
         }
 
        return true
+    }
+    
+    func sphereInFrustum(_ point: float3, radius: Float) -> Bool
+    {
+        for plane in frustumPlanes
+        {
+            let distance = plane.normal.x * point.x + plane.normal.y * point.y + plane.normal.z * point.z + plane.distance
+            
+            if distance <= -radius { return false }
+        }
+
+       return true
+    }
+    
+    func boxInFrustum(mins: float3, maxs: float3) -> Bool
+    {
+        // check box outside/inside of frustum
+        for plane in frustumPlanes
+        {
+            var out: Int = 0
+            
+            out += simd_dot(plane.normal, float3(mins.x, mins.y, mins.z)) + plane.distance < 0 ? 1 : 0
+            out += simd_dot(plane.normal, float3(maxs.x, mins.y, mins.z)) + plane.distance < 0 ? 1 : 0
+            out += simd_dot(plane.normal, float3(mins.x, maxs.y, mins.z)) + plane.distance < 0 ? 1 : 0
+            out += simd_dot(plane.normal, float3(maxs.x, maxs.y, mins.z)) + plane.distance < 0 ? 1 : 0
+            
+            out += simd_dot(plane.normal, float3(mins.x, mins.y, maxs.z)) + plane.distance < 0 ? 1 : 0
+            out += simd_dot(plane.normal, float3(maxs.x, mins.y, maxs.z)) + plane.distance < 0 ? 1 : 0
+            out += simd_dot(plane.normal, float3(mins.x, maxs.y, maxs.z)) + plane.distance < 0 ? 1 : 0
+            out += simd_dot(plane.normal, float3(maxs.x, maxs.y, maxs.z)) + plane.distance < 0 ? 1 : 0
+            
+            if out == 8 { return false }
+        }
+
+        return true
+    }
+    
+    func meshInFrustum(vertices: [float3]) -> Bool
+    {
+        for vertex in vertices
+        {
+            if pointInFrustum(vertex)
+            {
+                return true
+            }
+        }
+        
+        return false
     }
     
     static func frustumPlanes(from mat: matrix_float4x4) -> [Plane]

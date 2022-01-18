@@ -36,6 +36,28 @@ extension float4
     }
 }
 
+extension simd_float3
+{
+    /// Более корректно, но медленно
+    public static func * (lhs: simd_float4x4, rhs: simd_float3) -> simd_float3
+    {
+        let result = lhs * simd_float4(rhs.x, rhs.y, rhs.z, 1)
+        return simd_float3(result.x/result.w, result.y/result.w, result.z/result.w)
+    }
+    
+//    static func * (lhs: simd_float4x4, rhs: simd_float3) -> simd_float3
+//    {
+//        let result = lhs * simd_float4(rhs.x, rhs.y, rhs.z, 1)
+//        return simd_float3(result.x, result.y, result.z)
+//    }
+    
+    func translate(_ matrix: inout simd_float4x4) -> simd_float3
+    {
+        let result = matrix * simd_float4(x, y, z, 1)
+        return simd_float3(result.x, result.y, result.z)
+    }
+}
+
 extension matrix_float4x4
 {
     mutating func translate(direction: float3)

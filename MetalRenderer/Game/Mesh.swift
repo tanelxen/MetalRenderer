@@ -25,6 +25,8 @@ class Mesh
     
     private var modelConstants = ModelConstants()
     
+    var boundingBox: MDLAxisAlignedBoundingBox!
+    
     init()
     {
         createMesh()
@@ -107,6 +109,8 @@ class Mesh
             let submesh = Submesh(mtkSubmesh: mtkSubmesh, mdlMaterial: mdlSubmesh.material)
             addSubmesh(submesh)
         }
+        
+        boundingBox = mdlMesh.boundingBox
     }
     
     func setInstanceCount(_ count: Int)

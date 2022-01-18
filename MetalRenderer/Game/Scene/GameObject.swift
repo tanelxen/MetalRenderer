@@ -6,20 +6,22 @@
 //
 
 import MetalKit
+import RealityKit
 
 class GameObject: Node
 {
-    private var mesh: Mesh
+    var mesh: Mesh
     
     init(name: String = "GameObject", mesh: Mesh)
     {
         self.mesh = mesh
         super.init(name: name)
-    }
-
-    override func doUpdate()
-    {
-        mesh.transform = transform.matrix
+        
+        self.minBounds = mesh.boundingBox.minBounds
+        self.maxBounds = mesh.boundingBox.maxBounds
+        
+        let aabb = BoundingBox(min: minBounds, max: maxBounds)
+        self.center = aabb.center
     }
 }
 
