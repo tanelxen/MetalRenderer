@@ -11,6 +11,7 @@ enum ShaderTypes
 {
     case basic
     case skysphere
+    case final
 }
 
 enum ShaderLibrary
@@ -25,6 +26,7 @@ enum ShaderLibrary
         
         shaders.updateValue(BasicShader(), forKey: .basic)
         shaders.updateValue(SkysphereShader(), forKey: .skysphere)
+        shaders.updateValue(FinalShader(), forKey: .final)
     }
     
     static func vertex(_ type: ShaderTypes) -> MTLFunction
@@ -71,6 +73,36 @@ private struct SkysphereShader: Shader
         
         fragment = ShaderLibrary.defaultLibrary.makeFunction(name: "skysphere_fragment_shader")!
         fragment.label = "Skysphere Fragment Shader"
+    }
+}
+
+private struct FinalShader: Shader
+{
+    var vertex: MTLFunction
+    var fragment: MTLFunction
+    
+    init()
+    {
+        vertex = ShaderLibrary.defaultLibrary.makeFunction(name: "final_vertex_shader")!
+        vertex.label = "Final Vertex Shader"
+        
+        fragment = ShaderLibrary.defaultLibrary.makeFunction(name: "final_fragment_shader")!
+        fragment.label = "Final Fragment Shader"
+    }
+}
+
+private struct GBufferShader: Shader
+{
+    var vertex: MTLFunction
+    var fragment: MTLFunction
+    
+    init()
+    {
+        vertex = ShaderLibrary.defaultLibrary.makeFunction(name: "g_buffer_vertex_shader")!
+        vertex.label = "GBuffer Vertex Shader"
+        
+        fragment = ShaderLibrary.defaultLibrary.makeFunction(name: "g_buffer_fragment_shader")!
+        fragment.label = "GBuffer Fragment Shader"
     }
 }
 

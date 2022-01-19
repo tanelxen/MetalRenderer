@@ -10,54 +10,52 @@ import MetalKit
 enum TextureTypes
 {
     case none
+    
+    case baseColorRender
+    case baseDepthRender
+    
     case skull
     case skysphere
 }
 
 enum TextureLibrary
 {
-    private static var textures: [TextureTypes : Texture] = [:]
+    private static var textures: [TextureTypes : MTLTexture] = [:]
     
     static func initialize()
     {
-        textures.updateValue(Texture("skull", ext: "jpg", origin: .bottomLeft), forKey: .skull)
-        textures.updateValue(Texture("clouds2", ext: "jpg", origin: .bottomLeft), forKey: .skysphere)
+        textures.updateValue(
+            TextureLoader("skull", ext: "jpg", origin: .bottomLeft).loadFromBundle(),
+            forKey: .skull
+        )
+        
+        textures.updateValue(
+            TextureLoader("clouds2", ext: "jpg", origin: .bottomLeft).loadFromBundle(),
+            forKey: .skysphere
+        )
+    }
+    
+    static func set(_ texture: MTLTexture, for type: TextureTypes)
+    {
+        textures.updateValue(texture, forKey: .skull)
     }
     
     static subscript(_ type: TextureTypes) -> MTLTexture?
     {
-        return textures[type]?.texture
+        return textures[type]
     }
 }
 
-class Texture
-{
-    private (set) var texture: MTLTexture!
-    
-    init(_ textureName: String, ext: String = "png", origin: MTKTextureLoader.Origin = .topLeft)
-    {
-        let textureLoader = TextureLoader(name: textureName, fileExtension: ext, origin: origin)
-        let texture: MTLTexture = textureLoader.loadFromBundle()
-        
-        setTexture(texture)
-    }
-    
-    private func setTexture(_ texture: MTLTexture)
-    {
-        self.texture = texture
-    }
-}
-
-class TextureLoader
+private class TextureLoader
 {
     private var fileName: String
     private var fileExtension: String
     private var origin: MTKTextureLoader.Origin
     
-    init(name: String, fileExtension: String = "png", origin: MTKTextureLoader.Origin = .topLeft)
+    init(_ name: String, ext: String = "png", origin: MTKTextureLoader.Origin = .topLeft)
     {
         self.fileName = name
-        self.fileExtension = fileExtension
+        self.fileExtension = ext
         self.origin = origin
     }
     

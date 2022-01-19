@@ -10,7 +10,7 @@
 		8A0D271827901DF100F2D9E6 /* Input.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A0D271727901DF100F2D9E6 /* Input.swift */; };
 		8A0D271A27901E2400F2D9E6 /* KeyCodes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A0D271927901E2400F2D9E6 /* KeyCodes.swift */; };
 		8A0D271C279033A100F2D9E6 /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A0D271B279033A100F2D9E6 /* Camera.swift */; };
-		8A0D271E279043DD00F2D9E6 /* MeshLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A0D271D279043DD00F2D9E6 /* MeshLibrary.swift */; };
+		8A0D271E279043DD00F2D9E6 /* SimpleQuad.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A0D271D279043DD00F2D9E6 /* SimpleQuad.swift */; };
 		8A0D272027905E9400F2D9E6 /* DepthStencilStateLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A0D271F27905E9400F2D9E6 /* DepthStencilStateLibrary.swift */; };
 		8A0D272227907F0200F2D9E6 /* Common.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8A0D272127907F0200F2D9E6 /* Common.metal */; };
 		8A0D27242790808400F2D9E6 /* Sizeable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A0D27232790808400F2D9E6 /* Sizeable.swift */; };
@@ -37,6 +37,9 @@
 		8A4205372797AA9D00473A9D /* skysphere.mtl in Resources */ = {isa = PBXBuildFile; fileRef = 8A4205362797AA9D00473A9D /* skysphere.mtl */; };
 		8A4205392797AED500473A9D /* clouds2.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 8A4205382797AED500473A9D /* clouds2.jpg */; };
 		8A42053B2797B03400473A9D /* SkySphere.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8A42053A2797B03400473A9D /* SkySphere.metal */; };
+		8A42053D27981D2F00473A9D /* Final.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8A42053C27981D2F00473A9D /* Final.metal */; };
+		8A42053F279820C500473A9D /* quad.obj in Resources */ = {isa = PBXBuildFile; fileRef = 8A42053E279820C500473A9D /* quad.obj */; };
+		8A42054127983E9F00473A9D /* GameViewBasic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A42054027983E9F00473A9D /* GameViewBasic.swift */; };
 		8A56D713278E058200D3FE2B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A56D712278E058200D3FE2B /* AppDelegate.swift */; };
 		8A56D718278E058200D3FE2B /* MetalRenderer.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 8A56D716278E058200D3FE2B /* MetalRenderer.xcdatamodeld */; };
 		8A56D71A278E058400D3FE2B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8A56D719278E058400D3FE2B /* Assets.xcassets */; };
@@ -80,7 +83,7 @@
 		8A0D271727901DF100F2D9E6 /* Input.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Input.swift; sourceTree = "<group>"; };
 		8A0D271927901E2400F2D9E6 /* KeyCodes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyCodes.swift; sourceTree = "<group>"; };
 		8A0D271B279033A100F2D9E6 /* Camera.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Camera.swift; sourceTree = "<group>"; };
-		8A0D271D279043DD00F2D9E6 /* MeshLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeshLibrary.swift; sourceTree = "<group>"; };
+		8A0D271D279043DD00F2D9E6 /* SimpleQuad.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleQuad.swift; sourceTree = "<group>"; };
 		8A0D271F27905E9400F2D9E6 /* DepthStencilStateLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DepthStencilStateLibrary.swift; sourceTree = "<group>"; };
 		8A0D272127907F0200F2D9E6 /* Common.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Common.metal; sourceTree = "<group>"; };
 		8A0D27232790808400F2D9E6 /* Sizeable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sizeable.swift; sourceTree = "<group>"; };
@@ -107,6 +110,9 @@
 		8A4205362797AA9D00473A9D /* skysphere.mtl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = skysphere.mtl; sourceTree = "<group>"; };
 		8A4205382797AED500473A9D /* clouds2.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = clouds2.jpg; sourceTree = "<group>"; };
 		8A42053A2797B03400473A9D /* SkySphere.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = SkySphere.metal; sourceTree = "<group>"; };
+		8A42053C27981D2F00473A9D /* Final.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Final.metal; sourceTree = "<group>"; };
+		8A42053E279820C500473A9D /* quad.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = quad.obj; sourceTree = "<group>"; };
+		8A42054027983E9F00473A9D /* GameViewBasic.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameViewBasic.swift; sourceTree = "<group>"; };
 		8A56D70F278E058200D3FE2B /* MetalRenderer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MetalRenderer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8A56D712278E058200D3FE2B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		8A56D717278E058200D3FE2B /* MetalRenderer.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = MetalRenderer.xcdatamodel; sourceTree = "<group>"; };
@@ -178,6 +184,7 @@
 				8A672E79279472D200703001 /* Chest */,
 				8A0D27372790BA1D00F2D9E6 /* Skull */,
 				8AA6C3EE27935AC600DCB7B7 /* sphere.obj */,
+				8A42053E279820C500473A9D /* quad.obj */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -197,6 +204,7 @@
 			children = (
 				8A22EAC1278F8BE000A8CD7D /* Renderer.swift */,
 				8A56D727278E091900D3FE2B /* GameView.swift */,
+				8A42054027983E9F00473A9D /* GameViewBasic.swift */,
 				8A56D71B278E058400D3FE2B /* Main.storyboard */,
 			);
 			path = Display;
@@ -211,6 +219,7 @@
 				8A56D72B278E61CD00D3FE2B /* MetalTypes.swift */,
 				8A22EAB2278F735D00A8CD7D /* Engine.swift */,
 				8A0D272627908D5A00F2D9E6 /* GameTime.swift */,
+				8A0D271D279043DD00F2D9E6 /* SimpleQuad.swift */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -235,6 +244,7 @@
 				8A56D729278E10F600D3FE2B /* Shaders.metal */,
 				8A62323C2796282F00B1757C /* Instanced.metal */,
 				8A42053A2797B03400473A9D /* SkySphere.metal */,
+				8A42053C27981D2F00473A9D /* Final.metal */,
 			);
 			path = Shaders;
 			sourceTree = "<group>";
@@ -312,12 +322,11 @@
 		8A56D726278E085400D3FE2B /* Library */ = {
 			isa = PBXGroup;
 			children = (
-				8A22EAB6278F77DC00A8CD7D /* ShaderLibrary.swift */,
 				8A22EAB8278F7E7100A8CD7D /* VertexDescriptorLibrary.swift */,
 				8A22EABC278F849D00A8CD7D /* RenderPipelineStateLibrary.swift */,
+				8A22EAB6278F77DC00A8CD7D /* ShaderLibrary.swift */,
 				8A0D271F27905E9400F2D9E6 /* DepthStencilStateLibrary.swift */,
 				8A0D272A27909C6900F2D9E6 /* SamplerStateLibrary.swift */,
-				8A0D271D279043DD00F2D9E6 /* MeshLibrary.swift */,
 				8A0D27282790981F00F2D9E6 /* TextureLibrary.swift */,
 			);
 			path = Library;
@@ -474,6 +483,7 @@
 				8A42053527975B9F00473A9D /* skysphere.obj in Resources */,
 				8A0D273B2790BA3900F2D9E6 /* skull.obj in Resources */,
 				8A56D71A278E058400D3FE2B /* Assets.xcassets in Resources */,
+				8A42053F279820C500473A9D /* quad.obj in Resources */,
 				8A62322E2796064300B1757C /* tree_pineDefaultB.mtl in Resources */,
 				8AA6C3EF27935AC600DCB7B7 /* sphere.obj in Resources */,
 				8A6232102795BC2B00B1757C /* well.obj in Resources */,
@@ -510,12 +520,13 @@
 				8A56D72A278E10F600D3FE2B /* Shaders.metal in Sources */,
 				8A6232192795E01000B1757C /* SandboxScene.swift in Sources */,
 				8A22EAB3278F735D00A8CD7D /* Engine.swift in Sources */,
+				8A42054127983E9F00473A9D /* GameViewBasic.swift in Sources */,
 				8A0D272227907F0200F2D9E6 /* Common.metal in Sources */,
 				8A0D27292790981F00F2D9E6 /* TextureLibrary.swift in Sources */,
 				8A22EAB9278F7E7100A8CD7D /* VertexDescriptorLibrary.swift in Sources */,
 				8AC1658C278FBB8B00E1816A /* Scene.swift in Sources */,
 				8A62323D2796282F00B1757C /* Instanced.metal in Sources */,
-				8A0D271E279043DD00F2D9E6 /* MeshLibrary.swift in Sources */,
+				8A0D271E279043DD00F2D9E6 /* SimpleQuad.swift in Sources */,
 				8A420531279749AF00473A9D /* SkySphere.swift in Sources */,
 				8A22EAC2278F8BE000A8CD7D /* Renderer.swift in Sources */,
 				8A22EAC4278F92CD00A8CD7D /* Node.swift in Sources */,
@@ -529,6 +540,7 @@
 				8A0D272027905E9400F2D9E6 /* DepthStencilStateLibrary.swift in Sources */,
 				8A22EAB7278F77DC00A8CD7D /* ShaderLibrary.swift in Sources */,
 				8A6232152795DF4700B1757C /* ForestScene.swift in Sources */,
+				8A42053D27981D2F00473A9D /* Final.metal in Sources */,
 				8A0D272B27909C6900F2D9E6 /* SamplerStateLibrary.swift in Sources */,
 				8A56D72C278E61CD00D3FE2B /* MetalTypes.swift in Sources */,
 				8AA6C3EB2792EBB300DCB7B7 /* Transform.swift in Sources */,

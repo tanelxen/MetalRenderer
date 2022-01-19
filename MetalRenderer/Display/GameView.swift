@@ -20,8 +20,9 @@ class GameView: MTKView
         Engine.ignite(device: device!)
         
         self.clearColor = .init(red: 0.12, green: 0.12, blue: 0.14, alpha: 1.0)
-        self.colorPixelFormat = .bgra8Unorm_srgb
-        self.depthStencilPixelFormat = .depth32Float
+        self.colorPixelFormat = Preferences.colorPixelFormat
+//        self.depthStencilPixelFormat = Preferences.depthStencilPixelFormat
+        self.framebufferOnly = false
         
         renderer = Renderer(view: self)
         

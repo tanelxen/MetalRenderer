@@ -11,6 +11,7 @@ enum RenderPipelineStateTypes
 {
     case basic
     case skysphere
+    case final
 }
 
 enum RenderPipelineStateLibrary
@@ -21,6 +22,7 @@ enum RenderPipelineStateLibrary
     {
         states.updateValue(BasicRenderPipelineState(), forKey: .basic)
         states.updateValue(SkysphereRenderPipelineState(), forKey: .skysphere)
+        states.updateValue(FinalRenderPipelineState(), forKey: .final)
     }
     
     static subscript(_ type: RenderPipelineStateTypes) -> MTLRenderPipelineState
@@ -43,14 +45,15 @@ struct BasicRenderPipelineState: RenderPipelineState
     init()
     {
         let descriptor = MTLRenderPipelineDescriptor()
-        descriptor.colorAttachments[0].pixelFormat = .bgra8Unorm_srgb
-        descriptor.depthAttachmentPixelFormat = .depth32Float
+        descriptor.colorAttachments[0].pixelFormat = Preferences.colorPixelFormat
+        descriptor.colorAttachments[1].pixelFormat = Preferences.colorPixelFormat
+        descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
         
         descriptor.vertexFunction = ShaderLibrary.vertex(.basic)
         descriptor.fragmentFunction = ShaderLibrary.fragment(.basic)
         descriptor.vertexDescriptor = VertexDescriptorLibrary.descriptor(.basic)
         
-        descriptor.label = name
+        descriptor.label = "Basic Render"
         
         state = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
     }
@@ -64,12 +67,34 @@ struct SkysphereRenderPipelineState: RenderPipelineState
     init()
     {
         let descriptor = MTLRenderPipelineDescriptor()
-        descriptor.colorAttachments[0].pixelFormat = .bgra8Unorm_srgb
-        descriptor.depthAttachmentPixelFormat = .depth32Float
+        descriptor.colorAttachments[0].pixelFormat = Preferences.colorPixelFormat
+        descriptor.colorAttachments[1].pixelFormat = Preferences.colorPixelFormat
+        descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
         
         descriptor.vertexFunction = ShaderLibrary.vertex(.skysphere)
         descriptor.fragmentFunction = ShaderLibrary.fragment(.skysphere)
         descriptor.vertexDescriptor = VertexDescriptorLibrary.descriptor(.basic)
+        
+        descriptor.label = "Skysphere Render"
+        
+        state = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
+    }
+}
+
+struct FinalRenderPipelineState: RenderPipelineState
+{
+    var name: String = "Final Render"
+    var state: MTLRenderPipelineState
+    
+    init()
+    {
+        let descriptor = MTLRenderPipelineDescriptor()
+        descriptor.colorAttachments[0].pixelFormat = Preferences.colorPixelFormat
+//        descriptor.colorAttachments[1].pixelFormat = Preferences.colorPixelFormat
+//        descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
+        
+        descriptor.vertexFunction = ShaderLibrary.vertex(.final)
+        descriptor.fragmentFunction = ShaderLibrary.fragment(.final)
         
         descriptor.label = name
         

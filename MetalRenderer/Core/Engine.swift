@@ -27,3 +27,9 @@ enum Engine
         RenderPipelineStateLibrary.initialize()
     }
 }
+
+enum Preferences
+{
+    static let colorPixelFormat: MTLPixelFormat = .bgra8Unorm_srgb
+    static let depthStencilPixelFormat: MTLPixelFormat = .depth32Float
+}

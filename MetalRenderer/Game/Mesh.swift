@@ -89,8 +89,9 @@ class Mesh
         {
             mdlMesh.addTangentBasis(
                 forTextureCoordinateAttributeNamed: MDLVertexAttributeTextureCoordinate,
-                normalAttributeNamed: MDLVertexAttributeNormal,
-                tangentAttributeNamed: MDLVertexAttributeTangent)
+                tangentAttributeNamed: MDLVertexAttributeTangent,
+                bitangentAttributeNamed: MDLVertexAttributeBitangent
+            )
             
             mdlMesh.vertexDescriptor = descriptor
         }
