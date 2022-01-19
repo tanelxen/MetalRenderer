@@ -119,6 +119,8 @@ class Node
     {
         return DebugCamera.shared.boxInFrustum(mins: worldMinBounds, maxs: worldMaxBounds)
 //        return DebugCamera.shared.meshInFrustum(vertices: worldAABBVertices)
+        
+//        return DebugCamera.shared.aabbInFrustum(min: worldMinBounds, max: worldMaxBounds)
     }
     
     private func visibilityBoundingSphere() -> Bool

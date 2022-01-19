@@ -6,7 +6,6 @@
 //
 
 import MetalKit
-import RealityKit
 
 class GameObject: Node
 {
@@ -19,9 +18,7 @@ class GameObject: Node
         
         self.minBounds = mesh.boundingBox.minBounds
         self.maxBounds = mesh.boundingBox.maxBounds
-        
-        let aabb = BoundingBox(min: minBounds, max: maxBounds)
-        self.center = aabb.center
+        self.center = (minBounds + maxBounds) * 0.5
     }
 }
 

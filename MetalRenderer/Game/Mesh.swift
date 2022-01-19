@@ -21,7 +21,7 @@ class Mesh
         }
     }
     
-    var material = Material()
+    var customMaterial: Material?
     
     private var modelConstants = ModelConstants()
     
@@ -138,7 +138,7 @@ class Mesh
         {
             for submesh in _submeshes
             {
-                submesh._material.apply(to: encoder)
+                (customMaterial ?? submesh._material).apply(to: encoder)
                 
                 encoder.drawIndexedPrimitives(type: submesh.primitiveType,
                                               indexCount: submesh.indexCount,
@@ -150,7 +150,7 @@ class Mesh
         }
         else
         {
-            material.apply(to: encoder)
+            customMaterial?.apply(to: encoder)
             
             encoder.drawPrimitives(type: .triangle,
                                    vertexStart: 0,

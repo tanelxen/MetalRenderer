@@ -39,6 +39,7 @@ extension Material
     func setBaseColorMap(_ texture: MTLTexture)
     {
         self.baseColorMap = texture
+        self.materialConstants.useBaseColorMap = true
     }
     
     func setNormalMap(_ texture: MTLTexture)
@@ -64,7 +65,7 @@ extension Material
         encoder?.setRenderPipelineState(RenderPipelineStateLibrary[pipelineStateType])
         
         // Fragment shader setup
-//        encoder?.setFragmentSamplerState(SamplerStateLibrary[.linear], index: 0)
+        encoder?.setFragmentSamplerState(SamplerStateLibrary[.linear], index: 0)
         encoder?.setFragmentBytes(&materialConstants, length: MaterialConstants.stride, index: 1)
         
         if let texture = self.baseColorMap

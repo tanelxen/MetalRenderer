@@ -11,6 +11,7 @@ enum TextureTypes
 {
     case none
     case skull
+    case skysphere
 }
 
 enum TextureLibrary
@@ -20,6 +21,7 @@ enum TextureLibrary
     static func initialize()
     {
         textures.updateValue(Texture("skull", ext: "jpg", origin: .bottomLeft), forKey: .skull)
+        textures.updateValue(Texture("clouds2", ext: "jpg", origin: .bottomLeft), forKey: .skysphere)
     }
     
     static subscript(_ type: TextureTypes) -> MTLTexture?

@@ -22,11 +22,14 @@ class ForestScene: Scene
         camera.transform.position = data.playerPosition
         camera.eyeHeight = data.playerPosition.y
         
+        let skysphere = SkySphere()
+        addChild(skysphere)
+        
         for node in data.gameObjects
         {
             let mesh = Mesh(modelName: node.mesh)
 
-            mesh.material.setMaterial(isLit: true)
+//            mesh.material.setMaterial(isLit: true)
             
             let gameObject = GameObject(name: node.name, mesh: mesh)
             
@@ -44,7 +47,7 @@ class ForestScene: Scene
             Mesh(modelName: "tree_pineRoundC")
         ]
 
-        for i in 0..<5000
+        for i in 0..<1000
         {
             guard let mesh = pines.randomElement() else { continue }
             
@@ -70,7 +73,7 @@ class ForestScene: Scene
             Mesh(modelName: "flower_yellowA")
         ]
 
-        for i in 0..<5000
+        for i in 0..<1000
         {
             guard let mesh = flowers.randomElement() else { continue }
             
@@ -93,15 +96,15 @@ class ForestScene: Scene
         updateTransform()
     }
     
-    override func update()
-    {
-        let start = CFAbsoluteTimeGetCurrent()
-        
-        super.update()
-
-        let diff = (CFAbsoluteTimeGetCurrent() - start) * 1000
-        print("Took \(diff) ms")
-    }
+//    override func update()
+//    {
+//        let start = CFAbsoluteTimeGetCurrent()
+//
+//        super.update()
+//
+//        let diff = (CFAbsoluteTimeGetCurrent() - start) * 1000
+//        print("Took \(diff) ms")
+//    }
     
     override func doUpdate()
     {

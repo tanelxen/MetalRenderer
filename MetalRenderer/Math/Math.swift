@@ -162,3 +162,19 @@ extension matrix_float4x4
         return result
     }
 }
+
+//struct AABB
+//{
+//    var min: float3
+//    var max: float3
+//}
+
+func testAABBPlane(min: float3, max: float3, plane: Plane) -> Bool
+{
+    let c: float3 = (min + max) * 0.5
+    let e: float3 = max - c
+    let r: Float = e.x * abs(plane.normal.x) + e.y * abs(plane.normal.y) + e.x * abs(plane.normal.z)
+    let s: Float = simd_dot(plane.normal, c) - plane.distance
+    
+    return abs(s) <= r
+}

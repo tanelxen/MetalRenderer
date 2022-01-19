@@ -44,14 +44,14 @@ fragment half4 basic_fragment_shader(
                                      constant MaterialConstants         &material       [[ buffer(1) ]],
                                      constant LightData                 *lights         [[ buffer(2) ]],
                                      constant int                       &lightCount     [[ buffer(3) ]],
-//                                     sampler                          sampler2d       [[ sampler(0) ]],
+                                     sampler                            sampler2d       [[ sampler(0) ]],
                                      texture2d<float>                   baseColorMap    [[ texture(0) ]],
                                      texture2d<float>                   normalMap       [[ texture(1) ]]
                                      )
 {
     float4 color = material.color;
     
-    constexpr sampler sampler2d(filter::linear, address::repeat);
+//    constexpr sampler sampler2d(filter::linear, address::repeat);
     
     if (material.useBaseColorMap)
     {

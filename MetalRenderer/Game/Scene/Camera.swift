@@ -104,7 +104,7 @@ class DebugCamera: Camera
             }
         }
         
-        _projectionMatrix = matrix_float4x4.perspective(degreesFov: 45, aspectRatio: Renderer.aspectRatio, near: 0.01, far: 50)
+        _projectionMatrix = matrix_float4x4.perspective(degreesFov: 45, aspectRatio: Renderer.aspectRatio, near: 0.01, far: 500)
         
         frustumPlanes = DebugCamera.frustumPlanes(from: (_projectionMatrix * viewMatrix).transpose)
     }
@@ -160,6 +160,21 @@ class DebugCamera: Camera
         }
 
         return true
+    }
+    
+    func aabbInFrustum(min: float3, max: float3) -> Bool
+    {
+        // check box outside/inside of frustum
+        for plane in frustumPlanes
+        {
+            var out: Int = 0
+            
+            out += testAABBPlane(min: min, max: max, plane: plane) ? 1 : 0
+
+            if out == 8 { return true }
+        }
+
+        return false
     }
     
     func meshInFrustum(vertices: [float3]) -> Bool

@@ -49,7 +49,13 @@ class Scene: Node
     private func updateSceneConstants()
     {
         sceneConstants.viewMatrix = camera.viewMatrix
+        
+        sceneConstants.skyViewMatrix = camera.viewMatrix
+        
+        sceneConstants.skyViewMatrix[3] = .zero
+        
         sceneConstants.projectionMatrix = camera.projectionMatrix
+        
         sceneConstants.cameraPosition = camera.transform.position
     }
 }

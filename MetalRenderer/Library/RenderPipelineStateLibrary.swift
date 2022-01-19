@@ -10,6 +10,7 @@ import MetalKit
 enum RenderPipelineStateTypes
 {
     case basic
+    case skysphere
 }
 
 enum RenderPipelineStateLibrary
@@ -19,6 +20,7 @@ enum RenderPipelineStateLibrary
     static func initialize()
     {
         states.updateValue(BasicRenderPipelineState(), forKey: .basic)
+        states.updateValue(SkysphereRenderPipelineState(), forKey: .skysphere)
     }
     
     static subscript(_ type: RenderPipelineStateTypes) -> MTLRenderPipelineState
@@ -46,6 +48,27 @@ struct BasicRenderPipelineState: RenderPipelineState
         
         descriptor.vertexFunction = ShaderLibrary.vertex(.basic)
         descriptor.fragmentFunction = ShaderLibrary.fragment(.basic)
+        descriptor.vertexDescriptor = VertexDescriptorLibrary.descriptor(.basic)
+        
+        descriptor.label = name
+        
+        state = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
+    }
+}
+
+struct SkysphereRenderPipelineState: RenderPipelineState
+{
+    var name: String = "Skysphere Render Pipeline State"
+    var state: MTLRenderPipelineState
+    
+    init()
+    {
+        let descriptor = MTLRenderPipelineDescriptor()
+        descriptor.colorAttachments[0].pixelFormat = .bgra8Unorm_srgb
+        descriptor.depthAttachmentPixelFormat = .depth32Float
+        
+        descriptor.vertexFunction = ShaderLibrary.vertex(.skysphere)
+        descriptor.fragmentFunction = ShaderLibrary.fragment(.skysphere)
         descriptor.vertexDescriptor = VertexDescriptorLibrary.descriptor(.basic)
         
         descriptor.label = name

@@ -1,0 +1,8 @@
+# 3ds Max Wavefront OBJ Exporter v0.97b - (c)2007 guruware
+# File Created: 21.12.2011 14:29:19
+
+newmtl skysphere
+    Ka 1.0000000 1.0000000 1.0000000
+    Kd 1.0000000 1.0000000 1.0000000
+	map_Ka clouds.png
+	map_Kd clouds.png

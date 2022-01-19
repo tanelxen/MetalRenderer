@@ -76,10 +76,13 @@ class SandboxScene: Scene
     private func makeSkull() -> GameObject
     {
         let mesh = Mesh(modelName: "skull")
-
-        mesh.material.setTexture(.skull)
-        mesh.material.setMaterial(isLit: true)
-        mesh.material.setMaterial(ambient: float3(0.1, 0.1, 0.1))
+        
+        let material = Material()
+        material.setTexture(.skull)
+        material.setMaterial(isLit: true)
+        material.setMaterial(ambient: float3(0.1, 0.1, 0.1))
+        
+        mesh.customMaterial = material
         
         return GameObject(mesh: mesh)
     }
@@ -88,8 +91,11 @@ class SandboxScene: Scene
     {
         let mesh = Mesh(modelName: "sphere")
 
-        mesh.material.setMaterial(isLit: false)
-        mesh.material.setColor(float4(0.8, 0.8, 0.2, 1.0))
+        let material = Material()
+        material.setMaterial(isLit: false)
+        material.setMaterial(ambient: float3(0.1, 0.1, 0.1))
+        
+        mesh.customMaterial = material
         
         return GameObject(mesh: mesh)
     }
@@ -97,9 +103,6 @@ class SandboxScene: Scene
     private func makeChest() -> GameObject
     {
         let mesh = Mesh(modelName: "chest")
-
-        mesh.material.setMaterial(isLit: true)
-        mesh.material.setMaterial(ambient: float3(0.1, 0.1, 0.1))
         
         return GameObject(mesh: mesh)
     }
@@ -107,9 +110,6 @@ class SandboxScene: Scene
     private func makeWell() -> GameObject
     {
         let mesh = Mesh(modelName: "well")
-
-        mesh.material.setMaterial(isLit: true)
-        mesh.material.setMaterial(ambient: float3(0.1, 0.1, 0.1))
         
         return GameObject(mesh: mesh)
     }
