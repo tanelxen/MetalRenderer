@@ -39,7 +39,6 @@
 		8A42053B2797B03400473A9D /* SkySphere.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8A42053A2797B03400473A9D /* SkySphere.metal */; };
 		8A42053D27981D2F00473A9D /* Final.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8A42053C27981D2F00473A9D /* Final.metal */; };
 		8A42053F279820C500473A9D /* quad.obj in Resources */ = {isa = PBXBuildFile; fileRef = 8A42053E279820C500473A9D /* quad.obj */; };
-		8A42054127983E9F00473A9D /* GameViewBasic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A42054027983E9F00473A9D /* GameViewBasic.swift */; };
 		8A56D713278E058200D3FE2B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A56D712278E058200D3FE2B /* AppDelegate.swift */; };
 		8A56D718278E058200D3FE2B /* MetalRenderer.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 8A56D716278E058200D3FE2B /* MetalRenderer.xcdatamodeld */; };
 		8A56D71A278E058400D3FE2B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8A56D719278E058400D3FE2B /* Assets.xcassets */; };
@@ -52,7 +51,6 @@
 		8A6232112795BC2B00B1757C /* well-normal.png in Resources */ = {isa = PBXBuildFile; fileRef = 8A62320D2795BC2B00B1757C /* well-normal.png */; };
 		8A6232132795BC5000B1757C /* well.mtl in Resources */ = {isa = PBXBuildFile; fileRef = 8A6232122795BC5000B1757C /* well.mtl */; };
 		8A6232152795DF4700B1757C /* ForestScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A6232142795DF4600B1757C /* ForestScene.swift */; };
-		8A6232192795E01000B1757C /* SandboxScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A6232182795E01000B1757C /* SandboxScene.swift */; };
 		8A62321C2795F19500B1757C /* forest.json in Resources */ = {isa = PBXBuildFile; fileRef = 8A62321B2795F19500B1757C /* forest.json */; };
 		8A6232202795FA6C00B1757C /* ground_grass.obj in Resources */ = {isa = PBXBuildFile; fileRef = 8A62321E2795FA6C00B1757C /* ground_grass.obj */; };
 		8A6232212795FA6C00B1757C /* ground_grass.mtl in Resources */ = {isa = PBXBuildFile; fileRef = 8A62321F2795FA6C00B1757C /* ground_grass.mtl */; };
@@ -112,7 +110,7 @@
 		8A42053A2797B03400473A9D /* SkySphere.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = SkySphere.metal; sourceTree = "<group>"; };
 		8A42053C27981D2F00473A9D /* Final.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Final.metal; sourceTree = "<group>"; };
 		8A42053E279820C500473A9D /* quad.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = quad.obj; sourceTree = "<group>"; };
-		8A42054027983E9F00473A9D /* GameViewBasic.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameViewBasic.swift; sourceTree = "<group>"; };
+		8A42054427987C3500473A9D /* MetalRenderer-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MetalRenderer-Bridging-Header.h"; sourceTree = "<group>"; };
 		8A56D70F278E058200D3FE2B /* MetalRenderer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MetalRenderer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8A56D712278E058200D3FE2B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		8A56D717278E058200D3FE2B /* MetalRenderer.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = MetalRenderer.xcdatamodel; sourceTree = "<group>"; };
@@ -128,7 +126,6 @@
 		8A62320D2795BC2B00B1757C /* well-normal.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "well-normal.png"; sourceTree = "<group>"; };
 		8A6232122795BC5000B1757C /* well.mtl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = well.mtl; sourceTree = "<group>"; };
 		8A6232142795DF4600B1757C /* ForestScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForestScene.swift; sourceTree = "<group>"; };
-		8A6232182795E01000B1757C /* SandboxScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SandboxScene.swift; sourceTree = "<group>"; };
 		8A62321B2795F19500B1757C /* forest.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = forest.json; sourceTree = "<group>"; };
 		8A62321E2795FA6C00B1757C /* ground_grass.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ground_grass.obj; sourceTree = "<group>"; };
 		8A62321F2795FA6C00B1757C /* ground_grass.mtl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ground_grass.mtl; sourceTree = "<group>"; };
@@ -204,7 +201,6 @@
 			children = (
 				8A22EAC1278F8BE000A8CD7D /* Renderer.swift */,
 				8A56D727278E091900D3FE2B /* GameView.swift */,
-				8A42054027983E9F00473A9D /* GameViewBasic.swift */,
 				8A56D71B278E058400D3FE2B /* Main.storyboard */,
 			);
 			path = Display;
@@ -315,6 +311,7 @@
 				8A56D71E278E058400D3FE2B /* Info.plist */,
 				8A56D71F278E058400D3FE2B /* MetalRenderer.entitlements */,
 				8A56D716278E058200D3FE2B /* MetalRenderer.xcdatamodeld */,
+				8A42054427987C3500473A9D /* MetalRenderer-Bridging-Header.h */,
 			);
 			path = "Other Files";
 			sourceTree = "<group>";
@@ -350,7 +347,6 @@
 				8AC1658B278FBB8B00E1816A /* Scene.swift */,
 				8A0D271B279033A100F2D9E6 /* Camera.swift */,
 				8A0D27412790C88300F2D9E6 /* LightNode.swift */,
-				8A6232182795E01000B1757C /* SandboxScene.swift */,
 				8A6232142795DF4600B1757C /* ForestScene.swift */,
 			);
 			path = Scene;
@@ -518,9 +514,7 @@
 				8A0D271A27901E2400F2D9E6 /* KeyCodes.swift in Sources */,
 				8A22EAC0278F880700A8CD7D /* GameObject.swift in Sources */,
 				8A56D72A278E10F600D3FE2B /* Shaders.metal in Sources */,
-				8A6232192795E01000B1757C /* SandboxScene.swift in Sources */,
 				8A22EAB3278F735D00A8CD7D /* Engine.swift in Sources */,
-				8A42054127983E9F00473A9D /* GameViewBasic.swift in Sources */,
 				8A0D272227907F0200F2D9E6 /* Common.metal in Sources */,
 				8A0D27292790981F00F2D9E6 /* TextureLibrary.swift in Sources */,
 				8A22EAB9278F7E7100A8CD7D /* VertexDescriptorLibrary.swift in Sources */,
@@ -701,9 +695,9 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.tanelxen.MetalRenderer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "MetalRenderer/Other Files/MetalRenderer-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_PRECOMPILE_BRIDGING_HEADER = NO;
+				SWIFT_PRECOMPILE_BRIDGING_HEADER = YES;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -726,8 +720,8 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.tanelxen.MetalRenderer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "";
-				SWIFT_PRECOMPILE_BRIDGING_HEADER = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = "MetalRenderer/Other Files/MetalRenderer-Bridging-Header.h";
+				SWIFT_PRECOMPILE_BRIDGING_HEADER = YES;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;

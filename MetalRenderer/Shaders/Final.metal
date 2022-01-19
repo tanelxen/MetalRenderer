@@ -34,8 +34,7 @@ vertex VertexOut final_vertex_shader(const device VertexIn *vIn [[ buffer(0) ]],
 }
 
 // Fragment Shader
-fragment half4 final_fragment_shader(VertexOut data [[ stage_in ]],
-                                     texture2d<float>   baseColorMap    [[ texture(0) ]])
+fragment half4 final_fragment_shader(VertexOut data [[ stage_in ]], texture2d<float> baseColorMap [[ texture(0) ]])
 {
     sampler sampler2d;
     float4 color = baseColorMap.sample(sampler2d, data.texCoord, level(0));
