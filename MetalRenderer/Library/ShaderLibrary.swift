@@ -11,6 +11,7 @@ enum ShaderTypes
 {
     case basic
     case skysphere
+    case ssao
     case final
 }
 
@@ -26,6 +27,7 @@ enum ShaderLibrary
         
         shaders.updateValue(BasicShader(), forKey: .basic)
         shaders.updateValue(SkysphereShader(), forKey: .skysphere)
+        shaders.updateValue(SSAOShader(), forKey: .ssao)
         shaders.updateValue(FinalShader(), forKey: .final)
     }
     
@@ -73,6 +75,21 @@ private struct SkysphereShader: Shader
         
         fragment = ShaderLibrary.defaultLibrary.makeFunction(name: "skysphere_fragment_shader")!
         fragment.label = "Skysphere Fragment Shader"
+    }
+}
+
+private struct SSAOShader: Shader
+{
+    var vertex: MTLFunction
+    var fragment: MTLFunction
+    
+    init()
+    {
+        vertex = ShaderLibrary.defaultLibrary.makeFunction(name: "ssao_vertex_shader")!
+        vertex.label = "SSAO Vertex Shader"
+        
+        fragment = ShaderLibrary.defaultLibrary.makeFunction(name: "ssao_fragment_shader")!
+        fragment.label = "SSAO Fragment Shader"
     }
 }
 

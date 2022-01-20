@@ -17,15 +17,18 @@ class Renderer: NSObject
     }
     
     private var _baseRenderPass: MTLRenderPassDescriptor!
+    private var _ssaoRenderPass: MTLRenderPassDescriptor!
 //    private var _finalRenderPass: MTLRenderPassDescriptor!
     
     private var _baseRenderPipelineState: MTLRenderPipelineState!
+//    private var _ssaoRenderPipelineState: MTLRenderPipelineState!
     
     private let scene = ForestScene()
     
     private (set) var baseColorTexture_0: MTLTexture!
     private (set) var baseColorTexture_1: MTLTexture!
     private (set) var baseColorTexture_2: MTLTexture!
+    private (set) var aoTexture: MTLTexture!
     private (set) var baseDepthTexture: MTLTexture!
     
     private let _finalQuad = SimpleQuad()
@@ -38,6 +41,9 @@ class Renderer: NSObject
         
         createBaseRenderPass()
         createBaseRenderPipelineState()
+        
+        createSSAORenderPass()
+//        createSSAORenderPipelineState()
         
 //        _finalRenderPass = view.currentRenderPassDescriptor
     }
@@ -127,6 +133,29 @@ class Renderer: NSObject
         _baseRenderPass.depthAttachment.loadAction = .clear
     }
     
+    private func createSSAORenderPass()
+    {
+        let width = Int(Renderer.screenSize.x)
+        let height = Int(Renderer.screenSize.y)
+        
+        let aoTextureDecriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .r8Unorm,
+                                                                              width: width,
+                                                                              height: height,
+                                                                              mipmapped: false)
+        
+        aoTextureDecriptor.sampleCount = 1
+        aoTextureDecriptor.storageMode = .private
+        aoTextureDecriptor.usage = [.renderTarget, .shaderRead]
+        
+        aoTexture = Engine.device.makeTexture(descriptor: aoTextureDecriptor)!
+        
+        _ssaoRenderPass = MTLRenderPassDescriptor()
+        
+        _ssaoRenderPass.colorAttachments[0].texture = aoTexture
+        _ssaoRenderPass.colorAttachments[0].storeAction = .store
+        _ssaoRenderPass.colorAttachments[0].loadAction = .clear
+    }
+    
     private func createBaseRenderPipelineState()
     {
         let descriptor = MTLRenderPipelineDescriptor()
@@ -160,6 +189,30 @@ class Renderer: NSObject
         renderEncoder?.endEncoding()
     }
     
+    private func ssaoRenderPass(with commandBuffer: MTLCommandBuffer?, in view: MTKView)
+    {
+        guard let renderPassDescriptor = view.currentRenderPassDescriptor else { return }
+        
+        let renderEncoder = commandBuffer?.makeRenderCommandEncoder(descriptor: _ssaoRenderPass)
+        
+        renderEncoder?.label = "SSAO Render Command Encoder"
+
+        renderEncoder?.pushDebugGroup("Starting SSAO Render")
+        
+        renderEncoder?.setRenderPipelineState(RenderPipelineStateLibrary[.ssao])
+        
+        renderEncoder?.setFragmentTexture(baseColorTexture_1, index: 0)
+        renderEncoder?.setFragmentTexture(baseColorTexture_2, index: 1)
+        renderEncoder?.setFragmentTexture(_finalQuad.kernelTexture, index: 2)
+        renderEncoder?.setFragmentTexture(_finalQuad.noiseTexture, index: 3)
+        
+        _finalQuad.drawPrimitives(with: renderEncoder)
+        
+        renderEncoder?.popDebugGroup()
+        
+        renderEncoder?.endEncoding()
+    }
+    
     private func finalRenderPass(with commandBuffer: MTLCommandBuffer?, in view: MTKView)
     {
         guard let renderPassDescriptor = view.currentRenderPassDescriptor else { return }
@@ -173,10 +226,7 @@ class Renderer: NSObject
         renderEncoder?.setRenderPipelineState(RenderPipelineStateLibrary[.final])
         
         renderEncoder?.setFragmentTexture(baseColorTexture_0, index: 0)
-        renderEncoder?.setFragmentTexture(baseColorTexture_1, index: 1)
-        renderEncoder?.setFragmentTexture(baseColorTexture_2, index: 2)
-        renderEncoder?.setFragmentTexture(_finalQuad.kernelTexture, index: 3)
-        renderEncoder?.setFragmentTexture(_finalQuad.noiseTexture, index: 4)
+        renderEncoder?.setFragmentTexture(aoTexture, index: 1)
         
         _finalQuad.drawPrimitives(with: renderEncoder)
         
@@ -205,6 +255,7 @@ extension Renderer: MTKViewDelegate
         commandBuffer?.label = "Base Command Buffer"
 
         baseRenderPass(with: commandBuffer)
+        ssaoRenderPass(with: commandBuffer, in: view)
         finalRenderPass(with: commandBuffer, in: view)
 
         commandBuffer?.present(drawable)
