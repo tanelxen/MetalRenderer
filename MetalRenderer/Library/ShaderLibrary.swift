@@ -108,21 +108,6 @@ private struct FinalShader: Shader
     }
 }
 
-private struct GBufferShader: Shader
-{
-    var vertex: MTLFunction
-    var fragment: MTLFunction
-    
-    init()
-    {
-        vertex = ShaderLibrary.defaultLibrary.makeFunction(name: "g_buffer_vertex_shader")!
-        vertex.label = "GBuffer Vertex Shader"
-        
-        fragment = ShaderLibrary.defaultLibrary.makeFunction(name: "g_buffer_fragment_shader")!
-        fragment.label = "GBuffer Fragment Shader"
-    }
-}
-
 private struct InstancingShader: Shader
 {
     var vertex: MTLFunction

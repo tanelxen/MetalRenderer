@@ -28,7 +28,9 @@ class Renderer: NSObject
     private (set) var baseColorTexture_0: MTLTexture!
     private (set) var baseColorTexture_1: MTLTexture!
     private (set) var baseColorTexture_2: MTLTexture!
-    private (set) var aoTexture: MTLTexture!
+    
+    private (set) var ssaoTexture: MTLTexture!
+    
     private (set) var baseDepthTexture: MTLTexture!
     
     private let _finalQuad = SimpleQuad()
@@ -43,7 +45,6 @@ class Renderer: NSObject
         createBaseRenderPipelineState()
         
         createSSAORenderPass()
-//        createSSAORenderPipelineState()
         
 //        _finalRenderPass = view.currentRenderPassDescriptor
     }
@@ -147,11 +148,11 @@ class Renderer: NSObject
         aoTextureDecriptor.storageMode = .private
         aoTextureDecriptor.usage = [.renderTarget, .shaderRead]
         
-        aoTexture = Engine.device.makeTexture(descriptor: aoTextureDecriptor)!
+        ssaoTexture = Engine.device.makeTexture(descriptor: aoTextureDecriptor)!
         
         _ssaoRenderPass = MTLRenderPassDescriptor()
         
-        _ssaoRenderPass.colorAttachments[0].texture = aoTexture
+        _ssaoRenderPass.colorAttachments[0].texture = ssaoTexture
         _ssaoRenderPass.colorAttachments[0].storeAction = .store
         _ssaoRenderPass.colorAttachments[0].loadAction = .clear
     }
@@ -163,13 +164,13 @@ class Renderer: NSObject
         descriptor.colorAttachments[1].pixelFormat = .rgba32Float
         descriptor.colorAttachments[2].pixelFormat = .rgba32Float
         descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
-        
+
         descriptor.vertexFunction = ShaderLibrary.vertex(.basic)
         descriptor.fragmentFunction = ShaderLibrary.fragment(.basic)
         descriptor.vertexDescriptor = VertexDescriptorLibrary.descriptor(.basic)
-        
+
         descriptor.label = "Basic Render"
-        
+
         _baseRenderPipelineState = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
     }
     
@@ -191,8 +192,6 @@ class Renderer: NSObject
     
     private func ssaoRenderPass(with commandBuffer: MTLCommandBuffer?, in view: MTKView)
     {
-        guard let renderPassDescriptor = view.currentRenderPassDescriptor else { return }
-        
         let renderEncoder = commandBuffer?.makeRenderCommandEncoder(descriptor: _ssaoRenderPass)
         
         renderEncoder?.label = "SSAO Render Command Encoder"
@@ -226,7 +225,7 @@ class Renderer: NSObject
         renderEncoder?.setRenderPipelineState(RenderPipelineStateLibrary[.final])
         
         renderEncoder?.setFragmentTexture(baseColorTexture_0, index: 0)
-        renderEncoder?.setFragmentTexture(aoTexture, index: 1)
+        renderEncoder?.setFragmentTexture(ssaoTexture, index: 1)
         
         _finalQuad.drawPrimitives(with: renderEncoder)
         

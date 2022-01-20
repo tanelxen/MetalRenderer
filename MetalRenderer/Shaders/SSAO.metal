@@ -101,3 +101,43 @@ fragment half ssao_fragment_shader(
 
 
 
+// Vertex Shader
+vertex VertexOut ssao_blur_vertex_shader(const device VertexIn *vIn [[ buffer(0) ]], unsigned int vertexId [[ vertex_id ]])
+{
+    VertexOut out;
+    
+    VertexIn curVertex = vIn[vertexId];
+    
+    out.position = float4(curVertex.position, 1);
+    out.texCoord = curVertex.texCoord;
+    
+    return out;
+}
+
+// Fragment Shader
+fragment half ssao_blur_fragment_shader(
+                                     VertexOut          data            [[ stage_in ]],
+                                     texture2d<float>   occlusion       [[ texture(0) ]]
+                                     )
+{
+    sampler sampler2d;
+    
+    float2 texelSize = 1.0 / float2(occlusion.get_width(), occlusion.get_height());
+
+    float result = 0.0;
+
+    int kernelSize = 3;
+
+    for (int x = -kernelSize; x < kernelSize; ++x)
+    {
+        for (int y = -kernelSize; y < kernelSize; ++y)
+        {
+            float2 offset = float2(float(x), float(y)) * texelSize;
+            result += occlusion.sample(sampler2d, data.texCoord + offset).x;
+        }
+    }
+
+    float size = float(kernelSize) * 2;
+
+    return result / (size * size);
+}
