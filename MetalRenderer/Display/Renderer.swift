@@ -19,6 +19,8 @@ class Renderer: NSObject
     private var _baseRenderPass: MTLRenderPassDescriptor!
 //    private var _finalRenderPass: MTLRenderPassDescriptor!
     
+    private var _baseRenderPipelineState: MTLRenderPipelineState!
+    
     private let scene = ForestScene()
     
     private (set) var baseColorTexture_0: MTLTexture!
@@ -35,6 +37,7 @@ class Renderer: NSObject
         updateScreenSize(view.drawableSize)
         
         createBaseRenderPass()
+        createBaseRenderPipelineState()
         
 //        _finalRenderPass = view.currentRenderPassDescriptor
     }
@@ -64,27 +67,32 @@ class Renderer: NSObject
                                                                               height: height,
                                                                               mipmapped: false)
         
+        baseTextureDecriptor_0.sampleCount = 1
+        baseTextureDecriptor_0.storageMode = .private
         baseTextureDecriptor_0.usage = [.renderTarget, .shaderRead]
+        
         baseColorTexture_0 = Engine.device.makeTexture(descriptor: baseTextureDecriptor_0)!
         
         // ------ BASE COLOR 1 TEXTURE ------
-        let baseTextureDecriptor_1 = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: Preferences.colorPixelFormat,
+        let baseTextureDecriptor_1 = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba32Float,
                                                                               width: width,
                                                                               height: height,
                                                                               mipmapped: false)
         
+        baseTextureDecriptor_1.sampleCount = 1
+        baseTextureDecriptor_1.storageMode = .private
         baseTextureDecriptor_1.usage = [.renderTarget, .shaderRead]
+        
         baseColorTexture_1 = Engine.device.makeTexture(descriptor: baseTextureDecriptor_1)!
         
         // ------ BASE COLOR 2 TEXTURE ------
-        let baseTextureDecriptor_2 = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: Preferences.colorPixelFormat,
+        let baseTextureDecriptor_2 = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba32Float,
                                                                               width: width,
                                                                               height: height,
                                                                               mipmapped: false)
         
         baseTextureDecriptor_2.sampleCount = 1
         baseTextureDecriptor_2.storageMode = .private
-        baseTextureDecriptor_2.textureType = .type2D
         baseTextureDecriptor_2.usage = [.renderTarget, .shaderRead]
         
         baseColorTexture_2 = Engine.device.makeTexture(descriptor: baseTextureDecriptor_2)!
@@ -110,13 +118,30 @@ class Renderer: NSObject
         _baseRenderPass.colorAttachments[1].storeAction = .store
         _baseRenderPass.colorAttachments[1].loadAction = .clear
         
-//        _baseRenderPass.colorAttachments[2].texture = baseColorTexture_2
-//        _baseRenderPass.colorAttachments[2].storeAction = .store
-//        _baseRenderPass.colorAttachments[2].loadAction = .clear
+        _baseRenderPass.colorAttachments[2].texture = baseColorTexture_2
+        _baseRenderPass.colorAttachments[2].storeAction = .store
+        _baseRenderPass.colorAttachments[2].loadAction = .clear
         
         _baseRenderPass.depthAttachment.texture = baseDepthTexture
         _baseRenderPass.depthAttachment.storeAction = .store
         _baseRenderPass.depthAttachment.loadAction = .clear
+    }
+    
+    private func createBaseRenderPipelineState()
+    {
+        let descriptor = MTLRenderPipelineDescriptor()
+        descriptor.colorAttachments[0].pixelFormat = Preferences.colorPixelFormat
+        descriptor.colorAttachments[1].pixelFormat = .rgba32Float
+        descriptor.colorAttachments[2].pixelFormat = .rgba32Float
+        descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
+        
+        descriptor.vertexFunction = ShaderLibrary.vertex(.basic)
+        descriptor.fragmentFunction = ShaderLibrary.fragment(.basic)
+        descriptor.vertexDescriptor = VertexDescriptorLibrary.descriptor(.basic)
+        
+        descriptor.label = "Basic Render"
+        
+        _baseRenderPipelineState = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
     }
     
     private func baseRenderPass(with commandBuffer: MTLCommandBuffer?)
@@ -126,7 +151,10 @@ class Renderer: NSObject
         renderEncoder?.label = "Base Render Command Encoder"
 
         renderEncoder?.pushDebugGroup("Starting Base Render")
+        
+        renderEncoder?.setRenderPipelineState(_baseRenderPipelineState)
         scene.render(with: renderEncoder)
+        
         renderEncoder?.popDebugGroup()
         
         renderEncoder?.endEncoding()
@@ -143,7 +171,12 @@ class Renderer: NSObject
         renderEncoder?.pushDebugGroup("Starting Final Render")
         
         renderEncoder?.setRenderPipelineState(RenderPipelineStateLibrary[.final])
+        
         renderEncoder?.setFragmentTexture(baseColorTexture_0, index: 0)
+        renderEncoder?.setFragmentTexture(baseColorTexture_1, index: 1)
+        renderEncoder?.setFragmentTexture(baseColorTexture_2, index: 2)
+        renderEncoder?.setFragmentTexture(_finalQuad.kernelTexture, index: 3)
+        renderEncoder?.setFragmentTexture(_finalQuad.noiseTexture, index: 4)
         
         _finalQuad.drawPrimitives(with: renderEncoder)
         

@@ -31,7 +31,7 @@
             <objects>
                 <viewController id="XfG-lQ-9wD" sceneMemberID="viewController">
                     <view key="view" id="m2S-Jp-Qdl" customClass="GameView" customModule="MetalRenderer" customModuleProvider="target">
-                        <rect key="frame" x="0.0" y="0.0" width="1080" height="720"/>
+                        <rect key="frame" x="0.0" y="0.0" width="800" height="600"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </view>
                 </viewController>

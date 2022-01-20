@@ -21,7 +21,7 @@ struct RasterizerData
     float4 position [[ position ]];
     float2 uv;
     
-    float3 worldPosition;
+    float4 worldPosition;
     float3 surfaceNormal;
     float3 surfaceTangent;
     float3 surfaceBitangent;

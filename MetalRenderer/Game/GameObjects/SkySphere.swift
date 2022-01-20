@@ -15,7 +15,7 @@ class SkySphere: GameObject
         
         let material = Material()
         
-        material.pipelineStateType = .skysphere
+//        material.pipelineStateType = .skysphere
         
         if let texture = TextureLibrary[.skysphere]
         {

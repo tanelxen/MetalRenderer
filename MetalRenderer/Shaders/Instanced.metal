@@ -28,14 +28,14 @@ vertex RasterizerData instanced_vertex_shader(
     data.position = mvp * float4(vIn.position, 1);
     data.uv = vIn.uv;
     
-    data.worldPosition = worldPosition.xyz;
+    data.worldPosition = worldPosition;
     
     data.surfaceNormal = normalize(modelConstant.modelMatrix * float4(vIn.normal, 0.0)).xyz;
     data.surfaceTangent = normalize(modelConstant.modelMatrix * float4(vIn.tangent, 0.0)).xyz;
     data.surfaceBitangent = normalize(modelConstant.modelMatrix * float4(cross(vIn.normal, vIn.tangent), 0.0)).xyz;
     
     
-    data.eyeVector = normalize(viewConstants.cameraPosition - data.worldPosition);
+    data.eyeVector = normalize(viewConstants.cameraPosition - data.worldPosition.xyz);
     
     return data;
 }

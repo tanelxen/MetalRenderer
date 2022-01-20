@@ -47,7 +47,7 @@ class ForestScene: Scene
             Mesh(modelName: "tree_pineRoundC")
         ]
 
-        for i in 0..<1000
+        for i in 0..<500
         {
             guard let mesh = pines.randomElement() else { continue }
             
@@ -73,7 +73,7 @@ class ForestScene: Scene
             Mesh(modelName: "flower_yellowA")
         ]
 
-        for i in 0..<1000
+        for i in 0..<500
         {
             guard let mesh = flowers.randomElement() else { continue }
             

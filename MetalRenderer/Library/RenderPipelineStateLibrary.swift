@@ -9,7 +9,7 @@ import MetalKit
 
 enum RenderPipelineStateTypes
 {
-    case basic
+//    case basic
     case skysphere
     case final
 }
@@ -20,7 +20,7 @@ enum RenderPipelineStateLibrary
     
     static func initialize()
     {
-        states.updateValue(BasicRenderPipelineState(), forKey: .basic)
+//        states.updateValue(BasicRenderPipelineState(), forKey: .basic)
         states.updateValue(SkysphereRenderPipelineState(), forKey: .skysphere)
         states.updateValue(FinalRenderPipelineState(), forKey: .final)
     }

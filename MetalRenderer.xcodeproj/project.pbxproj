@@ -75,6 +75,8 @@
 		8AA6C3ED2793111100DCB7B7 /* Material.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AA6C3EC2793111100DCB7B7 /* Material.swift */; };
 		8AA6C3EF27935AC600DCB7B7 /* sphere.obj in Resources */ = {isa = PBXBuildFile; fileRef = 8AA6C3EE27935AC600DCB7B7 /* sphere.obj */; };
 		8AC1658C278FBB8B00E1816A /* Scene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AC1658B278FBB8B00E1816A /* Scene.swift */; };
+		8AF4401E27999ABC009E83A8 /* tent_smallOpen.obj in Resources */ = {isa = PBXBuildFile; fileRef = 8AF4401C27999ABC009E83A8 /* tent_smallOpen.obj */; };
+		8AF4401F27999ABC009E83A8 /* tent_smallOpen.mtl in Resources */ = {isa = PBXBuildFile; fileRef = 8AF4401D27999ABC009E83A8 /* tent_smallOpen.mtl */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -150,6 +152,8 @@
 		8AA6C3EC2793111100DCB7B7 /* Material.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Material.swift; sourceTree = "<group>"; };
 		8AA6C3EE27935AC600DCB7B7 /* sphere.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = sphere.obj; sourceTree = "<group>"; };
 		8AC1658B278FBB8B00E1816A /* Scene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Scene.swift; sourceTree = "<group>"; };
+		8AF4401C27999ABC009E83A8 /* tent_smallOpen.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = tent_smallOpen.obj; sourceTree = "<group>"; };
+		8AF4401D27999ABC009E83A8 /* tent_smallOpen.mtl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = tent_smallOpen.mtl; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -355,6 +359,7 @@
 		8A62321A2795EFDA00B1757C /* Forest */ = {
 			isa = PBXGroup;
 			children = (
+				8AF4401B27999AB1009E83A8 /* Tent */,
 				8A62322F27961D6A00B1757C /* Flowers */,
 				8A6232222796063600B1757C /* Trees */,
 				8A62321D2795FA6300B1757C /* Terrain */,
@@ -407,6 +412,15 @@
 				8A672E7A279472DC00703001 /* chest.obj */,
 			);
 			path = Chest;
+			sourceTree = "<group>";
+		};
+		8AF4401B27999AB1009E83A8 /* Tent */ = {
+			isa = PBXGroup;
+			children = (
+				8AF4401D27999ABC009E83A8 /* tent_smallOpen.mtl */,
+				8AF4401C27999ABC009E83A8 /* tent_smallOpen.obj */,
+			);
+			path = Tent;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -477,6 +491,7 @@
 				8A0D273D2790BA3900F2D9E6 /* skull.mtl in Resources */,
 				8A62323827961D8000B1757C /* flower_purpleA.mtl in Resources */,
 				8A42053527975B9F00473A9D /* skysphere.obj in Resources */,
+				8AF4401F27999ABC009E83A8 /* tent_smallOpen.mtl in Resources */,
 				8A0D273B2790BA3900F2D9E6 /* skull.obj in Resources */,
 				8A56D71A278E058400D3FE2B /* Assets.xcassets in Resources */,
 				8A42053F279820C500473A9D /* quad.obj in Resources */,
@@ -484,6 +499,7 @@
 				8AA6C3EF27935AC600DCB7B7 /* sphere.obj in Resources */,
 				8A6232102795BC2B00B1757C /* well.obj in Resources */,
 				8A42052D279748E200473A9D /* clouds.png in Resources */,
+				8AF4401E27999ABC009E83A8 /* tent_smallOpen.obj in Resources */,
 				8A6232202795FA6C00B1757C /* ground_grass.obj in Resources */,
 				8A62323A27961D8000B1757C /* flower_redA.obj in Resources */,
 				8A62323627961D8000B1757C /* flower_redA.mtl in Resources */,
