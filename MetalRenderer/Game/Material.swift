@@ -9,6 +9,8 @@ import MetalKit
 
 class Material
 {
+    var name: String = ""
+    
 //    var pipelineStateType: RenderPipelineStateTypes = .basic
     var materialConstants = MaterialConstants()
     

@@ -11,7 +11,7 @@ enum RenderPipelineStateTypes
 {
 //    case basic
     case skysphere
-    case ssao
+//    case ssao
     case final
 }
 
@@ -23,7 +23,7 @@ enum RenderPipelineStateLibrary
     {
 //        states.updateValue(BasicRenderPipelineState(), forKey: .basic)
         states.updateValue(SkysphereRenderPipelineState(), forKey: .skysphere)
-        states.updateValue(SSAORenderPipelineState(), forKey: .ssao)
+//        states.updateValue(SSAORenderPipelineState(), forKey: .ssao)
         states.updateValue(FinalRenderPipelineState(), forKey: .final)
     }
     
@@ -83,26 +83,26 @@ struct SkysphereRenderPipelineState: RenderPipelineState
     }
 }
 
-struct SSAORenderPipelineState: RenderPipelineState
-{
-    var name: String = "SSAO Render"
-    var state: MTLRenderPipelineState
-    
-    init()
-    {
-        let descriptor = MTLRenderPipelineDescriptor()
-        descriptor.colorAttachments[0].pixelFormat = .r8Unorm
-//        descriptor.colorAttachments[1].pixelFormat = Preferences.colorPixelFormat
-//        descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
-        
-        descriptor.vertexFunction = ShaderLibrary.vertex(.ssao)
-        descriptor.fragmentFunction = ShaderLibrary.fragment(.ssao)
-        
-        descriptor.label = name
-        
-        state = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
-    }
-}
+//struct SSAORenderPipelineState: RenderPipelineState
+//{
+//    var name: String = "SSAO Render"
+//    var state: MTLRenderPipelineState
+//
+//    init()
+//    {
+//        let descriptor = MTLRenderPipelineDescriptor()
+//        descriptor.colorAttachments[0].pixelFormat = .r8Unorm
+////        descriptor.colorAttachments[1].pixelFormat = Preferences.colorPixelFormat
+////        descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
+//
+//        descriptor.vertexFunction = ShaderLibrary.vertex(.ssao)
+//        descriptor.fragmentFunction = ShaderLibrary.fragment(.ssao)
+//
+//        descriptor.label = name
+//
+//        state = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
+//    }
+//}
 
 struct FinalRenderPipelineState: RenderPipelineState
 {

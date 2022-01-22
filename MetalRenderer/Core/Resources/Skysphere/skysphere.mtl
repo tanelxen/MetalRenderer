@@ -1,8 +1,12 @@
-# 3ds Max Wavefront OBJ Exporter v0.97b - (c)2007 guruware
-# File Created: 21.12.2011 14:29:19
+# Blender MTL File: 'None'
+# Material Count: 1
 
-newmtl skysphere
-    Ka 1.0000000 1.0000000 1.0000000
-    Kd 1.0000000 1.0000000 1.0000000
-	map_Ka clouds.png
-	map_Kd clouds.png
+newmtl Default_OBJ
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2

@@ -15,6 +15,12 @@ class Mesh
     private var _instanceCount: Int = 1
     private var _submeshes: [Submesh] = []
     
+    private var _batches: [String : [Submesh]] = [:]
+    private var _materials: [String : Material] = [:]
+    
+//    private var _batches: [[Submesh]] = []
+//    private var _materials: [Material] = []
+    
     var transform: matrix_float4x4 = matrix_identity_float4x4 {
         didSet {
             modelConstants.modelMatrix = transform
@@ -87,11 +93,11 @@ class Mesh
         
         for mdlMesh in mdlMeshes
         {
-            mdlMesh.addTangentBasis(
-                forTextureCoordinateAttributeNamed: MDLVertexAttributeTextureCoordinate,
-                tangentAttributeNamed: MDLVertexAttributeTangent,
-                bitangentAttributeNamed: MDLVertexAttributeBitangent
-            )
+//            mdlMesh.addTangentBasis(
+//                forTextureCoordinateAttributeNamed: MDLVertexAttributeTextureCoordinate,
+//                tangentAttributeNamed: MDLVertexAttributeTangent,
+//                bitangentAttributeNamed: MDLVertexAttributeBitangent
+//            )
             
             mdlMesh.vertexDescriptor = descriptor
         }
@@ -122,6 +128,28 @@ class Mesh
     func addSubmesh(_ submesh: Submesh)
     {
         _submeshes.append(submesh)
+        
+        let name = submesh._material.name
+        
+        if _batches.keys.contains(name)
+        {
+            _batches[name]?.append(submesh)
+        }
+        else
+        {
+            _materials[name] = submesh._material
+            _batches[name] = [submesh]
+        }
+        
+//        if let index = _materials.firstIndex(where: { $0.name == name })
+//        {
+//            _batches[index].append(submesh)
+//        }
+//        else
+//        {
+//            _materials.append(submesh._material)
+//            _batches.append([submesh])
+//        }
     }
     
     func addVertex(position: float3, uv: float2 = float2(0, 0), normal: float3 = float3(0, 1, 0), tangent: float3 = float3(1, 0, 0))
@@ -137,17 +165,8 @@ class Mesh
         
         if _submeshes.count > 0
         {
-            for submesh in _submeshes
-            {
-                (customMaterial ?? submesh._material).apply(to: encoder)
-                
-                encoder.drawIndexedPrimitives(type: submesh.primitiveType,
-                                              indexCount: submesh.indexCount,
-                                              indexType: submesh.indexType,
-                                              indexBuffer: submesh.indexBuffer,
-                                              indexBufferOffset: submesh.indexBufferOffset,
-                                              instanceCount: _instanceCount)
-            }
+            drawSubmeshes(with: encoder)
+//            drawBatches(with: encoder)
         }
         else
         {
@@ -157,6 +176,53 @@ class Mesh
                                    vertexStart: 0,
                                    vertexCount: _vertices.count,
                                    instanceCount: _instanceCount)
+        }
+    }
+    
+    private func drawBatches(with encoder: MTLRenderCommandEncoder)
+    {
+        for name in _batches.keys
+        {
+            _materials[name]?.apply(to: encoder)
+
+            _batches[name]?.forEach { submesh in
+                encoder.drawIndexedPrimitives(type: submesh.primitiveType,
+                                              indexCount: submesh.indexCount,
+                                              indexType: submesh.indexType,
+                                              indexBuffer: submesh.indexBuffer,
+                                              indexBufferOffset: submesh.indexBufferOffset,
+                                              instanceCount: _instanceCount)
+            }
+        }
+        
+//        for (index, material) in _materials.enumerated()
+//        {
+//            material.apply(to: encoder)
+//
+//            for submesh in _batches[index]
+//            {
+//                encoder.drawIndexedPrimitives(type: submesh.primitiveType,
+//                                              indexCount: submesh.indexCount,
+//                                              indexType: submesh.indexType,
+//                                              indexBuffer: submesh.indexBuffer,
+//                                              indexBufferOffset: submesh.indexBufferOffset,
+//                                              instanceCount: _instanceCount)
+//            }
+//        }
+    }
+    
+    private func drawSubmeshes(with encoder: MTLRenderCommandEncoder)
+    {
+        for submesh in _submeshes
+        {
+            (customMaterial ?? submesh._material).apply(to: encoder)
+
+            encoder.drawIndexedPrimitives(type: submesh.primitiveType,
+                                          indexCount: submesh.indexCount,
+                                          indexType: submesh.indexType,
+                                          indexBuffer: submesh.indexBuffer,
+                                          indexBufferOffset: submesh.indexBufferOffset,
+                                          instanceCount: _instanceCount)
         }
     }
 }
@@ -274,6 +340,8 @@ class Submesh
         }
         
         _material.materialConstants.isLit = true
+        
+        _material.name = mdlMaterial.name
     }
     
     private func createIndexBuffer()

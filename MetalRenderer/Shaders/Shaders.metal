@@ -57,7 +57,7 @@ fragment FragOut basic_fragment_shader(
                                        )
 {
     
-    constexpr sampler sampler2d(min_filter::linear, mag_filter::linear);
+    constexpr sampler sampler2d(min_filter::linear, mag_filter::linear, address::repeat);
     
     float4 albedo = material.color;
     

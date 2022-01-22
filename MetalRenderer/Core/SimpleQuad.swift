@@ -27,7 +27,6 @@ class SimpleQuad
          1, 1, 0, 1, 0      //Top Right
     ]
     
-    private (set) var kernel: [float3] = []
     private (set) var kernelTexture: MTLTexture?
     private (set) var noiseTexture: MTLTexture?
     
@@ -35,7 +34,7 @@ class SimpleQuad
     {
         vertexBuffer = Engine.device.makeBuffer(bytes: vertices, length: MemoryLayout<Float>.stride * vertices.count, options: [])
         
-        kernel = makeKernel(size: 64)
+//        kernel = makeKernel(size: 64)
         makeKernelTexture(kernelSize: 8)
         makeNoiseTexture(width: 4, height: 4)
     }
@@ -43,8 +42,10 @@ class SimpleQuad
     func drawPrimitives(with encoder: MTLRenderCommandEncoder?)
     {
         var projection = DebugCamera.shared.projectionMatrix
+        var time = GameTime.totalGameTime
         
         encoder?.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
+        encoder?.setVertexBytes(&time, length: MemoryLayout<Float>.size, index: 1)
         encoder?.setFragmentBytes(&projection, length: MemoryLayout<matrix_float4x4>.stride, index: 1)
         
         encoder?.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices.count)
@@ -63,17 +64,14 @@ class SimpleQuad
 
         for i in 0..<num
         {
-            let x: Float = Float.random(in: 0...1)
-            let y: Float = Float.random(in: 0...1)
-            let z: Float = Float.random(in: 0...1)
+            let x: Float = Float.random(in: -1...1)
+            let y: Float = Float.random(in: -1...1)
+            let z: Float = Float.random(in: -1...0)
 
-            var sample = float4(x * 2.0 - 1.0, y * 2.0 - 1.0, z, 1.0)
+            var sample = float4(x, y, z, 1.0)
+    
             sample = normalize(sample)
-            sample *= Float.random(in: 0...1)
-
-            var scale: Float = Float(i) / Float(num)
-            scale = lerp(0.1, 1.0, scale * scale)
-            sample *= scale
+            sample *= Float(i + 1) / Float(num)
 
             ssaoKernel.append(sample)
         }
@@ -81,34 +79,34 @@ class SimpleQuad
         kernelTexture = createTexture(data: ssaoKernel, width: kernelSize, height: kernelSize)
     }
     
-    private func makeKernel(size: Int) -> [float3]
-    {
-        var ssaoKernel: [float3] = []
-        
-        func lerp(_ a: Float, _ b: Float, _ f: Float) -> Float
-        {
-            return a + f * (b - a)
-        }
-
-        for i in 0..<size
-        {
-            let x: Float = Float.random(in: 0...1)
-            let y: Float = Float.random(in: 0...1)
-            let z: Float = Float.random(in: 0...1)
-
-            var sample = float3(x * 2.0 - 1.0, y * 2.0 - 1.0, z)
-            sample = normalize(sample)
-            sample *= Float.random(in: 0...1)
-
-            var scale: Float = Float(i) / Float(size)
-            scale = lerp(0.1, 1.0, scale * scale)
-            sample *= scale
-
-            ssaoKernel.append(sample)
-        }
-        
-        return ssaoKernel
-    }
+//    private func makeKernel(size: Int) -> [float3]
+//    {
+//        var ssaoKernel: [float3] = []
+//
+//        func lerp(_ a: Float, _ b: Float, _ f: Float) -> Float
+//        {
+//            return a + f * (b - a)
+//        }
+//
+//        for i in 0..<size
+//        {
+//            let x: Float = Float.random(in: 0...1)
+//            let y: Float = Float.random(in: 0...1)
+//            let z: Float = Float.random(in: 0...1)
+//
+//            var sample = float3(x * 2.0 - 1.0, y * 2.0 - 1.0, z)
+//            sample = normalize(sample)
+//            sample *= Float.random(in: 0...1)
+//
+//            var scale: Float = Float(i) / Float(size)
+//            scale = lerp(0.1, 1.0, scale * scale)
+//            sample *= scale
+//
+//            ssaoKernel.append(sample)
+//        }
+//
+//        return ssaoKernel
+//    }
     
     private func makeNoiseTexture(width: Int, height: Int)
     {
@@ -121,7 +119,7 @@ class SimpleQuad
             let x: Float = Float.random(in: 0...1)
             let y: Float = Float.random(in: 0...1)
 
-            let sample = float4(x * 2.0 - 1.0, y * 2.0 - 1.0, 0.0, 1.0)
+            let sample = float4(x * 2.0 - 1.0, 0.0, y * 2.0 - 1.0, 1.0)
             
             ssaoNoise.append(sample)
         }
@@ -148,32 +146,4 @@ class SimpleQuad
 
         return texture
     }
-    
-    
-//    // generate sample kernel
-//    // ----------------------
-//    std::uniform_real_distribution<GLfloat> randomFloats(0.0, 1.0); // generates random floats between 0.0 and 1.0
-//    std::default_random_engine generator;
-//    std::vector<glm::vec3> ssaoKernel;
-//    for (unsigned int i = 0; i < 64; ++i)
-//    {
-//        glm::vec3 sample(randomFloats(generator) * 2.0 - 1.0, randomFloats(generator) * 2.0 - 1.0, randomFloats(generator));
-//        sample = glm::normalize(sample);
-//        sample *= randomFloats(generator);
-//        float scale = float(i) / 64.0f;
-//
-//        // scale samples s.t. they're more aligned to center of kernel
-//        scale = lerp(0.1f, 1.0f, scale * scale);
-//        sample *= scale;
-//        ssaoKernel.push_back(sample);
-//    }
-//
-//    // generate noise texture
-//    // ----------------------
-//    std::vector<glm::vec3> ssaoNoise;
-//    for (unsigned int i = 0; i < 16; i++)
-//    {
-//        glm::vec3 noise(randomFloats(generator) * 2.0 - 1.0, randomFloats(generator) * 2.0 - 1.0, 0.0f); // rotate around z-axis (in tangent space)
-//        ssaoNoise.push_back(noise);
-//    }
 }
