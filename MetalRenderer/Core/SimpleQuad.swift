@@ -41,12 +41,18 @@ class SimpleQuad
     
     func drawPrimitives(with encoder: MTLRenderCommandEncoder?)
     {
-        var projection = DebugCamera.shared.projectionMatrix
         var time = GameTime.totalGameTime
         
         encoder?.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
         encoder?.setVertexBytes(&time, length: MemoryLayout<Float>.size, index: 1)
-        encoder?.setFragmentBytes(&projection, length: MemoryLayout<matrix_float4x4>.stride, index: 1)
+        
+        let projection = DebugCamera.shared.projectionMatrix
+        var view = DebugCamera.shared.viewMatrix
+        
+        var invCamPj = projection.inverse;
+        
+        encoder?.setFragmentBytes(&invCamPj, length: MemoryLayout<matrix_float4x4>.stride, index: 1)
+        encoder?.setFragmentBytes(&view, length: MemoryLayout<matrix_float4x4>.stride, index: 2)
         
         encoder?.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices.count)
     }

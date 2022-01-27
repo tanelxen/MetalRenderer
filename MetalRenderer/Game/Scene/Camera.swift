@@ -104,7 +104,7 @@ class DebugCamera: Camera
             }
         }
         
-        _projectionMatrix = matrix_float4x4.perspective(degreesFov: 45, aspectRatio: Renderer.aspectRatio, near: 0.01, far: 500)
+        _projectionMatrix = matrix_float4x4.perspective(degreesFov: 45, aspectRatio: Renderer.aspectRatio, near: 0.1, far: 500)
         
         frustumPlanes = DebugCamera.frustumPlanes(from: (_projectionMatrix * viewMatrix).transpose)
     }
@@ -248,7 +248,7 @@ struct Plane
 }
 
 /**
- Классический lookAt, как в GLM и GLU
+ Classic lookAt, likewise in GLM
  */
 func lookAt(eye: float3, target: float3, up: float3) -> matrix_float4x4
 {

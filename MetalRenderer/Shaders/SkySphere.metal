@@ -31,9 +31,9 @@ vertex RasterizerData skysphere_vertex_shader(const Vertex              vIn     
 
 // Fragment Shader
 fragment half4 skysphere_fragment_shader(RasterizerData     data            [[ stage_in ]],
-                                         sampler            sampler2d       [[ sampler(0) ]],
                                          texture2d<float>   baseColorMap    [[ texture(0) ]])
 {
+    constexpr sampler sampler2d(min_filter::linear, mag_filter::linear);
     float4 color = baseColorMap.sample(sampler2d, data.uv, level(0));
     
     return half4(color.r, color.g, color.b, color.a);

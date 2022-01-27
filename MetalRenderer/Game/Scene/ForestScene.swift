@@ -22,8 +22,8 @@ class ForestScene: Scene
         camera.transform.position = data.playerPosition
         camera.eyeHeight = data.playerPosition.y
         
-        let skysphere = SkySphere()
-        addChild(skysphere)
+//        let skysphere = SkySphere()
+//        addChild(skysphere)
         
         for node in data.gameObjects
         {

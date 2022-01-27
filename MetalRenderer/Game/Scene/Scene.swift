@@ -9,7 +9,7 @@ import MetalKit
 
 class Scene: Node
 {
-    private var sceneConstants = SceneConstants()
+    private (set) var sceneConstants = SceneConstants()
     let camera = DebugCamera.shared
     
     internal var lights: [LightNode] = []

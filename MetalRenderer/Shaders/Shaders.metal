@@ -32,6 +32,8 @@ vertex RasterizerData basic_vertex_shader(
     data.surfaceTangent = normalize(modelConstants.modelMatrix * float4(vIn.tangent, 0.0)).xyz;
     data.surfaceBitangent = normalize(modelConstants.modelMatrix * float4(cross(vIn.normal, vIn.tangent), 0.0)).xyz;
     
+    data.viewNormal = normalize(viewConstants.viewMatrix * modelConstants.modelMatrix * float4(vIn.normal, 0.0)).xyz;
+    data.viewPosition = viewConstants.viewMatrix * modelConstants.modelMatrix * float4(vIn.position, 1.0);
     
     data.eyeVector = normalize(viewConstants.cameraPosition - data.worldPosition.xyz);
     
@@ -51,7 +53,6 @@ fragment FragOut basic_fragment_shader(
                                        constant MaterialConstants         &material       [[ buffer(1) ]],
                                        constant LightData                 *lights         [[ buffer(2) ]],
                                        constant int                       &lightCount     [[ buffer(3) ]],
-//                                       sampler                            sampler2d       [[ sampler(0) ]],
                                        texture2d<float>                   baseColorMap    [[ texture(0) ]],
                                        texture2d<float>                   normalMap       [[ texture(1) ]]
                                        )
@@ -80,8 +81,8 @@ fragment FragOut basic_fragment_shader(
     FragOut out;
     
     out.albedo = albedo;
-    out.normal = float4(unitNormal, 1.0);
-    out.position = data.worldPosition;
+    out.normal = float4(data.viewNormal, 1.0);
+    out.position = data.viewPosition;
     
     return out;
 }

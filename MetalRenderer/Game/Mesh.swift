@@ -233,7 +233,7 @@ extension Mesh: Renderable
     {
         encoder?.pushDebugGroup("Mesh")
         
-        encoder?.setDepthStencilState(DepthStencilStateLibrary[.less])
+//        encoder?.setDepthStencilState(DepthStencilStateLibrary[.less])
         
         // Устанавливаем матрицу трансформаций объекта
         encoder?.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
