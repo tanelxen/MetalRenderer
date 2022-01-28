@@ -24,10 +24,10 @@ class GameObject: Node
 
 extension GameObject: Renderable
 {
-    func doRender(with encoder: MTLRenderCommandEncoder?)
+    func doRender(with encoder: MTLRenderCommandEncoder?, useMaterials: Bool)
     {
         mesh.transform = transform.matrix
         
-        mesh.doRender(with: encoder)
+        mesh.doRender(with: encoder, useMaterials: useMaterials)
     }
 }

@@ -20,9 +20,11 @@ class Material
 
 extension Material
 {
-    func setColor(_ color: float4)
+    @discardableResult
+    func setColor(_ color: float4) -> Material
     {
         materialConstants.color = color
+        return self
     }
     
     func setBaseColorMap(_ texture: MTLTexture)
@@ -55,7 +57,9 @@ extension Material
         
         // Fragment shader setup
 //        encoder?.setFragmentSamplerState(SamplerStateLibrary[.linear], index: 0)
-        encoder?.setFragmentBytes(&materialConstants, length: MaterialConstants.stride, index: 1)
+        
+        var constants = self.materialConstants
+        encoder?.setFragmentBytes(&constants, length: MaterialConstants.stride, index: 1)
         
         if let texture = self.baseColorMap
         {

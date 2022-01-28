@@ -7,43 +7,54 @@
 
 import MetalKit
 
-class Scene: Node
+class Scene
 {
+    private let name: String
+    
+    private let root = Node(name: "SceneRoot");
+    
     private (set) var sceneConstants = SceneConstants()
     let camera = DebugCamera.shared
     
-    internal var lights: [LightNode] = []
+    var lights: [LightNode] = []
     
-    init()
+    init(name: String = "Scene")
     {
-        super.init(name: "Scene")
+        self.name = name
+        
         build()
-        frustumTest = false
+        
+        root.frustumTest = false
+        root.updateTransform()
     }
     
     func build() { }
     
-    override func update()
+    final func update()
     {
+        // Update game logic
+        doUpdate()
+        
         camera.update(deltaTime: GameTime.deltaTime)
         
         updateSceneConstants()
         
-        super.update()
+        root.update()
     }
     
-    override func render(with encoder: MTLRenderCommandEncoder?)
+    /// Override this function instead of the update function
+    func doUpdate() { }
+    
+    func addChild(_ child: Node)
+    {
+        root.addChild(child)
+    }
+    
+    func render(with encoder: MTLRenderCommandEncoder?, useMaterials: Bool)
     {
         encoder?.setVertexBytes(&sceneConstants, length: SceneConstants.stride, index: 1)
         
-        // Lights
-        var lightDatas: [LightData] = lights.map { $0.lightData }
-        var lightCount = lights.count
-        
-        encoder?.setFragmentBytes(&lightDatas, length: LightData.stride * lightCount, index: 2)
-        encoder?.setFragmentBytes(&lightCount, length: Int32.size, index: 3)
-        
-        super.render(with: encoder)
+        root.render(with: encoder, useMaterials: useMaterials)
     }
     
     private func updateSceneConstants()

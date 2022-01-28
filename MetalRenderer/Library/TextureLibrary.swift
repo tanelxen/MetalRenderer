@@ -11,9 +11,6 @@ enum TextureTypes
 {
     case none
     
-    case baseColorRender
-    case baseDepthRender
-    
     case skull
     case skysphere
 }

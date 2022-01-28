@@ -10,11 +10,6 @@ import simd
 
 class ForestScene: Scene
 {
-    var well: GameObject!
-    var sphere: GameObject!
-    
-    let light = LightNode()
-    
     override func build()
     {
         guard let data = loadSceneData(from: "forest") else { return }
@@ -22,14 +17,9 @@ class ForestScene: Scene
         camera.transform.position = data.playerPosition
         camera.eyeHeight = data.playerPosition.y
         
-//        let skysphere = SkySphere()
-//        addChild(skysphere)
-        
         for node in data.gameObjects
         {
             let mesh = Mesh(modelName: node.mesh)
-
-//            mesh.material.setMaterial(isLit: true)
             
             let gameObject = GameObject(name: node.name, mesh: mesh)
             
@@ -89,22 +79,20 @@ class ForestScene: Scene
             addChild(flower)
         }
         
-        light.transform.position = float3(0, 100, 100)
+        let light = LightNode()
+        light.transform.position = float3(200, 120, 10)
+        light.setLight(color: float3(1.0, 0.9, 0.7))
+        light.setLight(brightness: 500)
         lights.append(light)
         addChild(light)
         
-        updateTransform()
+        let sphereMesh = Mesh(modelName: "sphere")
+        sphereMesh.customMaterial = Material().setColor(float4(1.0, 1.0, 0.0, 1.0))
+        let sun = GameObject(name: "Sun", mesh: sphereMesh)
+        sun.transform.position = light.transform.position
+        sun.transform.scale = float3(10, 10, 10);
+        addChild(sun)
     }
-    
-//    override func update()
-//    {
-//        let start = CFAbsoluteTimeGetCurrent()
-//
-//        super.update()
-//
-//        let diff = (CFAbsoluteTimeGetCurrent() - start) * 1000
-//        print("Took \(diff) ms")
-//    }
     
     override func doUpdate()
     {

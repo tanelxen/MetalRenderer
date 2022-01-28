@@ -29,7 +29,7 @@ class Node
     var children: [Node] = []
     
     var frustumTest = true
-    var isVisible = true
+    var isVisible = false
     
     init(name: String = "Node")
     {
@@ -96,7 +96,7 @@ class Node
         }
     }
     
-    func render(with encoder: MTLRenderCommandEncoder?)
+    func render(with encoder: MTLRenderCommandEncoder?, useMaterials: Bool)
     {
         if frustumTest && !isVisible
         {
@@ -105,11 +105,11 @@ class Node
         
         encoder?.pushDebugGroup("Rendering \(name)")
         
-        (self as? Renderable)?.doRender(with: encoder)
+        (self as? Renderable)?.doRender(with: encoder, useMaterials: useMaterials)
         
         for child in children
         {
-            child.render(with: encoder)
+            child.render(with: encoder, useMaterials: useMaterials)
         }
         
         encoder?.popDebugGroup()

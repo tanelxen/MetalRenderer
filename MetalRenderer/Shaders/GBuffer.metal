@@ -10,12 +10,9 @@
 #include <metal_stdlib>
 using namespace metal;
 
-// Vertex Shader
-vertex RasterizerData basic_vertex_shader(
-                                          const Vertex              vIn             [[ stage_in ]],
-                                          constant SceneConstants   &viewConstants  [[ buffer(1) ]],
-                                          constant ModelConstants   &modelConstants [[ buffer(2) ]]
-                                          )
+vertex RasterizerData gbuffer_vertex_shader(const Vertex              vIn             [[ stage_in ]],
+                                            constant SceneConstants   &viewConstants  [[ buffer(1) ]],
+                                            constant ModelConstants   &modelConstants [[ buffer(2) ]])
 {
     float4x4 mvp = viewConstants.projectionMatrix * viewConstants.viewMatrix * modelConstants.modelMatrix;
     
@@ -47,15 +44,10 @@ struct FragOut
     float4 position [[ color(2) ]];
 };
 
-// Fragment Shader
-fragment FragOut basic_fragment_shader(
-                                       RasterizerData                     data            [[ stage_in ]],
-                                       constant MaterialConstants         &material       [[ buffer(1) ]],
-                                       constant LightData                 *lights         [[ buffer(2) ]],
-                                       constant int                       &lightCount     [[ buffer(3) ]],
-                                       texture2d<float>                   baseColorMap    [[ texture(0) ]],
-                                       texture2d<float>                   normalMap       [[ texture(1) ]]
-                                       )
+fragment FragOut gbuffer_fragment_shader(RasterizerData             data            [[ stage_in ]],
+                                         constant MaterialConstants &material       [[ buffer(1) ]],
+                                         texture2d<float>           baseColorMap    [[ texture(0) ]],
+                                         texture2d<float>           normalMap       [[ texture(1) ]])
 {
     
     constexpr sampler sampler2d(min_filter::linear, mag_filter::linear, address::repeat);

@@ -157,7 +157,7 @@ class Mesh
         _vertices.append(Vertex(position: position, uv: uv, normal: normal, tangent: tangent))
     }
     
-    func drawPrimitives(with encoder: MTLRenderCommandEncoder)
+    func drawPrimitives(with encoder: MTLRenderCommandEncoder, useMaterials: Bool)
     {
         guard _vertexBuffer != nil else { return }
         
@@ -165,12 +165,15 @@ class Mesh
         
         if _submeshes.count > 0
         {
-            drawSubmeshes(with: encoder)
+            drawSubmeshes(with: encoder, useMaterials: useMaterials)
 //            drawBatches(with: encoder)
         }
         else
         {
-            customMaterial?.apply(to: encoder)
+            if useMaterials
+            {
+                customMaterial?.apply(to: encoder)
+            }
             
             encoder.drawPrimitives(type: .triangle,
                                    vertexStart: 0,
@@ -211,11 +214,14 @@ class Mesh
 //        }
     }
     
-    private func drawSubmeshes(with encoder: MTLRenderCommandEncoder)
+    private func drawSubmeshes(with encoder: MTLRenderCommandEncoder, useMaterials: Bool)
     {
         for submesh in _submeshes
         {
-            (customMaterial ?? submesh._material).apply(to: encoder)
+            if useMaterials
+            {
+                (customMaterial ?? submesh._material).apply(to: encoder)
+            }
 
             encoder.drawIndexedPrimitives(type: submesh.primitiveType,
                                           indexCount: submesh.indexCount,
@@ -229,7 +235,7 @@ class Mesh
 
 extension Mesh: Renderable
 {
-    func doRender(with encoder: MTLRenderCommandEncoder?)
+    func doRender(with encoder: MTLRenderCommandEncoder?, useMaterials: Bool)
     {
         encoder?.pushDebugGroup("Mesh")
         
@@ -238,7 +244,7 @@ extension Mesh: Renderable
         // Устанавливаем матрицу трансформаций объекта
         encoder?.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
         
-        drawPrimitives(with: encoder!)
+        drawPrimitives(with: encoder!, useMaterials: useMaterials)
         
         encoder?.popDebugGroup()
     }

@@ -23,8 +23,6 @@ enum Engine
         VertexDescriptorLibrary.initialize()
         DepthStencilStateLibrary.intitialize()
         SamplerStateLibrary.initialize()
-        
-        RenderPipelineStateLibrary.initialize()
     }
 }
 
