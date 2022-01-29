@@ -71,6 +71,9 @@
 		8A672E802794CA5900703001 /* Chest_Metal_Base_Color.png in Resources */ = {isa = PBXBuildFile; fileRef = 8A672E7D2794CA5900703001 /* Chest_Metal_Base_Color.png */; };
 		8A672E812794CA5900703001 /* Chest_Wood_Base_Color.png in Resources */ = {isa = PBXBuildFile; fileRef = 8A672E7E2794CA5900703001 /* Chest_Wood_Base_Color.png */; };
 		8A672E852794D5B800703001 /* chest.mtl in Resources */ = {isa = PBXBuildFile; fileRef = 8A672E842794D5B800703001 /* chest.mtl */; };
+		8A9C235827A4D5AA00965D21 /* Octree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A9C235727A4D5AA00965D21 /* Octree.swift */; };
+		8A9C235A27A4DB4100965D21 /* Wireframe.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8A9C235927A4DB4100965D21 /* Wireframe.metal */; };
+		8A9EE2CC27A5A1C5000A15C1 /* AABB.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A9EE2CB27A5A1C5000A15C1 /* AABB.swift */; };
 		8AA0652C279AB45E00492D26 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AA0652B279AB45E00492D26 /* Utils.swift */; };
 		8AA6C3EB2792EBB300DCB7B7 /* Transform.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AA6C3EA2792EBB300DCB7B7 /* Transform.swift */; };
 		8AA6C3ED2793111100DCB7B7 /* Material.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AA6C3EC2793111100DCB7B7 /* Material.swift */; };
@@ -152,6 +155,9 @@
 		8A672E7D2794CA5900703001 /* Chest_Metal_Base_Color.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Chest_Metal_Base_Color.png; sourceTree = "<group>"; };
 		8A672E7E2794CA5900703001 /* Chest_Wood_Base_Color.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Chest_Wood_Base_Color.png; sourceTree = "<group>"; };
 		8A672E842794D5B800703001 /* chest.mtl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = chest.mtl; sourceTree = "<group>"; };
+		8A9C235727A4D5AA00965D21 /* Octree.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Octree.swift; sourceTree = "<group>"; };
+		8A9C235927A4DB4100965D21 /* Wireframe.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Wireframe.metal; sourceTree = "<group>"; };
+		8A9EE2CB27A5A1C5000A15C1 /* AABB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AABB.swift; sourceTree = "<group>"; };
 		8AA0652B279AB45E00492D26 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 		8AA6C3EA2792EBB300DCB7B7 /* Transform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transform.swift; sourceTree = "<group>"; };
 		8AA6C3EC2793111100DCB7B7 /* Material.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Material.swift; sourceTree = "<group>"; };
@@ -254,6 +260,7 @@
 				8A62323C2796282F00B1757C /* Instanced.metal */,
 				8A42053A2797B03400473A9D /* SkySphere.metal */,
 				8A42053C27981D2F00473A9D /* Compose.metal */,
+				8A9C235927A4DB4100965D21 /* Wireframe.metal */,
 			);
 			path = Shaders;
 			sourceTree = "<group>";
@@ -378,6 +385,8 @@
 				8A0D271B279033A100F2D9E6 /* Camera.swift */,
 				8A0D27412790C88300F2D9E6 /* LightNode.swift */,
 				8A6232142795DF4600B1757C /* ForestScene.swift */,
+				8A9C235727A4D5AA00965D21 /* Octree.swift */,
+				8A9EE2CB27A5A1C5000A15C1 /* AABB.swift */,
 			);
 			path = Scene;
 			sourceTree = "<group>";
@@ -560,7 +569,9 @@
 				8A0D272227907F0200F2D9E6 /* Common.metal in Sources */,
 				8A0D27292790981F00F2D9E6 /* TextureLibrary.swift in Sources */,
 				8A22EAB9278F7E7100A8CD7D /* VertexDescriptorLibrary.swift in Sources */,
+				8A9EE2CC27A5A1C5000A15C1 /* AABB.swift in Sources */,
 				8AC1658C278FBB8B00E1816A /* Scene.swift in Sources */,
+				8A9C235A27A4DB4100965D21 /* Wireframe.metal in Sources */,
 				8A62323D2796282F00B1757C /* Instanced.metal in Sources */,
 				8A33E705279B77070023D6C0 /* ssao.metal in Sources */,
 				8A0D271E279043DD00F2D9E6 /* SimpleQuad.swift in Sources */,
@@ -573,6 +584,7 @@
 				8A56D718278E058200D3FE2B /* MetalRenderer.xcdatamodeld in Sources */,
 				8A42053B2797B03400473A9D /* SkySphere.metal in Sources */,
 				8A22EAC6278F940600A8CD7D /* Renderable.swift in Sources */,
+				8A9C235827A4D5AA00965D21 /* Octree.swift in Sources */,
 				8A0D271C279033A100F2D9E6 /* Camera.swift in Sources */,
 				8A0D272027905E9400F2D9E6 /* DepthStencilStateLibrary.swift in Sources */,
 				8A22EAB7278F77DC00A8CD7D /* ShaderLibrary.swift in Sources */,

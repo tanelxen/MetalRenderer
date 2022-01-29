@@ -12,6 +12,7 @@ enum ShaderTypes
     case gbuffer
     case compose
     case skysphere
+    case wireframe
 }
 
 enum ShaderLibrary
@@ -27,6 +28,7 @@ enum ShaderLibrary
         shaders.updateValue(GBufferShader(), forKey: .gbuffer)
         shaders.updateValue(SkysphereShader(), forKey: .skysphere)
         shaders.updateValue(ComposeShader(), forKey: .compose)
+        shaders.updateValue(WireframeShader(), forKey: .wireframe)
     }
     
     static func vertex(_ type: ShaderTypes) -> MTLFunction
@@ -88,6 +90,21 @@ private struct ComposeShader: Shader
         
         fragment = ShaderLibrary.defaultLibrary.makeFunction(name: "compose_fragment_shader")!
         fragment?.label = "Compose Fragment Shader"
+    }
+}
+
+private struct WireframeShader: Shader
+{
+    var vertex: MTLFunction
+    var fragment: MTLFunction?
+    
+    init()
+    {
+        vertex = ShaderLibrary.defaultLibrary.makeFunction(name: "wireframe_vertex_shader")!
+        vertex.label = "Wireframe Vertex Shader"
+        
+        fragment = ShaderLibrary.defaultLibrary.makeFunction(name: "wireframe_fragment_shader")!
+        fragment?.label = "Wireframe Fragment Shader"
     }
 }
 

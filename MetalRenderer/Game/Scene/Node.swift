@@ -9,8 +9,8 @@ import MetalKit
 
 class Node
 {
-    private let name: String
-    private let id: String
+    let name: String
+    let id: String
     
     var transform = Transform()
     
@@ -25,6 +25,8 @@ class Node
     private var worldMinBounds: float3 = .one
     private var worldMaxBounds: float3 = .one
     private var worldSphereRadius: Float = 1
+    
+    private var aabb: AABB?
     
     var children: [Node] = []
     
@@ -66,19 +68,22 @@ class Node
             child.transform.parent = transform.matrix
             child.updateTransform()
         }
+        
+        aabb = AABB(min: minBounds, max: maxBounds)
+        aabb?.transform = transform
     }
     
     private func updateAABB()
     {
         worldAABBVertices = [
-            float3(worldMinBounds.x, worldMinBounds.y, worldMinBounds.z),
-            float3(worldMaxBounds.x, worldMinBounds.y, worldMinBounds.z),
-            float3(worldMinBounds.x, worldMaxBounds.y, worldMinBounds.z),
-            float3(worldMaxBounds.x, worldMaxBounds.y, worldMinBounds.z),
-            float3(worldMinBounds.x, worldMinBounds.y, worldMaxBounds.z),
-            float3(worldMaxBounds.x, worldMinBounds.y, worldMaxBounds.z),
-            float3(worldMinBounds.x, worldMaxBounds.y, worldMaxBounds.z),
-            float3(worldMaxBounds.x, worldMaxBounds.y, worldMaxBounds.z),
+            float3(worldMinBounds.x, worldMaxBounds.y, worldMaxBounds.z), //frontLeftTop
+            float3(worldMinBounds.x, worldMinBounds.y, worldMaxBounds.z), //frontLeftBottom
+            float3(worldMaxBounds.x, worldMaxBounds.y, worldMaxBounds.z), //frontRightTop
+            float3(worldMaxBounds.x, worldMinBounds.y, worldMaxBounds.z), //frontRightBottom
+            float3(worldMinBounds.x, worldMaxBounds.y, worldMinBounds.z), //backLeftTop
+            float3(worldMinBounds.x, worldMinBounds.y, worldMinBounds.z), //backLeftBottom
+            float3(worldMaxBounds.x, worldMaxBounds.y, worldMinBounds.z), //backRightTop
+            float3(worldMaxBounds.x, worldMinBounds.y, worldMinBounds.z), //backRightBottom
         ]
     }
     
@@ -113,6 +118,11 @@ class Node
         }
         
         encoder?.popDebugGroup()
+    }
+    
+    func renderBoundingBox(with encoder: MTLRenderCommandEncoder?)
+    {
+        aabb?.render(with: encoder)
     }
     
     private func visibilityAABB() -> Bool

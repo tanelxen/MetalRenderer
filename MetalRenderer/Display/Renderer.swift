@@ -21,6 +21,7 @@ class Renderer: NSObject
     private var _gbufferPipelineState: MTLRenderPipelineState!
     private var _compositePipelineState: MTLRenderPipelineState!
     private var _skyPipelineState: MTLRenderPipelineState!
+    private var _simplePipelineState: MTLRenderPipelineState!
     
     private let scene = ForestScene()
     
@@ -43,6 +44,7 @@ class Renderer: NSObject
         createGBufferPipelineState()
         createCompositePipelineState()
         createSkyPipelineState()
+        createSimplePipelineState()
         
         preferredFramesPerSecond = Float(view.preferredFramesPerSecond)
     }
@@ -196,6 +198,23 @@ class Renderer: NSObject
         _skyPipelineState = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
     }
     
+    private func createSimplePipelineState()
+    {
+        let descriptor = MTLRenderPipelineDescriptor()
+        
+        descriptor.colorAttachments[0].pixelFormat = Preferences.colorPixelFormat
+        descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
+        descriptor.stencilAttachmentPixelFormat = Preferences.depthStencilPixelFormat
+
+        descriptor.vertexFunction = ShaderLibrary.vertex(.wireframe)
+        descriptor.fragmentFunction = ShaderLibrary.fragment(.wireframe)
+//        descriptor.vertexDescriptor = VertexDescriptorLibrary.descriptor(.basic)
+
+        descriptor.label = "Simple Render Pipeline State"
+
+        _simplePipelineState = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
+    }
+    
     private func gbufferPass(with commandBuffer: MTLCommandBuffer?)
     {
         let renderEncoder = commandBuffer?.makeRenderCommandEncoder(descriptor: _gbufferRenderPass)
@@ -272,8 +291,52 @@ class Renderer: NSObject
         
         renderEncoder?.popDebugGroup()
         
+        
+        // DEBUG
+        
+        renderEncoder?.pushDebugGroup("Bounding Boxes")
+        
+        renderEncoder?.setDepthStencilState(DepthStencilStateLibrary[.less])
+        renderEncoder?.setRenderPipelineState(_simplePipelineState)
+        
+        scene.renderBoundingBoxes(with: renderEncoder)
+//        scene.renderOctree(with: renderEncoder)
+        
+        renderEncoder?.popDebugGroup()
+        
+        
+        
+        
         renderEncoder?.endEncoding()
     }
+    
+//    private func debugPass(with commandBuffer: MTLCommandBuffer?, in view: MTKView)
+//    {
+//        guard let renderPassDescriptor = view.currentRenderPassDescriptor else { return }
+//
+//        renderPassDescriptor.depthAttachment.texture = gDepthTexture
+//        renderPassDescriptor.depthAttachment.storeAction = .dontCare
+//        renderPassDescriptor.depthAttachment.loadAction = .load
+//
+//        renderPassDescriptor.stencilAttachment.texture = gDepthTexture
+//        renderPassDescriptor.stencilAttachment.storeAction = .dontCare
+//        renderPassDescriptor.stencilAttachment.loadAction = .dontCare
+//
+//        let renderEncoder = commandBuffer?.makeRenderCommandEncoder(descriptor: renderPassDescriptor)
+//
+//        renderEncoder?.label = "Debug Render Command Encoder"
+//
+//        renderEncoder?.pushDebugGroup("Bounding Boxes")
+//
+//        renderEncoder?.setDepthStencilState(DepthStencilStateLibrary[.less])
+//        renderEncoder?.setRenderPipelineState(_simplePipelineState)
+//
+//        scene.renderOctree(with: renderEncoder)
+//
+//        renderEncoder?.popDebugGroup()
+//
+//        renderEncoder?.endEncoding()
+//    }
     
     private func render(in view: MTKView)
     {
@@ -294,6 +357,8 @@ class Renderer: NSObject
         compositeCommandBuffer?.label = "Composite Command Buffer"
         
         compositePass(with: compositeCommandBuffer, in: view)
+        
+        // =======================================================
 
         compositeCommandBuffer?.present(drawable)
         

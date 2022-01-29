@@ -11,7 +11,7 @@ class Mesh
 {
     private var _vertices: [Vertex] = []
     private var _vertexCount: Int = 0
-    private var _vertexBuffer: MTLBuffer! = nil
+    private var _vertexBuffer: MTLBuffer!
     private var _instanceCount: Int = 1
     private var _submeshes: [Submesh] = []
     
