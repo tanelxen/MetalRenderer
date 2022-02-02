@@ -6,7 +6,7 @@
         "mesh": "tent_smallOpen",
         "transform": {
             "position": [0.0, 0.0, 0.0],
-            "rotation": [0.0, 1.13, 0.0],
+            "rotation": [0.0, 0.0, 0.0],
             "scale": [2.0, 2.0, 2.0]
         },
         "children": []
@@ -18,16 +18,6 @@
               "position": [0.0, 0.0, 0.0],
               "rotation": [0.0, 0.0, 0.0],
               "scale": [1000.0, 1.0, 1000.0]
-          },
-          "children": []
-      },
-      {
-          "name": "Skull",
-          "mesh": "skull",
-          "transform": {
-              "position": [0.0, 0.5, 4.0],
-              "rotation": [-1.57, 0.0, 0.0],
-              "scale": [0.01, 0.01, 0.01]
           },
           "children": []
       }

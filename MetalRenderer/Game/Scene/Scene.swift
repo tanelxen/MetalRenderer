@@ -64,7 +64,7 @@ class Scene
         
         for node in root.children
         {
-            octree?.add(node.name, at: node.transform.position)
+            octree?.add(node.name, at: node.worldCenter)
         }
         
 //        print(octree)
@@ -75,6 +75,36 @@ class Scene
         encoder?.setVertexBytes(&sceneConstants, length: SceneConstants.stride, index: 1)
         
         root.render(with: encoder, useMaterials: useMaterials)
+    }
+    
+    func renderLightVolumes(with encoder: MTLRenderCommandEncoder?)
+    {
+        encoder?.setVertexBytes(&sceneConstants, length: SceneConstants.stride, index: 1)
+        
+        for light in lights
+        {
+            encoder?.pushDebugGroup("Rendering \(light.name)")
+            light.renderVolume(with: encoder)
+            encoder?.popDebugGroup()
+        }
+    }
+    
+    func renderShadows(with encoder: MTLRenderCommandEncoder?)
+    {
+        for light in lights
+        {
+            guard light.shouldCastShadow else { continue }
+            
+            encoder?.pushDebugGroup("Rendering shadowmap for \(light.name)")
+            
+            var lightSpaceMatrix = light.viewProjMatrix
+            
+            encoder?.setVertexBytes(&lightSpaceMatrix, length: matrix_float4x4.stride, index: 1)
+            
+            root.render(with: encoder, useMaterials: false)
+            
+            encoder?.popDebugGroup()
+        }
     }
     
     func renderBoundingBoxes(with encoder: MTLRenderCommandEncoder?)

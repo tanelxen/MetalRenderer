@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import simd
 
 protocol sizeable
 {
@@ -43,4 +44,4 @@ extension SIMD2: sizeable { }
 extension SIMD3: sizeable { }
 extension SIMD4: sizeable { }
 
-//extension matrix_float4x4: sizeable { }
+extension matrix_float4x4: sizeable { }

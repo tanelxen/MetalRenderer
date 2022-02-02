@@ -11,6 +11,7 @@ enum DepthStencilStateTypes
 {
     case less
     case gbuffer
+    case lighting
     case compose
     case sky
 }
@@ -28,6 +29,7 @@ enum DepthStencilStateLibrary
     {
         depthStencilStates.updateValue(LessDepthStencilState(), forKey: .less)
         depthStencilStates.updateValue(GBufferDepthStencilState(), forKey: .gbuffer)
+        depthStencilStates.updateValue(LightingDepthStencilState(), forKey: .lighting)
         depthStencilStates.updateValue(ComposeDepthStencilState(), forKey: .compose)
         depthStencilStates.updateValue(SkyDepthStencilState(), forKey: .sky)
     }
@@ -75,6 +77,27 @@ class GBufferDepthStencilState: DepthStencilState
         descriptor.depthCompareFunction = .less
         descriptor.frontFaceStencil = stencilStateDescriptor
         descriptor.backFaceStencil = stencilStateDescriptor
+        descriptor.label = name
+        
+        depthStencilState = Engine.device.makeDepthStencilState(descriptor: descriptor)
+    }
+}
+
+class LightingDepthStencilState: DepthStencilState
+{
+    var name: String = "Lighting Depth Stencil State"
+    var depthStencilState: MTLDepthStencilState!
+    
+    init()
+    {
+//        let stencilStateDescriptor: MTLStencilDescriptor = MTLStencilDescriptor()
+//        stencilStateDescriptor.stencilCompareFunction = .notEqual
+        
+        let descriptor = MTLDepthStencilDescriptor()
+        descriptor.isDepthWriteEnabled = false
+        descriptor.depthCompareFunction = .greaterEqual
+//        descriptor.frontFaceStencil = stencilStateDescriptor
+//        descriptor.backFaceStencil = stencilStateDescriptor
         descriptor.label = name
         
         depthStencilState = Engine.device.makeDepthStencilState(descriptor: descriptor)

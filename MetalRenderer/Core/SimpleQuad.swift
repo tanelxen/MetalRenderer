@@ -36,14 +36,6 @@ class SimpleQuad
     {
         encoder?.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
         
-        let projection = DebugCamera.shared.projectionMatrix
-        var view = DebugCamera.shared.viewMatrix
-        
-        var invCamPj = projection.inverse;
-        
-        encoder?.setFragmentBytes(&invCamPj, length: MemoryLayout<matrix_float4x4>.stride, index: 1)
-        encoder?.setFragmentBytes(&view, length: MemoryLayout<matrix_float4x4>.stride, index: 2)
-        
         encoder?.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices.count)
     }
 }

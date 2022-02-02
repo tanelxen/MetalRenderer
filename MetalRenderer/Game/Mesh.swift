@@ -6,6 +6,7 @@
 //
 
 import MetalKit
+import SceneKit
 
 class Mesh
 {
@@ -105,8 +106,8 @@ class Mesh
         let mtkMesh = mtkMeshes[0]
         let mdlMesh = mdlMeshes[0]
         
-        self._vertexBuffer = mtkMesh.vertexBuffers[0].buffer
-        self._vertexCount = mtkMesh.vertexCount
+        _vertexBuffer = mtkMesh.vertexBuffers[0].buffer
+        _vertexCount = mtkMesh.vertexCount
         
         for i in 0 ..< mtkMesh.submeshes.count
         {

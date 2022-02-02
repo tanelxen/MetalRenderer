@@ -33,6 +33,12 @@ struct SceneConstants: sizeable
     var cameraPosition: float3 = .zero
 }
 
+struct ShadowConstants: sizeable
+{
+    var viewMatrix = matrix_identity_float4x4
+    var projectionMatrix = matrix_identity_float4x4
+}
+
 struct MaterialConstants: sizeable
 {
     var isLit = false

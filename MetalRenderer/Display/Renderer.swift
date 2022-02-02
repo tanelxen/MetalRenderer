@@ -16,19 +16,27 @@ class Renderer: NSObject
         return screenSize.x / screenSize.y
     }
     
-    private var _gbufferRenderPass: MTLRenderPassDescriptor!
+    private var _defaultLibrary: MTLLibrary!
     
+    private var _shadowRenderPass: MTLRenderPassDescriptor!
+    private var _gbufferRenderPass: MTLRenderPassDescriptor!
+    private var _lightingRenderPass: MTLRenderPassDescriptor!
+    
+    private var _shadowPipelineState: MTLRenderPipelineState!
     private var _gbufferPipelineState: MTLRenderPipelineState!
+    private var _lightingPipelineState: MTLRenderPipelineState!
     private var _compositePipelineState: MTLRenderPipelineState!
     private var _skyPipelineState: MTLRenderPipelineState!
     private var _simplePipelineState: MTLRenderPipelineState!
     
     private let scene = ForestScene()
     
+    private var shadowTexture: MTLTexture!
     private var gAlbedoTexture: MTLTexture!
     private var gNormalTexture: MTLTexture!
     private var gPositionTexture: MTLTexture!
     private var gDepthTexture: MTLTexture!
+    private var lightingTexture: MTLTexture!
     
     private let _skysphere = SkySphere()
     private let _fullscreenQuad = SimpleQuad()
@@ -40,8 +48,12 @@ class Renderer: NSObject
         super.init()
         
         mtkView(view, drawableSizeWillChange: view.drawableSize)
+        
+        _defaultLibrary = Engine.device.makeDefaultLibrary()
 
+        createShadowPipelineState()
         createGBufferPipelineState()
+        createLightingPipelineState()
         createCompositePipelineState()
         createSkyPipelineState()
         createSimplePipelineState()
@@ -69,6 +81,32 @@ class Renderer: NSObject
 //        print("Took \(diff) ms")
     }
     
+    // MARK: - PASSES
+    
+    private func createShadowPass()
+    {
+//        let shadowTextureDescriptor = MTLTextureDescriptor.textureCubeDescriptor(pixelFormat: .depth16Unorm,
+//                                                                                 size: 128,
+//                                                                                 mipmapped: false)
+        
+        let shadowTextureDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .depth16Unorm,
+                                                                               width: 128,
+                                                                               height: 128,
+                                                                               mipmapped: false)
+        
+        shadowTextureDescriptor.usage = [.renderTarget, .shaderRead]
+        shadowTextureDescriptor.storageMode = .private
+        
+        shadowTexture = Engine.device.makeTexture(descriptor: shadowTextureDescriptor)!
+        shadowTexture.label = "Shadow"
+
+        _shadowRenderPass = MTLRenderPassDescriptor()
+        _shadowRenderPass.depthAttachment.texture = shadowTexture
+        _shadowRenderPass.depthAttachment.loadAction = .clear
+        _shadowRenderPass.depthAttachment.storeAction = .store
+        _shadowRenderPass.depthAttachment.clearDepth = 1.0
+    }
+    
     private func createGBufferPass()
     {
         let width = Int(Renderer.screenSize.x)
@@ -88,7 +126,7 @@ class Renderer: NSObject
         gAlbedoTexture.label = "Albedo"
         
         // ------ NORMAL ------
-        let normalTextureDecriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba16Float,
+        let normalTextureDecriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rg16Float,
                                                                               width: width,
                                                                               height: height,
                                                                               mipmapped: false)
@@ -146,23 +184,89 @@ class Renderer: NSObject
         _gbufferRenderPass.stencilAttachment.storeAction = .store
     }
     
+    private func createLightingPass()
+    {
+        let width = Int(Renderer.screenSize.x)
+        let height = Int(Renderer.screenSize.y)
+        
+        let lightingTextureDecriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba16Float,
+                                                                                width: width,
+                                                                                height: height,
+                                                                                mipmapped: false)
+        
+        lightingTextureDecriptor.sampleCount = 1
+        lightingTextureDecriptor.storageMode = .private
+        lightingTextureDecriptor.usage = [.renderTarget, .shaderRead]
+        
+        lightingTexture = Engine.device.makeTexture(descriptor: lightingTextureDecriptor)!
+        lightingTexture.label = "Lighting"
+
+        _lightingRenderPass = MTLRenderPassDescriptor()
+        
+        _lightingRenderPass.colorAttachments[0].texture = lightingTexture
+        _lightingRenderPass.colorAttachments[0].loadAction = .clear
+        _lightingRenderPass.colorAttachments[0].storeAction = .store
+        
+        _lightingRenderPass.depthAttachment.texture = gDepthTexture
+        _lightingRenderPass.depthAttachment.loadAction = .load
+        _lightingRenderPass.depthAttachment.storeAction = .dontCare
+        
+//        _lightingRenderPass.stencilAttachment.texture = gDepthTexture
+//        _lightingRenderPass.stencilAttachment.loadAction = .load
+//        _lightingRenderPass.stencilAttachment.storeAction = .dontCare
+    }
+    
+    // MARK: - STATES
+    
+    private func createShadowPipelineState()
+    {
+        let descriptor = MTLRenderPipelineDescriptor()
+        
+        descriptor.depthAttachmentPixelFormat = .depth16Unorm
+
+        descriptor.vertexFunction = _defaultLibrary.makeFunction(name: "shadowmap_vertex_shader")
+        descriptor.fragmentFunction = nil
+        descriptor.vertexDescriptor = VertexDescriptorLibrary.descriptor(.basic)
+
+        descriptor.label = "Shadow Render Pipeline State"
+
+        _shadowPipelineState = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
+    }
+    
     private func createGBufferPipelineState()
     {
         let descriptor = MTLRenderPipelineDescriptor()
         descriptor.colorAttachments[0].pixelFormat = .rgba8Unorm
-        descriptor.colorAttachments[1].pixelFormat = .rgba16Float
+        descriptor.colorAttachments[1].pixelFormat = .rg16Float
         descriptor.colorAttachments[2].pixelFormat = .rgba16Float
         
         descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
         descriptor.stencilAttachmentPixelFormat = Preferences.depthStencilPixelFormat
 
-        descriptor.vertexFunction = ShaderLibrary.vertex(.gbuffer)
-        descriptor.fragmentFunction = ShaderLibrary.fragment(.gbuffer)
+        descriptor.vertexFunction = _defaultLibrary.makeFunction(name: "gbuffer_vertex_shader")
+        descriptor.fragmentFunction = _defaultLibrary.makeFunction(name: "gbuffer_fragment_shader")
         descriptor.vertexDescriptor = VertexDescriptorLibrary.descriptor(.basic)
 
         descriptor.label = "GBuffer Render Pipeline State"
 
         _gbufferPipelineState = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
+    }
+    
+    private func createLightingPipelineState()
+    {
+        let descriptor = MTLRenderPipelineDescriptor()
+        descriptor.colorAttachments[0].pixelFormat = .rgba16Float
+        
+        descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
+//        descriptor.stencilAttachmentPixelFormat = Preferences.depthStencilPixelFormat
+
+        descriptor.vertexFunction = _defaultLibrary.makeFunction(name: "lighting_vertex_shader")
+        descriptor.fragmentFunction = _defaultLibrary.makeFunction(name: "lighting_fragment_shader")
+        descriptor.vertexDescriptor = VertexDescriptorLibrary.descriptor(.basic)
+
+        descriptor.label = "Lighting Render Pipeline State"
+
+        _lightingPipelineState = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
     }
     
     private func createCompositePipelineState()
@@ -173,8 +277,8 @@ class Renderer: NSObject
         descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
         descriptor.stencilAttachmentPixelFormat = Preferences.depthStencilPixelFormat
 
-        descriptor.vertexFunction = ShaderLibrary.vertex(.compose)
-        descriptor.fragmentFunction = ShaderLibrary.fragment(.compose)
+        descriptor.vertexFunction = _defaultLibrary.makeFunction(name: "compose_vertex_shader")
+        descriptor.fragmentFunction = _defaultLibrary.makeFunction(name: "compose_fragment_shader")
 
         descriptor.label = "Composite Render Pipeline State"
 
@@ -189,8 +293,8 @@ class Renderer: NSObject
         descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
         descriptor.stencilAttachmentPixelFormat = Preferences.depthStencilPixelFormat
 
-        descriptor.vertexFunction = ShaderLibrary.vertex(.skysphere)
-        descriptor.fragmentFunction = ShaderLibrary.fragment(.skysphere)
+        descriptor.vertexFunction = _defaultLibrary.makeFunction(name: "skysphere_vertex_shader")
+        descriptor.fragmentFunction = _defaultLibrary.makeFunction(name: "skysphere_fragment_shader")
         descriptor.vertexDescriptor = VertexDescriptorLibrary.descriptor(.basic)
 
         descriptor.label = "Skysphere Render Pipeline State"
@@ -206,8 +310,8 @@ class Renderer: NSObject
         descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
         descriptor.stencilAttachmentPixelFormat = Preferences.depthStencilPixelFormat
 
-        descriptor.vertexFunction = ShaderLibrary.vertex(.wireframe)
-        descriptor.fragmentFunction = ShaderLibrary.fragment(.wireframe)
+        descriptor.vertexFunction = _defaultLibrary.makeFunction(name: "wireframe_vertex_shader")
+        descriptor.fragmentFunction = _defaultLibrary.makeFunction(name: "wireframe_fragment_shader")
 //        descriptor.vertexDescriptor = VertexDescriptorLibrary.descriptor(.basic)
 
         descriptor.label = "Simple Render Pipeline State"
@@ -215,7 +319,41 @@ class Renderer: NSObject
         _simplePipelineState = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
     }
     
-    private func gbufferPass(with commandBuffer: MTLCommandBuffer?)
+//    func doShadowPass(commandBuffer: MTLCommandBuffer)
+//    {
+//        let shadowRenderCommandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: _shadowRenderPassDescriptor)
+//        shadowRenderCommandEncoder?.label = "Shadow Render Command Encoder"
+//        shadowRenderCommandEncoder?.pushDebugGroup("Starting Shadow Render Pass")
+//        shadowRenderCommandEncoder?.setFrontFacing(.counterClockwise)
+//        shadowRenderCommandEncoder?.setCullMode(.front)
+//        SceneManager.ShadowRender(renderCommandEncoder: shadowRenderCommandEncoder!)
+//        shadowRenderCommandEncoder?.popDebugGroup()
+//        shadowRenderCommandEncoder?.endEncoding()
+//    }
+    
+    // MARK: - DO PASSES
+    
+    private func doShadowPass(with commandBuffer: MTLCommandBuffer?)
+    {
+        let renderEncoder = commandBuffer?.makeRenderCommandEncoder(descriptor: _shadowRenderPass)
+        
+        renderEncoder?.label = "Shadow Render Command Encoder"
+
+        renderEncoder?.pushDebugGroup("Shadow Render")
+        
+        renderEncoder?.setDepthStencilState(DepthStencilStateLibrary[.less])
+        
+//        renderEncoder?.setCullMode(.front)
+        
+        renderEncoder?.setRenderPipelineState(_shadowPipelineState)
+        scene.renderShadows(with: renderEncoder)
+        
+        renderEncoder?.popDebugGroup()
+        
+        renderEncoder?.endEncoding()
+    }
+    
+    private func doGeometryPass(with commandBuffer: MTLCommandBuffer?)
     {
         let renderEncoder = commandBuffer?.makeRenderCommandEncoder(descriptor: _gbufferRenderPass)
         
@@ -226,6 +364,8 @@ class Renderer: NSObject
         renderEncoder?.setDepthStencilState(DepthStencilStateLibrary[.gbuffer])
         renderEncoder?.setStencilReferenceValue(128)
         
+        renderEncoder?.setCullMode(.front)
+        
         renderEncoder?.setRenderPipelineState(_gbufferPipelineState)
         scene.render(with: renderEncoder, useMaterials: true)
         
@@ -234,7 +374,33 @@ class Renderer: NSObject
         renderEncoder?.endEncoding()
     }
     
-    private func compositePass(with commandBuffer: MTLCommandBuffer?, in view: MTKView)
+    private func doLightingPass(with commandBuffer: MTLCommandBuffer?)
+    {
+        let renderEncoder = commandBuffer?.makeRenderCommandEncoder(descriptor: _lightingRenderPass)
+        
+        renderEncoder?.label = "Lighting Render Command Encoder"
+
+        renderEncoder?.pushDebugGroup("Lighting Render")
+        
+        renderEncoder?.setDepthStencilState(DepthStencilStateLibrary[.lighting])
+        
+        renderEncoder?.setCullMode(.back)
+        
+        renderEncoder?.setRenderPipelineState(_lightingPipelineState)
+        
+        renderEncoder?.setFragmentTexture(gNormalTexture, index: 1)
+        renderEncoder?.setFragmentTexture(gPositionTexture, index: 2)
+        renderEncoder?.setFragmentTexture(shadowTexture, index: 3)
+        renderEncoder?.setFragmentTexture(gDepthTexture, index: 4)
+        
+        scene.renderLightVolumes(with: renderEncoder)
+        
+        renderEncoder?.popDebugGroup()
+        
+        renderEncoder?.endEncoding()
+    }
+    
+    private func doCompositePass(with commandBuffer: MTLCommandBuffer?, in view: MTKView)
     {
         guard let renderPassDescriptor = view.currentRenderPassDescriptor else { return }
         
@@ -259,19 +425,13 @@ class Renderer: NSObject
         
         renderEncoder?.setRenderPipelineState(_compositePipelineState)
         
+        var invCamPj = DebugCamera.shared.projectionMatrix.inverse
+        renderEncoder?.setFragmentBytes(&invCamPj, length: MemoryLayout<matrix_float4x4>.stride, index: 1)
+        
         renderEncoder?.setFragmentTexture(gAlbedoTexture, index: 0)
         renderEncoder?.setFragmentTexture(gNormalTexture, index: 1)
-        renderEncoder?.setFragmentTexture(gPositionTexture, index: 2)
-        renderEncoder?.setFragmentTexture(gDepthTexture, index: 3)
-        
-        
-        // LIGHTS
-        var lightDatas: [LightData] = scene.lights.map { $0.lightData }
-        var lightCount = lightDatas.count
-        
-        renderEncoder?.setFragmentBytes(&lightDatas, length: LightData.stride * lightCount, index: 3)
-        renderEncoder?.setFragmentBytes(&lightCount, length: Int32.size, index: 4)
-        
+        renderEncoder?.setFragmentTexture(gDepthTexture, index: 2)
+        renderEncoder?.setFragmentTexture(lightingTexture, index: 3)
         
         _fullscreenQuad.drawPrimitives(with: renderEncoder)
         
@@ -292,71 +452,58 @@ class Renderer: NSObject
         renderEncoder?.popDebugGroup()
         
         
-        // DEBUG
-        
-        renderEncoder?.pushDebugGroup("Bounding Boxes")
-        
-        renderEncoder?.setDepthStencilState(DepthStencilStateLibrary[.less])
-        renderEncoder?.setRenderPipelineState(_simplePipelineState)
-        
-        scene.renderBoundingBoxes(with: renderEncoder)
-//        scene.renderOctree(with: renderEncoder)
-        
-        renderEncoder?.popDebugGroup()
-        
-        
-        
-        
-        renderEncoder?.endEncoding()
-    }
-    
-//    private func debugPass(with commandBuffer: MTLCommandBuffer?, in view: MTKView)
-//    {
-//        guard let renderPassDescriptor = view.currentRenderPassDescriptor else { return }
-//
-//        renderPassDescriptor.depthAttachment.texture = gDepthTexture
-//        renderPassDescriptor.depthAttachment.storeAction = .dontCare
-//        renderPassDescriptor.depthAttachment.loadAction = .load
-//
-//        renderPassDescriptor.stencilAttachment.texture = gDepthTexture
-//        renderPassDescriptor.stencilAttachment.storeAction = .dontCare
-//        renderPassDescriptor.stencilAttachment.loadAction = .dontCare
-//
-//        let renderEncoder = commandBuffer?.makeRenderCommandEncoder(descriptor: renderPassDescriptor)
-//
-//        renderEncoder?.label = "Debug Render Command Encoder"
+//        // DEBUG
 //
 //        renderEncoder?.pushDebugGroup("Bounding Boxes")
 //
 //        renderEncoder?.setDepthStencilState(DepthStencilStateLibrary[.less])
 //        renderEncoder?.setRenderPipelineState(_simplePipelineState)
 //
-//        scene.renderOctree(with: renderEncoder)
+//        scene.renderBoundingBoxes(with: renderEncoder)
 //
 //        renderEncoder?.popDebugGroup()
-//
-//        renderEncoder?.endEncoding()
-//    }
+        
+        
+        renderEncoder?.endEncoding()
+    }
     
     private func render(in view: MTKView)
     {
         guard let drawable = view.currentDrawable else { return }
+        
+        // ========= SHADOW =======================================
+
+        let shadowCommandBuffer = Engine.commandQueue.makeCommandBuffer()
+        shadowCommandBuffer?.label = "Shadow Command Buffer"
+
+        doShadowPass(with: shadowCommandBuffer)
+
+        shadowCommandBuffer?.commit()
 
         // ========= G-BUFFER =======================================
         
         let geometryCommandBuffer = Engine.commandQueue.makeCommandBuffer()
         geometryCommandBuffer?.label = "Geometry Command Buffer"
         
-        gbufferPass(with: geometryCommandBuffer)
+        doGeometryPass(with: geometryCommandBuffer)
         
         geometryCommandBuffer?.commit()
+        
+        // ========= LIGHTING =======================================
+        
+        let lightingCommandBuffer = Engine.commandQueue.makeCommandBuffer()
+        lightingCommandBuffer?.label = "Lighting Command Buffer"
+        
+        doLightingPass(with: lightingCommandBuffer)
+        
+        lightingCommandBuffer?.commit()
         
         // ========= COMPOSITE =======================================
         
         let compositeCommandBuffer = Engine.commandQueue.makeCommandBuffer()
         compositeCommandBuffer?.label = "Composite Command Buffer"
         
-        compositePass(with: compositeCommandBuffer, in: view)
+        doCompositePass(with: compositeCommandBuffer, in: view)
         
         // =======================================================
 
@@ -372,7 +519,9 @@ extension Renderer: MTKViewDelegate
     {
         updateScreenSize(size)
         
+        createShadowPass()
         createGBufferPass()
+        createLightingPass()
     }
     
     func draw(in view: MTKView)

@@ -20,56 +20,56 @@ class ForestScene: Scene
         for node in data.gameObjects
         {
             let mesh = Mesh(modelName: node.mesh)
-            
+
             let gameObject = GameObject(name: node.name, mesh: mesh)
-            
+
             gameObject.transform.position = node.transform.position
             gameObject.transform.rotation = node.transform.rotation
             gameObject.transform.scale = node.transform.scale
-            
+
             addChild(gameObject)
         }
 
-        
-        let pines: [Mesh] = [
-            Mesh(modelName: "tree_pineTallA_detailed"),
-            Mesh(modelName: "tree_pineDefaultB"),
-            Mesh(modelName: "tree_pineRoundC")
-        ]
 
-        for i in 0..<500
-        {
-            guard let mesh = pines.randomElement() else { continue }
-            
-            let tree = GameObject(name: "Tree_\(i)", mesh: mesh)
-            
-            let radius: Float = Float.random(in: 8...70)
-            let x = cos(Float(i)) * radius
-            let z = sin(Float(i)) * radius
+//        let pines: [Mesh] = [
+//            Mesh(modelName: "tree_pineTallA_detailed"),
+//            Mesh(modelName: "tree_pineDefaultB"),
+//            Mesh(modelName: "tree_pineRoundC")
+//        ]
+//
+//        for i in 0..<500
+//        {
+//            guard let mesh = pines.randomElement() else { continue }
+//
+//            let tree = GameObject(name: "Tree_\(i)", mesh: mesh)
+//
+//            let radius: Float = Float.random(in: 8...70)
+//            let x = cos(Float(i)) * radius
+//            let z = sin(Float(i)) * radius
+//
+//            let scale = Float.random(in: 1...2)
+//
+//            tree.transform.position = float3(x, 0, z)
+//            tree.transform.scale = float3(repeating: scale)
+//            tree.transform.rotation.y = Float.random(in: 0...360).radians
+//
+//            addChild(tree)
+//        }
 
-            let scale = Float.random(in: 1...2)
 
-            tree.transform.position = float3(x, 0, z)
-            tree.transform.scale = float3(repeating: scale)
-            tree.transform.rotation.y = Float.random(in: 0...360).radians
-
-            addChild(tree)
-        }
-        
-        
         let flowers: [Mesh] = [
             Mesh(modelName: "flower_purpleA"),
             Mesh(modelName: "flower_redA"),
             Mesh(modelName: "flower_yellowA")
         ]
 
-        for i in 0..<500
+        for i in 0..<100
         {
             guard let mesh = flowers.randomElement() else { continue }
-            
+
             let flower = GameObject(name: "Flower_\(i)", mesh: mesh)
-            
-            let radius: Float = Float.random(in: 2...70)
+
+            let radius: Float = Float.random(in: 1...10)
             let x = cos(Float(i)) * radius
             let z = sin(Float(i)) * radius
 
@@ -79,19 +79,36 @@ class ForestScene: Scene
             addChild(flower)
         }
         
-        let light = LightNode()
-        light.transform.position = float3(200, 120, 10)
-        light.setLight(color: float3(1.0, 0.9, 0.7))
-        light.setLight(brightness: 500)
-        lights.append(light)
-        addChild(light)
+        let light1 = LightNode()
+        light1.transform.position = float3(0, 0.2, 0)
+        light1.transform.rotation.y = Float(180).radians
+        light1.setLight(color: float3(1.0, 0.9, 0.7))
+        light1.setLight(brightness: 2)
+        lights.append(light1)
+        addChild(light1)
         
-        let sphereMesh = Mesh(modelName: "sphere")
-        sphereMesh.customMaterial = Material().setColor(float4(1.0, 1.0, 0.0, 1.0))
-        let sun = GameObject(name: "Sun", mesh: sphereMesh)
-        sun.transform.position = light.transform.position
-        sun.transform.scale = float3(10, 10, 10);
-        addChild(sun)
+//        let light2 = LightNode()
+//        light2.transform.position = float3(0, 0.2, 0)
+//        light2.transform.rotation.y = Float(90).radians
+//        light2.setLight(color: float3(1.0, 0.9, 0.7))
+//        light2.setLight(brightness: 2)
+//        lights.append(light2)
+//        addChild(light2)
+//
+//        let light3 = LightNode()
+//        light3.transform.position = float3(0, 0.2, 0)
+//        light3.transform.rotation.y = Float(-90).radians
+//        light3.setLight(color: float3(1.0, 0.9, 0.7))
+//        light3.setLight(brightness: 2)
+//        lights.append(light3)
+//        addChild(light3)
+        
+//        let sphereMesh = Mesh(modelName: "sphere")
+//        sphereMesh.customMaterial = Material().setColor(float4(1.0, 1.0, 0.0, 1.0))
+//        let sun = GameObject(name: "Sun", mesh: sphereMesh)
+//        sun.transform.position = light.transform.position
+//        sun.transform.scale = float3(repeating: 0.1);
+//        addChild(sun)
     }
     
     override func doUpdate()

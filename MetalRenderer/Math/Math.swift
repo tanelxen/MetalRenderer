@@ -161,6 +161,24 @@ extension matrix_float4x4
         
         return result
     }
+    
+    static func orthographic(left: Float, right: Float, bottom: Float, top: Float, near: Float, far: Float)->matrix_float4x4{
+        return float4x4 (
+            [ 2 / (right - left), 0, 0, 0 ],
+            [ 0, 2 / (top - bottom), 0, 0 ],
+            [ 0, 0, -2 / (far - near), 0 ],
+            [ 0,0,0,1 ]
+        )
+     }
+    
+    static func orthographic(width: Float, height: Float, length: Float)->matrix_float4x4{
+        return float4x4 (
+            [ Float(2.0) / width,   0,                      0,                      0 ],
+            [ 0,                    Float(2.0) / height,    0,                      0 ],
+            [ 0,                    0,                      -Float(2.0) / length,    0 ],
+            [ 0,                    0,                      0,                      Float(1.0) ]
+        )
+     }
 }
 
 //struct AABB

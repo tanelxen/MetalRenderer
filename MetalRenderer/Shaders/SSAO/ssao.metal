@@ -134,4 +134,29 @@ float positionBasedSSAO(texture2d<float> positionMap, float2 texCoord, float3 vi
     return total;
 }
 
+float3 ViewPosFromDepth(float depth, float2 texCoord, constant float4x4 &projMatrixInv)
+{
+    float z = depth * 2.0 - 1.0;
+
+    float4 clipSpacePosition = float4(texCoord * 2.0 - 1.0, z, 1.0);
+    float4 viewSpacePosition = projMatrixInv * clipSpacePosition;
+    
+    return viewSpacePosition.xyz;
+}
+
+float3 WorldPosFromDepth(float depth, float2 texCoord, constant float4x4 &projMatrixInv, constant float4x4 &viewMatrixInv)
+{
+    float z = depth * 2.0 - 1.0;
+
+    float4 clipSpacePosition = float4(texCoord * 2.0 - 1.0, z, 1.0);
+    float4 viewSpacePosition = projMatrixInv * clipSpacePosition;
+
+    // Perspective division
+    viewSpacePosition /= viewSpacePosition.w;
+
+    float4 worldSpacePosition = viewMatrixInv * viewSpacePosition;
+
+    return worldSpacePosition.xyz;
+}
+
 #endif

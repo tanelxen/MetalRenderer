@@ -40,7 +40,7 @@ vertex RasterizerData gbuffer_vertex_shader(const Vertex              vIn       
 struct FragOut
 {
     float4 albedo   [[ color(0) ]];
-    float4 normal   [[ color(1) ]];
+    half2 normal   [[ color(1) ]];
     float4 position [[ color(2) ]];
 };
 
@@ -73,8 +73,8 @@ fragment FragOut gbuffer_fragment_shader(RasterizerData             data        
     FragOut out;
     
     out.albedo = albedo;
-    out.normal = float4(data.viewNormal, 1.0);
-    out.position = data.viewPosition;
+    out.normal = half2(data.viewNormal.xy);
+    out.position = data.worldPosition;
     
     return out;
 }

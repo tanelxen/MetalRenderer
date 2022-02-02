@@ -40,6 +40,12 @@ struct SceneConstants
     float3 cameraPosition;
 };
 
+struct ShadowConstants
+{
+    float4x4 viewMatrix;
+    float4x4 projectionMatrix;
+};
+
 struct ModelConstants
 {
     float4x4 modelMatrix;

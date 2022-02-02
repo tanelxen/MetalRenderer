@@ -21,7 +21,7 @@ class Node
     
     private var worldAABBVertices: [float3] = []
     
-    private var worldCenter: float3 = float3(0.5, 0.5, 0.5)
+    var worldCenter: float3 = float3(0.5, 0.5, 0.5)
     private var worldMinBounds: float3 = .one
     private var worldMaxBounds: float3 = .one
     private var worldSphereRadius: Float = 1
@@ -30,7 +30,7 @@ class Node
     
     var children: [Node] = []
     
-    var frustumTest = true
+    var frustumTest = false
     var isVisible = false
     
     init(name: String = "Node")
