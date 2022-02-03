@@ -44,31 +44,43 @@ vertex VertexOut compose_vertex_shader(const device VertexIn *vIn [[ buffer(0) ]
     return out;
 }
 
-float3 lensflare(float2 uv, float2 pos);
+float3 fog(float distance, float3 color);
 
 sampler sampler2d;
 
 // Fragment Shader
-fragment half4 compose_fragment_shader(VertexOut          data        [[ stage_in ]],
-                                       constant float4x4  &invCamPj   [[ buffer(1) ]],
-                                       texture2d<float>   albedoMap   [[ texture(0) ]],
-                                       texture2d<float>   normalMap   [[ texture(1) ]],
-                                       depth2d<float>     depthMap    [[ texture(2) ]],
-                                       texture2d<float>   lightMap    [[ texture(3) ]])
+fragment float4 compose_fragment_shader(VertexOut            data        [[ stage_in ]],
+                                       constant LightData   &light      [[ buffer(0) ]],
+                                       constant float4x4    &invCamPj   [[ buffer(1) ]],
+                                       texture2d<float>     albedoMap   [[ texture(0) ]],
+                                       texture2d<float>     normalMap   [[ texture(1) ]],
+                                       depth2d<float>       depthMap    [[ texture(2) ]],
+                                       texture2d<float>     lightMap    [[ texture(3) ]],
+                                       depthcube<float>     shadowMap   [[ texture(4) ]],
+                                       texture2d<float>     positionMap [[ texture(5) ]])
 {
     float3 albedo = albedoMap.sample(sampler2d, data.texCoord).rgb;
-    
+
     float2 normalXY = normalMap.sample(sampler2d, data.texCoord).xy;
     float normalZ = sqrt(1.0f - normalXY.x * normalXY.x - normalXY.y * normalXY.y);
     float3 normal = float3(normalXY, normalZ);
-    
-    float3 diffuse = lightMap.sample(sampler2d, data.texCoord).rgb;
-    
-    diffuse = saturate(diffuse + 0.02);
-    
-    float ssao = pureDepthSSAO(depthMap, data.texCoord, normal, invCamPj);
-    
-    float3 result = albedo * ssao * diffuse;
 
-    return half4(result.r, result.g, result.b, 1.0);
+    float3 diffuse = lightMap.sample(sampler2d, data.texCoord).rgb + 0.002;
+
+//    diffuse = saturate(diffuse + 0.02);
+
+    float ssao = pureDepthSSAO(depthMap, data.texCoord, normal, invCamPj);
+
+    float3 result = saturate(albedo * diffuse) * ssao;
+    
+    const float exposure = 5.0;
+    const float gamma = 2.2;
+    
+    // тональная компрессия с экспозицией
+    float3 mapped = float3(1.0) - exp(-result * exposure);
+    
+    // гамма-коррекция
+    mapped = pow(mapped, float3(1.0 / gamma));
+
+    return float4(mapped, 1.0);
 }

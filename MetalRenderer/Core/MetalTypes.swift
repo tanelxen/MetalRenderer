@@ -56,7 +56,7 @@ struct LightData: sizeable
 {
     var position: float3 = .zero
     var color: float3 = float3(1.0, 1.0, 1.0)
-    var brightness: Float = 0.9
+    var radius: Float = 1.0
     
     var ambientIntensity: Float = 0.5
     var diffuseIntensity: Float = 0.9

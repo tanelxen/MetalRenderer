@@ -46,10 +46,8 @@ class LightNode: Node
         
         viewMatrix.translate(direction: -transform.position)
         
-        let volumeScale = lightData.brightness * 2
-        
-        let projectionMatrix = matrix_float4x4.perspective(degreesFov: 45, aspectRatio: 1.0, near: 0.1, far: volumeScale)
-//        let projectionMatrix = matrix_float4x4.orthographic(width: volumeScale, height: volumeScale, length: volumeScale)
+        let projectionMatrix = matrix_float4x4.perspective(degreesFov: 90, aspectRatio: 1.0, near: 0.1, far: lightData.radius)
+//        let projectionMatrix = matrix_float4x4.orthographic(width: lightData.radius * 2, height: lightData.radius * 2, length: lightData.radius)
         
         viewProjMatrix = projectionMatrix * viewMatrix;
     }
@@ -64,7 +62,7 @@ extension LightNode
     
     func setLight(brightness: Float)
     {
-        lightData.brightness = brightness
+        lightData.radius = brightness
     }
     
     func setLight(ambientIntensity: Float)
@@ -77,7 +75,7 @@ extension LightNode
 {
     func renderVolume(with encoder: MTLRenderCommandEncoder?)
     {
-        let volumeScale = lightData.brightness * 2
+        let volumeScale = lightData.radius * 2
         
         mesh.transform = transform.matrix
         mesh.transform.scale(axis: float3(repeating: volumeScale))

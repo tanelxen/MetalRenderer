@@ -97,11 +97,57 @@ class Scene
             
             encoder?.pushDebugGroup("Rendering shadowmap for \(light.name)")
             
-            var lightSpaceMatrix = light.viewProjMatrix
+            var viewDir: float3 = .zero
+            var up: float3 = .zero
             
-            encoder?.setVertexBytes(&lightSpaceMatrix, length: matrix_float4x4.stride, index: 1)
-            
-            root.render(with: encoder, useMaterials: false)
+            for i in 0 ..< 6
+            {
+                switch i
+                {
+                    case 0:
+                        viewDir = float3(1, 0, 0)       // +X
+                        up = float3(0, -1, 0)
+                        
+                    case 1:
+                        viewDir = float3(-1, 0, 0)      // -X
+                        up = float3(0, -1, 0)
+                        
+                    case 2:
+                        viewDir = float3(0, 1, 0)       // +Y
+                        up = float3(0, 0, 1)
+                        
+                    case 3:
+                        viewDir = float3(0, -1, 0)      // -Y
+                        up = float3(0, 0, -1)
+                        
+                    case 4:
+                        viewDir = float3(0, 0, 1)       // +Z
+                        up = float3(0, -1, 0)
+                        
+                    case 5:
+                        viewDir = float3(0, 0, -1)      // -Z
+                        up = float3(0, -1, 0)
+                        
+                    default:
+                        break;
+                }
+
+                let viewMatrix = lookAt(eye: light.transform.position, direction: viewDir, up: up)
+                let projectionMatrix = matrix_float4x4.perspective(degreesFov: 90, aspectRatio: 1.0, near: 0.1, far: light.lightData.radius)
+                
+//                light.updateShadowMatrix()
+                
+                var lightSpaceMatrix = projectionMatrix * viewMatrix
+                var sideIndex: UInt = UInt(i)
+                var lightData = light.lightData
+                
+                encoder?.setVertexBytes(&lightSpaceMatrix, length: matrix_float4x4.stride, index: 1)
+                encoder?.setVertexBytes(&sideIndex, length: MemoryLayout<UInt>.size, index: 3)
+                
+                encoder?.setFragmentBytes(&lightData, length: LightData.stride, index: 0)
+                
+                root.render(with: encoder, useMaterials: false)
+            }
             
             encoder?.popDebugGroup()
         }

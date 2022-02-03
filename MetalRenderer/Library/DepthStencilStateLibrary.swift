@@ -10,6 +10,7 @@ import MetalKit
 enum DepthStencilStateTypes
 {
     case less
+    case shadow
     case gbuffer
     case lighting
     case compose
@@ -28,6 +29,7 @@ enum DepthStencilStateLibrary
     private static func createDefaultDepthStencilStates()
     {
         depthStencilStates.updateValue(LessDepthStencilState(), forKey: .less)
+        depthStencilStates.updateValue(ShadowDepthStencilState(), forKey: .shadow)
         depthStencilStates.updateValue(GBufferDepthStencilState(), forKey: .gbuffer)
         depthStencilStates.updateValue(LightingDepthStencilState(), forKey: .lighting)
         depthStencilStates.updateValue(ComposeDepthStencilState(), forKey: .compose)
@@ -49,6 +51,22 @@ protocol DepthStencilState
 class LessDepthStencilState: DepthStencilState
 {
     var name: String = "Less Depth Stencil State"
+    var depthStencilState: MTLDepthStencilState!
+    
+    init()
+    {
+        let descriptor = MTLDepthStencilDescriptor()
+        descriptor.isDepthWriteEnabled = true
+        descriptor.depthCompareFunction = .less
+        descriptor.label = name
+        
+        depthStencilState = Engine.device.makeDepthStencilState(descriptor: descriptor)
+    }
+}
+
+class ShadowDepthStencilState: DepthStencilState
+{
+    var name: String = "Shadow Depth Stencil State"
     var depthStencilState: MTLDepthStencilState!
     
     init()

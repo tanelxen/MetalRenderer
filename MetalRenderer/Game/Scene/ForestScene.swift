@@ -31,30 +31,30 @@ class ForestScene: Scene
         }
 
 
-//        let pines: [Mesh] = [
-//            Mesh(modelName: "tree_pineTallA_detailed"),
-//            Mesh(modelName: "tree_pineDefaultB"),
-//            Mesh(modelName: "tree_pineRoundC")
-//        ]
-//
-//        for i in 0..<500
-//        {
-//            guard let mesh = pines.randomElement() else { continue }
-//
-//            let tree = GameObject(name: "Tree_\(i)", mesh: mesh)
-//
-//            let radius: Float = Float.random(in: 8...70)
-//            let x = cos(Float(i)) * radius
-//            let z = sin(Float(i)) * radius
-//
-//            let scale = Float.random(in: 1...2)
-//
-//            tree.transform.position = float3(x, 0, z)
-//            tree.transform.scale = float3(repeating: scale)
-//            tree.transform.rotation.y = Float.random(in: 0...360).radians
-//
-//            addChild(tree)
-//        }
+        let pines: [Mesh] = [
+            Mesh(modelName: "tree_pineTallA_detailed"),
+            Mesh(modelName: "tree_pineDefaultB"),
+            Mesh(modelName: "tree_pineRoundC")
+        ]
+
+        for i in 0..<100
+        {
+            guard let mesh = pines.randomElement() else { continue }
+
+            let tree = GameObject(name: "Tree_\(i)", mesh: mesh)
+
+            let radius: Float = Float.random(in: 8...70)
+            let x = cos(Float(i)) * radius
+            let z = sin(Float(i)) * radius
+
+            let scale = Float.random(in: 1...2)
+
+            tree.transform.position = float3(x, 0, z)
+            tree.transform.scale = float3(repeating: scale)
+            tree.transform.rotation.y = Float.random(in: 0...360).radians
+
+            addChild(tree)
+        }
 
 
         let flowers: [Mesh] = [
@@ -81,7 +81,6 @@ class ForestScene: Scene
         
         let light1 = LightNode()
         light1.transform.position = float3(0, 0.2, 0)
-        light1.transform.rotation.y = Float(180).radians
         light1.setLight(color: float3(1.0, 0.9, 0.7))
         light1.setLight(brightness: 2)
         lights.append(light1)

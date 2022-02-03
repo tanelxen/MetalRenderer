@@ -13,7 +13,7 @@ class Camera: Node
         matrix_identity_float4x4
     }
     
-    var eyeHeight: Float = 0.8
+    var eyeHeight: Float = 0.2
     
     var viewMatrix: matrix_float4x4 {
         var matrix = matrix_identity_float4x4

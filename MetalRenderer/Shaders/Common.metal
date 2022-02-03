@@ -68,7 +68,7 @@ struct LightData
 {
     float3 position;
     float3 color;
-    float brightness;
+    float radius;
     
     float ambientIntensity;
     float diffuseIntensity;

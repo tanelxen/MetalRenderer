@@ -32,13 +32,16 @@ class Renderer: NSObject
     private let scene = ForestScene()
     
     private var shadowTexture: MTLTexture!
+    
     private var gAlbedoTexture: MTLTexture!
     private var gNormalTexture: MTLTexture!
     private var gPositionTexture: MTLTexture!
     private var gDepthTexture: MTLTexture!
     private var lightingTexture: MTLTexture!
     
+    private var skyCubeTexture: MTLTexture!
     private let _skysphere = SkySphere()
+    
     private let _fullscreenQuad = SimpleQuad()
     
     private var preferredFramesPerSecond: Float = 60
@@ -50,6 +53,8 @@ class Renderer: NSObject
         mtkView(view, drawableSizeWillChange: view.drawableSize)
         
         _defaultLibrary = Engine.device.makeDefaultLibrary()
+        
+        skyCubeTexture = loadCubeTexture(imageName: "sky")
 
         createShadowPipelineState()
         createGBufferPipelineState()
@@ -81,18 +86,35 @@ class Renderer: NSObject
 //        print("Took \(diff) ms")
     }
     
+    func loadCubeTexture(imageName: String) -> MTLTexture?
+    {
+        let textureLoader = MTKTextureLoader(device: Engine.device)
+        
+        if let texture = MDLTexture(cubeWithImagesNamed: [imageName])
+        {
+            let options: [MTKTextureLoader.Option: Any] = [
+                .origin: MTKTextureLoader.Origin.topLeft,
+                .SRGB: false,
+                .generateMipmaps: NSNumber(booleanLiteral: false)
+            ]
+            
+            return try? textureLoader.newTexture(texture: texture, options: options)
+        }
+        
+        let texture = try? textureLoader.newTexture(name: imageName, scaleFactor: 1.0, bundle: .main)
+        
+        return texture
+    }
+    
     // MARK: - PASSES
     
     private func createShadowPass()
     {
-//        let shadowTextureDescriptor = MTLTextureDescriptor.textureCubeDescriptor(pixelFormat: .depth16Unorm,
-//                                                                                 size: 128,
-//                                                                                 mipmapped: false)
+        let size: Int = 256
         
-        let shadowTextureDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .depth16Unorm,
-                                                                               width: 128,
-                                                                               height: 128,
-                                                                               mipmapped: false)
+        let shadowTextureDescriptor = MTLTextureDescriptor.textureCubeDescriptor(pixelFormat: .depth16Unorm,
+                                                                                 size: size,
+                                                                                 mipmapped: false)
         
         shadowTextureDescriptor.usage = [.renderTarget, .shaderRead]
         shadowTextureDescriptor.storageMode = .private
@@ -105,6 +127,8 @@ class Renderer: NSObject
         _shadowRenderPass.depthAttachment.loadAction = .clear
         _shadowRenderPass.depthAttachment.storeAction = .store
         _shadowRenderPass.depthAttachment.clearDepth = 1.0
+        
+        _shadowRenderPass.renderTargetArrayLength = 6
     }
     
     private func createGBufferPass()
@@ -225,8 +249,9 @@ class Renderer: NSObject
         descriptor.depthAttachmentPixelFormat = .depth16Unorm
 
         descriptor.vertexFunction = _defaultLibrary.makeFunction(name: "shadowmap_vertex_shader")
-        descriptor.fragmentFunction = nil
+        descriptor.fragmentFunction = _defaultLibrary.makeFunction(name: "shadowmap_fragment_shader")
         descriptor.vertexDescriptor = VertexDescriptorLibrary.descriptor(.basic)
+        descriptor.inputPrimitiveTopology = .triangle
 
         descriptor.label = "Shadow Render Pipeline State"
 
@@ -341,9 +366,9 @@ class Renderer: NSObject
 
         renderEncoder?.pushDebugGroup("Shadow Render")
         
-        renderEncoder?.setDepthStencilState(DepthStencilStateLibrary[.less])
+        renderEncoder?.setDepthStencilState(DepthStencilStateLibrary[.shadow])
         
-//        renderEncoder?.setCullMode(.front)
+        renderEncoder?.setCullMode(.front)
         
         renderEncoder?.setRenderPipelineState(_shadowPipelineState)
         scene.renderShadows(with: renderEncoder)
@@ -391,7 +416,6 @@ class Renderer: NSObject
         renderEncoder?.setFragmentTexture(gNormalTexture, index: 1)
         renderEncoder?.setFragmentTexture(gPositionTexture, index: 2)
         renderEncoder?.setFragmentTexture(shadowTexture, index: 3)
-        renderEncoder?.setFragmentTexture(gDepthTexture, index: 4)
         
         scene.renderLightVolumes(with: renderEncoder)
         
@@ -415,40 +439,47 @@ class Renderer: NSObject
         let renderEncoder = commandBuffer?.makeRenderCommandEncoder(descriptor: renderPassDescriptor)
         
         // COMPOSITE
-        
+
         renderEncoder?.label = "Composite Render Command Encoder"
 
         renderEncoder?.pushDebugGroup("Composite Render")
-        
+
         renderEncoder?.setDepthStencilState(DepthStencilStateLibrary[.compose])
         renderEncoder?.setStencilReferenceValue(128)
-        
+
         renderEncoder?.setRenderPipelineState(_compositePipelineState)
-        
+
         var invCamPj = DebugCamera.shared.projectionMatrix.inverse
         renderEncoder?.setFragmentBytes(&invCamPj, length: MemoryLayout<matrix_float4x4>.stride, index: 1)
-        
+
+        var lightData = scene.lights.first?.lightData
+        renderEncoder?.setFragmentBytes(&lightData, length: LightData.stride, index: 0)
+
         renderEncoder?.setFragmentTexture(gAlbedoTexture, index: 0)
         renderEncoder?.setFragmentTexture(gNormalTexture, index: 1)
         renderEncoder?.setFragmentTexture(gDepthTexture, index: 2)
         renderEncoder?.setFragmentTexture(lightingTexture, index: 3)
-        
+        renderEncoder?.setFragmentTexture(shadowTexture, index: 4)
+        renderEncoder?.setFragmentTexture(gPositionTexture, index: 5)
+
         _fullscreenQuad.drawPrimitives(with: renderEncoder)
-        
+
         renderEncoder?.popDebugGroup()
         
         // SKY
-        
+
         renderEncoder?.pushDebugGroup("Sky Render")
-        
+
         renderEncoder?.setDepthStencilState(DepthStencilStateLibrary[.sky])
         renderEncoder?.setRenderPipelineState(_skyPipelineState)
-        
+
         var sceneConstants = scene.sceneConstants
         renderEncoder?.setVertexBytes(&sceneConstants, length: SceneConstants.stride, index: 1)
-        
+
+        renderEncoder?.setFragmentTexture(skyCubeTexture, index: 1)
+
         _skysphere.doRender(with: renderEncoder, useMaterials: true)
-        
+
         renderEncoder?.popDebugGroup()
         
         
