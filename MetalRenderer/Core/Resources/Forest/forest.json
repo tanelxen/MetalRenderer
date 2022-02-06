@@ -1,12 +1,12 @@
 {
-  "playerPosition": [0.0, 0.7, 5.0],
+  "playerPosition": [0.0, 1.0, 2.0],
   "gameObjects": [
       {
         "name": "Tent",
         "mesh": "tent_smallOpen",
         "transform": {
             "position": [0.0, 0.0, 0.0],
-            "rotation": [0.0, 0.0, 0.0],
+            "rotation": [0.0, 0.7, 0.0],
             "scale": [2.0, 2.0, 2.0]
         },
         "children": []

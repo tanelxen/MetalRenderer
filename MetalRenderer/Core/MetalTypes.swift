@@ -59,5 +59,5 @@ struct LightData: sizeable
     var radius: Float = 1.0
     
     var ambientIntensity: Float = 0.5
-    var diffuseIntensity: Float = 0.9
+    var diffuseIntensity: Float = 1.0
 }

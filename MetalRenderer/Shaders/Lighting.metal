@@ -36,7 +36,7 @@ vertex VertexOut lighting_vertex_shader(const Vertex              vIn           
 }
 
 float shadowCalculation(float3 fragToLight, texturecube<float> shadowMap, float far_plane);
-float shadowCalculation(float3 fragToLight, depthcube<float> shadowMap, float far_plane);
+float shadowCalculation(float3 fragToLight, depthcube<float> shadowMap, float far_plane, float ndotl);
 
 constexpr sampler sampler2d;
 
@@ -51,26 +51,21 @@ fragment float4 lighting_fragment_shader(VertexOut          data                
     float2 texCoord = data.position.xy / screenSize;
     
     float3 normal = normalMap.sample(sampler2d, texCoord).xyz;
-    float4 position = positionMap.sample(sampler2d, texCoord);
-    
-    float3 viewPosition = (view * position).xyz;
-    
-    normal.z = sqrt(1.0f - normal.x * normal.x - normal.y * normal.y);
+    float3 position = positionMap.sample(sampler2d, texCoord).xyz;
 
     float3 lightColor = light.color;
-    float3 lightPosition = (view * float4(light.position, 1.0)).xyz;
-    float3 lightToUnit = lightPosition - viewPosition;
-
+    float3 lightToUnit = light.position - position;
     float3 lightDir = normalize(lightToUnit);
+    float LdotN = dot(normal, lightDir);
     
-    float3 lightDirWS = position.xyz - light.position;
-    float shadow = shadowCalculation(lightDirWS, shadowMap, light.radius);
+    float3 unitLightSpace = position.xyz - light.position;
+    float shadow = shadowCalculation(unitLightSpace, shadowMap, light.radius, LdotN);
 
     float dist_sqr = length_squared(lightToUnit);
     float radius_sqr = light.radius * light.radius;
     float attenuation = 1.0 - clamp(dist_sqr/radius_sqr, 0.0, 1.0);
 
-    float3 diffuse = max(dot(normal, lightDir), 0.0) * lightColor * light.diffuseIntensity * attenuation * (1.0 - shadow);
+    float3 diffuse = max(LdotN, 0.0) * lightColor * light.diffuseIntensity * attenuation * (1.0 - shadow);
 
     return float4(diffuse, 1.0);
 }
@@ -107,29 +102,53 @@ constant float3 sampleOffsetDirections[SAMPLES] = {
     float3( 0,  1,  1), float3( 0, -1,  1), float3( 0, -1, -1), float3( 0,  1, -1),
 };
 
-float shadowCalculation(float3 fragToLight, depthcube<float> shadowMap, float far_plane)
+float shadowCalculation(float3 fragToLight, depthcube<float> shadowMap, float far_plane, float ndotl)
 {
-    constexpr sampler s;
+    constexpr sampler s(coord::normalized,
+//                        filter::linear,
+                        address::clamp_to_border,
+                        border_color::opaque_white,
+                        compare_func::greater);
     
-    float3 texCoords = float3(fragToLight.x, -fragToLight.y, fragToLight.z);
+//    constexpr sampler s;
+    
+    fragToLight.x = -fragToLight.x;
+    
+    float minBias = 0.003;
+    float maxBias = 0.03;
+    float bias = max(maxBias * (1.0 - ndotl), minBias);
 
     float currentDepth = length(fragToLight);
     
     float shadow = 0.0;
-    float bias   = 0.001;
-    float diskRadius = 0.01;
     
-    int numSamples = 3;
+//    float diskRadius = 0.01;
+//    int numSamples = 20;
+//
+//    for(int i = 0; i < numSamples; ++i)
+//    {
+//        float closestDepth = shadowMap.sample(s, fragToLight + sampleOffsetDirections[i] * diskRadius);
+//        closestDepth *= far_plane;   // обратное преобразование из диапазона [0...1]
+//
+//        shadow += currentDepth - bias > closestDepth ? 1.0 : 0.0;
+//    }
+//
+//    shadow /= float(numSamples);
     
-    for(int i = 0; i < numSamples; ++i)
-    {
-        float closestDepth = shadowMap.sample(s, texCoords + sampleOffsetDirections[i] * diskRadius);
-        closestDepth *= far_plane;   // обратное преобразование из диапазона [0...1]
-        
-        shadow += currentDepth - bias > closestDepth ? 1.0 : 0.0;
-    }
+    float closestDepth = shadowMap.sample(s, fragToLight);
+    closestDepth *= far_plane;   // обратное преобразование из диапазона [0...1]
+
+    shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
     
-    shadow /= float(numSamples);
+    
+//    shadow = shadowMap.sample_compare(s, fragToLight, currentDepth);
+    
+//    for(int i = 0; i < numSamples; ++i)
+//    {
+//        shadow += shadowMap.sample_compare(s, fragToLight + sampleOffsetDirections[i] * diskRadius, currentDepth);
+//    }
+//
+//    shadow /= float(numSamples);
     
     return shadow;
 }

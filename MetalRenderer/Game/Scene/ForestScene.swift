@@ -79,35 +79,12 @@ class ForestScene: Scene
             addChild(flower)
         }
         
-        let light1 = LightNode()
-        light1.transform.position = float3(0, 0.2, 0)
-        light1.setLight(color: float3(1.0, 0.9, 0.7))
-        light1.setLight(brightness: 2)
-        lights.append(light1)
-        addChild(light1)
-        
-//        let light2 = LightNode()
-//        light2.transform.position = float3(0, 0.2, 0)
-//        light2.transform.rotation.y = Float(90).radians
-//        light2.setLight(color: float3(1.0, 0.9, 0.7))
-//        light2.setLight(brightness: 2)
-//        lights.append(light2)
-//        addChild(light2)
-//
-//        let light3 = LightNode()
-//        light3.transform.position = float3(0, 0.2, 0)
-//        light3.transform.rotation.y = Float(-90).radians
-//        light3.setLight(color: float3(1.0, 0.9, 0.7))
-//        light3.setLight(brightness: 2)
-//        lights.append(light3)
-//        addChild(light3)
-        
-//        let sphereMesh = Mesh(modelName: "sphere")
-//        sphereMesh.customMaterial = Material().setColor(float4(1.0, 1.0, 0.0, 1.0))
-//        let sun = GameObject(name: "Sun", mesh: sphereMesh)
-//        sun.transform.position = light.transform.position
-//        sun.transform.scale = float3(repeating: 0.1);
-//        addChild(sun)
+        let light = LightNode()
+        light.transform.position = float3(0, 0.2, 0)
+        light.setLight(color: float3(1.0, 0.9, 0.7))
+        light.setLight(brightness: 5)
+        lights.append(light)
+        addChild(light)
     }
     
     override func doUpdate()

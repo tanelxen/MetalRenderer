@@ -29,8 +29,9 @@ class Renderer: NSObject
     private var _skyPipelineState: MTLRenderPipelineState!
     private var _simplePipelineState: MTLRenderPipelineState!
     
-    private let scene = ForestScene()
+    private let scene = SponzaScene()
     
+    private var isShadowMapNeedsUpdate = true
     private var shadowTexture: MTLTexture!
     
     private var gAlbedoTexture: MTLTexture!
@@ -40,10 +41,11 @@ class Renderer: NSObject
     private var lightingTexture: MTLTexture!
     
     private var skyCubeTexture: MTLTexture!
-    private let _skysphere = SkySphere()
+    private let _skybox = Skybox()
     
     private let _fullscreenQuad = SimpleQuad()
     
+    private var frameNum: UInt = 0
     private var preferredFramesPerSecond: Float = 60
     
     init(view: MTKView)
@@ -54,7 +56,7 @@ class Renderer: NSObject
         
         _defaultLibrary = Engine.device.makeDefaultLibrary()
         
-        skyCubeTexture = loadCubeTexture(imageName: "sky")
+        skyCubeTexture = loadCubeTexture(imageName: "night-sky")
 
         createShadowPipelineState()
         createGBufferPipelineState()
@@ -93,7 +95,7 @@ class Renderer: NSObject
         if let texture = MDLTexture(cubeWithImagesNamed: [imageName])
         {
             let options: [MTKTextureLoader.Option: Any] = [
-                .origin: MTKTextureLoader.Origin.topLeft,
+                .origin: MTKTextureLoader.Origin.bottomLeft,
                 .SRGB: false,
                 .generateMipmaps: NSNumber(booleanLiteral: false)
             ]
@@ -110,7 +112,7 @@ class Renderer: NSObject
     
     private func createShadowPass()
     {
-        let size: Int = 256
+        let size: Int = 512
         
         let shadowTextureDescriptor = MTLTextureDescriptor.textureCubeDescriptor(pixelFormat: .depth16Unorm,
                                                                                  size: size,
@@ -127,7 +129,6 @@ class Renderer: NSObject
         _shadowRenderPass.depthAttachment.loadAction = .clear
         _shadowRenderPass.depthAttachment.storeAction = .store
         _shadowRenderPass.depthAttachment.clearDepth = 1.0
-        
         _shadowRenderPass.renderTargetArrayLength = 6
     }
     
@@ -150,7 +151,7 @@ class Renderer: NSObject
         gAlbedoTexture.label = "Albedo"
         
         // ------ NORMAL ------
-        let normalTextureDecriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rg16Float,
+        let normalTextureDecriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba16Float,
                                                                               width: width,
                                                                               height: height,
                                                                               mipmapped: false)
@@ -202,10 +203,7 @@ class Renderer: NSObject
         _gbufferRenderPass.depthAttachment.texture = gDepthTexture
         _gbufferRenderPass.depthAttachment.loadAction = .clear
         _gbufferRenderPass.depthAttachment.storeAction = .store
-
-        _gbufferRenderPass.stencilAttachment.texture = gDepthTexture
-        _gbufferRenderPass.stencilAttachment.loadAction = .clear
-        _gbufferRenderPass.stencilAttachment.storeAction = .store
+        _gbufferRenderPass.depthAttachment.clearDepth = 1.0
     }
     
     private func createLightingPass()
@@ -234,10 +232,6 @@ class Renderer: NSObject
         _lightingRenderPass.depthAttachment.texture = gDepthTexture
         _lightingRenderPass.depthAttachment.loadAction = .load
         _lightingRenderPass.depthAttachment.storeAction = .dontCare
-        
-//        _lightingRenderPass.stencilAttachment.texture = gDepthTexture
-//        _lightingRenderPass.stencilAttachment.loadAction = .load
-//        _lightingRenderPass.stencilAttachment.storeAction = .dontCare
     }
     
     // MARK: - STATES
@@ -262,11 +256,9 @@ class Renderer: NSObject
     {
         let descriptor = MTLRenderPipelineDescriptor()
         descriptor.colorAttachments[0].pixelFormat = .rgba8Unorm
-        descriptor.colorAttachments[1].pixelFormat = .rg16Float
+        descriptor.colorAttachments[1].pixelFormat = .rgba16Float
         descriptor.colorAttachments[2].pixelFormat = .rgba16Float
-        
         descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
-        descriptor.stencilAttachmentPixelFormat = Preferences.depthStencilPixelFormat
 
         descriptor.vertexFunction = _defaultLibrary.makeFunction(name: "gbuffer_vertex_shader")
         descriptor.fragmentFunction = _defaultLibrary.makeFunction(name: "gbuffer_fragment_shader")
@@ -281,9 +273,7 @@ class Renderer: NSObject
     {
         let descriptor = MTLRenderPipelineDescriptor()
         descriptor.colorAttachments[0].pixelFormat = .rgba16Float
-        
         descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
-//        descriptor.stencilAttachmentPixelFormat = Preferences.depthStencilPixelFormat
 
         descriptor.vertexFunction = _defaultLibrary.makeFunction(name: "lighting_vertex_shader")
         descriptor.fragmentFunction = _defaultLibrary.makeFunction(name: "lighting_fragment_shader")
@@ -300,7 +290,6 @@ class Renderer: NSObject
         
         descriptor.colorAttachments[0].pixelFormat = Preferences.colorPixelFormat
         descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
-        descriptor.stencilAttachmentPixelFormat = Preferences.depthStencilPixelFormat
 
         descriptor.vertexFunction = _defaultLibrary.makeFunction(name: "compose_vertex_shader")
         descriptor.fragmentFunction = _defaultLibrary.makeFunction(name: "compose_fragment_shader")
@@ -316,13 +305,12 @@ class Renderer: NSObject
         
         descriptor.colorAttachments[0].pixelFormat = Preferences.colorPixelFormat
         descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
-        descriptor.stencilAttachmentPixelFormat = Preferences.depthStencilPixelFormat
 
-        descriptor.vertexFunction = _defaultLibrary.makeFunction(name: "skysphere_vertex_shader")
-        descriptor.fragmentFunction = _defaultLibrary.makeFunction(name: "skysphere_fragment_shader")
-        descriptor.vertexDescriptor = VertexDescriptorLibrary.descriptor(.basic)
+        descriptor.vertexFunction = _defaultLibrary.makeFunction(name: "skybox_vertex_shader")
+        descriptor.fragmentFunction = _defaultLibrary.makeFunction(name: "skybox_fragment_shader")
+        descriptor.vertexDescriptor = _skybox.vertexDescriptor
 
-        descriptor.label = "Skysphere Render Pipeline State"
+        descriptor.label = "Skybox Pipeline State"
 
         _skyPipelineState = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
     }
@@ -333,28 +321,14 @@ class Renderer: NSObject
         
         descriptor.colorAttachments[0].pixelFormat = Preferences.colorPixelFormat
         descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
-        descriptor.stencilAttachmentPixelFormat = Preferences.depthStencilPixelFormat
 
         descriptor.vertexFunction = _defaultLibrary.makeFunction(name: "wireframe_vertex_shader")
         descriptor.fragmentFunction = _defaultLibrary.makeFunction(name: "wireframe_fragment_shader")
-//        descriptor.vertexDescriptor = VertexDescriptorLibrary.descriptor(.basic)
 
         descriptor.label = "Simple Render Pipeline State"
 
         _simplePipelineState = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
     }
-    
-//    func doShadowPass(commandBuffer: MTLCommandBuffer)
-//    {
-//        let shadowRenderCommandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: _shadowRenderPassDescriptor)
-//        shadowRenderCommandEncoder?.label = "Shadow Render Command Encoder"
-//        shadowRenderCommandEncoder?.pushDebugGroup("Starting Shadow Render Pass")
-//        shadowRenderCommandEncoder?.setFrontFacing(.counterClockwise)
-//        shadowRenderCommandEncoder?.setCullMode(.front)
-//        SceneManager.ShadowRender(renderCommandEncoder: shadowRenderCommandEncoder!)
-//        shadowRenderCommandEncoder?.popDebugGroup()
-//        shadowRenderCommandEncoder?.endEncoding()
-//    }
     
     // MARK: - DO PASSES
     
@@ -432,10 +406,6 @@ class Renderer: NSObject
         renderPassDescriptor.depthAttachment.storeAction = .dontCare
         renderPassDescriptor.depthAttachment.loadAction = .load
         
-        renderPassDescriptor.stencilAttachment.texture = gDepthTexture
-        renderPassDescriptor.stencilAttachment.storeAction = .dontCare
-        renderPassDescriptor.stencilAttachment.loadAction = .load
-        
         let renderEncoder = commandBuffer?.makeRenderCommandEncoder(descriptor: renderPassDescriptor)
         
         // COMPOSITE
@@ -449,18 +419,20 @@ class Renderer: NSObject
 
         renderEncoder?.setRenderPipelineState(_compositePipelineState)
 
-        var invCamPj = DebugCamera.shared.projectionMatrix.inverse
-        renderEncoder?.setFragmentBytes(&invCamPj, length: MemoryLayout<matrix_float4x4>.stride, index: 1)
-
         var lightData = scene.lights.first?.lightData
         renderEncoder?.setFragmentBytes(&lightData, length: LightData.stride, index: 0)
+        
+        var invCamPj = DebugCamera.shared.projectionMatrix.inverse
+        renderEncoder?.setFragmentBytes(&invCamPj, length: MemoryLayout<matrix_float4x4>.stride, index: 1)
+        
+        var viewMatrix = DebugCamera.shared.viewMatrix
+        renderEncoder?.setFragmentBytes(&viewMatrix, length: MemoryLayout<matrix_float4x4>.stride, index: 2)
 
         renderEncoder?.setFragmentTexture(gAlbedoTexture, index: 0)
         renderEncoder?.setFragmentTexture(gNormalTexture, index: 1)
         renderEncoder?.setFragmentTexture(gDepthTexture, index: 2)
         renderEncoder?.setFragmentTexture(lightingTexture, index: 3)
-        renderEncoder?.setFragmentTexture(shadowTexture, index: 4)
-        renderEncoder?.setFragmentTexture(gPositionTexture, index: 5)
+        renderEncoder?.setFragmentTexture(gPositionTexture, index: 4)
 
         _fullscreenQuad.drawPrimitives(with: renderEncoder)
 
@@ -478,7 +450,7 @@ class Renderer: NSObject
 
         renderEncoder?.setFragmentTexture(skyCubeTexture, index: 1)
 
-        _skysphere.doRender(with: renderEncoder, useMaterials: true)
+        _skybox.render(with: renderEncoder!)
 
         renderEncoder?.popDebugGroup()
         
@@ -503,30 +475,35 @@ class Renderer: NSObject
         guard let drawable = view.currentDrawable else { return }
         
         // ========= SHADOW =======================================
+        
+        if isShadowMapNeedsUpdate
+        {
+            let shadowCommandBuffer = Engine.commandQueue.makeCommandBuffer()
+            shadowCommandBuffer?.label = "Shadow Command Buffer"
 
-        let shadowCommandBuffer = Engine.commandQueue.makeCommandBuffer()
-        shadowCommandBuffer?.label = "Shadow Command Buffer"
+            doShadowPass(with: shadowCommandBuffer)
 
-        doShadowPass(with: shadowCommandBuffer)
-
-        shadowCommandBuffer?.commit()
+            shadowCommandBuffer?.commit()
+            
+            isShadowMapNeedsUpdate = false
+        }
 
         // ========= G-BUFFER =======================================
-        
+
         let geometryCommandBuffer = Engine.commandQueue.makeCommandBuffer()
         geometryCommandBuffer?.label = "Geometry Command Buffer"
-        
+
         doGeometryPass(with: geometryCommandBuffer)
-        
+
         geometryCommandBuffer?.commit()
-        
+
         // ========= LIGHTING =======================================
-        
+
         let lightingCommandBuffer = Engine.commandQueue.makeCommandBuffer()
         lightingCommandBuffer?.label = "Lighting Command Buffer"
-        
+
         doLightingPass(with: lightingCommandBuffer)
-        
+
         lightingCommandBuffer?.commit()
         
         // ========= COMPOSITE =======================================
@@ -541,6 +518,8 @@ class Renderer: NSObject
         compositeCommandBuffer?.present(drawable)
         
         compositeCommandBuffer?.commit()
+        
+        frameNum += 1;
     }
 }
 

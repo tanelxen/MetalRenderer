@@ -87,14 +87,14 @@ class GBufferDepthStencilState: DepthStencilState
     
     init()
     {
-        let stencilStateDescriptor: MTLStencilDescriptor = MTLStencilDescriptor()
-        stencilStateDescriptor.depthStencilPassOperation = .replace
+//        let stencilStateDescriptor: MTLStencilDescriptor = MTLStencilDescriptor()
+//        stencilStateDescriptor.depthStencilPassOperation = .replace
         
         let descriptor = MTLDepthStencilDescriptor()
         descriptor.isDepthWriteEnabled = true
         descriptor.depthCompareFunction = .less
-        descriptor.frontFaceStencil = stencilStateDescriptor
-        descriptor.backFaceStencil = stencilStateDescriptor
+//        descriptor.frontFaceStencil = stencilStateDescriptor
+//        descriptor.backFaceStencil = stencilStateDescriptor
         descriptor.label = name
         
         depthStencilState = Engine.device.makeDepthStencilState(descriptor: descriptor)
@@ -137,6 +137,8 @@ class ComposeDepthStencilState: DepthStencilState
         let descriptor = MTLDepthStencilDescriptor()
 //        descriptor.frontFaceStencil = stencilStateDescriptor
 //        descriptor.backFaceStencil = stencilStateDescriptor
+        descriptor.isDepthWriteEnabled = false
+        descriptor.depthCompareFunction = .always
         descriptor.label = name
         
         depthStencilState = Engine.device.makeDepthStencilState(descriptor: descriptor)
@@ -150,15 +152,15 @@ class SkyDepthStencilState: DepthStencilState
     
     init()
     {
-        let stencilStateDescriptor: MTLStencilDescriptor = MTLStencilDescriptor()
-        stencilStateDescriptor.stencilCompareFunction = .notEqual
+//        let stencilStateDescriptor: MTLStencilDescriptor = MTLStencilDescriptor()
+//        stencilStateDescriptor.stencilCompareFunction = .notEqual
 //        stencilStateDescriptor.readMask = 0x0
         
         let descriptor = MTLDepthStencilDescriptor()
-//        descriptor.isDepthWriteEnabled = false
-//        descriptor.depthCompareFunction = .less
-        descriptor.frontFaceStencil = stencilStateDescriptor
-        descriptor.backFaceStencil = stencilStateDescriptor
+        descriptor.isDepthWriteEnabled = false
+        descriptor.depthCompareFunction = .lessEqual
+//        descriptor.frontFaceStencil = stencilStateDescriptor
+//        descriptor.backFaceStencil = stencilStateDescriptor
         descriptor.label = name
         
         depthStencilState = Engine.device.makeDepthStencilState(descriptor: descriptor)

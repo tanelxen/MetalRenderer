@@ -1,0 +1,8 @@
+# Created by Kenney (www.kenney.nl)
+
+newmtl wood
+Kd 0.9098039 0.6 0.372549
+
+newmtl cloth
+Kd 0.9764706 0.4156863 0.2745098
+

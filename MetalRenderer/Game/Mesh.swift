@@ -78,7 +78,7 @@ class Mesh
                                        preserveTopology: true,
                                        error: nil)
         
-        asset.loadTextures()
+//        asset.loadTextures()
         
         var mtkMeshes: [MTKMesh] = []
         var mdlMeshes: [MDLMesh] = []
@@ -94,11 +94,17 @@ class Mesh
         
         for mdlMesh in mdlMeshes
         {
-//            mdlMesh.addTangentBasis(
-//                forTextureCoordinateAttributeNamed: MDLVertexAttributeTextureCoordinate,
-//                tangentAttributeNamed: MDLVertexAttributeTangent,
-//                bitangentAttributeNamed: MDLVertexAttributeBitangent
-//            )
+            mdlMesh.addNormals(withAttributeNamed: MDLVertexAttributeNormal, creaseThreshold: 0.1)
+            
+//            mdlMesh.addTangentBasis(forTextureCoordinateAttributeNamed: MDLVertexAttributeTextureCoordinate,
+//                                    normalAttributeNamed: MDLVertexAttributeNormal,
+//                                    tangentAttributeNamed: MDLVertexAttributeTangent)
+            
+            mdlMesh.addTangentBasis(
+                forTextureCoordinateAttributeNamed: MDLVertexAttributeTextureCoordinate,
+                tangentAttributeNamed: MDLVertexAttributeTangent,
+                bitangentAttributeNamed: MDLVertexAttributeBitangent
+            )
             
             mdlMesh.vertexDescriptor = descriptor
         }
@@ -281,8 +287,12 @@ class Submesh
         indexType = mtkSubmesh.indexType
         primitiveType = mtkSubmesh.primitiveType
         
+//        print("============== Submesh", mtkSubmesh.name)
+        
         if let mdlMaterial = mdlMaterial
         {
+//            print("Material", mdlMaterial.name)
+            
             loadTexture(for: mdlMaterial)
             createMaterial(from: mdlMaterial)
         }
@@ -296,26 +306,35 @@ class Submesh
             _material.materialConstants.useBaseColorMap = true
         }
         
-        if let normal = texture(for: .tangentSpaceNormal, in: mdlMaterial, textureOrigin: .bottomLeft)
-        {
-            _material.setNormalMap(normal)
-            _material.materialConstants.useNormalMap = true
-        }
+//        if let normal = texture(for: .tangentSpaceNormal, in: mdlMaterial, textureOrigin: .bottomLeft)
+//        {
+//            _material.setNormalMap(normal)
+//            _material.materialConstants.useNormalMap = true
+//        }
     }
     
     private func texture(for semantic: MDLMaterialSemantic, in material: MDLMaterial?, textureOrigin: MTKTextureLoader.Origin) -> MTLTexture?
     {
-        let textureLoader = MTKTextureLoader(device: Engine.device)
+//        let textureLoader = MTKTextureLoader(device: Engine.device)
         
         guard let materialProperty = material?.property(with: semantic) else { return nil }
-        guard let sourceTexture = materialProperty.textureSamplerValue?.texture else { return nil }
         
-        let options: [MTKTextureLoader.Option : Any] = [
-            MTKTextureLoader.Option.origin : textureOrigin as Any,
-            MTKTextureLoader.Option.generateMipmaps : true
-        ]
+//        guard let sourceTexture = materialProperty.textureSamplerValue?.texture else { return nil }
         
-        return try? textureLoader.newTexture(texture: sourceTexture, options: options)
+//        let options: [MTKTextureLoader.Option : Any] = [
+//            MTKTextureLoader.Option.origin : textureOrigin as Any,
+//            MTKTextureLoader.Option.generateMipmaps : true
+//        ]
+//
+//        return try? textureLoader.newTexture(texture: sourceTexture, options: options)
+        
+        if let stringValue = materialProperty.stringValue, let url = materialProperty.urlValue
+        {
+            print("Loading \(stringValue)")
+            return TextureManager.shared.getTexture(url: url, origin: textureOrigin)
+        }
+        
+        return nil
     }
      
     

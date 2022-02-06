@@ -34,9 +34,6 @@ vertex RasterizerData instanced_vertex_shader(
     data.surfaceTangent = normalize(modelConstant.modelMatrix * float4(vIn.tangent, 0.0)).xyz;
     data.surfaceBitangent = normalize(modelConstant.modelMatrix * float4(cross(vIn.normal, vIn.tangent), 0.0)).xyz;
     
-    
-    data.eyeVector = normalize(viewConstants.cameraPosition - data.worldPosition.xyz);
-    
     return data;
 }
 

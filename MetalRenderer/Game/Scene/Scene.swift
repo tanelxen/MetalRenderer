@@ -105,28 +105,28 @@ class Scene
                 switch i
                 {
                     case 0:
-                        viewDir = float3(1, 0, 0)       // +X
-                        up = float3(0, -1, 0)
+                        viewDir = float3(-1, 0, 0)      // -X
+                        up = float3(0, 1, 0)
                         
                     case 1:
-                        viewDir = float3(-1, 0, 0)      // -X
-                        up = float3(0, -1, 0)
+                        viewDir = float3(1, 0, 0)       // +X
+                        up = float3(0, 1, 0)
                         
                     case 2:
                         viewDir = float3(0, 1, 0)       // +Y
-                        up = float3(0, 0, 1)
+                        up = float3(0, 0, -1)
                         
                     case 3:
                         viewDir = float3(0, -1, 0)      // -Y
-                        up = float3(0, 0, -1)
+                        up = float3(0, 0, 1)
                         
                     case 4:
                         viewDir = float3(0, 0, 1)       // +Z
-                        up = float3(0, -1, 0)
+                        up = float3(0, 1, 0)
                         
                     case 5:
                         viewDir = float3(0, 0, -1)      // -Z
-                        up = float3(0, -1, 0)
+                        up = float3(0, 1, 0)
                         
                     default:
                         break;

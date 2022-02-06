@@ -25,11 +25,6 @@ struct RasterizerData
     float3 surfaceNormal;
     float3 surfaceTangent;
     float3 surfaceBitangent;
-    
-    float3 eyeVector;
-    
-    float4 viewPosition;
-    float3 viewNormal;
 };
 
 struct SceneConstants

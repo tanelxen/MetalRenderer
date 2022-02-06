@@ -34,7 +34,7 @@ vertex VertexOut shadowmap_vertex_shader(const Vertex               vIn         
 
 struct FragOut
 {
-    half color [[ color(0) ]];
+//    half color [[ color(0) ]];
     float depth [[ depth(any) ]];
 };
 
@@ -50,7 +50,7 @@ fragment FragOut shadowmap_fragment_shader(VertexOut            in      [[ stage
     
     FragOut out;
     
-    out.color = lightDistance;
+//    out.color = lightDistance;
     out.depth = lightDistance;
     
     return out;

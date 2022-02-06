@@ -1,0 +1,8 @@
+# Created by Kenney (www.kenney.nl)
+
+newmtl foliage
+Kd 0.2666667 0.8 0.5803922
+
+newmtl rock
+Kd 0.9098039 0.8352941 0.6745098
+

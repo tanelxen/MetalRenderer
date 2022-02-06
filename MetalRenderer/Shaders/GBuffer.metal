@@ -29,18 +29,13 @@ vertex RasterizerData gbuffer_vertex_shader(const Vertex              vIn       
     data.surfaceTangent = normalize(modelConstants.modelMatrix * float4(vIn.tangent, 0.0)).xyz;
     data.surfaceBitangent = normalize(modelConstants.modelMatrix * float4(cross(vIn.normal, vIn.tangent), 0.0)).xyz;
     
-    data.viewNormal = normalize(viewConstants.viewMatrix * modelConstants.modelMatrix * float4(vIn.normal, 0.0)).xyz;
-    data.viewPosition = viewConstants.viewMatrix * modelConstants.modelMatrix * float4(vIn.position, 1.0);
-    
-    data.eyeVector = normalize(viewConstants.cameraPosition - data.worldPosition.xyz);
-    
     return data;
 }
 
 struct FragOut
 {
     float4 albedo   [[ color(0) ]];
-    half2 normal   [[ color(1) ]];
+    float4 normal   [[ color(1) ]];
     float4 position [[ color(2) ]];
 };
 
@@ -64,6 +59,7 @@ fragment FragOut gbuffer_fragment_shader(RasterizerData             data        
     if (material.useNormalMap)
     {
         float3 sampleNormal = normalMap.sample(sampler2d, data.uv).rgb * 2 - 1;
+        //sampleNormal.g = 1.0 - sampleNormal.g;
 
         float3x3 TBN = { data.surfaceTangent, data.surfaceBitangent, data.surfaceNormal };
 
@@ -73,7 +69,7 @@ fragment FragOut gbuffer_fragment_shader(RasterizerData             data        
     FragOut out;
     
     out.albedo = albedo;
-    out.normal = half2(data.viewNormal.xy);
+    out.normal = float4(unitNormal, 0.0);
     out.position = data.worldPosition;
     
     return out;

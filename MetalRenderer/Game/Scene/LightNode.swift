@@ -10,6 +10,7 @@ import MetalKit
 class LightNode: Node
 {
     var shouldCastShadow = true
+    var shadowTexture: MTLTexture!
     
     private (set) var mesh = Mesh(modelName: "sphere")
     private (set) var lightData = LightData()
@@ -19,6 +20,8 @@ class LightNode: Node
     override init(name: String = "Light")
     {
         super.init(name: name)
+        
+        createShadowMap()
     }
 
     override func update()
@@ -50,6 +53,21 @@ class LightNode: Node
 //        let projectionMatrix = matrix_float4x4.orthographic(width: lightData.radius * 2, height: lightData.radius * 2, length: lightData.radius)
         
         viewProjMatrix = projectionMatrix * viewMatrix;
+    }
+    
+    private func createShadowMap()
+    {
+        let size: Int = 512
+        
+        let shadowTextureDescriptor = MTLTextureDescriptor.textureCubeDescriptor(pixelFormat: .depth16Unorm,
+                                                                                 size: size,
+                                                                                 mipmapped: false)
+        
+        shadowTextureDescriptor.usage = [.renderTarget, .shaderRead]
+        shadowTextureDescriptor.storageMode = .private
+        
+        shadowTexture = Engine.device.makeTexture(descriptor: shadowTextureDescriptor)!
+        shadowTexture.label = name + " Shadow"
     }
 }
 
