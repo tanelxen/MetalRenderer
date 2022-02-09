@@ -14,7 +14,7 @@ vertex float4 billboard_vertex_shader(const Vertex              vIn             
                                       constant SceneConstants   &viewConstants  [[ buffer(1) ]],
                                       constant ModelConstants   &modelConstants [[ buffer(2) ]])
 {
-    float4 position = float4(vIn.position, 1);
+    float4 position = vIn.position;
     
     float4x4 vMatrix = viewConstants.viewMatrix;
     float3 cameraRight = float3(vMatrix[0][0], vMatrix[1][0], vMatrix[2][0]);

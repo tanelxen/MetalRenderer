@@ -29,7 +29,7 @@ class Renderer: NSObject
     private var _skyPipelineState: MTLRenderPipelineState!
     private var _simplePipelineState: MTLRenderPipelineState!
     
-    private let scene = SponzaScene()
+    private let scene = Q3MapScene()
     
     private var isShadowMapNeedsUpdate = true
     private var shadowTexture: MTLTexture!
@@ -185,6 +185,20 @@ class Renderer: NSObject
         depthTextureDecriptor.usage = [.renderTarget, .shaderRead]
         depthTextureDecriptor.storageMode = .private
         gDepthTexture = Engine.device.makeTexture(descriptor: depthTextureDecriptor)!
+        
+        // ------ LIGHTING TEXTURE ------
+        
+        let lightingTextureDecriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba16Float,
+                                                                                width: width,
+                                                                                height: height,
+                                                                                mipmapped: false)
+        
+        lightingTextureDecriptor.sampleCount = 1
+        lightingTextureDecriptor.storageMode = .private
+        lightingTextureDecriptor.usage = [.renderTarget, .shaderRead]
+        
+        lightingTexture = Engine.device.makeTexture(descriptor: lightingTextureDecriptor)!
+        lightingTexture.label = "Lighting"
 
         _gbufferRenderPass = MTLRenderPassDescriptor()
         
@@ -200,6 +214,10 @@ class Renderer: NSObject
         _gbufferRenderPass.colorAttachments[2].loadAction = .clear
         _gbufferRenderPass.colorAttachments[2].storeAction = .store
         
+        _gbufferRenderPass.colorAttachments[3].texture = lightingTexture
+        _gbufferRenderPass.colorAttachments[3].loadAction = .clear
+        _gbufferRenderPass.colorAttachments[3].storeAction = .store
+        
         _gbufferRenderPass.depthAttachment.texture = gDepthTexture
         _gbufferRenderPass.depthAttachment.loadAction = .clear
         _gbufferRenderPass.depthAttachment.storeAction = .store
@@ -208,21 +226,6 @@ class Renderer: NSObject
     
     private func createLightingPass()
     {
-        let width = Int(Renderer.screenSize.x)
-        let height = Int(Renderer.screenSize.y)
-        
-        let lightingTextureDecriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba16Float,
-                                                                                width: width,
-                                                                                height: height,
-                                                                                mipmapped: false)
-        
-        lightingTextureDecriptor.sampleCount = 1
-        lightingTextureDecriptor.storageMode = .private
-        lightingTextureDecriptor.usage = [.renderTarget, .shaderRead]
-        
-        lightingTexture = Engine.device.makeTexture(descriptor: lightingTextureDecriptor)!
-        lightingTexture.label = "Lighting"
-
         _lightingRenderPass = MTLRenderPassDescriptor()
         
         _lightingRenderPass.colorAttachments[0].texture = lightingTexture
@@ -258,11 +261,12 @@ class Renderer: NSObject
         descriptor.colorAttachments[0].pixelFormat = .rgba8Unorm
         descriptor.colorAttachments[1].pixelFormat = .rgba16Float
         descriptor.colorAttachments[2].pixelFormat = .rgba16Float
+        descriptor.colorAttachments[3].pixelFormat = .rgba16Float
         descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
 
         descriptor.vertexFunction = _defaultLibrary.makeFunction(name: "gbuffer_vertex_shader")
         descriptor.fragmentFunction = _defaultLibrary.makeFunction(name: "gbuffer_fragment_shader")
-        descriptor.vertexDescriptor = VertexDescriptorLibrary.descriptor(.basic)
+        descriptor.vertexDescriptor = BSPMesh.vertexDescriptor()
 
         descriptor.label = "GBuffer Render Pipeline State"
 
@@ -363,7 +367,8 @@ class Renderer: NSObject
         renderEncoder?.setDepthStencilState(DepthStencilStateLibrary[.gbuffer])
         renderEncoder?.setStencilReferenceValue(128)
         
-        renderEncoder?.setCullMode(.front)
+        renderEncoder?.setFrontFacing(.clockwise)
+        renderEncoder?.setCullMode(.back)
         
         renderEncoder?.setRenderPipelineState(_gbufferPipelineState)
         scene.render(with: renderEncoder, useMaterials: true)
@@ -383,7 +388,8 @@ class Renderer: NSObject
         
         renderEncoder?.setDepthStencilState(DepthStencilStateLibrary[.lighting])
         
-        renderEncoder?.setCullMode(.back)
+        renderEncoder?.setFrontFacing(.clockwise)
+        renderEncoder?.setCullMode(.front)
         
         renderEncoder?.setRenderPipelineState(_lightingPipelineState)
         
@@ -474,19 +480,19 @@ class Renderer: NSObject
     {
         guard let drawable = view.currentDrawable else { return }
         
-        // ========= SHADOW =======================================
-        
-        if isShadowMapNeedsUpdate
-        {
-            let shadowCommandBuffer = Engine.commandQueue.makeCommandBuffer()
-            shadowCommandBuffer?.label = "Shadow Command Buffer"
-
-            doShadowPass(with: shadowCommandBuffer)
-
-            shadowCommandBuffer?.commit()
-            
-            isShadowMapNeedsUpdate = false
-        }
+//        // ========= SHADOW =======================================
+//
+//        if isShadowMapNeedsUpdate
+//        {
+//            let shadowCommandBuffer = Engine.commandQueue.makeCommandBuffer()
+//            shadowCommandBuffer?.label = "Shadow Command Buffer"
+//
+//            doShadowPass(with: shadowCommandBuffer)
+//
+//            shadowCommandBuffer?.commit()
+//
+//            isShadowMapNeedsUpdate = false
+//        }
 
         // ========= G-BUFFER =======================================
 
@@ -497,14 +503,14 @@ class Renderer: NSObject
 
         geometryCommandBuffer?.commit()
 
-        // ========= LIGHTING =======================================
-
-        let lightingCommandBuffer = Engine.commandQueue.makeCommandBuffer()
-        lightingCommandBuffer?.label = "Lighting Command Buffer"
-
-        doLightingPass(with: lightingCommandBuffer)
-
-        lightingCommandBuffer?.commit()
+//        // ========= LIGHTING =======================================
+//
+//        let lightingCommandBuffer = Engine.commandQueue.makeCommandBuffer()
+//        lightingCommandBuffer?.label = "Lighting Command Buffer"
+//
+//        doLightingPass(with: lightingCommandBuffer)
+//
+//        lightingCommandBuffer?.commit()
         
         // ========= COMPOSITE =======================================
         
@@ -518,8 +524,6 @@ class Renderer: NSObject
         compositeCommandBuffer?.present(drawable)
         
         compositeCommandBuffer?.commit()
-        
-        frameNum += 1;
     }
 }
 

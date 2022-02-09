@@ -59,16 +59,16 @@ fragment float4 compose_fragment_shader(VertexOut           data        [[ stage
 {
     float3 albedo = albedoMap.sample(sampler2d, data.texCoord).rgb;
 
-    float4 normal = normalMap.sample(sampler2d, data.texCoord);
-    float3 viewNormal = (view * normal).xyz;
+//    float4 normal = normalMap.sample(sampler2d, data.texCoord);
+//    float3 viewNormal = (view * normal).xyz;
     
     float3 ambient = float3(0.9, 0.9, 1.0);
 
     float3 diffuse = lightMap.sample(sampler2d, data.texCoord).rgb + ambient * 0.03;
 
-    float ssao = pureDepthSSAO(depthMap, data.texCoord, viewNormal, invCamPj);
+//    float ssao = pureDepthSSAO(depthMap, data.texCoord, viewNormal, invCamPj);
 
-    float3 result = albedo * diffuse * ssao;
+    float3 result = albedo * diffuse;
     
 //    const float exposure = 1.0;
 //    const float gamma = 2.2;

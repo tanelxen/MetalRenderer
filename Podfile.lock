@@ -1,0 +1,21 @@
+PODS:
+  - Assimp (5.0.3)
+
+DEPENDENCIES:
+  - Assimp (from `https://github.com/ndreca/Assimp.git`)
+
+EXTERNAL SOURCES:
+  Assimp:
+    :git: https://github.com/ndreca/Assimp.git
+
+CHECKOUT OPTIONS:
+  Assimp:
+    :commit: c356671b664c6b66924e399c7ef90f1270e12063
+    :git: https://github.com/ndreca/Assimp.git
+
+SPEC CHECKSUMS:
+  Assimp: 9852088859c975bd1f7564cfe90546aea0763777
+
+PODFILE CHECKSUM: 28e36990ae48689ed08cd85dfbe6762733e4f25d
+
+COCOAPODS: 1.10.0

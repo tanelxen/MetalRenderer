@@ -38,7 +38,7 @@ class DebugCamera: Camera
     
     static var shared = DebugCamera()
     
-    var movementSpeed: Float = 3.0
+    var movementSpeed: Float = 50.0
     var rotateSpeed: Float = 20
     
     var pitch: Float = 0
@@ -88,7 +88,7 @@ class DebugCamera: Camera
             transform.position += right * (movementSpeed * deltaTime)
         }
         
-        transform.position.y = eyeHeight
+//        transform.position.y = eyeHeight
         
         if Mouse.IsMouseButtonPressed(.right)
         {
@@ -104,7 +104,7 @@ class DebugCamera: Camera
             }
         }
         
-        _projectionMatrix = matrix_float4x4.perspective(degreesFov: 45, aspectRatio: Renderer.aspectRatio, near: 0.1, far: 500)
+        _projectionMatrix = matrix_float4x4.perspective(degreesFov: 65, aspectRatio: Renderer.aspectRatio, near: 0.1, far: 5000)
         
         frustumPlanes = DebugCamera.frustumPlanes(from: (_projectionMatrix * viewMatrix).transpose)
     }

@@ -26,7 +26,7 @@ vertex VertexOut lighting_vertex_shader(const Vertex              vIn           
                                         constant SceneConstants   &viewConstants    [[ buffer(1) ]],
                                         constant ModelConstants   &modelConstants   [[ buffer(2) ]])
 {
-    float4 worldPosition = modelConstants.modelMatrix * float4(vIn.position, 1);
+    float4 worldPosition = modelConstants.modelMatrix * vIn.position;
     
     VertexOut out;
     
@@ -58,14 +58,14 @@ fragment float4 lighting_fragment_shader(VertexOut          data                
     float3 lightDir = normalize(lightToUnit);
     float LdotN = dot(normal, lightDir);
     
-    float3 unitLightSpace = position.xyz - light.position;
-    float shadow = shadowCalculation(unitLightSpace, shadowMap, light.radius, LdotN);
+//    float3 unitLightSpace = position.xyz - light.position;
+//    float shadow = shadowCalculation(unitLightSpace, shadowMap, light.radius, LdotN);
 
     float dist_sqr = length_squared(lightToUnit);
     float radius_sqr = light.radius * light.radius;
     float attenuation = 1.0 - clamp(dist_sqr/radius_sqr, 0.0, 1.0);
 
-    float3 diffuse = max(LdotN, 0.0) * lightColor * light.diffuseIntensity * attenuation * (1.0 - shadow);
+    float3 diffuse = max(LdotN, 0.0) * lightColor * light.diffuseIntensity * attenuation;// * (1.0 - shadow);
 
     return float4(diffuse, 1.0);
 }

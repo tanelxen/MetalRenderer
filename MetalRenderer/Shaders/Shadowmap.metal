@@ -23,7 +23,7 @@ vertex VertexOut shadowmap_vertex_shader(const Vertex               vIn         
 {
     VertexOut out;
     
-    float4 worldPos = modelConstants.modelMatrix * float4(vIn.position, 1);
+    float4 worldPos = modelConstants.modelMatrix * vIn.position;
     
     out.worldPos = worldPos.xyz;
     out.position = projectionMatrix * worldPos;

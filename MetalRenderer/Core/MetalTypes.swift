@@ -44,6 +44,7 @@ struct MaterialConstants: sizeable
     var isLit = false
     var useBaseColorMap = false
     var useNormalMap = false
+    var useLightMap = false
     
     var color: float4 = float4(1.0, 1.0, 1.0, 1.0)
     var ambient: float3 = float3(0.01, 0.01, 0.01)

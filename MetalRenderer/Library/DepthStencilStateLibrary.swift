@@ -113,7 +113,7 @@ class LightingDepthStencilState: DepthStencilState
         
         let descriptor = MTLDepthStencilDescriptor()
         descriptor.isDepthWriteEnabled = false
-        descriptor.depthCompareFunction = .greaterEqual
+        descriptor.depthCompareFunction = .less
 //        descriptor.frontFaceStencil = stencilStateDescriptor
 //        descriptor.backFaceStencil = stencilStateDescriptor
         descriptor.label = name

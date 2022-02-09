@@ -27,8 +27,8 @@ vertex VertexOut skybox_vertex_shader(const Vertex              vIn             
     skyViewMatrix[3][3] = 1;
      
     VertexOut out;
-    out.position = (viewConstants.projectionMatrix * skyViewMatrix * float4(vIn.position, 1)).xyww;
-    out.texCoords = vIn.position;
+    out.position = (viewConstants.projectionMatrix * skyViewMatrix * vIn.position).xyww;
+    out.texCoords = vIn.position.xyz;
     
     out.texCoords.x = -out.texCoords.x;
     

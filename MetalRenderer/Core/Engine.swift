@@ -26,5 +26,5 @@ enum Engine
 enum Preferences
 {
     static let colorPixelFormat: MTLPixelFormat = .bgra8Unorm_srgb
-    static let depthStencilPixelFormat: MTLPixelFormat = .depth16Unorm
+    static let depthStencilPixelFormat: MTLPixelFormat = .depth32Float
 }
