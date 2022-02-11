@@ -27,7 +27,7 @@ func ==(lhs: IndexGroupKey, rhs: IndexGroupKey) -> Bool
 struct FaceMesh
 {
 //    let sort: Int32
-//    let material: Material
+    let material: Material
     let lightmap: MTLTexture
     let indexCount: Int
     let indexBuffer: MTLBuffer
@@ -35,6 +35,8 @@ struct FaceMesh
     func renderWithEncoder(_ encoder: MTLRenderCommandEncoder, time: Float)
     {
 //        material.renderWithEncoder(encoder, time: time, indexBuffer: indexBuffer, indexCount: indexCount, lightmap: lightmap)
+        
+        material.apply(to: encoder)
         
         encoder.setFragmentTexture(lightmap, index: 2)
         
@@ -56,7 +58,7 @@ class BSPMesh
     var faceMeshes: Array<FaceMesh> = []
     var shadedFaceMeshes: Array<FaceMesh> = []
     
-    let material = Material()
+//    let material = Material()
     
     init(device: MTLDevice, map: Q3Map)
     {
@@ -74,13 +76,10 @@ class BSPMesh
 //            }
 //        }
         
-        if let assetURL = Bundle.main.url(forResource: "dev_256", withExtension: "jpeg"),
-           let texture = TextureManager.shared.getTexture(url: assetURL, origin: .topLeft)
-        {
-            material.setBaseColorMap(texture)
-        }
-        
-        material.materialConstants.useLightMap = true
+        let assetURL = Bundle.main.url(forResource: "dev_256", withExtension: "jpeg")!
+        let devTexture = TextureManager.shared.getTexture(url: assetURL, origin: .topLeft)!
+//
+//        material.materialConstants.useLightMap = true
         
         var groupedIndices: Dictionary<IndexGroupKey, [UInt32]> = Dictionary()
         
@@ -118,7 +117,23 @@ class BSPMesh
 //
 //            let shader = self.shaders[key.texture] ?? Q3Shader(textureName: key.texture)
 //            let material = try! Material(shader: shader, device: device, textureLoader: textureLoader)
-//
+            
+            let url = URL(fileURLWithPath: "Contents/Resources/" + key.texture + ".jpg", relativeTo: Bundle.main.bundleURL)
+//            print(url)
+            
+            let material = Material()
+            
+            if let texture = TextureManager.shared.getTexture(url: url)
+            {
+                material.setBaseColorMap(texture)
+            }
+            else
+            {
+                material.setBaseColorMap(devTexture)
+            }
+            
+            material.materialConstants.useLightMap = true
+
             let lightmap = key.lightmap >= 0
                 ? TextureManager.shared.loadLightmap(map.lightmaps[key.lightmap])
                 : TextureManager.shared.whiteTexture()
@@ -129,7 +144,7 @@ class BSPMesh
             
             let faceMesh = FaceMesh(
 //                sort: shader.sort.order(),
-//                material: material,
+                material: material,
                 lightmap: lightmap,
                 indexCount: indices.count,
                 indexBuffer: buffer!

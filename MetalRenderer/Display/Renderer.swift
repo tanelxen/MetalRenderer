@@ -425,8 +425,8 @@ class Renderer: NSObject
 
         renderEncoder?.setRenderPipelineState(_compositePipelineState)
 
-        var lightData = scene.lights.first?.lightData
-        renderEncoder?.setFragmentBytes(&lightData, length: LightData.stride, index: 0)
+//        var lightData: LightData = scene.lights.first?.lightData
+//        renderEncoder?.setFragmentBytes(&lightData, length: LightData.stride, index: 0)
         
         var invCamPj = DebugCamera.shared.projectionMatrix.inverse
         renderEncoder?.setFragmentBytes(&invCamPj, length: MemoryLayout<matrix_float4x4>.stride, index: 1)

@@ -38,11 +38,13 @@ class DebugCamera: Camera
     
     static var shared = DebugCamera()
     
-    var movementSpeed: Float = 50.0
+    var movementSpeed: Float = 300.0
     var rotateSpeed: Float = 20
     
     var pitch: Float = 0
     var yaw: Float = -90
+    
+    var desiredPosition: float3 = .zero
     
     private var up = float3(0, 1, 0)
     
@@ -68,24 +70,26 @@ class DebugCamera: Camera
         let forward = direction
         let right = simd_cross(direction, up)
         
+        desiredPosition = transform.position
+        
         if Keyboard.isKeyPressed(.upArrow) || Keyboard.isKeyPressed(.w)
         {
-            transform.position += forward * (movementSpeed * deltaTime)
+            desiredPosition += forward * (movementSpeed * deltaTime)
         }
         
         if Keyboard.isKeyPressed(.downArrow) || Keyboard.isKeyPressed(.s)
         {
-            transform.position -= forward * (movementSpeed * deltaTime)
+            desiredPosition -= forward * (movementSpeed * deltaTime)
         }
         
         if Keyboard.isKeyPressed(.leftArrow) || Keyboard.isKeyPressed(.a)
         {
-            transform.position -= right * (movementSpeed * deltaTime)
+            desiredPosition -= right * (movementSpeed * deltaTime)
         }
 
         if Keyboard.isKeyPressed(.rightArrow) || Keyboard.isKeyPressed(.d)
         {
-            transform.position += right * (movementSpeed * deltaTime)
+            desiredPosition += right * (movementSpeed * deltaTime)
         }
         
 //        transform.position.y = eyeHeight

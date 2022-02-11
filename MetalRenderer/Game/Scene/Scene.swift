@@ -36,10 +36,10 @@ class Scene
     
     final func update()
     {
+        camera.update(deltaTime: GameTime.deltaTime)
+        
         // Update game logic
         doUpdate()
-        
-        camera.update(deltaTime: GameTime.deltaTime)
         
         updateSceneConstants()
         

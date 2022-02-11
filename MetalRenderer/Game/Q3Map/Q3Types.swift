@@ -54,9 +54,76 @@ enum Q3FaceType: Int
     case billboard = 4
 }
 
+struct Q3Texture
+{
+    let texureName: String
+    let surfaceFlags: Int32
+    let contentFlags: Int32
+}
+
 struct Q3Face
 {
     let textureName: String
     let lightmapIndex: Int
     let vertexIndices: Array<UInt32>
+}
+
+struct Q3Plane
+{
+    let normal: float3
+    let distance: Float
+}
+
+struct Q3Brush
+{
+    let brushside: Int
+    let numBrushsides: Int
+    let texture: Int
+}
+
+struct Q3BrushSide
+{
+    let plane: Int
+    let texture: Int
+}
+
+struct Q3Node
+{
+    let plane: Int
+    let front, back: Int
+    let mins: float3
+    let maxs: float3
+}
+
+struct Q3Leaf
+{
+    let cluster: Int
+    let area: Int
+    let mins: float3
+    let maxs: float3
+    let leafface: Int
+    let n_leaffaces: Int
+    let leafbrush: Int
+    let n_leafbrushes: Int
+}
+
+enum Lumps: Int
+{
+    case entities       // Game-related object descriptions.
+    case textures       // Surface descriptions.
+    case planes         // Planes used by map geometry.
+    case nodes          // BSP tree nodes.
+    case leafs          // BSP tree leaves.
+    case leaffaces      // Lists of face indices, one list per leaf.
+    case leafbrushes    // Lists of brush indices, one list per leaf.
+    case models         // Descriptions of rigid world geometry in map.
+    case brushes        // Convex polyhedra used to describe solid space.
+    case brushsides     // Brush surfaces.
+    case vertexes       // Vertices used to describe faces.
+    case meshverts      // Lists of offsets, one list per mesh.
+    case effects        // List of special map effects.
+    case faces          // Surface geometry.
+    case lightmaps      // Packed lightmap data.
+    case lightvols      // Local illumination data.
+    case visdata        // Cluster-cluster visibility data.
 }
