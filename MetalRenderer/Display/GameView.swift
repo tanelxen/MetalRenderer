@@ -9,7 +9,7 @@ import MetalKit
 
 class GameView: MTKView
 {
-    private var renderer: Renderer!
+    private var renderer: MTKViewDelegate!
     
     required init(coder: NSCoder)
     {
@@ -21,10 +21,10 @@ class GameView: MTKView
         
         self.clearColor = .init(red: 0.02, green: 0.02, blue: 0.03, alpha: 1.0)
         self.colorPixelFormat = Preferences.colorPixelFormat
-//        self.depthStencilPixelFormat = Preferences.depthStencilPixelFormat
+        self.depthStencilPixelFormat = Preferences.depthStencilPixelFormat
         self.framebufferOnly = false
         
-        renderer = Renderer(view: self)
+        renderer = ForwardRenderer(view: self)
         
         self.delegate = renderer
     }

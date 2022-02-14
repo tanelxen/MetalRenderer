@@ -11,11 +11,13 @@ enum Engine
 {
     static private(set) var device: MTLDevice!
     static private(set) var commandQueue: MTLCommandQueue!
+    static private(set) var defaultLibrary: MTLLibrary!
     
     static func ignite(device: MTLDevice)
     {
         self.device = device
         self.commandQueue = device.makeCommandQueue()
+        self.defaultLibrary = device.makeDefaultLibrary()
         
         TextureLibrary.initialize()
         VertexDescriptorLibrary.initialize()

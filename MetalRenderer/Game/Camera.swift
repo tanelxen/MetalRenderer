@@ -44,7 +44,9 @@ class DebugCamera: Camera
     var pitch: Float = 0
     var yaw: Float = -90
     
-    var desiredPosition: float3 = .zero
+//    var desiredPosition: float3 = .zero
+    
+    var velocity: float3 = .zero
     
     private var up = float3(0, 1, 0)
     
@@ -70,27 +72,29 @@ class DebugCamera: Camera
         let forward = direction
         let right = simd_cross(direction, up)
         
-        desiredPosition = transform.position
+        velocity = .zero
         
         if Keyboard.isKeyPressed(.upArrow) || Keyboard.isKeyPressed(.w)
         {
-            desiredPosition += forward * (movementSpeed * deltaTime)
+            velocity = forward * (movementSpeed * deltaTime)
         }
         
         if Keyboard.isKeyPressed(.downArrow) || Keyboard.isKeyPressed(.s)
         {
-            desiredPosition -= forward * (movementSpeed * deltaTime)
+            velocity = -forward * (movementSpeed * deltaTime)
         }
         
         if Keyboard.isKeyPressed(.leftArrow) || Keyboard.isKeyPressed(.a)
         {
-            desiredPosition -= right * (movementSpeed * deltaTime)
+            velocity = -right * (movementSpeed * deltaTime)
         }
 
         if Keyboard.isKeyPressed(.rightArrow) || Keyboard.isKeyPressed(.d)
         {
-            desiredPosition += right * (movementSpeed * deltaTime)
+            velocity = right * (movementSpeed * deltaTime)
         }
+        
+//        desiredPosition = transform.position + velocity
         
 //        transform.position.y = eyeHeight
         
@@ -108,7 +112,7 @@ class DebugCamera: Camera
             }
         }
         
-        _projectionMatrix = matrix_float4x4.perspective(degreesFov: 65, aspectRatio: Renderer.aspectRatio, near: 0.1, far: 5000)
+        _projectionMatrix = matrix_float4x4.perspective(degreesFov: 65, aspectRatio: ForwardRenderer.aspectRatio, near: 0.1, far: 5000)
         
         frustumPlanes = DebugCamera.frustumPlanes(from: (_projectionMatrix * viewMatrix).transpose)
     }

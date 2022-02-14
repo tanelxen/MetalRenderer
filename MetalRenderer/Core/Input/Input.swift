@@ -105,8 +105,8 @@ enum Mouse
     //Returns the mouse position in screen-view coordinates [-1, 1]
     static func getMouseViewportPosition() -> float2
     {
-        let x = (overallMousePosition.x - Renderer.screenSize.x * 0.5) / (Renderer.screenSize.x * 0.5)
-        let y = (overallMousePosition.y - Renderer.screenSize.y * 0.5) / (Renderer.screenSize.y * 0.5)
+        let x = (overallMousePosition.x - ForwardRenderer.screenSize.x * 0.5) / (ForwardRenderer.screenSize.x * 0.5)
+        let y = (overallMousePosition.y - ForwardRenderer.screenSize.y * 0.5) / (ForwardRenderer.screenSize.y * 0.5)
         return float2(x, y)
     }
 }

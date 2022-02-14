@@ -41,13 +41,11 @@ class TextureManager
         
         var texture: MTLTexture?
         
-        let textureLoader = MTKTextureLoader(device: Engine.device)
-        
         let options: [MTKTextureLoader.Option : MTKTextureLoader.Origin] = [MTKTextureLoader.Option.origin : origin]
         
         do
         {
-            texture = try textureLoader.newTexture(URL: url, options: options)
+            texture = try _textureLoader.newTexture(URL: url, options: options)
             texture?.label = fileName
         }
         catch let error as NSError
@@ -56,6 +54,24 @@ class TextureManager
         }
         
         _cache[fileName] = texture
+        
+        return texture
+    }
+    
+    func loadCubeTexture(imageName: String) -> MTLTexture?
+    {
+        if let texture = MDLTexture(cubeWithImagesNamed: [imageName])
+        {
+            let options: [MTKTextureLoader.Option: Any] = [
+                .origin: MTKTextureLoader.Origin.bottomLeft,
+                .SRGB: false,
+                .generateMipmaps: NSNumber(booleanLiteral: false)
+            ]
+            
+            return try? _textureLoader.newTexture(texture: texture, options: options)
+        }
+        
+        let texture = try? _textureLoader.newTexture(name: imageName, scaleFactor: 1.0, bundle: .main)
         
         return texture
     }

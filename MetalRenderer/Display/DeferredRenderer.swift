@@ -1,5 +1,5 @@
 //
-//  Renderer.swift
+//  DeferredRenderer.swift
 //  MetalRenderer
 //
 //  Created by Fedor Artemenkov on 13.01.2022.
@@ -7,7 +7,7 @@
 
 import MetalKit
 
-class Renderer: NSObject
+class DeferredRenderer: NSObject
 {
     static private (set) var screenSize: float2 = .zero
     
@@ -56,7 +56,7 @@ class Renderer: NSObject
         
         _defaultLibrary = Engine.device.makeDefaultLibrary()
         
-        skyCubeTexture = loadCubeTexture(imageName: "night-sky")
+        skyCubeTexture = TextureManager.shared.loadCubeTexture(imageName: "night-sky")
 
         createShadowPipelineState()
         createGBufferPipelineState()
@@ -70,8 +70,8 @@ class Renderer: NSObject
     
     private func updateScreenSize(_ size: CGSize)
     {
-        Renderer.screenSize.x = Float(size.width)
-        Renderer.screenSize.y = Float(size.height)
+        DeferredRenderer.screenSize.x = Float(size.width)
+        DeferredRenderer.screenSize.y = Float(size.height)
     }
     
     fileprivate func update()
@@ -79,33 +79,7 @@ class Renderer: NSObject
         let dt = 1.0 / preferredFramesPerSecond
         GameTime.update(deltaTime: dt)
         
-        
-//        let start = CFAbsoluteTimeGetCurrent()
-        
         scene.update()
-        
-//        let diff = (CFAbsoluteTimeGetCurrent() - start) * 1000
-//        print("Took \(diff) ms")
-    }
-    
-    func loadCubeTexture(imageName: String) -> MTLTexture?
-    {
-        let textureLoader = MTKTextureLoader(device: Engine.device)
-        
-        if let texture = MDLTexture(cubeWithImagesNamed: [imageName])
-        {
-            let options: [MTKTextureLoader.Option: Any] = [
-                .origin: MTKTextureLoader.Origin.bottomLeft,
-                .SRGB: false,
-                .generateMipmaps: NSNumber(booleanLiteral: false)
-            ]
-            
-            return try? textureLoader.newTexture(texture: texture, options: options)
-        }
-        
-        let texture = try? textureLoader.newTexture(name: imageName, scaleFactor: 1.0, bundle: .main)
-        
-        return texture
     }
     
     // MARK: - PASSES
@@ -134,8 +108,8 @@ class Renderer: NSObject
     
     private func createGBufferPass()
     {
-        let width = Int(Renderer.screenSize.x)
-        let height = Int(Renderer.screenSize.y)
+        let width = Int(DeferredRenderer.screenSize.x)
+        let height = Int(DeferredRenderer.screenSize.y)
         
         // ------ ALBEDO ------
         let albedoTextureDecriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba8Unorm,
@@ -527,7 +501,7 @@ class Renderer: NSObject
     }
 }
 
-extension Renderer: MTKViewDelegate
+extension DeferredRenderer: MTKViewDelegate
 {
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize)
     {

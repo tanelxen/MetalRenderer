@@ -15,11 +15,6 @@ struct Q3Vertex
     var color: float4 = float4(0, 0, 0, 0)
     var textureCoord: float2 = float2(0, 0)
     var lightmapCoord: float2 = float2(0, 0)
-    
-//    var position: float3 = float3(0, 0, 0)
-//    var uv: float2 = float2(0, 0)
-//    var normal: float3 = float3(0, 0, 0)
-//    var tangent: float3 = float3(0, 0, 0)
 }
 
 func +(left: Q3Vertex, right: Q3Vertex) -> Q3Vertex
