@@ -19,6 +19,7 @@ class ForwardRenderer: NSObject
     private var _skyboxPipelineState: MTLRenderPipelineState!
     private var _worldMeshPipelineState: MTLRenderPipelineState!
     private var _staticMeshPipelineState: MTLRenderPipelineState!
+    private var _skeletalMeshPipelineState: MTLRenderPipelineState!
     
     private var _skyCubeTexture: MTLTexture!
     private let _skybox = Skybox()
@@ -38,6 +39,7 @@ class ForwardRenderer: NSObject
         createSkyboxPipelineState()
         createWorldMeshPipelineState()
         createStaticMeshPipelineState()
+        createSkeletalMeshPipelineState()
         
         preferredFramesPerSecond = Float(view.preferredFramesPerSecond)
     }
@@ -104,6 +106,21 @@ class ForwardRenderer: NSObject
         _staticMeshPipelineState = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
     }
     
+    private func createSkeletalMeshPipelineState()
+    {
+        let descriptor = MTLRenderPipelineDescriptor()
+        descriptor.colorAttachments[0].pixelFormat = Preferences.colorPixelFormat
+        descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
+
+        descriptor.vertexFunction = Engine.defaultLibrary.makeFunction(name: "skeletal_mesh_vs")
+        descriptor.fragmentFunction = Engine.defaultLibrary.makeFunction(name: "skeletal_mesh_fs")
+        descriptor.vertexDescriptor = SkeletalMesh.vertexDescriptor()
+
+        descriptor.label = "Skeletal Mesh Pipeline State"
+
+        _skeletalMeshPipelineState = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
+    }
+    
     // MARK: - DO PASSES
     
     private func doMainRenderPass(with commandBuffer: MTLCommandBuffer?, in view: MTKView)
@@ -134,13 +151,13 @@ class ForwardRenderer: NSObject
 
         renderEncoder?.pushDebugGroup("World Mesh Render")
 
-        renderEncoder?.setDepthStencilState(DepthStencilStateLibrary[.less])
+            renderEncoder?.setDepthStencilState(DepthStencilStateLibrary[.less])
 
-        renderEncoder?.setFrontFacing(.clockwise)
-        renderEncoder?.setCullMode(.back)
+            renderEncoder?.setFrontFacing(.clockwise)
+            renderEncoder?.setCullMode(.back)
 
-        renderEncoder?.setRenderPipelineState(_worldMeshPipelineState)
-        scene.render(with: renderEncoder, useMaterials: true)
+            renderEncoder?.setRenderPipelineState(_worldMeshPipelineState)
+            scene.renderWorld(with: renderEncoder)
 
         renderEncoder?.popDebugGroup()
         
@@ -151,13 +168,29 @@ class ForwardRenderer: NSObject
 
         renderEncoder?.setDepthStencilState(DepthStencilStateLibrary[.less])
         
-//        renderEncoder?.setFrontFacing(.clockwise)
-//        renderEncoder?.setCullMode(.back)
+    //        renderEncoder?.setFrontFacing(.clockwise)
+    //        renderEncoder?.setCullMode(.back)
+            
+    //        renderEncoder?.setTriangleFillMode(.lines)
+            
+            renderEncoder?.setRenderPipelineState(_staticMeshPipelineState)
+            scene.renderStaticMeshes(with: renderEncoder)
+
+        renderEncoder?.popDebugGroup()
         
-//        renderEncoder?.setTriangleFillMode(.lines)
+        // SKELETAL MESHES
+
+        renderEncoder?.pushDebugGroup("Skeletal Meshes Render")
+
+        renderEncoder?.setDepthStencilState(DepthStencilStateLibrary[.less])
         
-        renderEncoder?.setRenderPipelineState(_staticMeshPipelineState)
-        scene.renderStaticMeshes(with: renderEncoder)
+    //        renderEncoder?.setFrontFacing(.clockwise)
+    //        renderEncoder?.setCullMode(.back)
+            
+    //        renderEncoder?.setTriangleFillMode(.lines)
+            
+            renderEncoder?.setRenderPipelineState(_skeletalMeshPipelineState)
+            scene.renderSkeletalMeshes(with: renderEncoder)
 
         renderEncoder?.popDebugGroup()
         

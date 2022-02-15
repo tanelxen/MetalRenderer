@@ -11,7 +11,9 @@ import Assimp
 class Q3MapScene: Scene
 {
     var bspMesh: BSPMesh?
+    
     var staticMesh: StaticMesh?
+    var skeletalMesh: SkeletalMesh?
     
     let scale: Float = 1.0
     
@@ -19,80 +21,44 @@ class Q3MapScene: Scene
     
     override func build()
     {
-        camera.transform.position = float3(0, 1.0, 0)
-        camera.eyeHeight = 1.0
+        camera.transform.position = float3(0, 0, -30)
         
-        if let url = Bundle.main.url(forResource: "q3dm0", withExtension: "bsp"), let data = try? Data(contentsOf: url)
-        {
-            let q3map = Q3Map(data: data)
-            print("bsp file loaded")
-            
-            collision = Q3MapCollision(q3map: q3map)
-            
-            // get spawn points and set camera position to one
-            let spawnPoints = q3map.entities.filter { entity in
-                entity["classname"] == "info_player_deathmatch"
-            }
-
-            if spawnPoints.count > 0
-            {
-//                let i = Int(arc4random_uniform(UInt32(spawnPoints.count)))
-                let entity = spawnPoints[0]
-
-                let origin = entity["origin"]!.split(separator: " ").map { Float($0)! }
-                let angle = Float(entity["angle"]!)!.radians
-                
-                let position = float3(origin[0], origin[2] + 60, -origin[1]) * scale
-                let rotation = float3(0, angle, 0)
-
-                camera.transform.position = position
-                camera.transform.rotation = rotation
-            }
-            
-//            let lightEntities = q3map.entities.filter { entity in
-//                entity["classname"] == "light"
+//        if let url = Bundle.main.url(forResource: "q3dm0", withExtension: "bsp"), let data = try? Data(contentsOf: url)
+//        {
+//            let q3map = Q3Map(data: data)
+//            print("bsp file loaded")
+//
+//            collision = Q3MapCollision(q3map: q3map)
+//
+//            // get spawn points and set camera position to one
+//            let spawnPoints = q3map.entities.filter { entity in
+//                entity["classname"] == "info_player_deathmatch"
 //            }
 //
-//            for entity in lightEntities
+//            if spawnPoints.count > 0
 //            {
+////                let i = Int(arc4random_uniform(UInt32(spawnPoints.count)))
+//                let entity = spawnPoints[0]
+//
 //                let origin = entity["origin"]!.split(separator: " ").map { Float($0)! }
-//                let position = float3(origin[0], origin[2], -origin[1]) * scale
+//                let angle = Float(entity["angle"]!)!.radians
 //
-//                let radius = Float(entity["light"]!)!
+//                let position = float3(origin[0], origin[2] + 60, -origin[1]) * scale
+//                let rotation = float3(0, angle, 0)
 //
-//                let light = LightNode()
-//                light.shouldCastShadow = false
-//                light.transform.position = position
-//                light.setLight(color: float3(1.0, 0.9, 0.7))
-//                light.setLight(brightness: radius)
-//                lights.append(light)
-//
-//                addChild(light)
+//                camera.transform.position = position
+//                camera.transform.rotation = rotation
 //            }
-            
-            bspMesh = BSPMesh(device: Engine.device, map: q3map)
-            print("bsp mesh created")
-        }
-        
-//        if let url = Bundle.main.url(forResource: "barney", withExtension: "mdl"), let data = try? Data(contentsOf: url)
-//        {
-//            let mdl = HLModel(data: data)
-//            print("mdl file loaded")
+//
+//            bspMesh = BSPMesh(device: Engine.device, map: q3map)
+//            print("bsp mesh created")
 //        }
         
-//        if let url = Bundle.main.url(forResource: "police", withExtension: "smd")
-//        {
-//            let path = url.path
-//
-//            let scene = try? AiScene.init(file: path)
-//
-//            print(scene?.meshes.first?.faces)
-//        }
-        
-        staticMesh = StaticMesh(name: "skull", ext: "obj")
+//        staticMesh = StaticMesh(name: "skull", ext: "obj")
+        skeletalMesh = SkeletalMesh(name: "barney", ext: "mdl")
     }
     
-    override func render(with encoder: MTLRenderCommandEncoder?, useMaterials: Bool)
+    func renderWorld(with encoder: MTLRenderCommandEncoder?)
     {
         var sceneUniforms = sceneConstants
         var modelConstants = ModelConstants()
@@ -102,8 +68,6 @@ class Q3MapScene: Scene
         encoder?.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
         
         bspMesh?.renderWithEncoder(encoder!)
-        
-        super.render(with: encoder, useMaterials: true)
     }
     
     func renderStaticMeshes(with encoder: MTLRenderCommandEncoder?)
@@ -116,6 +80,18 @@ class Q3MapScene: Scene
         encoder?.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
         
         staticMesh?.renderWithEncoder(encoder!)
+    }
+    
+    func renderSkeletalMeshes(with encoder: MTLRenderCommandEncoder?)
+    {
+        var sceneUniforms = sceneConstants
+        var modelConstants = ModelConstants()
+        modelConstants.modelMatrix.scale(axis: float3(repeating: 1))
+        
+        encoder?.setVertexBytes(&sceneUniforms, length: SceneConstants.stride, index: 1)
+        encoder?.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
+        
+        skeletalMesh?.renderWithEncoder(encoder!)
     }
     
     override func doUpdate()

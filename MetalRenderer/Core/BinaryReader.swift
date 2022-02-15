@@ -111,3 +111,10 @@ class BinaryReader
     }
 }
 
+func decode<T>(data: NSData) -> T
+{
+    let pointer = UnsafeMutablePointer<T>.allocate(capacity: MemoryLayout.size(ofValue:T.self))
+    data.getBytes(pointer, length: MemoryLayout<T>.size)
+    
+    return pointer.move()
+}

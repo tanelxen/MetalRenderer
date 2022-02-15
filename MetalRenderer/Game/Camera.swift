@@ -42,7 +42,7 @@ class DebugCamera: Camera
     var rotateSpeed: Float = 20
     
     var pitch: Float = 0
-    var yaw: Float = -90
+    var yaw: Float = 90
     
 //    var desiredPosition: float3 = .zero
     
