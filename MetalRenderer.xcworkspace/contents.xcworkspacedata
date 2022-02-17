@@ -4,4 +4,7 @@
    <FileRef
       location = "group:MetalRenderer.xcodeproj">
    </FileRef>
+   <FileRef
+      location = "group:GoldSrc MDL Importer">
+   </FileRef>
 </Workspace>

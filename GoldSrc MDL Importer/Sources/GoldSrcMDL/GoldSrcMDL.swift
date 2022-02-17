@@ -1,15 +1,40 @@
 //
-//  HLModel.swift
-//  MetalRenderer
+//  GoldSrcMDL.swift
+//  Half-Life MDL
 //
-//  Created by Fedor Artemenkov on 09.02.2022.
+//  Created by Fedor Artemenkov on 15.02.2022.
 //
 
 import Foundation
 import simd
 
-class HLModel
+public struct MeshVertex
 {
+    public let position: SIMD3<Float>
+    public let texCoord: SIMD2<Float>
+}
+
+public struct Mesh
+{
+    public let vertexBuffer: [MeshVertex]
+    public let indexBuffer: [Int]
+    public let textureIndex: Int
+}
+
+public struct Texture
+{
+    public let name: String
+    public let data: [UInt8]
+    public let width: Int
+    public let height: Int
+}
+
+public class GoldSrcMDL
+{
+    public var modelName = ""
+    public var meshes: [Mesh] = []
+    public var textures: [Texture] = []
+    
     private var buffer: BinaryReader
     
     private var mdlHeader: studiohdr_t!
@@ -22,37 +47,13 @@ class HLModel
     
     private var bonetransforms: [matrix_float4x4] = []
     
-    var meshes: [Mesh] = []
-    var textures: [Texture] = []
-    
     private var mdlSequences: [mstudioseqdesc_t] = []
     private var mdlAnimations: [[mstudioanim_t]] = []
     private var mdlBones: [mstudiobone_t] = []
     
     private let animValues = AnimValues()
     
-    struct MeshVertex
-    {
-        let position: float3
-        let texCoord: float2
-    }
-    
-    struct Mesh
-    {
-        let vertexBuffer: [MeshVertex]
-        let indexBuffer: [Int]
-        let textureIndex: Int
-    }
-    
-    struct Texture
-    {
-        let name: String
-        let data: [UInt8]
-        let width: Int
-        let height: Int
-    }
-    
-    init(data: Data)
+    public init(data: Data)
     {
         buffer = BinaryReader(data: data)
         
@@ -70,11 +71,11 @@ class HLModel
         
         self.mdlHeader = header
         
-//        var nameBytes = header.name
-//
-//        let name: String = withUnsafePointer(to: &nameBytes) { ptr -> String in
-//           return String(cString: UnsafeRawPointer(ptr).assumingMemoryBound(to: CChar.self))
-//        }
+        var nameBytes = header.name
+
+        modelName = withUnsafePointer(to: &nameBytes) { ptr -> String in
+           return String(cString: UnsafeRawPointer(ptr).assumingMemoryBound(to: CChar.self))
+        }
     }
     
     private func readTextures()
@@ -82,7 +83,7 @@ class HLModel
         let offset = Int(mdlHeader.textureindex)
         let count = Int(mdlHeader.numtextures)
         
-        mdlTextures = readItems(buffer.data, offset: offset, count: count)
+        mdlTextures = buffer.readItems(offset: offset, count: count)
         textures = mdlTextures.map( { self.readTextureData($0) })
         
         if count > 0
@@ -90,7 +91,7 @@ class HLModel
             let skin_offset = Int(mdlHeader.skinindex)
             let skin_count = Int(mdlHeader.numskinref)
             
-            mdlSkinrefs = readItems(buffer.data, offset: skin_offset, count: skin_count)
+            mdlSkinrefs = buffer.readItems(offset: skin_offset, count: skin_count)
         }
     }
     
@@ -99,7 +100,7 @@ class HLModel
         let offset = Int(textureInfo.index)
         let count: Int = Int(textureInfo.width * textureInfo.height)
 
-        let textureData: [UInt8] = readItems(buffer.data, offset: Int(textureInfo.index), count: count)
+        let textureData: [UInt8] = buffer.readItems(offset: Int(textureInfo.index), count: count)
         
         let RGB_SIZE = 3
         let RGBA_SIZE = 4
@@ -108,7 +109,7 @@ class HLModel
         let PALETTE_SIZE = 256 * RGB_SIZE
 
         // Palette of colors
-        let palette: [UInt8] = readItems(buffer.data, offset: offset + count, count: PALETTE_SIZE)
+        let palette: [UInt8] = buffer.readItems(offset: offset + count, count: PALETTE_SIZE)
 
         // Create new image buffer
         var imageBuffer: [UInt8] = Array.init(repeating: 0, count: count * RGBA_SIZE)
@@ -145,34 +146,34 @@ class HLModel
         let offset = Int(mdlHeader.bodypartindex)
         let count = Int(mdlHeader.numbodyparts)
         
-        mdlBodyparts = readItems(buffer.data, offset: offset, count: count)
+        mdlBodyparts = buffer.readItems(offset: offset, count: count)
         
         for bodypart in mdlBodyparts
         {
             let models_offset = Int(bodypart.modelindex)
             let num_models = Int(bodypart.nummodels)
             
-            let bodypart_models: [mstudiomodel_t] = readItems(buffer.data, offset: models_offset, count: num_models)
+            let bodypart_models: [mstudiomodel_t] = buffer.readItems(offset: models_offset, count: num_models)
             
             for model in bodypart_models
             {
                 let verts_offset = Int(model.vertindex)
                 let num_verts = Int(model.numverts)
-                let verts: [Float32] = readItems(buffer.data, offset: verts_offset, count: num_verts * 3)
+                let verts: [Float32] = buffer.readItems(offset: verts_offset, count: num_verts * 3)
                 
                 let mesh_offset = Int(model.meshindex)
                 let num_mesh = Int(model.nummesh)
-                let meshes: [mstudiomesh_t] = readItems(buffer.data, offset: mesh_offset, count: num_mesh)
+                let meshes: [mstudiomesh_t] = buffer.readItems(offset: mesh_offset, count: num_mesh)
                 
                 let vert_info_offset = Int(model.vertinfoindex)
                 let num_vert_info = Int(model.numverts)
-                let vert_info: [UInt8] = readItems(buffer.data, offset: vert_info_offset, count: num_vert_info)
+                let vert_info: [UInt8] = buffer.readItems(offset: vert_info_offset, count: num_vert_info)
                 
                 for mesh in meshes
                 {
                     let tris_offset = Int(mesh.triindex)
                     let tris_count = Int(floor(Double(mdlHeader.length - mesh.triindex) / 2))
-                    let tris: [Int16] = readItems(buffer.data, offset: tris_offset, count: tris_count)
+                    let tris: [Int16] = buffer.readItems(offset: tris_offset, count: tris_count)
                     
                     var textureIndex: Int?
                     
@@ -199,9 +200,6 @@ class HLModel
         
         let textureWidth: Float = Float(texture?.width ?? 64)
         let textureHeight: Float = Float(texture?.height ?? 64)
-        
-        let texcoords_s_scale: Float = 1.0 / textureWidth
-        let texcoords_t_scale: Float = 1.0 / textureHeight
         
         // Current position in buffer
         var trisPos = 0
@@ -364,17 +362,17 @@ class HLModel
     
     private func setupBones()
     {
-        self.mdlSequences = readItems(offset: mdlHeader.seqindex, count: mdlHeader.numseq)
+        self.mdlSequences = buffer.readItems(offset: mdlHeader.seqindex, count: mdlHeader.numseq)
         
         for sequence in mdlSequences
         {
-            let anims: [mstudioanim_t] = readItems(offset: sequence.animindex, count: mdlHeader.numbones)
+            let anims: [mstudioanim_t] = buffer.readItems(offset: sequence.animindex, count: mdlHeader.numbones)
             self.mdlAnimations.append(anims)
         }
         
         animValues.parse(data: buffer.data, seqs: self.mdlSequences, anims: self.mdlAnimations, numBones: Int(mdlHeader.numbones))
         
-        self.mdlBones = readItems(offset: mdlHeader.boneindex, count: mdlHeader.numbones)
+        self.mdlBones = buffer.readItems(offset: mdlHeader.boneindex, count: mdlHeader.numbones)
         
         bonetransforms = calcRotations(sequenceIndex: 1, frame: 0)
     }
@@ -546,146 +544,5 @@ class HLModel
         
         return boneTransforms
     }
-    
-    private func readItems<T>(_ data: Data, offset: Int, count: Int) -> Array<T>
-    {
-        let size = MemoryLayout<T>.size
-        let range = offset ..< (offset + count * size)
-        let subdata = data.subdata(in: range)
-        
-        return subdata.withUnsafeBytes {
-            Array(UnsafeBufferPointer<T>(start: $0, count: count))
-        }
-    }
-    
-    private func readItems<T>(offset: Int32, count: Int32) -> Array<T>
-    {
-        return readItems(buffer.data, offset: Int(offset), count: Int(count))
-    }
 }
 
-func anglesToQuaternion(_ angles: float3) -> simd_quatf
-{
-    let pitch = angles[0]
-    let roll = angles[1]
-    let yaw = angles[2]
-
-    // FIXME: rescale the inputs to 1/2 angle
-    let cy = cos(yaw * 0.5)
-    let sy = sin(yaw * 0.5)
-    let cp = cos(roll * 0.5)
-    let sp = sin(roll * 0.5)
-    let cr = cos(pitch * 0.5)
-    let sr = sin(pitch * 0.5)
-    
-    let vector = simd_float4(
-        sr * cp * cy - cr * sp * sy,    // X
-        cr * sp * cy + sr * cp * sy,    // Y
-        cr * cp * sy - sr * sp * cy,    // Z
-        cr * cp * cy + sr * sp * sy     // W
-    )
-    
-    return simd_quatf(vector: vector)
-}
-
-extension HLModel
-{
-    class AnimValues
-    {
-        func parse(data: Data, seqs: [mstudioseqdesc_t], anims: [[mstudioanim_t]], numBones: Int)
-        {
-            let AXLES_NUM = 3
-            let MAX_SRCBONES = 3
-            let animStructLength = MemoryLayout<mstudioanim_t>.size
-            
-            let reader = BinaryReader(data: data)
-            
-            sequences = Array(
-                repeating: Array(
-                    repeating: Array(
-                        repeating: Array(
-                            repeating: animvalue_t(),
-                            count: MAX_SRCBONES
-                        ),
-                        count: AXLES_NUM
-                    ),
-                    count: numBones
-                ),
-                count: seqs.count
-            )
-            
-            for i in 0 ..< seqs.count
-            {
-                for j in 0 ..< numBones
-                {
-                    let animationIndex = Int(seqs[i].animindex) + j * animStructLength
-                    
-                    for axis in 0 ..< AXLES_NUM
-                    {
-                        for v in 0 ..< MAX_SRCBONES
-                        {
-                            let anim = [anims[i][j].offset.0, anims[i][j].offset.1, anims[i][j].offset.2,
-                                        anims[i][j].offset.3, anims[i][j].offset.4, anims[i][j].offset.5]
-                            
-                            let offset = animationIndex + Int(anim[axis + AXLES_NUM]) + v * MemoryLayout<Int16>.size
-                            
-                            reader.position = offset
-                            let value = reader.getInt16()
-                            
-                            reader.position = offset
-                            let valid = reader.getUInt8()
-                            
-                            reader.position = offset + MemoryLayout<UInt8>.size
-                            let total = reader.getUInt8()
-                            
-                            sequences[i][j][axis][v].value = Int(value)
-                            sequences[i][j][axis][v].valid = Int(valid)
-                            sequences[i][j][axis][v].total = Int(total)
-                        }
-                    }
-                }
-            }
-            
-            print("====== SEQUENCES READED ===========")
-        }
-        
-        func get(_ sequenceIndex: Int, _ boneIndex: Int, _ axis: Int, _ index: Int, _ anim: ANIM_VALUE) -> Int
-        {
-            let animvalue = sequences[sequenceIndex][boneIndex][axis][index]
-            
-            switch anim
-            {
-                case .TOTAL: return animvalue.total
-                case .VALID: return animvalue.valid
-                case .VALUE: return animvalue.value
-            }
-        }
-        
-        private var sequences: [ [ [ [animvalue_t] ] ] ] = []
-        
-        enum ANIM_VALUE
-        {
-            case TOTAL
-            case VALID
-            case VALUE
-        }
-        
-        struct animvalue_t
-        {
-            var valid: Int = 0
-            var total: Int = 0
-            var value: Int = 0
-        }
-        
-        private func readItems<T>(_ data: Data, offset: Int, count: Int) -> Array<T>
-        {
-            let size = MemoryLayout<T>.size
-            let range = offset ..< (offset + count * size)
-            let subdata = data.subdata(in: range)
-            
-            return subdata.withUnsafeBytes {
-                Array(UnsafeBufferPointer<T>(start: $0, count: count))
-            }
-        }
-    }
-}

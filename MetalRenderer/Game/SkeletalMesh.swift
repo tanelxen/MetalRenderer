@@ -6,6 +6,7 @@
 //
 
 import MetalKit
+import GoldSrcMDL
 
 class SkeletalMesh
 {
@@ -17,7 +18,7 @@ class SkeletalMesh
         guard let url = Bundle.main.url(forResource: name, withExtension: ext) else { return nil }
         guard let data = try? Data(contentsOf: url) else { return nil }
         
-        let mdl = HLModel(data: data)
+        let mdl = GoldSrcMDL(data: data)
         
         let assetURL = Bundle.main.url(forResource: "dev_256", withExtension: "jpeg")!
         let devTexture = TextureManager.shared.getTexture(url: assetURL, origin: .topLeft)!
