@@ -57,10 +57,17 @@
 		8A5EDFE427B9CB4C007166E4 /* StaticMesh.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8A5EDFE327B9CB4C007166E4 /* StaticMesh.metal */; };
 		8A5EDFE627B9DDDC007166E4 /* tris.md2 in Resources */ = {isa = PBXBuildFile; fileRef = 8A5EDFE527B9DDDC007166E4 /* tris.md2 */; };
 		8A5EDFEA27B9DF9A007166E4 /* shotgun.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 8A5EDFE927B9DF9A007166E4 /* shotgun.jpg */; };
-		8A5EDFEC27BB4549007166E4 /* zombie.mdl in Resources */ = {isa = PBXBuildFile; fileRef = 8A5EDFEB27BB4549007166E4 /* zombie.mdl */; };
 		8A5EDFEE27BC1BB3007166E4 /* SkeletalMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5EDFED27BC1BB3007166E4 /* SkeletalMesh.swift */; };
 		8A5EDFF027BC205B007166E4 /* SkeletalMesh.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8A5EDFEF27BC205B007166E4 /* SkeletalMesh.metal */; };
 		8A5EDFF227BC28F5007166E4 /* MDLDefines.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5EDFF127BC28F5007166E4 /* MDLDefines.swift */; };
+		8A5EDFF627BD081C007166E4 /* can.mdl in Resources */ = {isa = PBXBuildFile; fileRef = 8A5EDFF527BD081C007166E4 /* can.mdl */; };
+		8A5EDFF827BD2308007166E4 /* shell.mdl in Resources */ = {isa = PBXBuildFile; fileRef = 8A5EDFF727BD2308007166E4 /* shell.mdl */; };
+		8A5EDFFA27BD2317007166E4 /* testsphere.mdl in Resources */ = {isa = PBXBuildFile; fileRef = 8A5EDFF927BD2317007166E4 /* testsphere.mdl */; };
+		8A5EDFFF27BD2559007166E4 /* islave.mdl in Resources */ = {isa = PBXBuildFile; fileRef = 8A5EDFFB27BD2559007166E4 /* islave.mdl */; };
+		8A5EE00027BD2559007166E4 /* zombie.mdl in Resources */ = {isa = PBXBuildFile; fileRef = 8A5EDFFC27BD2559007166E4 /* zombie.mdl */; };
+		8A5EE00127BD2559007166E4 /* w_357ammo.mdl in Resources */ = {isa = PBXBuildFile; fileRef = 8A5EDFFD27BD2559007166E4 /* w_357ammo.mdl */; };
+		8A5EE00227BD2559007166E4 /* w_shotbox.mdl in Resources */ = {isa = PBXBuildFile; fileRef = 8A5EDFFE27BD2559007166E4 /* w_shotbox.mdl */; };
+		8A5EE00427BD2A08007166E4 /* scientist.mdl in Resources */ = {isa = PBXBuildFile; fileRef = 8A5EE00327BD2A08007166E4 /* scientist.mdl */; };
 		8A62320F2795BC2B00B1757C /* well-diff.png in Resources */ = {isa = PBXBuildFile; fileRef = 8A62320B2795BC2B00B1757C /* well-diff.png */; };
 		8A6232102795BC2B00B1757C /* well.obj in Resources */ = {isa = PBXBuildFile; fileRef = 8A62320C2795BC2B00B1757C /* well.obj */; };
 		8A6232112795BC2B00B1757C /* well-normal.png in Resources */ = {isa = PBXBuildFile; fileRef = 8A62320D2795BC2B00B1757C /* well-normal.png */; };
@@ -191,8 +198,6 @@
 		8ABA755927B746F5001AC1F5 /* shotgun.md3 in Resources */ = {isa = PBXBuildFile; fileRef = 8ABA755827B746F5001AC1F5 /* shotgun.md3 */; };
 		8ABA755B27B748F7001AC1F5 /* characterMedium.fbx in Resources */ = {isa = PBXBuildFile; fileRef = 8ABA755A27B748F6001AC1F5 /* characterMedium.fbx */; };
 		8ABA755F27B749FE001AC1F5 /* head.mdc in Resources */ = {isa = PBXBuildFile; fileRef = 8ABA755E27B749FE001AC1F5 /* head.mdc */; };
-		8ABA756127B7659D001AC1F5 /* police.smd in Resources */ = {isa = PBXBuildFile; fileRef = 8ABA756027B7659D001AC1F5 /* police.smd */; };
-		8ABA756327B76698001AC1F5 /* idle.smd in Resources */ = {isa = PBXBuildFile; fileRef = 8ABA756227B76698001AC1F5 /* idle.smd */; };
 		8ABAABCE27A709310091D260 /* Lighting.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8ABAABCD27A709310091D260 /* Lighting.metal */; };
 		8AC1658C278FBB8B00E1816A /* Scene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AC1658B278FBB8B00E1816A /* Scene.swift */; };
 		8AD4567127B5D207009C43F4 /* Q3MapCollision.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD4567027B5D207009C43F4 /* Q3MapCollision.swift */; };
@@ -260,10 +265,17 @@
 		8A5EDFE327B9CB4C007166E4 /* StaticMesh.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = StaticMesh.metal; sourceTree = "<group>"; };
 		8A5EDFE527B9DDDC007166E4 /* tris.md2 */ = {isa = PBXFileReference; lastKnownFileType = file; path = tris.md2; sourceTree = "<group>"; };
 		8A5EDFE927B9DF9A007166E4 /* shotgun.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = shotgun.jpg; sourceTree = "<group>"; };
-		8A5EDFEB27BB4549007166E4 /* zombie.mdl */ = {isa = PBXFileReference; lastKnownFileType = file; path = zombie.mdl; sourceTree = "<group>"; };
 		8A5EDFED27BC1BB3007166E4 /* SkeletalMesh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkeletalMesh.swift; sourceTree = "<group>"; };
 		8A5EDFEF27BC205B007166E4 /* SkeletalMesh.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = SkeletalMesh.metal; sourceTree = "<group>"; };
 		8A5EDFF127BC28F5007166E4 /* MDLDefines.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MDLDefines.swift; sourceTree = "<group>"; };
+		8A5EDFF527BD081C007166E4 /* can.mdl */ = {isa = PBXFileReference; lastKnownFileType = file; path = can.mdl; sourceTree = "<group>"; };
+		8A5EDFF727BD2308007166E4 /* shell.mdl */ = {isa = PBXFileReference; lastKnownFileType = file; path = shell.mdl; sourceTree = "<group>"; };
+		8A5EDFF927BD2317007166E4 /* testsphere.mdl */ = {isa = PBXFileReference; lastKnownFileType = file; path = testsphere.mdl; sourceTree = "<group>"; };
+		8A5EDFFB27BD2559007166E4 /* islave.mdl */ = {isa = PBXFileReference; lastKnownFileType = file; path = islave.mdl; sourceTree = "<group>"; };
+		8A5EDFFC27BD2559007166E4 /* zombie.mdl */ = {isa = PBXFileReference; lastKnownFileType = file; path = zombie.mdl; sourceTree = "<group>"; };
+		8A5EDFFD27BD2559007166E4 /* w_357ammo.mdl */ = {isa = PBXFileReference; lastKnownFileType = file; path = w_357ammo.mdl; sourceTree = "<group>"; };
+		8A5EDFFE27BD2559007166E4 /* w_shotbox.mdl */ = {isa = PBXFileReference; lastKnownFileType = file; path = w_shotbox.mdl; sourceTree = "<group>"; };
+		8A5EE00327BD2A08007166E4 /* scientist.mdl */ = {isa = PBXFileReference; lastKnownFileType = file; path = scientist.mdl; sourceTree = "<group>"; };
 		8A62320B2795BC2B00B1757C /* well-diff.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "well-diff.png"; sourceTree = "<group>"; };
 		8A62320C2795BC2B00B1757C /* well.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = well.obj; sourceTree = "<group>"; };
 		8A62320D2795BC2B00B1757C /* well-normal.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "well-normal.png"; sourceTree = "<group>"; };
@@ -396,8 +408,6 @@
 		8ABA755827B746F5001AC1F5 /* shotgun.md3 */ = {isa = PBXFileReference; lastKnownFileType = file; path = shotgun.md3; sourceTree = "<group>"; };
 		8ABA755A27B748F6001AC1F5 /* characterMedium.fbx */ = {isa = PBXFileReference; lastKnownFileType = file; path = characterMedium.fbx; sourceTree = "<group>"; };
 		8ABA755E27B749FE001AC1F5 /* head.mdc */ = {isa = PBXFileReference; lastKnownFileType = file; path = head.mdc; sourceTree = "<group>"; };
-		8ABA756027B7659D001AC1F5 /* police.smd */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = police.smd; sourceTree = "<group>"; };
-		8ABA756227B76698001AC1F5 /* idle.smd */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = idle.smd; sourceTree = "<group>"; };
 		8ABAABCD27A709310091D260 /* Lighting.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Lighting.metal; sourceTree = "<group>"; };
 		8AC1658B278FBB8B00E1816A /* Scene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Scene.swift; sourceTree = "<group>"; };
 		8AD4567027B5D207009C43F4 /* Q3MapCollision.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Q3MapCollision.swift; sourceTree = "<group>"; };
@@ -477,9 +487,14 @@
 			isa = PBXGroup;
 			children = (
 				8A14296F27B4343500A9ED50 /* barney.mdl */,
-				8A5EDFEB27BB4549007166E4 /* zombie.mdl */,
-				8ABA756027B7659D001AC1F5 /* police.smd */,
-				8ABA756227B76698001AC1F5 /* idle.smd */,
+				8A5EDFF727BD2308007166E4 /* shell.mdl */,
+				8A5EDFF527BD081C007166E4 /* can.mdl */,
+				8A5EDFF927BD2317007166E4 /* testsphere.mdl */,
+				8A5EDFFB27BD2559007166E4 /* islave.mdl */,
+				8A5EDFFD27BD2559007166E4 /* w_357ammo.mdl */,
+				8A5EDFFE27BD2559007166E4 /* w_shotbox.mdl */,
+				8A5EDFFC27BD2559007166E4 /* zombie.mdl */,
+				8A5EE00327BD2A08007166E4 /* scientist.mdl */,
 			);
 			path = HL1Model;
 			sourceTree = "<group>";
@@ -984,12 +999,14 @@
 				8A62322D2796064300B1757C /* tree_pineRoundC.mtl in Resources */,
 				8A75007A27AEDD31001F63F6 /* rockA.mtl in Resources */,
 				8A75008427AEDD31001F63F6 /* tentHalf.mtl in Resources */,
+				8A5EE00227BD2559007166E4 /* w_shotbox.mdl in Resources */,
 				8A7500A127AEDD32001F63F6 /* bedrollFrame.mtl in Resources */,
 				8A78064827B33CF0005871F8 /* q3dm9.bsp in Resources */,
 				8A62322A2796064300B1757C /* tree_pineDefaultB.obj in Resources */,
 				8A4205372797AA9D00473A9D /* skysphere.mtl in Resources */,
-				8A5EDFEC27BB4549007166E4 /* zombie.mdl in Resources */,
 				8A0D273D2790BA3900F2D9E6 /* skull.mtl in Resources */,
+				8A5EDFFA27BD2317007166E4 /* testsphere.mdl in Resources */,
+				8A5EE00127BD2559007166E4 /* w_357ammo.mdl in Resources */,
 				8ABA755927B746F5001AC1F5 /* shotgun.md3 in Resources */,
 				8A75009227AEDD32001F63F6 /* bedrollPacked.mtl in Resources */,
 				8A75008E27AEDD32001F63F6 /* rockC.obj in Resources */,
@@ -1006,19 +1023,19 @@
 				8A75009327AEDD32001F63F6 /* campfire.mtl in Resources */,
 				8AF4401F27999ABC009E83A8 /* tent_smallOpen.mtl in Resources */,
 				8A75007B27AEDD31001F63F6 /* structure.obj in Resources */,
-				8ABA756327B76698001AC1F5 /* idle.smd in Resources */,
 				8A0D273B2790BA3900F2D9E6 /* skull.obj in Resources */,
 				8A78064727B33CF0005871F8 /* q3dm7.bsp in Resources */,
 				8A56D71A278E058400D3FE2B /* Assets.xcassets in Resources */,
 				8A7500B427AEDD32001F63F6 /* toolHoe.obj in Resources */,
 				8A42053F279820C500473A9D /* room.obj in Resources */,
 				8A75015527B01711001F63F6 /* sponza.mtl in Resources */,
+				8A5EDFFF27BD2559007166E4 /* islave.mdl in Resources */,
 				8A62322E2796064300B1757C /* tree_pineDefaultB.mtl in Resources */,
 				8A75008A27AEDD31001F63F6 /* structure.mtl in Resources */,
 				8AA6C3EF27935AC600DCB7B7 /* sphere.obj in Resources */,
 				8ABA755F27B749FE001AC1F5 /* head.mdc in Resources */,
-				8ABA756127B7659D001AC1F5 /* police.smd in Resources */,
 				8A78064927B33CF0005871F8 /* q3dm6.bsp in Resources */,
+				8A5EDFF627BD081C007166E4 /* can.mdl in Resources */,
 				8A75009B27AEDD32001F63F6 /* treeFall.obj in Resources */,
 				8A7500A927AEDD32001F63F6 /* chest.obj in Resources */,
 				8A75008727AEDD31001F63F6 /* toolAxe.mtl in Resources */,
@@ -1028,8 +1045,10 @@
 				8A75009C27AEDD32001F63F6 /* workbenchAnvil.obj in Resources */,
 				8A7500A427AEDD32001F63F6 /* resourceWood.mtl in Resources */,
 				8A6232202795FA6C00B1757C /* ground_grass.obj in Resources */,
+				8A5EE00027BD2559007166E4 /* zombie.mdl in Resources */,
 				8A75009027AEDD32001F63F6 /* toolHoe.mtl in Resources */,
 				8A75009127AEDD32001F63F6 /* resourceStone.mtl in Resources */,
+				8A5EE00427BD2A08007166E4 /* scientist.mdl in Resources */,
 				8A78063E27B339A8005871F8 /* d1_trainstation_05.bsp in Resources */,
 				8A62323A27961D8000B1757C /* flower_redA.obj in Resources */,
 				8A7500B127AEDD32001F63F6 /* rockC.mtl in Resources */,
@@ -1071,6 +1090,7 @@
 				8A75008827AEDD31001F63F6 /* rockFlat.obj in Resources */,
 				8A77906627B1717F004BC255 /* q3dm2.bsp in Resources */,
 				8A62323727961D8000B1757C /* flower_yellowA.mtl in Resources */,
+				8A5EDFF827BD2308007166E4 /* shell.mdl in Resources */,
 				8A62320F2795BC2B00B1757C /* well-diff.png in Resources */,
 				8A6232112795BC2B00B1757C /* well-normal.png in Resources */,
 				8A75008F27AEDD32001F63F6 /* floor.mtl in Resources */,

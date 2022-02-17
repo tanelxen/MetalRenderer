@@ -131,21 +131,21 @@ class ForwardRenderer: NSObject
         
         renderEncoder?.label = "Main Pass Command Encoder"
         
-//        // SKYBOX
-//
-//        renderEncoder?.pushDebugGroup("Skybox Render")
-//
-//        renderEncoder?.setDepthStencilState(DepthStencilStateLibrary[.less])
-//        renderEncoder?.setRenderPipelineState(_skyboxPipelineState)
-//
-//        var sceneConstants = scene.sceneConstants
-//        renderEncoder?.setVertexBytes(&sceneConstants, length: SceneConstants.stride, index: 1)
-//
-//        renderEncoder?.setFragmentTexture(_skyCubeTexture, index: 1)
-//
-//        _skybox.render(with: renderEncoder!)
-//
-//        renderEncoder?.popDebugGroup()
+        // SKYBOX
+
+        renderEncoder?.pushDebugGroup("Skybox Render")
+
+        renderEncoder?.setDepthStencilState(DepthStencilStateLibrary[.sky])
+        renderEncoder?.setRenderPipelineState(_skyboxPipelineState)
+
+        var sceneConstants = scene.sceneConstants
+        renderEncoder?.setVertexBytes(&sceneConstants, length: SceneConstants.stride, index: 1)
+
+        renderEncoder?.setFragmentTexture(_skyCubeTexture, index: 1)
+
+        _skybox.render(with: renderEncoder!)
+
+        renderEncoder?.popDebugGroup()
         
         // WORLD MESH
 
@@ -171,7 +171,7 @@ class ForwardRenderer: NSObject
     //        renderEncoder?.setFrontFacing(.clockwise)
     //        renderEncoder?.setCullMode(.back)
             
-    //        renderEncoder?.setTriangleFillMode(.lines)
+            renderEncoder?.setTriangleFillMode(.lines)
             
             renderEncoder?.setRenderPipelineState(_staticMeshPipelineState)
             scene.renderStaticMeshes(with: renderEncoder)
@@ -184,8 +184,8 @@ class ForwardRenderer: NSObject
 
         renderEncoder?.setDepthStencilState(DepthStencilStateLibrary[.less])
         
-    //        renderEncoder?.setFrontFacing(.clockwise)
-    //        renderEncoder?.setCullMode(.back)
+//            renderEncoder?.setFrontFacing(.clockwise)
+            renderEncoder?.setCullMode(.none)
             
     //        renderEncoder?.setTriangleFillMode(.lines)
             

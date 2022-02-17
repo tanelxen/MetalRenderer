@@ -110,11 +110,96 @@ extension HLModel
         let numnorms: Int32   // per mesh normals
         let normindex: Int32  // normal vec3_t
     }
+    
+    struct mstudiobone_t
+    {
+        let name: Chars32
+        let parent: Int32
+        let flags: Int32
+        let bonecontroller: (Int32, Int32, Int32, Int32, Int32, Int32)
+        let value: (Float32, Float32, Float32, Float32, Float32, Float32)
+        let scale: (Float32, Float32, Float32, Float32, Float32, Float32)
+    }
+    
+    //
+    // demand loaded sequence groups
+    //
+    struct mstudioseqgroup_t
+    {
+        let label: Chars32      // textual name
+        let name: Chars64       // file name
+        let cache: Int32        // was "cache"  - index pointer
+        let data: Int32         // was "data" -  hack for group 0
+    }
+    
+    // sequence descriptions
+    struct mstudioseqdesc_t
+    {
+        let label: Chars32    // sequence label
+
+        let fps: Float32        // frames per second
+        let flags: Int32        // looping/non-looping flags
+
+        let activity: Int32
+        let actweight: Int32
+
+        let numevents: Int32
+        let eventindex: Int32
+
+        let numframes: Int32    // number of frames per sequence
+
+        let numpivots: Int32    // number of foot pivots
+        let pivotindex: Int32
+
+        let motiontype: Int32
+        let motionbone: Int32
+        let linearmovement: vec3
+        let automoveposindex: Int32
+        let automoveangleindex: Int32
+
+        let bbmin: vec3        // per sequence bounding box
+        let bbmax: vec3
+
+        let numblends: Int32
+        let animindex: Int32        // mstudioanim_t pointer relative to start of sequence group data
+                                            // [blend][bone][X, Y, Z, XR, YR, ZR]
+
+        let blendtype: (Int32, Int32)    // X, Y, Z, XR, YR, ZR
+        let blendstart: (Float32, Float32)    // starting value
+        let blendend: (Float32, Float32)    // ending value
+        let blendparent: Int32
+
+        let seqgroup: Int32        // sequence group for demand loading
+
+        let entrynode: Int32        // transition node at entry
+        let exitnode: Int32        // transition node at exit
+        let nodeflags: Int32        // transition rules
+        
+        let nextseq: Int32        // auto advancing sequences
+    }
+    
+    struct mstudioanim_t
+    {
+        let offset: (UInt16, UInt16, UInt16, UInt16, UInt16, UInt16)
+    }
+    
+    // animation frames
+    struct mstudioanimvalue_t
+    {
+        let valid: UInt8
+        let total: UInt8
+        let value: UInt16
+    }
 
     struct vec3
     {
         let x, y, z: Float32
     }
+    
+    typealias Chars32 = (CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar,
+                         CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar,
+                         CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar,
+                         CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar)
 
     typealias Chars64 = (CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar,
                          CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar,

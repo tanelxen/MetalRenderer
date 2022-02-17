@@ -55,7 +55,7 @@ class Q3MapScene: Scene
 //        }
         
 //        staticMesh = StaticMesh(name: "skull", ext: "obj")
-        skeletalMesh = SkeletalMesh(name: "barney", ext: "mdl")
+        skeletalMesh = SkeletalMesh(name: "scientist", ext: "mdl")
     }
     
     func renderWorld(with encoder: MTLRenderCommandEncoder?)

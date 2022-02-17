@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import simd
 
 class HLModel
 {
@@ -19,9 +20,15 @@ class HLModel
     private var bodyparts: [mstudiobodyparts_t] = []
     private var models: [mstudiomodel_t] = []
     
-    private var bonetransforms: [ms]
+    private var bonetransforms: [matrix_float4x4] = []
     
     var meshes: [Mesh] = []
+    
+    private var sequences: [mstudioseqdesc_t] = []
+    private var animations: [[mstudioanim_t]] = []
+    private var bones: [mstudiobone_t] = []
+    
+    private let animValues = AnimValues()
     
     struct MeshVertex
     {
@@ -41,12 +48,17 @@ class HLModel
         
         readHeader()
         readTextures()
+        
+        setupBones()
+        
         readBodyparts()
     }
     
     private func readHeader()
     {
-        header = decode(data: (buffer.data as NSData))
+        let header: studiohdr_t = decode(data: (buffer.data as NSData))
+        
+        self.header = header
         
 //        var nameBytes = header.name
 //
@@ -105,17 +117,32 @@ class HLModel
                     let tris_count = Int(floor(Double(header.length - mesh.triindex) / 2))
                     let tris: [Int16] = readItems(buffer.data, offset: tris_offset, count: tris_count)
                     
-                    let mesh = readMesh(trianglesBuffer: tris, verticesBuffer: verts, bones: vert_info)
+                    var tex: mstudiotexture_t?
+                    
+                    if mesh.skinref < skinref.count
+                    {
+                        let skin = self.skinref[Int(mesh.skinref)]
+                        
+                        if skin < textures.count
+                        {
+                            tex = self.textures[Int(skin)]
+                        }
+                    }
+                    
+                    let mesh = readMesh(trianglesBuffer: tris, verticesBuffer: verts, texture: tex, bones: vert_info)
                     self.meshes.append(mesh)
                 }
             }
         }
     }
     
-    private func readMesh(trianglesBuffer: [Int16], verticesBuffer: [Float32], bones: [UInt8]) -> Mesh
+    private func readMesh(trianglesBuffer: [Int16], verticesBuffer: [Float32], texture: mstudiotexture_t?, bones: [UInt8]) -> Mesh
     {
-        let textureWidth: Float = 1.0
-        let textureHeight: Float = 1.0
+        let textureWidth: Float = Float(texture?.width ?? 64)
+        let textureHeight: Float = Float(texture?.height ?? 64)
+        
+        let texcoords_s_scale: Float = 1.0 / textureWidth
+        let texcoords_t_scale: Float = 1.0 / textureHeight
         
         // Current position in buffer
         var trisPos = 0
@@ -167,8 +194,8 @@ class HLModel
                     x: verticesBuffer[vert + 0],
                     y: verticesBuffer[vert + 1],
                     z: verticesBuffer[vert + 2],
-                    u: Float(trianglesBuffer[trisPos + 2]) / textureWidth,
-                    v: 1.0 - Float(trianglesBuffer[trisPos + 3]) / textureHeight,
+                    u: Float(trianglesBuffer[trisPos + 2]) * texcoords_s_scale,
+                    v: 1.0 - Float(trianglesBuffer[trisPos + 3]) * texcoords_t_scale,
                     vindex: vertIndex
                 )
                 
@@ -246,17 +273,227 @@ class HLModel
 
         for i in 0 ..< vertNumber
         {
+            let position = float3(verticesData[i].x, verticesData[i].y, verticesData[i].z)
+            
+            let transformed_pos = applyBoneTransforms(position: position,
+                                                      vertIndex: verticesData[i].vindex,
+                                                      vertBoneBuffer: bones,
+                                                      boneTransforms: bonetransforms)
+            
             meshVerts.append(
                 MeshVertex(
-                    position: float3(verticesData[i].x, verticesData[i].y, verticesData[i].z),
+                    position: float3(transformed_pos.x, transformed_pos.z, -transformed_pos.y),
                     texCoord: float2(verticesData[i].u, verticesData[i].v)
                 )
             )
             
-            indices[i] = verticesData[i].vindex
+            indices[i] = i
         }
         
         return Mesh(vertexBuffer: meshVerts, indexBuffer: indices)
+    }
+    
+    private func applyBoneTransforms(position: float3, vertIndex: Int, vertBoneBuffer: [UInt8], boneTransforms: [matrix_float4x4]) -> float3
+    {
+        let boneIndex = Int(vertBoneBuffer[vertIndex])
+        let transform = boneTransforms[boneIndex]
+
+        return transform * position
+    }
+    
+    private func setupBones()
+    {
+        self.sequences = readItems(offset: header.seqindex, count: header.numseq)
+        
+        for sequence in sequences
+        {
+            let anims: [mstudioanim_t] = readItems(offset: sequence.animindex, count: header.numbones)
+            self.animations.append(anims)
+        }
+        
+        Utils.timeProfile("animValues.parse") {
+            animValues.parse(data: buffer.data, seqs: self.sequences, anims: self.animations, numBones: Int(header.numbones))
+        }
+        
+        self.bones = readItems(offset: header.boneindex, count: header.numbones)
+        
+        bonetransforms = calcRotations(sequenceIndex: 0, frame: 0)
+    }
+    
+    private func calcRotations(sequenceIndex: Int, frame: Int, s: Float = 0) -> [matrix_float4x4]
+    {
+        var boneQuaternions: [simd_quatf] = []
+        var bonePositions: [float3] = []
+        
+        for boneIndex in 0 ..< bones.count
+        {
+            let q = calcBoneQuaternion(frame: frame,
+                                       bone: bones[boneIndex],
+                                       anim: animations[sequenceIndex][boneIndex],
+                                       sequenceIndex: sequenceIndex,
+                                       boneIndex: boneIndex,
+                                       s: s)
+            
+            let pos = calcBonePosition(frame: frame,
+                                       s: s,
+                                       bone: bones[boneIndex],
+                                       anim: animations[sequenceIndex][boneIndex],
+                                       animindex: UInt16(sequenceIndex))
+            
+            boneQuaternions.append(q)
+            bonePositions.append(pos)
+        }
+
+        return calcBoneTransforms(quaternions: boneQuaternions, positions: bonePositions, bones: bones)
+    }
+    
+    private func calcBoneQuaternion(frame: Int, bone: mstudiobone_t, anim: mstudioanim_t, sequenceIndex: Int, boneIndex: Int, s: Float) -> simd_quatf
+    {
+//        var nameBytes = bone.name
+//
+//        let name: String = withUnsafePointer(to: &nameBytes) { ptr -> String in
+//           return String(cString: UnsafeRawPointer(ptr).assumingMemoryBound(to: CChar.self))
+//        }
+//
+//        print("bone", name)
+        
+        var angle1 = float3()
+        var angle2 = float3()
+        
+        let bone_value = [bone.value.0, bone.value.1, bone.value.2,
+                          bone.value.3, bone.value.4, bone.value.5]
+        
+        let bone_scale = [bone.scale.0, bone.scale.1, bone.scale.2,
+                          bone.scale.3, bone.scale.4, bone.scale.5]
+        
+        let animOffset = [anim.offset.0, anim.offset.1, anim.offset.2,
+                          anim.offset.3, anim.offset.4, anim.offset.5]
+        
+        for axis in 0 ..< 3
+        {
+            if animOffset[axis + 3] == 0
+            {
+                // default
+                angle1[axis] = bone_value[axis + 3]
+                angle2[axis] = angle1[axis]
+            }
+            else
+            {
+                func getTotal(_ index: Int) -> Int {
+                    let total = animValues.get(sequenceIndex, boneIndex, axis, index, .TOTAL)
+                    return total
+                }
+                
+                func getValue(_ index: Int) -> Float {
+                    let value = animValues.get(sequenceIndex, boneIndex, axis, index, .VALUE)
+                    return Float(value)
+                }
+                
+                func getValid(_ index: Int) -> Int {
+                    let valid = animValues.get(sequenceIndex, boneIndex, axis, index, .VALID)
+                    return valid
+                }
+                
+                var i = 0
+                var k = frame
+
+                while getTotal(i) <= k
+                {
+                    k -= getTotal(i)
+                    i += getValid(i) + 1
+                }
+                
+                // Bah, missing blend!
+                if getValid(i) > k
+                {
+                    angle1[axis] = getValue(i + k + 1)
+
+                    if getValid(i) > k + 1
+                    {
+                        angle2[axis] = getValue(i + k + 2)
+                    }
+                    else
+                    {
+                        if (getTotal(i) > k + 1)
+                        {
+                            angle2[axis] = angle1[axis]
+                        }
+                        else
+                        {
+                            angle2[axis] = getValue(i + getValid(i) + 2)
+                        }
+                    }
+                }
+                else
+                {
+                    angle1[axis] = getValue(i + getValid(i))
+
+                    if (getTotal(i) > k + 1)
+                    {
+                        angle2[axis] = angle1[axis]
+                    }
+                    else
+                    {
+                        angle2[axis] = getValue(i + getValid(i) + 2)
+                    }
+                }
+
+                angle1[axis] = bone_value[axis + 3] + angle1[axis] * bone_scale[axis + 3]
+                angle2[axis] = bone_value[axis + 3] + angle2[axis] * bone_scale[axis + 3]
+            }
+        }
+        
+        if angle1 == angle2
+        {
+            return anglesToQuaternion(angle1)
+        }
+
+        let q1 = anglesToQuaternion(angle1)
+        let q2 = anglesToQuaternion(angle2)
+        
+        return simd_slerp(q1, q2, s)
+    }
+    
+    private func calcBonePosition(frame: Int, s: Float, bone: mstudiobone_t, anim: mstudioanim_t, animindex: UInt16) -> float3
+    {
+        return float3(bone.value.0, bone.value.1, bone.value.2)
+    }
+    
+    private func calcBoneTransforms(quaternions: [simd_quatf], positions: [float3], bones: [mstudiobone_t]) -> [matrix_float4x4]
+    {
+        var boneTransforms: [matrix_float4x4] = []
+        
+//        var pos = positions
+//
+//        if seqDesc.motiontype & 1 == 1 { pos[Int(seqDesc.motionbone)][0] = 0 }
+//        if seqDesc.motiontype & 2 == 2 { pos[Int(seqDesc.motionbone)][1] = 0 }
+//        if seqDesc.motiontype & 2 == 2 { pos[Int(seqDesc.motionbone)][2] = 0 }
+
+        for i in 0 ..< bones.count
+        {
+            var boneMatrix = matrix_float4x4.init(quaternions[i])
+
+            boneMatrix[3].x = positions[i].x
+            boneMatrix[3].y = positions[i].y
+            boneMatrix[3].z = positions[i].z
+            
+            let parentIndex = Int(bones[i].parent)
+
+            if parentIndex == -1
+            {
+                // Root bone
+                boneTransforms.append(boneMatrix)
+            }
+            else
+            {
+                let parentMatrix = boneTransforms[parentIndex]
+                let result = matrix_multiply(parentMatrix, boneMatrix)
+                
+                boneTransforms.append(result)
+            }
+        }
+        
+        return boneTransforms
     }
     
     private func readItems<T>(_ data: Data, offset: Int, count: Int) -> Array<T>
@@ -267,6 +504,137 @@ class HLModel
         
         return subdata.withUnsafeBytes {
             Array(UnsafeBufferPointer<T>(start: $0, count: count))
+        }
+    }
+    
+    private func readItems<T>(offset: Int32, count: Int32) -> Array<T>
+    {
+        return readItems(buffer.data, offset: Int(offset), count: Int(count))
+    }
+}
+
+func anglesToQuaternion(_ angles: float3) -> simd_quatf
+{
+    let pitch = angles[0]
+    let roll = angles[1]
+    let yaw = angles[2]
+
+    // FIXME: rescale the inputs to 1/2 angle
+    let cy = cos(yaw * 0.5)
+    let sy = sin(yaw * 0.5)
+    let cp = cos(roll * 0.5)
+    let sp = sin(roll * 0.5)
+    let cr = cos(pitch * 0.5)
+    let sr = sin(pitch * 0.5)
+    
+    let vector = simd_float4(
+        sr * cp * cy - cr * sp * sy,    // X
+        cr * sp * cy + sr * cp * sy,    // Y
+        cr * cp * sy - sr * sp * cy,    // Z
+        cr * cp * cy + sr * sp * sy     // W
+    )
+    
+    return simd_quatf(vector: vector)
+}
+
+extension HLModel
+{
+    class AnimValues
+    {
+        func parse(data: Data, seqs: [mstudioseqdesc_t], anims: [[mstudioanim_t]], numBones: Int)
+        {
+            let AXLES_NUM = 3
+            let MAX_SRCBONES = 3
+            let animStructLength = MemoryLayout<mstudioanim_t>.size
+            
+            let reader = BinaryReader(data: data)
+            
+            sequences = Array(
+                repeating: Array(
+                    repeating: Array(
+                        repeating: Array(
+                            repeating: animvalue_t(),
+                            count: MAX_SRCBONES
+                        ),
+                        count: AXLES_NUM
+                    ),
+                    count: numBones
+                ),
+                count: seqs.count
+            )
+            
+            for i in 0 ..< seqs.count
+            {
+                for j in 0 ..< numBones
+                {
+                    let animationIndex = Int(seqs[i].animindex) + j * animStructLength
+                    
+                    for axis in 0 ..< AXLES_NUM
+                    {
+                        for v in 0 ..< MAX_SRCBONES
+                        {
+                            let anim = [anims[i][j].offset.0, anims[i][j].offset.1, anims[i][j].offset.2,
+                                        anims[i][j].offset.3, anims[i][j].offset.4, anims[i][j].offset.5]
+                            
+                            let offset = animationIndex + Int(anim[axis + AXLES_NUM]) + v * MemoryLayout<Int16>.size
+                            
+                            reader.position = offset
+                            let value = reader.getInt16()
+                            
+                            reader.position = offset
+                            let valid = reader.getUInt8()
+                            
+                            reader.position = offset + MemoryLayout<UInt8>.size
+                            let total = reader.getUInt8()
+                            
+                            sequences[i][j][axis][v].value = Int(value)
+                            sequences[i][j][axis][v].valid = Int(valid)
+                            sequences[i][j][axis][v].total = Int(total)
+                        }
+                    }
+                }
+            }
+            
+            print("====== SEQUENCES READED ===========")
+        }
+        
+        func get(_ sequenceIndex: Int, _ boneIndex: Int, _ axis: Int, _ index: Int, _ anim: ANIM_VALUE) -> Int
+        {
+            let animvalue = sequences[sequenceIndex][boneIndex][axis][index]
+            
+            switch anim
+            {
+                case .TOTAL: return animvalue.total
+                case .VALID: return animvalue.valid
+                case .VALUE: return animvalue.value
+            }
+        }
+        
+        private var sequences: [ [ [ [animvalue_t] ] ] ] = []
+        
+        enum ANIM_VALUE
+        {
+            case TOTAL
+            case VALID
+            case VALUE
+        }
+        
+        struct animvalue_t
+        {
+            var valid: Int = 0
+            var total: Int = 0
+            var value: Int = 0
+        }
+        
+        private func readItems<T>(_ data: Data, offset: Int, count: Int) -> Array<T>
+        {
+            let size = MemoryLayout<T>.size
+            let range = offset ..< (offset + count * size)
+            let subdata = data.subdata(in: range)
+            
+            return subdata.withUnsafeBytes {
+                Array(UnsafeBufferPointer<T>(start: $0, count: count))
+            }
         }
     }
 }
