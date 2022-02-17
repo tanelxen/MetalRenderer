@@ -12,21 +12,22 @@ class HLModel
 {
     private var buffer: BinaryReader
     
-    private var header: studiohdr_t!
+    private var mdlHeader: studiohdr_t!
     
-    private var textures: [mstudiotexture_t] = []
-    private var skinref: [Int16] = []
+    private var mdlTextures: [mstudiotexture_t] = []
+    private var mdlSkinrefs: [Int16] = []
     
-    private var bodyparts: [mstudiobodyparts_t] = []
-    private var models: [mstudiomodel_t] = []
+    private var mdlBodyparts: [mstudiobodyparts_t] = []
+    private var mdlModels: [mstudiomodel_t] = []
     
     private var bonetransforms: [matrix_float4x4] = []
     
     var meshes: [Mesh] = []
+    var textures: [Texture] = []
     
-    private var sequences: [mstudioseqdesc_t] = []
-    private var animations: [[mstudioanim_t]] = []
-    private var bones: [mstudiobone_t] = []
+    private var mdlSequences: [mstudioseqdesc_t] = []
+    private var mdlAnimations: [[mstudioanim_t]] = []
+    private var mdlBones: [mstudiobone_t] = []
     
     private let animValues = AnimValues()
     
@@ -40,6 +41,15 @@ class HLModel
     {
         let vertexBuffer: [MeshVertex]
         let indexBuffer: [Int]
+        let textureIndex: Int
+    }
+    
+    struct Texture
+    {
+        let name: String
+        let data: [UInt8]
+        let width: Int
+        let height: Int
     }
     
     init(data: Data)
@@ -58,7 +68,7 @@ class HLModel
     {
         let header: studiohdr_t = decode(data: (buffer.data as NSData))
         
-        self.header = header
+        self.mdlHeader = header
         
 //        var nameBytes = header.name
 //
@@ -69,28 +79,75 @@ class HLModel
     
     private func readTextures()
     {
-        let offset = Int(header.textureindex)
-        let count = Int(header.numtextures)
+        let offset = Int(mdlHeader.textureindex)
+        let count = Int(mdlHeader.numtextures)
         
-        textures = readItems(buffer.data, offset: offset, count: count)
+        mdlTextures = readItems(buffer.data, offset: offset, count: count)
+        textures = mdlTextures.map( { self.readTextureData($0) })
         
         if count > 0
         {
-            let skin_offset = Int(header.skinindex)
-            let skin_count = Int(header.numskinref)
+            let skin_offset = Int(mdlHeader.skinindex)
+            let skin_count = Int(mdlHeader.numskinref)
             
-            skinref = readItems(buffer.data, offset: skin_offset, count: skin_count)
+            mdlSkinrefs = readItems(buffer.data, offset: skin_offset, count: skin_count)
         }
+    }
+    
+    private func readTextureData(_ textureInfo: mstudiotexture_t) -> Texture
+    {
+        let offset = Int(textureInfo.index)
+        let count: Int = Int(textureInfo.width * textureInfo.height)
+
+        let textureData: [UInt8] = readItems(buffer.data, offset: Int(textureInfo.index), count: count)
+        
+        let RGB_SIZE = 3
+        let RGBA_SIZE = 4
+        
+        // Total size of a palette, in bytes (RGB8)
+        let PALETTE_SIZE = 256 * RGB_SIZE
+
+        // Palette of colors
+        let palette: [UInt8] = readItems(buffer.data, offset: offset + count, count: PALETTE_SIZE)
+
+        // Create new image buffer
+        var imageBuffer: [UInt8] = Array.init(repeating: 0, count: count * RGBA_SIZE)
+        
+        // Parsing indexed color: every item in texture data is index of color in colors palette
+        for i in 0 ..< count
+        {
+            let item = textureData[i]
+
+            let paletteOffset = Int(item) * RGB_SIZE
+            let pixelOffset = i * RGBA_SIZE
+
+            // Just applying to texture image data
+            imageBuffer[pixelOffset + 0] = palette[paletteOffset + 0] // red
+            imageBuffer[pixelOffset + 1] = palette[paletteOffset + 1] // green
+            imageBuffer[pixelOffset + 2] = palette[paletteOffset + 2] // blue
+            imageBuffer[pixelOffset + 3] = 255 // alpha
+        }
+        
+        var nameBytes = textureInfo.name
+
+        let name: String = withUnsafePointer(to: &nameBytes) { ptr -> String in
+           return String(cString: UnsafeRawPointer(ptr).assumingMemoryBound(to: CChar.self))
+        }
+        
+        return Texture(name: name,
+                       data: imageBuffer,
+                       width: Int(textureInfo.width),
+                       height: Int(textureInfo.height))
     }
     
     private func readBodyparts()
     {
-        let offset = Int(header.bodypartindex)
-        let count = Int(header.numbodyparts)
+        let offset = Int(mdlHeader.bodypartindex)
+        let count = Int(mdlHeader.numbodyparts)
         
-        bodyparts = readItems(buffer.data, offset: offset, count: count)
+        mdlBodyparts = readItems(buffer.data, offset: offset, count: count)
         
-        for bodypart in bodyparts
+        for bodypart in mdlBodyparts
         {
             let models_offset = Int(bodypart.modelindex)
             let num_models = Int(bodypart.nummodels)
@@ -114,30 +171,32 @@ class HLModel
                 for mesh in meshes
                 {
                     let tris_offset = Int(mesh.triindex)
-                    let tris_count = Int(floor(Double(header.length - mesh.triindex) / 2))
+                    let tris_count = Int(floor(Double(mdlHeader.length - mesh.triindex) / 2))
                     let tris: [Int16] = readItems(buffer.data, offset: tris_offset, count: tris_count)
                     
-                    var tex: mstudiotexture_t?
+                    var textureIndex: Int?
                     
-                    if mesh.skinref < skinref.count
+                    if mesh.skinref < mdlSkinrefs.count
                     {
-                        let skin = self.skinref[Int(mesh.skinref)]
-                        
-                        if skin < textures.count
-                        {
-                            tex = self.textures[Int(skin)]
-                        }
+                        textureIndex = Int(self.mdlSkinrefs[Int(mesh.skinref)])
                     }
                     
-                    let mesh = readMesh(trianglesBuffer: tris, verticesBuffer: verts, texture: tex, bones: vert_info)
+                    let mesh = readMesh(trianglesBuffer: tris, verticesBuffer: verts, textureIndex: textureIndex, bones: vert_info)
                     self.meshes.append(mesh)
                 }
             }
         }
     }
     
-    private func readMesh(trianglesBuffer: [Int16], verticesBuffer: [Float32], texture: mstudiotexture_t?, bones: [UInt8]) -> Mesh
+    private func readMesh(trianglesBuffer: [Int16], verticesBuffer: [Float32], textureIndex: Int?, bones: [UInt8]) -> Mesh
     {
+        var texture: mstudiotexture_t?
+        
+        if let index = textureIndex, index < mdlTextures.count
+        {
+            texture = mdlTextures[index]
+        }
+        
         let textureWidth: Float = Float(texture?.width ?? 64)
         let textureHeight: Float = Float(texture?.height ?? 64)
         
@@ -194,8 +253,8 @@ class HLModel
                     x: verticesBuffer[vert + 0],
                     y: verticesBuffer[vert + 1],
                     z: verticesBuffer[vert + 2],
-                    u: Float(trianglesBuffer[trisPos + 2]) * texcoords_s_scale,
-                    v: 1.0 - Float(trianglesBuffer[trisPos + 3]) * texcoords_t_scale,
+                    u: Float(trianglesBuffer[trisPos + 2]) / textureWidth,
+                    v: Float(trianglesBuffer[trisPos + 3]) / textureHeight,
                     vindex: vertIndex
                 )
                 
@@ -290,7 +349,9 @@ class HLModel
             indices[i] = i
         }
         
-        return Mesh(vertexBuffer: meshVerts, indexBuffer: indices)
+        return Mesh(vertexBuffer: meshVerts,
+                    indexBuffer: indices,
+                    textureIndex: textureIndex ?? -1)
     }
     
     private func applyBoneTransforms(position: float3, vertIndex: Int, vertBoneBuffer: [UInt8], boneTransforms: [matrix_float4x4]) -> float3
@@ -303,21 +364,19 @@ class HLModel
     
     private func setupBones()
     {
-        self.sequences = readItems(offset: header.seqindex, count: header.numseq)
+        self.mdlSequences = readItems(offset: mdlHeader.seqindex, count: mdlHeader.numseq)
         
-        for sequence in sequences
+        for sequence in mdlSequences
         {
-            let anims: [mstudioanim_t] = readItems(offset: sequence.animindex, count: header.numbones)
-            self.animations.append(anims)
+            let anims: [mstudioanim_t] = readItems(offset: sequence.animindex, count: mdlHeader.numbones)
+            self.mdlAnimations.append(anims)
         }
         
-        Utils.timeProfile("animValues.parse") {
-            animValues.parse(data: buffer.data, seqs: self.sequences, anims: self.animations, numBones: Int(header.numbones))
-        }
+        animValues.parse(data: buffer.data, seqs: self.mdlSequences, anims: self.mdlAnimations, numBones: Int(mdlHeader.numbones))
         
-        self.bones = readItems(offset: header.boneindex, count: header.numbones)
+        self.mdlBones = readItems(offset: mdlHeader.boneindex, count: mdlHeader.numbones)
         
-        bonetransforms = calcRotations(sequenceIndex: 0, frame: 0)
+        bonetransforms = calcRotations(sequenceIndex: 1, frame: 0)
     }
     
     private func calcRotations(sequenceIndex: Int, frame: Int, s: Float = 0) -> [matrix_float4x4]
@@ -325,38 +384,30 @@ class HLModel
         var boneQuaternions: [simd_quatf] = []
         var bonePositions: [float3] = []
         
-        for boneIndex in 0 ..< bones.count
+        for boneIndex in 0 ..< mdlBones.count
         {
             let q = calcBoneQuaternion(frame: frame,
-                                       bone: bones[boneIndex],
-                                       anim: animations[sequenceIndex][boneIndex],
+                                       bone: mdlBones[boneIndex],
+                                       anim: mdlAnimations[sequenceIndex][boneIndex],
                                        sequenceIndex: sequenceIndex,
                                        boneIndex: boneIndex,
                                        s: s)
             
             let pos = calcBonePosition(frame: frame,
                                        s: s,
-                                       bone: bones[boneIndex],
-                                       anim: animations[sequenceIndex][boneIndex],
+                                       bone: mdlBones[boneIndex],
+                                       anim: mdlAnimations[sequenceIndex][boneIndex],
                                        animindex: UInt16(sequenceIndex))
             
             boneQuaternions.append(q)
             bonePositions.append(pos)
         }
 
-        return calcBoneTransforms(quaternions: boneQuaternions, positions: bonePositions, bones: bones)
+        return calcBoneTransforms(quaternions: boneQuaternions, positions: bonePositions, bones: mdlBones)
     }
     
     private func calcBoneQuaternion(frame: Int, bone: mstudiobone_t, anim: mstudioanim_t, sequenceIndex: Int, boneIndex: Int, s: Float) -> simd_quatf
     {
-//        var nameBytes = bone.name
-//
-//        let name: String = withUnsafePointer(to: &nameBytes) { ptr -> String in
-//           return String(cString: UnsafeRawPointer(ptr).assumingMemoryBound(to: CChar.self))
-//        }
-//
-//        print("bone", name)
-        
         var angle1 = float3()
         var angle2 = float3()
         

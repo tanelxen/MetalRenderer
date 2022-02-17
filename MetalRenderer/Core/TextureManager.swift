@@ -16,7 +16,7 @@ class TextureManager
     
     private var _whiteTexture: MTLTexture?
     
-    private let lightmapDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba8Unorm,
+    private let lightmapDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba8Unorm_srgb,
                                                                               width: 128,
                                                                               height: 128,
                                                                               mipmapped: true)
@@ -107,6 +107,25 @@ class TextureManager
                          mipmapLevel: 0,
                          withBytes: lightmap,
                          bytesPerRow: 128 * 4)
+        
+        generateMipmaps(texture!)
+        
+        return texture!
+    }
+    
+    func createTexture(_ name: String, bytes: [UInt8], width: Int, height: Int ) -> MTLTexture
+    {
+        let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba8Unorm_srgb,
+                                                                  width: width,
+                                                                  height: height,
+                                                                  mipmapped: true)
+        
+        let texture = Engine.device.makeTexture(descriptor: descriptor)
+        
+        texture?.replace(region: MTLRegionMake2D(0, 0, width, height),
+                         mipmapLevel: 0,
+                         withBytes: bytes,
+                         bytesPerRow: width * 4)
         
         generateMipmaps(texture!)
         

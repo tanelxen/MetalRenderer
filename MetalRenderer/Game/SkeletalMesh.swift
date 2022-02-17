@@ -10,6 +10,7 @@ import MetalKit
 class SkeletalMesh
 {
     private var meshes: [SkeletalMeshData] = []
+    //private var textures: [MTLTexture] = []
     
     init?(name: String, ext: String)
     {
@@ -21,6 +22,10 @@ class SkeletalMesh
         let assetURL = Bundle.main.url(forResource: "dev_256", withExtension: "jpeg")!
         let devTexture = TextureManager.shared.getTexture(url: assetURL, origin: .topLeft)!
         
+        let textures = mdl.textures.map {
+            TextureManager.shared.createTexture($0.name, bytes: $0.data, width: $0.width, height: $0.height)
+        }
+        
         for mdlMesh in mdl.meshes
         {
             let vertices = mdlMesh.vertexBuffer.map( { SkeletalMeshVertex(position: $0.position, texCoord: $0.texCoord) } )
@@ -29,7 +34,14 @@ class SkeletalMesh
             let vertexBuffer = Engine.device.makeBuffer(bytes: vertices, length: vertices.count * MemoryLayout<SkeletalMeshVertex>.stride, options: [])
             let indexBuffer = Engine.device.makeBuffer(bytes: indices, length: indices.count * MemoryLayout<UInt32>.stride, options: [])
             
-            let mesh = SkeletalMeshData(texture: devTexture,
+            var texture = devTexture
+            
+            if mdlMesh.textureIndex != -1, mdlMesh.textureIndex < textures.count
+            {
+                texture = textures[mdlMesh.textureIndex]
+            }
+            
+            let mesh = SkeletalMeshData(texture: texture,
                                         vertexBuffer: vertexBuffer!,
                                         indexBuffer: indexBuffer!,
                                         indexCount: indices.count)

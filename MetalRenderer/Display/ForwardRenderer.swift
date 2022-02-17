@@ -166,12 +166,12 @@ class ForwardRenderer: NSObject
 
         renderEncoder?.pushDebugGroup("Static Meshes Render")
 
-        renderEncoder?.setDepthStencilState(DepthStencilStateLibrary[.less])
+            renderEncoder?.setDepthStencilState(DepthStencilStateLibrary[.less])
         
-    //        renderEncoder?.setFrontFacing(.clockwise)
-    //        renderEncoder?.setCullMode(.back)
+            renderEncoder?.setFrontFacing(.clockwise)
+            renderEncoder?.setCullMode(.back)
             
-            renderEncoder?.setTriangleFillMode(.lines)
+//            renderEncoder?.setTriangleFillMode(.lines)
             
             renderEncoder?.setRenderPipelineState(_staticMeshPipelineState)
             scene.renderStaticMeshes(with: renderEncoder)
@@ -182,10 +182,10 @@ class ForwardRenderer: NSObject
 
         renderEncoder?.pushDebugGroup("Skeletal Meshes Render")
 
-        renderEncoder?.setDepthStencilState(DepthStencilStateLibrary[.less])
+            renderEncoder?.setDepthStencilState(DepthStencilStateLibrary[.less])
         
-//            renderEncoder?.setFrontFacing(.clockwise)
-            renderEncoder?.setCullMode(.none)
+            renderEncoder?.setFrontFacing(.clockwise)
+            renderEncoder?.setCullMode(.back)
             
     //        renderEncoder?.setTriangleFillMode(.lines)
             
