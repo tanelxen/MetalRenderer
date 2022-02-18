@@ -95,7 +95,7 @@ class AnimValues
     func parse(data: Data, seqs: [mstudioseqdesc_t], anims: [[mstudioanim_t]], numBones: Int)
     {
         let AXLES_NUM = 3
-        let MAX_SRCBONES = 3
+        let MAX_SRCBONES = 4
         let animStructLength = MemoryLayout<mstudioanim_t>.size
         
         let reader = BinaryReader(data: data)

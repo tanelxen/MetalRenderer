@@ -218,6 +218,7 @@ public class GoldSrcMDL
         }
         
         var verticesData: [vert_t] = []
+        var indicesData: [Int] = []
 
         // Processing triangle series
         while trianglesBuffer[trisPos] != 0
@@ -226,7 +227,7 @@ public class GoldSrcMDL
             let trianglesType: TrianglesType = trianglesBuffer[trisPos] < 0 ? .TRIANGLE_FAN : .TRIANGLE_STRIP
 
             // Starting vertex for triangle fan
-            var startVert: vert_t? = nil
+            var startVertIndex: Int? = nil
 
             // Number of following triangles
             let trianglesNum = abs(trianglesBuffer[trisPos])
@@ -272,20 +273,20 @@ public class GoldSrcMDL
                         if j % 2 == 0
                         {
                             // even
-                            verticesData.append(contentsOf:
+                            indicesData.append(contentsOf:
                                                     [
-                                                        verticesData[verticesData.count - 3],   // previously first one
-                                                        verticesData[verticesData.count - 1]    // last one
+                                                        indicesData[indicesData.count - 3],   // previously first one
+                                                        indicesData[indicesData.count - 1]    // last one
                                                     ]
                             )
                         }
                         else
                         {
                             // odd
-                            verticesData.append(contentsOf:
+                            indicesData.append(contentsOf:
                                                     [
-                                                        verticesData[verticesData.count - 1],   // last one
-                                                        verticesData[verticesData.count - 2]    // second to last
+                                                        indicesData[indicesData.count - 1],   // last one
+                                                        indicesData[indicesData.count - 2]    // second to last
                                                     ]
                             )
                         }
@@ -301,24 +302,25 @@ public class GoldSrcMDL
                 // 1          0            5
                 if trianglesType == .TRIANGLE_FAN
                 {
-                    if startVert == nil
+                    if startVertIndex == nil
                     {
-                        startVert = vertexData
+                        startVertIndex = verticesData.count
                     }
 
                     if j > 2
                     {
-                        verticesData.append(contentsOf:
+                        indicesData.append(contentsOf:
                                                 [
-                                                    startVert!,
-                                                    verticesData[verticesData.count - 1]
+                                                    startVertIndex!,
+                                                    indicesData[indicesData.count - 1]
                                                 ]
                         )
                     }
                 }
 
                 // New one
-                verticesData.append( vertexData )
+                indicesData.append(verticesData.count)
+                verticesData.append(vertexData)
             }
         }
         
@@ -326,7 +328,6 @@ public class GoldSrcMDL
         let vertNumber = verticesData.count
         
         var meshVerts: [MeshVertex] = []
-        var indices = Array.init(repeating: 0, count: verticesData.count)
 
         for i in 0 ..< vertNumber
         {
@@ -343,12 +344,10 @@ public class GoldSrcMDL
                     texCoord: float2(verticesData[i].u, verticesData[i].v)
                 )
             )
-            
-            indices[i] = i
         }
         
         return Mesh(vertexBuffer: meshVerts,
-                    indexBuffer: indices,
+                    indexBuffer: indicesData,
                     textureIndex: textureIndex ?? -1)
     }
     
@@ -374,7 +373,7 @@ public class GoldSrcMDL
         
         self.mdlBones = buffer.readItems(offset: mdlHeader.boneindex, count: mdlHeader.numbones)
         
-        bonetransforms = calcRotations(sequenceIndex: 1, frame: 0)
+        bonetransforms = calcRotations(sequenceIndex: 0, frame: 0)
     }
     
     private func calcRotations(sequenceIndex: Int, frame: Int, s: Float = 0) -> [matrix_float4x4]
