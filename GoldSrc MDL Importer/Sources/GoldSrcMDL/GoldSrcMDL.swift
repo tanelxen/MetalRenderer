@@ -53,8 +53,11 @@ public class GoldSrcMDL
     
     private let animValues = AnimValues()
     
+    private let bytes: UnsafeRawPointer
+    
     public init(data: Data)
     {
+        self.bytes = (data as NSData).bytes
         buffer = BinaryReader(data: data)
         
         readHeader()
@@ -67,11 +70,10 @@ public class GoldSrcMDL
     
     private func readHeader()
     {
-        let header: studiohdr_t = decode(data: (buffer.data as NSData))
+        let pData = UnsafeMutableRawPointer(mutating: self.bytes)
+        self.mdlHeader = pData.load(as: studiohdr_t.self)
         
-        self.mdlHeader = header
-        
-        var nameBytes = header.name
+        var nameBytes = mdlHeader.name
 
         modelName = withUnsafePointer(to: &nameBytes) { ptr -> String in
            return String(cString: UnsafeRawPointer(ptr).assumingMemoryBound(to: CChar.self))
@@ -206,8 +208,8 @@ public class GoldSrcMDL
         
         struct vert_t
         {
-            let x, y, z: Float
-            let u, v: Float
+            let pos: float3
+            let uv: float2
             let vindex: Int
         }
         
@@ -249,11 +251,13 @@ public class GoldSrcMDL
                 
                 // Vertex data
                 let vertexData = vert_t(
-                    x: verticesBuffer[vert + 0],
-                    y: verticesBuffer[vert + 1],
-                    z: verticesBuffer[vert + 2],
-                    u: Float(trianglesBuffer[trisPos + 2]) / textureWidth,
-                    v: Float(trianglesBuffer[trisPos + 3]) / textureHeight,
+                    pos: float3(
+                        verticesBuffer[vert + 0],
+                        verticesBuffer[vert + 1],
+                        verticesBuffer[vert + 2]),
+                    uv: float2(
+                        Float(trianglesBuffer[trisPos + 2]) / textureWidth,
+                        Float(trianglesBuffer[trisPos + 3]) / textureHeight),
                     vindex: vertIndex
                 )
                 
@@ -331,9 +335,7 @@ public class GoldSrcMDL
 
         for i in 0 ..< vertNumber
         {
-            let position = float3(verticesData[i].x, verticesData[i].y, verticesData[i].z)
-            
-            let transformed_pos = applyBoneTransforms(position: position,
+            let transformed_pos = applyBoneTransforms(position: verticesData[i].pos,
                                                       vertIndex: verticesData[i].vindex,
                                                       vertBoneBuffer: bones,
                                                       boneTransforms: bonetransforms)
@@ -341,7 +343,7 @@ public class GoldSrcMDL
             meshVerts.append(
                 MeshVertex(
                     position: float3(transformed_pos.x, transformed_pos.z, -transformed_pos.y),
-                    texCoord: float2(verticesData[i].u, verticesData[i].v)
+                    texCoord: verticesData[i].uv
                 )
             )
         }

@@ -16,7 +16,7 @@ class TextureManager
     
     private var _whiteTexture: MTLTexture?
     
-    private let lightmapDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba8Unorm_srgb,
+    private let lightmapDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba8Unorm,
                                                                               width: 128,
                                                                               height: 128,
                                                                               mipmapped: true)

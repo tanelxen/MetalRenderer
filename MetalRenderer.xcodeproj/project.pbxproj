@@ -186,6 +186,7 @@
 		8AA6C3EB2792EBB300DCB7B7 /* Transform.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AA6C3EA2792EBB300DCB7B7 /* Transform.swift */; };
 		8AA6C3ED2793111100DCB7B7 /* Material.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AA6C3EC2793111100DCB7B7 /* Material.swift */; };
 		8AA6C3EF27935AC600DCB7B7 /* sphere.obj in Resources */ = {isa = PBXBuildFile; fileRef = 8AA6C3EE27935AC600DCB7B7 /* sphere.obj */; };
+		8AB9EEF927C00C7D008C33B2 /* Barney.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB9EEF827C00C7D008C33B2 /* Barney.swift */; };
 		8ABA754F27B72D8F001AC1F5 /* Assimp in Frameworks */ = {isa = PBXBuildFile; productRef = 8ABA754E27B72D8F001AC1F5 /* Assimp */; };
 		8ABA755427B73248001AC1F5 /* duck.dae in Resources */ = {isa = PBXBuildFile; fileRef = 8ABA755227B72F16001AC1F5 /* duck.dae */; settings = {ATTRIBUTES = ("--decompress", ); }; };
 		8ABA755527B732F9001AC1F5 /* barney.mdl in Resources */ = {isa = PBXBuildFile; fileRef = 8A14296F27B4343500A9ED50 /* barney.mdl */; };
@@ -389,6 +390,7 @@
 		8AA6C3EA2792EBB300DCB7B7 /* Transform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transform.swift; sourceTree = "<group>"; };
 		8AA6C3EC2793111100DCB7B7 /* Material.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Material.swift; sourceTree = "<group>"; };
 		8AA6C3EE27935AC600DCB7B7 /* sphere.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = sphere.obj; sourceTree = "<group>"; };
+		8AB9EEF827C00C7D008C33B2 /* Barney.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Barney.swift; sourceTree = "<group>"; };
 		8ABA755227B72F16001AC1F5 /* duck.dae */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml.dae; path = duck.dae; sourceTree = "<group>"; };
 		8ABA755827B746F5001AC1F5 /* shotgun.md3 */ = {isa = PBXFileReference; lastKnownFileType = file; path = shotgun.md3; sourceTree = "<group>"; };
 		8ABA755A27B748F6001AC1F5 /* characterMedium.fbx */ = {isa = PBXFileReference; lastKnownFileType = file; path = characterMedium.fbx; sourceTree = "<group>"; };
@@ -587,6 +589,7 @@
 				8A420530279749AF00473A9D /* SkySphere.swift */,
 				8AF27E3427ACA5BC0025E4F4 /* Skybox.swift */,
 				8A75015727B03653001F63F6 /* Billboard.swift */,
+				8AB9EEF827C00C7D008C33B2 /* Barney.swift */,
 			);
 			path = GameObjects;
 			sourceTree = "<group>";
@@ -1085,6 +1088,7 @@
 				8A0D272227907F0200F2D9E6 /* Common.metal in Sources */,
 				8A0D27292790981F00F2D9E6 /* TextureLibrary.swift in Sources */,
 				8A22EAB9278F7E7100A8CD7D /* VertexDescriptorLibrary.swift in Sources */,
+				8AB9EEF927C00C7D008C33B2 /* Barney.swift in Sources */,
 				8ABAABCE27A709310091D260 /* Lighting.metal in Sources */,
 				8A75016927B0966A001F63F6 /* Q3EntityParser.swift in Sources */,
 				8A9EE2CC27A5A1C5000A15C1 /* AABB.swift in Sources */,
