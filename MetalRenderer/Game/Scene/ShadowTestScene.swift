@@ -9,9 +9,6 @@ class ShadowTestScene: Scene
 {
     override func build()
     {
-        camera.transform.position = float3(0, 1.0, 0)
-        camera.eyeHeight = 1.0
-        
 //        let terrain = GameObject(name: "Terrain", mesh: Mesh(modelName: "ground_grass"))
 //        terrain.transform.position = float3(0, 0, 0)
 //        terrain.transform.scale = float3(100, 0, 100)

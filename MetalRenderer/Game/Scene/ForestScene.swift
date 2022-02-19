@@ -14,9 +14,6 @@ class ForestScene: Scene
     {
         guard let data = loadSceneData(from: "forest") else { return }
         
-        camera.transform.position = data.playerPosition
-        camera.eyeHeight = data.playerPosition.y
-        
         for node in data.gameObjects
         {
             let mesh = Mesh(modelName: node.mesh)

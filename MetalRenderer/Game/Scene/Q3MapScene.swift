@@ -18,10 +18,15 @@ class Q3MapScene: Scene
     
     private var entities: [Barney] = []
     
+    private (set) var player: Player?
+    
+    init()
+    {
+        super.init(name: "Q3MapScene")
+    }
+    
     override func build()
     {
-        camera.transform.position = float3(0, 0, -30)
-        
         if let url = Bundle.main.url(forResource: "q3dm1", withExtension: "bsp"), let data = try? Data(contentsOf: url)
         {
             let q3map = Q3Map(data: data)
@@ -33,29 +38,29 @@ class Q3MapScene: Scene
             let spawnPoints = q3map.entities.filter { entity in
                 entity["classname"] == "info_player_deathmatch"
             }
-
-            if spawnPoints.count > 0
+            
+            for i in 0 ..< spawnPoints.count
             {
-                let entity = spawnPoints[0]
-
-                let origin = entity["origin"]!.split(separator: " ").map { Float($0)! }
-                let angle = Float(entity["angle"]!)!
-
-                let position = float3(origin[0], origin[2] + 60, -origin[1])
-
-                camera.transform.position = position
-                camera.yaw = angle + 90
+                let spawnPoint = spawnPoints[i]
+                let origin = spawnPoint["origin"]!.split(separator: " ").map { Float($0)! }
+                let angle = Float(spawnPoint["angle"]!)!
                 
+                let transform = Transform()
+                transform.position = float3(origin[0], origin[2] - 25, -origin[1])
+                transform.rotation = float3(0, angle, 0)
                 
-                for i in 1 ..< 2
+                if i == 0
                 {
-                    let spawnPoint = spawnPoints[i]
-                    let origin = spawnPoint["origin"]!.split(separator: " ").map { Float($0)! }
-                    let angle = Float(spawnPoint["angle"]!)!
-                    
+                    let player = Player(scene: self)
+                    player.transform = transform
+                    player.posses()
+
+                    self.player = player
+                }
+                else
+                {
                     let barney = Barney(scene: self)
-                    barney.transform.position = float3(origin[0], origin[2] - 25, -origin[1])
-                    barney.transform.rotation = float3(0, angle.radians, 0)
+                    barney.transform = transform
                     
                     entities.append(barney)
                 }
@@ -118,6 +123,8 @@ class Q3MapScene: Scene
     
     override func doUpdate()
     {
+        player?.update()
+        
 //        let start = camera.transform.position
 //
 //        let end = start - float3(0, 0.25, 0)
@@ -196,8 +203,6 @@ class Q3MapScene: Scene
 //                i += 1
 //            }
 //        }
-        
-        camera.transform.position += camera.velocity
         
 //        var start = entities[0].transform.position
 //        start.y += 64

@@ -99,7 +99,7 @@ extension LightNode
         mesh.transform.scale(axis: float3(repeating: volumeScale))
         
         var lightData = lightData
-        var view = DebugCamera.shared.viewMatrix
+        var view = CameraManager.shared.mainCamera.viewMatrix
         var lightSpaceMatrix = viewProjMatrix
         
         encoder?.setFragmentBytes(&lightSpaceMatrix, length: MemoryLayout<matrix_float4x4>.stride, index: 3)

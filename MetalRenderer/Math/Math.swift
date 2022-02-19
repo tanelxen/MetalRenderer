@@ -187,6 +187,12 @@ extension matrix_float4x4
 //    var max: float3
 //}
 
+struct Plane
+{
+    var normal: float3
+    var distance: Float
+}
+
 func testAABBPlane(min: float3, max: float3, plane: Plane) -> Bool
 {
     let c: float3 = (min + max) * 0.5
@@ -195,4 +201,35 @@ func testAABBPlane(min: float3, max: float3, plane: Plane) -> Bool
     let s: Float = simd_dot(plane.normal, c) - plane.distance
     
     return abs(s) <= r
+}
+
+/**
+ Classic lookAt, likewise in GLM
+ */
+func lookAt(eye: float3, target: float3, up: float3) -> matrix_float4x4
+{
+    let n: float3 = normalize(eye - target)
+    let u: float3 = normalize(simd_cross(up, n))
+    let v: float3 = simd_cross(n, u)
+    
+    return matrix_float4x4(
+        float4(u.x, v.x, n.x, 0.0),
+        float4(u.y, v.y, n.y, 0.0),
+        float4(u.z, v.z, n.z, 0.0),
+        float4(simd_dot(-u, eye), simd_dot(-v, eye), simd_dot(-n, eye), 1.0)
+    )
+}
+
+func lookAt(eye: float3, direction: float3, up: float3) -> matrix_float4x4
+{
+    let n: float3 = -direction
+    let u: float3 = normalize(simd_cross(up, n))
+    let v: float3 = simd_cross(n, u)
+    
+    return matrix_float4x4(
+        float4(u.x, v.x, n.x, 0.0),
+        float4(u.y, v.y, n.y, 0.0),
+        float4(u.z, v.z, n.z, 0.0),
+        float4(simd_dot(-u, eye), simd_dot(-v, eye), simd_dot(-n, eye), 1.0)
+    )
 }

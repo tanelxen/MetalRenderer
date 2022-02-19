@@ -198,6 +198,9 @@
 		8AC1658C278FBB8B00E1816A /* Scene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AC1658B278FBB8B00E1816A /* Scene.swift */; };
 		8AD4567127B5D207009C43F4 /* Q3MapCollision.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD4567027B5D207009C43F4 /* Q3MapCollision.swift */; };
 		8AE5332027BEEA8B00A80C1E /* GoldSrcMDL in Frameworks */ = {isa = PBXBuildFile; productRef = 8AE5331F27BEEA8B00A80C1E /* GoldSrcMDL */; };
+		8AEB11C527C146AF008FC445 /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AEB11C427C146AF008FC445 /* Player.swift */; };
+		8AEB11C727C14DCA008FC445 /* Frustum.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AEB11C627C14DCA008FC445 /* Frustum.swift */; };
+		8AEB11C927C1524C008FC445 /* CameraManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AEB11C827C1524C008FC445 /* CameraManager.swift */; };
 		8AF27E3527ACA5BC0025E4F4 /* Skybox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AF27E3427ACA5BC0025E4F4 /* Skybox.swift */; };
 		8AF4401E27999ABC009E83A8 /* tent_smallOpen.obj in Resources */ = {isa = PBXBuildFile; fileRef = 8AF4401C27999ABC009E83A8 /* tent_smallOpen.obj */; };
 		8AF4401F27999ABC009E83A8 /* tent_smallOpen.mtl in Resources */ = {isa = PBXBuildFile; fileRef = 8AF4401D27999ABC009E83A8 /* tent_smallOpen.mtl */; };
@@ -400,6 +403,9 @@
 		8ABAABCD27A709310091D260 /* Lighting.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Lighting.metal; sourceTree = "<group>"; };
 		8AC1658B278FBB8B00E1816A /* Scene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Scene.swift; sourceTree = "<group>"; };
 		8AD4567027B5D207009C43F4 /* Q3MapCollision.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Q3MapCollision.swift; sourceTree = "<group>"; };
+		8AEB11C427C146AF008FC445 /* Player.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
+		8AEB11C627C14DCA008FC445 /* Frustum.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Frustum.swift; sourceTree = "<group>"; };
+		8AEB11C827C1524C008FC445 /* CameraManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraManager.swift; sourceTree = "<group>"; };
 		8AF27E3427ACA5BC0025E4F4 /* Skybox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Skybox.swift; sourceTree = "<group>"; };
 		8AF4401C27999ABC009E83A8 /* tent_smallOpen.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = tent_smallOpen.obj; sourceTree = "<group>"; };
 		8AF4401D27999ABC009E83A8 /* tent_smallOpen.mtl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = tent_smallOpen.mtl; sourceTree = "<group>"; };
@@ -517,6 +523,8 @@
 				8A6232162795DF4F00B1757C /* Scene */,
 				8A22EAC5278F940600A8CD7D /* Renderable.swift */,
 				8A0D271B279033A100F2D9E6 /* Camera.swift */,
+				8AEB11C827C1524C008FC445 /* CameraManager.swift */,
+				8AEB11C627C14DCA008FC445 /* Frustum.swift */,
 				8AA6C3EA2792EBB300DCB7B7 /* Transform.swift */,
 				8A0D27352790A7A200F2D9E6 /* Mesh.swift */,
 				8AA6C3EC2793111100DCB7B7 /* Material.swift */,
@@ -592,6 +600,7 @@
 				8AF27E3427ACA5BC0025E4F4 /* Skybox.swift */,
 				8A75015727B03653001F63F6 /* Billboard.swift */,
 				8AB9EEF827C00C7D008C33B2 /* Barney.swift */,
+				8AEB11C427C146AF008FC445 /* Player.swift */,
 			);
 			path = GameObjects;
 			sourceTree = "<group>";
@@ -1105,6 +1114,7 @@
 				8A33E705279B77070023D6C0 /* ssao.metal in Sources */,
 				8A0D271E279043DD00F2D9E6 /* SimpleQuad.swift in Sources */,
 				8A420531279749AF00473A9D /* SkySphere.swift in Sources */,
+				8AEB11C527C146AF008FC445 /* Player.swift in Sources */,
 				8A22EAC2278F8BE000A8CD7D /* DeferredRenderer.swift in Sources */,
 				8A75015A27B03AB0001F63F6 /* Billboard.metal in Sources */,
 				8A9C764D27A8856F00D3BC90 /* PipelineState.swift in Sources */,
@@ -1120,6 +1130,7 @@
 				8A56D718278E058200D3FE2B /* MetalRenderer.xcdatamodeld in Sources */,
 				8A42053B2797B03400473A9D /* SkySphere.metal in Sources */,
 				8A22EAC6278F940600A8CD7D /* Renderable.swift in Sources */,
+				8AEB11C727C14DCA008FC445 /* Frustum.swift in Sources */,
 				8A9C235827A4D5AA00965D21 /* Octree.swift in Sources */,
 				8A5EDFF027BC205B007166E4 /* SkeletalMesh.metal in Sources */,
 				8A5EDFE227B9B76D007166E4 /* StaticMesh.swift in Sources */,
@@ -1131,6 +1142,7 @@
 				8A42053D27981D2F00473A9D /* Compose.metal in Sources */,
 				8A56D72C278E61CD00D3FE2B /* MetalTypes.swift in Sources */,
 				8AA6C3EB2792EBB300DCB7B7 /* Transform.swift in Sources */,
+				8AEB11C927C1524C008FC445 /* CameraManager.swift in Sources */,
 				8A75016227B08F84001F63F6 /* Q3MapScene.swift in Sources */,
 				8A75016727B095E8001F63F6 /* Q3Types.swift in Sources */,
 				8A0D272727908D5A00F2D9E6 /* GameTime.swift in Sources */,

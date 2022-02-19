@@ -7,13 +7,13 @@
 
 import simd
 
-class Camera: Node
+class Camera
 {
+    var transform = Transform()
+    
     var projectionMatrix: matrix_float4x4 {
         matrix_identity_float4x4
     }
-    
-    var eyeHeight: Float = 0.2
     
     var viewMatrix: matrix_float4x4 {
         var matrix = matrix_identity_float4x4
@@ -26,6 +26,33 @@ class Camera: Node
         
         return matrix
     }
+    
+    func update() { }
+}
+
+class PlayerCamera: Camera
+{
+    override var projectionMatrix: matrix_float4x4 {
+        _projectionMatrix
+    }
+    
+    override var viewMatrix: matrix_float4x4 {
+        return getViewMatrix()
+    }
+    
+    private var _projectionMatrix: matrix_float4x4 = matrix_identity_float4x4
+    
+    override init()
+    {
+        super.init()
+        _projectionMatrix = matrix_float4x4.perspective(degreesFov: 65, aspectRatio: ForwardRenderer.aspectRatio, near: 0.1, far: 5000)
+    }
+    
+    private func getViewMatrix() -> matrix_float4x4
+    {
+        let up = float3(0, 1, 0)
+        return lookAt(eye: transform.position, target: transform.position + transform.forward, up: up)
+    }
 }
 
 class DebugCamera: Camera
@@ -36,15 +63,11 @@ class DebugCamera: Camera
     
     private var _projectionMatrix: matrix_float4x4 = matrix_identity_float4x4
     
-    static var shared = DebugCamera()
-    
-    var movementSpeed: Float = 300.0
+    var movementSpeed: Float = 500.0
     var rotateSpeed: Float = 20
     
     var pitch: Float = 0
     var yaw: Float = 90
-    
-//    var desiredPosition: float3 = .zero
     
     var velocity: float3 = .zero
     
@@ -67,8 +90,10 @@ class DebugCamera: Camera
         return getViewMatrix()
     }
     
-    func update(deltaTime: Float)
+    override func update()
     {
+        let deltaTime = GameTime.deltaTime
+        
         let forward = direction
         let right = simd_cross(direction, up)
         
@@ -94,10 +119,6 @@ class DebugCamera: Camera
             velocity = right * (movementSpeed * deltaTime)
         }
         
-//        desiredPosition = transform.position + velocity
-        
-//        transform.position.y = eyeHeight
-        
         if Mouse.IsMouseButtonPressed(.right)
         {
             pitch -= Mouse.getDY() * rotateSpeed * deltaTime
@@ -112,6 +133,8 @@ class DebugCamera: Camera
             }
         }
         
+        transform.position += velocity
+        
         _projectionMatrix = matrix_float4x4.perspective(degreesFov: 65, aspectRatio: ForwardRenderer.aspectRatio, near: 0.1, far: 5000)
         
         frustumPlanes = DebugCamera.frustumPlanes(from: (_projectionMatrix * viewMatrix).transpose)
@@ -119,8 +142,7 @@ class DebugCamera: Camera
     
     private func getViewMatrix() -> matrix_float4x4
     {
-//        return lookAt(eye: transform.position, target: transform.position + direction, up: up)
-        return lookAt(eye: transform.position, direction: direction, up: up)
+        return lookAt(eye: transform.position, target: transform.position + direction, up: up)
     }
     
     func pointInFrustum(_ point: float3) -> Bool
@@ -247,41 +269,4 @@ class DebugCamera: Camera
 
         return Plane(normal: float3(nf * A, nf * B, nf * C), distance: nf * D)
     }
-}
-
-struct Plane
-{
-    var normal: float3
-    var distance: Float
-}
-
-/**
- Classic lookAt, likewise in GLM
- */
-func lookAt(eye: float3, target: float3, up: float3) -> matrix_float4x4
-{
-    let n: float3 = normalize(eye - target)
-    let u: float3 = normalize(simd_cross(up, n))
-    let v: float3 = simd_cross(n, u)
-    
-    return matrix_float4x4(
-        float4(u.x, v.x, n.x, 0.0),
-        float4(u.y, v.y, n.y, 0.0),
-        float4(u.z, v.z, n.z, 0.0),
-        float4(simd_dot(-u, eye), simd_dot(-v, eye), simd_dot(-n, eye), 1.0)
-    )
-}
-
-func lookAt(eye: float3, direction: float3, up: float3) -> matrix_float4x4
-{
-    let n: float3 = -direction
-    let u: float3 = normalize(simd_cross(up, n))
-    let v: float3 = simd_cross(n, u)
-    
-    return matrix_float4x4(
-        float4(u.x, v.x, n.x, 0.0),
-        float4(u.y, v.y, n.y, 0.0),
-        float4(u.z, v.z, n.z, 0.0),
-        float4(simd_dot(-u, eye), simd_dot(-v, eye), simd_dot(-n, eye), 1.0)
-    )
 }

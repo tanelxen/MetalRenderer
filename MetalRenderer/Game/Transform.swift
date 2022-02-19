@@ -25,10 +25,24 @@ class Transform
         
         _matrix.translate(direction: position)
         
-        _matrix.rotate(angle: rotation.x, axis: .x_axis)
-        _matrix.rotate(angle: rotation.y, axis: .y_axis)
-        _matrix.rotate(angle: rotation.z, axis: .z_axis)
+        _matrix.rotate(angle: rotation.x.radians, axis: .x_axis)
+        _matrix.rotate(angle: rotation.y.radians, axis: .y_axis)
+        _matrix.rotate(angle: rotation.z.radians, axis: .z_axis)
         
         _matrix.scale(axis: scale)
+    }
+    
+    var forward: float3 {
+        
+        let pitch = rotation.x
+        let yaw = rotation.y
+        
+        let x = cos(pitch.radians) * cos(yaw.radians)
+        let y = sin(pitch.radians)
+        let z = cos(pitch.radians) * sin(yaw.radians)
+
+        let dir = float3(x, y, z)
+
+        return normalize(dir)
     }
 }

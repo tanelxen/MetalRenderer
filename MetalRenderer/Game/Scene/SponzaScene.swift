@@ -9,9 +9,6 @@ class SponzaScene: Scene
 {
     override func build()
     {
-        camera.transform.position = float3(0, 1.0, 0)
-        camera.eyeHeight = 1.0
-        
         let sponza = GameObject(name: "Sponza", mesh: Mesh(modelName: "sponza"))
         sponza.transform.scale = float3(repeating: 0.01)
         addChild(sponza)

@@ -402,10 +402,10 @@ class DeferredRenderer: NSObject
 //        var lightData: LightData = scene.lights.first?.lightData
 //        renderEncoder?.setFragmentBytes(&lightData, length: LightData.stride, index: 0)
         
-        var invCamPj = DebugCamera.shared.projectionMatrix.inverse
+        var invCamPj = CameraManager.shared.mainCamera.projectionMatrix.inverse
         renderEncoder?.setFragmentBytes(&invCamPj, length: MemoryLayout<matrix_float4x4>.stride, index: 1)
         
-        var viewMatrix = DebugCamera.shared.viewMatrix
+        var viewMatrix = CameraManager.shared.mainCamera.viewMatrix
         renderEncoder?.setFragmentBytes(&viewMatrix, length: MemoryLayout<matrix_float4x4>.stride, index: 2)
 
         renderEncoder?.setFragmentTexture(gAlbedoTexture, index: 0)
