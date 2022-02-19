@@ -24,20 +24,26 @@ class Barney
     
     func update()
     {
-//        if let scene = self.scene
-//        {
-//            let isSeePlayer = scene.trace(start: transform.position, end: DebugCamera.shared.transform.position)
-//
-//            print("isSeePlayer", isSeePlayer)
-//        }
+        var eyePos = transform.position
+        eyePos.y += 64
+
+        let isSeePlayer = scene!.trace(start: eyePos, end: DebugCamera.shared.transform.position)
         
+        if isSeePlayer
+        {
+            moveToPlayer(minDist: 128)
+        }
+    }
+    
+    private func moveToPlayer(minDist: Float)
+    {
         var eyePos = transform.position
         eyePos.y += 64
         
         let vectorToPlayer = DebugCamera.shared.transform.position - eyePos
         let dir = normalize(vectorToPlayer)
         
-        if length(vectorToPlayer) > 128
+        if length(vectorToPlayer) > minDist
         {
             transform.position += dir * (movementSpeed * GameTime.deltaTime)
         }

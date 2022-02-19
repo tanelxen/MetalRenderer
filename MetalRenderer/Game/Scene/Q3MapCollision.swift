@@ -20,6 +20,13 @@ struct HitResult
     var plane: Q3Plane?
 }
 
+struct ContentType: OptionSet
+{
+    let rawValue: Int32
+
+    static let solid = ContentType(rawValue: 1 << 0)
+}
+
 class Q3MapCollision
 {
 //    private var outputFraction: Float = 0.0
@@ -212,11 +219,11 @@ class Q3MapCollision
         // STEP 6: check the second side
         if side == 0
         {
-            CheckNode(result: &result, nodeIndex: node.back, startFraction: startFraction, endFraction: middleFraction, start: start, end: middle)
+            CheckNode(result: &result, nodeIndex: node.back, startFraction: middleFraction, endFraction: endFraction, start: middle, end: end)
         }
         else
         {
-            CheckNode(result: &result, nodeIndex: node.front, startFraction: startFraction, endFraction: middleFraction, start: start, end: middle)
+            CheckNode(result: &result, nodeIndex: node.front, startFraction: middleFraction, endFraction: endFraction, start: middle, end: end)
         }
     }
     
@@ -229,10 +236,10 @@ class Q3MapCollision
             let leafbrush = Int(q3map.leafbrushes[leaf.leafbrush + i])
             var brush = q3map.brushes[leafbrush]
             
-//                let texture = q3map.textures[brush.texture]
-//                let isSolid = (texture.contentFlags & 1) == 1
+//            let texture = q3map.textures[brush.texture]
+//            let contentFlags = ContentType(rawValue: texture.contentFlags)
             
-            if brush.brushside > 0// && isSolid
+            if brush.brushside > 0 // && contentFlags.contains(.solid)
             {
                 CheckBrush(result: &result, brush: &brush)
             }

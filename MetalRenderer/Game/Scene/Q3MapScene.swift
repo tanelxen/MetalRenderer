@@ -111,9 +111,9 @@ class Q3MapScene: Scene
     func trace(start: float3, end: float3) -> Bool
     {
         var hitResult = HitResult()
-        collision.traceRay(result: &hitResult, start: start, end: end)
+        collision.traceRay(result: &hitResult, start: end, end: start)
         
-        return hitResult.fraction == 1
+        return hitResult.fraction >= 1
     }
     
     override func doUpdate()
@@ -198,5 +198,15 @@ class Q3MapScene: Scene
 //        }
         
         camera.transform.position += camera.velocity
+        
+//        var start = entities[0].transform.position
+//        start.y += 64
+//        
+//        let end = camera.transform.position
+//        
+//        var hitResult = HitResult()
+//        collision.traceRay(result: &hitResult, start: start, end: end)
+//        
+//        print("hitResult.fraction", hitResult.fraction)
     }
 }

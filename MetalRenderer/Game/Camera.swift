@@ -50,7 +50,7 @@ class DebugCamera: Camera
     
     private var up = float3(0, 1, 0)
     
-    private var direction: float3 {
+    var direction: float3 {
         
         let x = cos(pitch.radians) * cos(yaw.radians)
         let y = sin(pitch.radians)

@@ -67,6 +67,7 @@ struct Q3Plane
 {
     let normal: float3
     let distance: Float
+    let type: PlaneType
 }
 
 struct Q3Brush
@@ -121,4 +122,34 @@ enum Lumps: Int
     case lightmaps      // Packed lightmap data.
     case lightvols      // Local illumination data.
     case visdata        // Cluster-cluster visibility data.
+}
+
+// plane types are used to speed some tests
+// 0-2 are axial planes
+enum PlaneType: Int
+{
+    case PLANE_X = 0
+    case PLANE_Y = 1
+    case PLANE_Z = 2
+    case PLANE_NON_AXIAL = 3
+    
+    init(normal: float3)
+    {
+        if normal.x == 1.0
+        {
+            self = .PLANE_X
+        }
+        else if normal.y == 1.0
+        {
+            self = .PLANE_Y
+        }
+        else if normal.z == 1.0
+        {
+            self = .PLANE_Z
+        }
+        else
+        {
+            self = .PLANE_NON_AXIAL
+        }
+    }
 }

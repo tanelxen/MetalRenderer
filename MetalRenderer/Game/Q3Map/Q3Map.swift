@@ -230,9 +230,11 @@ class Q3Map
             }
         }
         
-        let planes = readLump(.planes, as: Plane.self).map {
-            Q3Plane(normal: float3($0.normal.x, $0.normal.z, -$0.normal.y),
-                    distance: $0.dist)
+        let planes = readLump(.planes, as: Plane.self).map { p -> Q3Plane in
+            
+            let normal = float3(p.normal.x, p.normal.z, -p.normal.y)
+            let type = PlaneType(normal: normal)
+            return Q3Plane(normal: normal, distance: p.dist, type: type)
         }
 
         return planes
