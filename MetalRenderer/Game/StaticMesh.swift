@@ -6,7 +6,7 @@
 //
 
 import simd
-import Assimp
+//import Assimp
 import MetalKit
 
 class StaticMesh
@@ -20,42 +20,42 @@ class StaticMesh
     
     init?(name: String, ext: String)
     {
-        guard let url = Bundle.main.url(forResource: name, withExtension: ext) else { return nil }
-        
-        guard let scene = try? AiScene(file: url.path, flags: [.removeRedundantMaterials]) else { return nil }
-        
-        guard let aiMesh = scene.meshes.first else { return nil }
-        
-        let aiVertices = aiMesh.vertices.chunked(into: 3)
-        let aiTexCoords = aiMesh.texCoords.0?.compactMap({ $0 }).chunked(into: 3)
-        
-        var vertices: [StaticMeshVertex] = []
-        
-        for (aiVertex, texCoords) in zip(aiVertices, aiTexCoords!)
-        {
-            let position = float3(aiVertex[0], aiVertex[1], aiVertex[2])
-            let uv = float2(texCoords[0], texCoords[1])
-            let vertex = StaticMeshVertex(position: position, texCoord: uv)
-            
-            vertices.append(vertex)
-        }
-        
-        var indices: [UInt32] = []
-        
-        for aiFace in aiMesh.faces
-        {
-            indices.append(contentsOf: aiFace.indices)
-        }
-        
-        let assetURL = Bundle.main.url(forResource: "shotgun", withExtension: "jpg")!
-        let devTexture = TextureManager.shared.getTexture(url: assetURL, origin: .bottomLeft)!
-        
-        vertexBuffer = Engine.device.makeBuffer(bytes: vertices, length: vertices.count * MemoryLayout<StaticMeshVertex>.stride, options: [])
-        indexBuffer = Engine.device.makeBuffer(bytes: indices, length: indices.count * MemoryLayout<UInt32>.stride, options: [])
-        
-        indexCount = indices.count
-        
-        texture = devTexture
+//        guard let url = Bundle.main.url(forResource: name, withExtension: ext) else { return nil }
+//        
+//        guard let scene = try? AiScene(file: url.path, flags: [.removeRedundantMaterials]) else { return nil }
+//        
+//        guard let aiMesh = scene.meshes.first else { return nil }
+//        
+//        let aiVertices = aiMesh.vertices.chunked(into: 3)
+//        let aiTexCoords = aiMesh.texCoords.0?.compactMap({ $0 }).chunked(into: 3)
+//        
+//        var vertices: [StaticMeshVertex] = []
+//        
+//        for (aiVertex, texCoords) in zip(aiVertices, aiTexCoords!)
+//        {
+//            let position = float3(aiVertex[0], aiVertex[1], aiVertex[2])
+//            let uv = float2(texCoords[0], texCoords[1])
+//            let vertex = StaticMeshVertex(position: position, texCoord: uv)
+//            
+//            vertices.append(vertex)
+//        }
+//        
+//        var indices: [UInt32] = []
+//        
+//        for aiFace in aiMesh.faces
+//        {
+//            indices.append(contentsOf: aiFace.indices)
+//        }
+//        
+//        let assetURL = Bundle.main.url(forResource: "shotgun", withExtension: "jpg")!
+//        let devTexture = TextureManager.shared.getTexture(url: assetURL, origin: .bottomLeft)!
+//        
+//        vertexBuffer = Engine.device.makeBuffer(bytes: vertices, length: vertices.count * MemoryLayout<StaticMeshVertex>.stride, options: [])
+//        indexBuffer = Engine.device.makeBuffer(bytes: indices, length: indices.count * MemoryLayout<UInt32>.stride, options: [])
+//        
+//        indexCount = indices.count
+//        
+//        texture = devTexture
     }
     
     func renderWithEncoder(_ encoder: MTLRenderCommandEncoder)

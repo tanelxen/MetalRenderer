@@ -13,6 +13,8 @@ class Transform
     var rotation: float3 = .zero
     var scale: float3 = .one
     
+    static let zero: Transform = Transform()
+    
     var parent = matrix_identity_float4x4
     
     private var _matrix: matrix_float4x4 = matrix_identity_float4x4

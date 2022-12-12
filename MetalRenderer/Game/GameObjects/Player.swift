@@ -24,11 +24,15 @@ class Player
     
     private var isFreeFly = false
     
+    private var playerMovement = PlayerMovement()
+    
     init(scene: Q3MapScene)
     {
         self.scene = scene
         
         CameraManager.shared.mainCamera = camera
+        
+        playerMovement.scene = scene
     }
     
     func posses()
@@ -39,6 +43,9 @@ class Player
     func update()
     {
         updateInput()
+        
+        playerMovement.transform = transform
+        
         updateMovement()
         
         camera.transform.position = transform.position + float3(0, 64, 0)
@@ -47,7 +54,8 @@ class Player
     
     private func updateMovement()
     {
-        transform.position += velocity
+        playerMovement.update()
+        transform.position = playerMovement.transform.position
         
 //        camera.transform.position += camera.velocity
     }
@@ -55,45 +63,34 @@ class Player
     private func updateInput()
     {
         let deltaTime = GameTime.deltaTime
-        
-        let up = float3(0, 1, 0)
-        var forward = transform.forward
-        
-        if !isFreeFly
-        {
-            forward *= float3(1, 0, 1)
-        }
-        
-        let right = simd_cross(forward, up)
-        
-        velocity = .zero
+
+        playerMovement.forwardmove = 0
+        playerMovement.rightmove = 0
         
         if Keyboard.isKeyPressed(.w)
         {
-            velocity = forward * (movementSpeed * deltaTime)
+            playerMovement.forwardmove = 1
         }
 
         else if Keyboard.isKeyPressed(.s)
         {
-            velocity = -forward * (movementSpeed * deltaTime)
+            playerMovement.forwardmove = -1
         }
         
         if Keyboard.isKeyPressed(.a)
         {
-            velocity = -right * (movementSpeed * deltaTime)
+            playerMovement.rightmove = -1
         }
 
         if Keyboard.isKeyPressed(.d)
         {
-            velocity = right * (movementSpeed * deltaTime)
+            playerMovement.rightmove = 1
         }
         
         if Mouse.IsMouseButtonPressed(.right)
         {
             transform.rotation.y += Mouse.getDX() * rotateSpeed * deltaTime
-            
             transform.rotation.x -= Mouse.getDY() * rotateSpeed * deltaTime
-//            transform.rotation.y = max(-89, min(89, transform.rotation.y))
         }
     }
 }
