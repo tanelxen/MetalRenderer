@@ -26,7 +26,7 @@ class Barney
     
     func update()
     {
-        look()
+//        look()
         
         if isSeePlayer
         {
@@ -61,6 +61,6 @@ class Barney
         
         let angle = atan2(dir.x, dir.z).degrees
         
-        transform.rotation.y = angle - 90
+        transform.rotation.yaw = angle - 90
     }
 }

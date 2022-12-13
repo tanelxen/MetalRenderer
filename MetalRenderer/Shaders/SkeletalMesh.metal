@@ -32,6 +32,13 @@ vertex VertexOut skeletal_mesh_vs
     constant ModelConstants  &modelConstants [[ buffer(2) ]]
 )
 {
+//    float4x4 quakeToMetal = float4x4(
+//        1, 0, 0, 0,
+//        0, 0, 1, 0,
+//        0, -1, 0, 0,
+//        0, 0, 0, 1
+//    );
+    
     float4x4 mvp = viewConstants.projectionMatrix * viewConstants.viewMatrix * modelConstants.modelMatrix;
     
     VertexOut data;

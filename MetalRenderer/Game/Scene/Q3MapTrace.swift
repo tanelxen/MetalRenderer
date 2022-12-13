@@ -14,6 +14,7 @@ private struct trace_t
     var startsolid = false          // if true, the initial point was in a solid area
     var fraction: Float = 1.0       // time completed, 1.0 = didn't hit anything
     var endpos: float3 = .zero      // final position
+    var plane: Q3Plane?             // surface normal at impact, transformed to world space
 }
 
 private struct traceWork_t
@@ -21,9 +22,11 @@ private struct traceWork_t
     var start: float3 = .zero
     var end: float3 = .zero
     
-    var mins: float3 = .zero
-    var maxs: float3 = .zero
-    var bounds: [float3] = [.zero, .zero]
+    var size: [float3] = [.zero, .zero]         // size of the box being swept through the model
+    var offsets: [float3] = []                  // [signbits][x] = either size[0][x] or size[1][x]
+    var maxOffset: Float = 0
+    var extents: [float3] = []
+    var bounds: [float3] = [.zero, .zero]       // enclosing box of start and end surrounding by size
     var isPoint: Bool = true
     var trace: trace_t = trace_t()
 }
@@ -45,8 +48,8 @@ class Q3MapTrace
         
         tw.start = start
         tw.end = end
-        tw.mins = .zero
-        tw.maxs = .zero
+//        tw.mins = .zero
+//        tw.maxs = .zero
         
         for i in 0 ..< 3
         {

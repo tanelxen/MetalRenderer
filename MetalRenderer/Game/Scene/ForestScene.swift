@@ -12,20 +12,20 @@ class ForestScene: Scene
 {
     override func build()
     {
-        guard let data = loadSceneData(from: "forest") else { return }
-        
-        for node in data.gameObjects
-        {
-            let mesh = Mesh(modelName: node.mesh)
-
-            let gameObject = GameObject(name: node.name, mesh: mesh)
-
-            gameObject.transform.position = node.transform.position
-            gameObject.transform.rotation = node.transform.rotation
-            gameObject.transform.scale = node.transform.scale
-
-            addChild(gameObject)
-        }
+//        guard let data = loadSceneData(from: "forest") else { return }
+//        
+//        for node in data.gameObjects
+//        {
+//            let mesh = Mesh(modelName: node.mesh)
+//
+//            let gameObject = GameObject(name: node.name, mesh: mesh)
+//
+//            gameObject.transform.position = node.transform.position
+//            gameObject.transform.rotation = node.transform.rotation
+//            gameObject.transform.scale = node.transform.scale
+//
+//            addChild(gameObject)
+//        }
 
 
         let pines: [Mesh] = [
@@ -48,7 +48,7 @@ class ForestScene: Scene
 
             tree.transform.position = float3(x, 0, z)
             tree.transform.scale = float3(repeating: scale)
-            tree.transform.rotation.y = Float.random(in: 0...360).radians
+            tree.transform.rotation.yaw = Float.random(in: 0...360).radians
 
             addChild(tree)
         }
@@ -71,7 +71,7 @@ class ForestScene: Scene
             let z = sin(Float(i)) * radius
 
             flower.transform.position = float3(x, 0, z)
-            flower.transform.rotation.y = Float.random(in: 0...360).radians
+            flower.transform.rotation.yaw = Float.random(in: 0...360).radians
 
             addChild(flower)
         }
@@ -89,44 +89,44 @@ class ForestScene: Scene
     }
 }
 
-extension ForestScene
-{
-    struct SceneData: Decodable
-    {
-        let playerPosition: float3
-        let gameObjects: [GameObjectData]
-    }
-    
-    struct GameObjectData: Decodable
-    {
-        let name: String
-        let transform: Transform
-        let mesh: String
-    }
-    
-    struct Transform: Decodable
-    {
-        let position: float3
-        let rotation: float3
-        let scale: float3
-    }
-
-    func loadSceneData(from fileName: String) -> SceneData?
-    {
-        guard let url = Bundle.main.url(forResource: fileName, withExtension: "json") else { return nil }
-        
-        do
-        {
-            let data = try Data(contentsOf: url)
-            let decoder = JSONDecoder()
-            let jsonData = try decoder.decode(SceneData.self, from: data)
-            return jsonData
-        }
-        catch
-        {
-            print("error:\(error)")
-        }
-        
-        return nil
-    }
-}
+//extension ForestScene
+//{
+//    struct SceneData: Decodable
+//    {
+//        let playerPosition: float3
+//        let gameObjects: [GameObjectData]
+//    }
+//
+//    struct GameObjectData: Decodable
+//    {
+//        let name: String
+//        let transform: Transform
+//        let mesh: String
+//    }
+//
+//    struct Transform: Decodable
+//    {
+//        let position: float3
+//        let rotation: Rotator
+//        let scale: float3
+//    }
+//
+//    func loadSceneData(from fileName: String) -> SceneData?
+//    {
+//        guard let url = Bundle.main.url(forResource: fileName, withExtension: "json") else { return nil }
+//
+//        do
+//        {
+//            let data = try Data(contentsOf: url)
+//            let decoder = JSONDecoder()
+//            let jsonData = try decoder.decode(SceneData.self, from: data)
+//            return jsonData
+//        }
+//        catch
+//        {
+//            print("error:\(error)")
+//        }
+//
+//        return nil
+//    }
+//}

@@ -47,7 +47,7 @@ class Q3MapScene: Scene
                 
                 let transform = Transform()
                 transform.position = float3(origin[0], origin[2] - 25, -origin[1])
-                transform.rotation = float3(0, angle, 0)
+                transform.rotation = Rotator(pitch: 0, yaw: angle, roll: 0)
                 
                 if i == 0
                 {
@@ -121,97 +121,16 @@ class Q3MapScene: Scene
         return hitResult.fraction >= 1
     }
     
+    func trace(start: float3, end: float3, mins: float3, maxs: float3) -> HitResult
+    {
+        var hitResult = HitResult()
+        collision.traceBox(result: &hitResult, start: start, end: end, mins: mins, maxs: maxs)
+        
+        return hitResult
+    }
+    
     override func doUpdate()
     {
         player?.update()
-        
-//        let start = camera.transform.position
-//
-//        let end = start - float3(0, 0.25, 0)
-//
-//        var hitResult = HitResult()
-//
-//        let playerMins = float3(-15, -24, -15)
-//        let playerMaxs = float3(15, 32, 15)
-//
-//        collision.traceBox(result: &hitResult, start: start, end: end, mins: playerMins, maxs: playerMaxs)
-//
-//        var normals: [float3] = []
-//        var timeLeft = GameTime.deltaTime
-//
-//        var velocity = camera.velocity
-////        velocity.y -= 80 * GameTime.deltaTime
-//
-//        if let normal = hitResult.plane?.normal
-//        {
-//            let overbounce: Float = 1.001
-//
-//            var backoff = dot(velocity, normal)
-//
-//            if backoff < 0
-//            {
-//                backoff *= overbounce;
-//            }
-//            else
-//            {
-//                backoff /= overbounce;
-//            }
-//
-//            velocity = velocity - normal * backoff
-//
-//            normals.append(normal)
-//        }
-//
-//        for _ in 0 ..< 4
-//        {
-//            var i: Int = 0
-//
-//            let end = camera.transform.position + velocity * timeLeft
-//
-//            var work = HitResult()
-//            collision.traceBox(result: &work, start: start, end: end, mins: playerMins, maxs: playerMaxs)
-//
-//            if work.fraction > 0
-//            {
-//                camera.transform.position = work.point
-//            }
-//
-//            if work.fraction == 1 { break }
-//
-//            timeLeft -= timeLeft * work.fraction
-//
-//            if normals.count >= 5
-//            {
-//                velocity = .zero
-//                return
-//            }
-//
-//            for normal in normals
-//            {
-//                if dot(work.normal!, normal) > 0.99
-//                {
-//                    velocity += work.normal!
-//                    break
-//                }
-//            }
-//
-//            if i < normals.count { continue }
-//
-//            if let normal = work.normal
-//            {
-//                normals.append(normal)
-//                i += 1
-//            }
-//        }
-        
-//        var start = entities[0].transform.position
-//        start.y += 64
-//
-//        let end = camera.transform.position
-//
-//        var hitResult = HitResult()
-//        collision.traceRay(result: &hitResult, start: start, end: end)
-//
-//        print("hitResult.fraction", hitResult.fraction)
     }
 }

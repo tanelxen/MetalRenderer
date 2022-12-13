@@ -178,6 +178,7 @@
 		8A78064A27B33CF0005871F8 /* q3dm8.bsp in Resources */ = {isa = PBXBuildFile; fileRef = 8A78064427B33CF0005871F8 /* q3dm8.bsp */; };
 		8A84536A27ADA45100E25638 /* TextureManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A84536927ADA45100E25638 /* TextureManager.swift */; };
 		8A8B047627AED50C004A2537 /* room.mtl in Resources */ = {isa = PBXBuildFile; fileRef = 8A8B047527AED50C004A2537 /* room.mtl */; };
+		8A9977D029492CC400B48C70 /* Rotator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A9977CF29492CC400B48C70 /* Rotator.swift */; };
 		8A9C235827A4D5AA00965D21 /* Octree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A9C235727A4D5AA00965D21 /* Octree.swift */; };
 		8A9C235A27A4DB4100965D21 /* Wireframe.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8A9C235927A4DB4100965D21 /* Wireframe.metal */; };
 		8A9C764D27A8856F00D3BC90 /* PipelineState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A9C764C27A8856F00D3BC90 /* PipelineState.swift */; };
@@ -386,6 +387,7 @@
 		8A78064427B33CF0005871F8 /* q3dm8.bsp */ = {isa = PBXFileReference; lastKnownFileType = file; path = q3dm8.bsp; sourceTree = "<group>"; };
 		8A84536927ADA45100E25638 /* TextureManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureManager.swift; sourceTree = "<group>"; };
 		8A8B047527AED50C004A2537 /* room.mtl */ = {isa = PBXFileReference; lastKnownFileType = text; path = room.mtl; sourceTree = "<group>"; };
+		8A9977CF29492CC400B48C70 /* Rotator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rotator.swift; sourceTree = "<group>"; };
 		8A9C235727A4D5AA00965D21 /* Octree.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Octree.swift; sourceTree = "<group>"; };
 		8A9C235927A4DB4100965D21 /* Wireframe.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Wireframe.metal; sourceTree = "<group>"; };
 		8A9C764C27A8856F00D3BC90 /* PipelineState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PipelineState.swift; sourceTree = "<group>"; };
@@ -560,6 +562,7 @@
 			isa = PBXGroup;
 			children = (
 				8A22EAC9278FA89A00A8CD7D /* Math.swift */,
+				8A9977CF29492CC400B48C70 /* Rotator.swift */,
 			);
 			path = Math;
 			sourceTree = "<group>";
@@ -1163,6 +1166,7 @@
 				8A56D713278E058200D3FE2B /* AppDelegate.swift in Sources */,
 				8AB9EEFB27C0611C008C33B2 /* Q3MapTrace.swift in Sources */,
 				8A22EACA278FA89A00A8CD7D /* Math.swift in Sources */,
+				8A9977D029492CC400B48C70 /* Rotator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

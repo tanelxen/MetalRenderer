@@ -21,7 +21,7 @@ class ShadowTestScene: Scene
         let campfire = GameObject(name: "Campfire", mesh: Mesh(modelName: "campfire"))
         campfire.transform.position = float3(2, 0, 0)
         campfire.transform.scale = float3(repeating: 0.5)
-        campfire.transform.rotation.y = Float(45).radians
+        campfire.transform.rotation.yaw = Float(45).radians
         addChild(campfire)
         
         let flower = GameObject(name: "Flower", mesh: Mesh(modelName: "flower_purpleA"))

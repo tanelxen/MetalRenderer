@@ -13,16 +13,11 @@ class Player
     
     let camera = PlayerCamera()
     
-    private var movementSpeed: Float = 300.0
-    private var rotateSpeed: Float = 20.0
+    private var rotateSpeed: Float = 30.0
     
     private var velocity: float3 = .zero
     
-    private var up = float3(0, 1, 0)
-    
     private weak var scene: Q3MapScene?
-    
-    private var isFreeFly = false
     
     private var playerMovement = PlayerMovement()
     
@@ -56,8 +51,6 @@ class Player
     {
         playerMovement.update()
         transform.position = playerMovement.transform.position
-        
-//        camera.transform.position += camera.velocity
     }
     
     private func updateInput()
@@ -72,7 +65,7 @@ class Player
             playerMovement.forwardmove = 1
         }
 
-        else if Keyboard.isKeyPressed(.s)
+        if Keyboard.isKeyPressed(.s)
         {
             playerMovement.forwardmove = -1
         }
@@ -87,10 +80,30 @@ class Player
             playerMovement.rightmove = 1
         }
         
+        if Keyboard.isKeyPressed(.leftArrow)
+        {
+            transform.rotation.yaw += rotateSpeed * deltaTime
+        }
+        
+        if Keyboard.isKeyPressed(.rightArrow)
+        {
+            transform.rotation.yaw -= rotateSpeed * deltaTime
+        }
+        
+        if Keyboard.isKeyPressed(.upArrow)
+        {
+            transform.rotation.pitch -= rotateSpeed * deltaTime
+        }
+        
+        if Keyboard.isKeyPressed(.downArrow)
+        {
+            transform.rotation.pitch += rotateSpeed * deltaTime
+        }
+        
         if Mouse.IsMouseButtonPressed(.right)
         {
-            transform.rotation.y += Mouse.getDX() * rotateSpeed * deltaTime
-            transform.rotation.x -= Mouse.getDY() * rotateSpeed * deltaTime
+            transform.rotation.yaw -= Mouse.getDX() * rotateSpeed * deltaTime
+            transform.rotation.pitch += Mouse.getDY() * rotateSpeed * deltaTime
         }
     }
 }

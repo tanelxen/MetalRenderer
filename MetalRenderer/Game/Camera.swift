@@ -18,9 +18,9 @@ class Camera
     var viewMatrix: matrix_float4x4 {
         var matrix = matrix_identity_float4x4
         
-        matrix.rotate(angle: transform.rotation.x, axis: .x_axis)
-        matrix.rotate(angle: transform.rotation.y, axis: .y_axis)
-        matrix.rotate(angle: transform.rotation.z, axis: .z_axis)
+        matrix.rotate(angle: transform.rotation.pitch, axis: .x_axis)
+        matrix.rotate(angle: transform.rotation.yaw, axis: .y_axis)
+        matrix.rotate(angle: transform.rotation.roll, axis: .z_axis)
         
         matrix.translate(direction: -transform.position)
         
@@ -51,7 +51,8 @@ class PlayerCamera: Camera
     private func getViewMatrix() -> matrix_float4x4
     {
         let up = float3(0, 1, 0)
-        return lookAt(eye: transform.position, target: transform.position + transform.forward, up: up)
+        let target = transform.position + transform.rotation.forward
+        return lookAt(eye: transform.position, target: target, up: up)
     }
 }
 

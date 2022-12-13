@@ -41,11 +41,7 @@ class LightNode: Node
     
     func updateShadowMatrix()
     {
-        var viewMatrix = matrix_identity_float4x4
-        
-        viewMatrix.rotate(angle: transform.rotation.x, axis: .x_axis)
-        viewMatrix.rotate(angle: transform.rotation.y, axis: .y_axis)
-        viewMatrix.rotate(angle: transform.rotation.z, axis: .z_axis)
+        var viewMatrix = transform.rotation.matrix
         
         viewMatrix.translate(direction: -transform.position)
         
