@@ -101,8 +101,8 @@ class Q3MapCollision
         result.point = inputEnd
         
         result.fraction = 1.0
-        result.normal = nil
-        result.plane = nil
+//        result.normal = nil
+//        result.plane = nil
 
         // walk through the BSP tree
         CheckNode(result: &result, nodeIndex: 0, startFraction: 0.0, endFraction: 1.0, start: inputStart, end: inputEnd)

@@ -100,6 +100,8 @@ class Player
             transform.rotation.pitch += rotateSpeed * deltaTime
         }
         
+//        playerMovement.isWishJump = Keyboard.isKeyPressed(.space)
+        
         if Mouse.IsMouseButtonPressed(.right)
         {
             transform.rotation.yaw -= Mouse.getDX() * rotateSpeed * deltaTime

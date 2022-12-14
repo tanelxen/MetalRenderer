@@ -46,11 +46,13 @@ class Q3MapScene: Scene
                 let angle = Float(spawnPoint["angle"]!)!
                 
                 let transform = Transform()
-                transform.position = float3(origin[0], origin[1], origin[2] - 25)
+                transform.position = float3(origin[0], origin[1], origin[2])
                 transform.rotation = Rotator(pitch: 0, yaw: angle, roll: 0)
                 
-                if i == 0
+                if i == 1
                 {
+                    transform.position.z += 1
+                    
                     let player = Player(scene: self)
                     player.transform = transform
                     player.posses()
@@ -59,6 +61,8 @@ class Q3MapScene: Scene
                 }
                 else
                 {
+                    transform.position.z -= 25
+                    
                     let barney = Barney(scene: self)
                     barney.transform = transform
                     
