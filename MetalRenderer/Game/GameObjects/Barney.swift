@@ -38,8 +38,8 @@ class Barney
     {
         guard let player = scene?.player else { return }
         
-        let myEye = transform.position + float3(0, 64, 0)
-        let playerEye = player.transform.position + float3(0, 64, 0)
+        let myEye = transform.position + float3(0, 0, 64)
+        let playerEye = player.transform.position + float3(0, 0, 64)
 
         isSeePlayer = scene!.trace(start: myEye, end: playerEye)
     }
@@ -48,8 +48,8 @@ class Barney
     {
         guard let player = scene?.player else { return }
         
-        let myEye = transform.position + float3(0, 64, 0)
-        let playerEye = player.transform.position + float3(0, 64, 0)
+        let myEye = transform.position + float3(0, 0, 64)
+        let playerEye = player.transform.position + float3(0, 0, 64)
         
         let vectorToPlayer = playerEye - myEye
         let dir = normalize(vectorToPlayer)
@@ -59,8 +59,8 @@ class Barney
             transform.position += dir * (movementSpeed * GameTime.deltaTime)
         }
         
-        let angle = atan2(dir.x, dir.z).degrees
+        let angle = atan2(dir.y, dir.x).degrees
         
-        transform.rotation.yaw = angle - 90
+        transform.rotation.yaw = angle
     }
 }

@@ -200,8 +200,8 @@ class Q3Map
         }
         
         let vertices = readLump(.vertexes, as: Vertex.self).map {
-            Q3Vertex(position: float4($0.position.x, $0.position.z, -$0.position.y, 1.0),
-                     normal: float4($0.normal.x, $0.normal.z, -$0.normal.y, 0.0),
+            Q3Vertex(position: float4($0.position.x, $0.position.y, $0.position.z, 1.0),
+                     normal: float4($0.normal.x, $0.normal.y, $0.normal.z, 0.0),
                      color: float4(Float($0.color.r) / 255, Float($0.color.g) / 255, Float($0.color.b) / 255, Float($0.color.a) / 255),
                      textureCoord: float2($0.textureCoord.x, $0.textureCoord.y),
                      lightmapCoord: float2($0.lightmapCoord.x, $0.lightmapCoord.y))
@@ -232,7 +232,7 @@ class Q3Map
         
         let planes = readLump(.planes, as: Plane.self).map { p -> Q3Plane in
             
-            let normal = float3(p.normal.x, p.normal.z, -p.normal.y)
+            let normal = float3(p.normal.x, p.normal.y, p.normal.z)
             let type = PlaneType(normal: normal)
             return Q3Plane(normal: normal, distance: p.dist, type: type)
         }
@@ -260,8 +260,8 @@ class Q3Map
             Q3Node(plane: Int($0.plane),
                    front: Int($0.front),
                    back: Int($0.back),
-                   mins: float3(Float($0.mins.x), Float($0.mins.z), -Float($0.mins.y)),
-                   maxs: float3(Float($0.maxs.x), Float($0.maxs.z), -Float($0.maxs.y)))
+                   mins: float3(Float($0.mins.x), Float($0.mins.y), Float($0.mins.z)),
+                   maxs: float3(Float($0.maxs.x), Float($0.maxs.y), Float($0.maxs.z)))
         }
 
         return nodes
@@ -289,8 +289,8 @@ class Q3Map
         let leafs = readLump(.leafs, as: Leaf.self).map {
             Q3Leaf(cluster: Int($0.cluster),
                    area: Int($0.area),
-                   mins: float3(Float($0.mins.x), Float($0.mins.z), -Float($0.mins.y)),
-                   maxs: float3(Float($0.maxs.x), Float($0.maxs.z), -Float($0.maxs.y)),
+                   mins: float3(Float($0.mins.x), Float($0.mins.y), Float($0.mins.z)),
+                   maxs: float3(Float($0.maxs.x), Float($0.maxs.y), Float($0.maxs.z)),
                    leafface: Int($0.leafface),
                    n_leaffaces: Int($0.n_leaffaces),
                    leafbrush: Int($0.leafbrush),

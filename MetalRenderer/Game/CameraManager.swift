@@ -15,7 +15,7 @@ class CameraManager
     
     private init()
     {
-        mainCamera = DebugCamera()
+        mainCamera = Camera()
     }
     
     func update()

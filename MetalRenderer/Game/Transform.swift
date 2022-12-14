@@ -27,7 +27,9 @@ class Transform
         
         _matrix.translate(direction: position)
         
-        _matrix = _matrix * rotation.matrix
+        _matrix.rotate(angle: rotation.pitch.radians, axis: .x_axis)
+        _matrix.rotate(angle: rotation.yaw.radians, axis: .z_axis)
+        _matrix.rotate(angle: rotation.roll.radians, axis: .y_axis)
         
         _matrix.scale(axis: scale)
     }

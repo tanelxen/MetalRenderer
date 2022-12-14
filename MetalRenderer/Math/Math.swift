@@ -212,12 +212,12 @@ func lookAt(eye: float3, target: float3, up: float3) -> matrix_float4x4
     let u: float3 = normalize(simd_cross(up, n))
     let v: float3 = simd_cross(n, u)
     
-    return matrix_float4x4(
-        float4(u.x, v.x, n.x, 0.0),
-        float4(u.y, v.y, n.y, 0.0),
-        float4(u.z, v.z, n.z, 0.0),
-        float4(simd_dot(-u, eye), simd_dot(-v, eye), simd_dot(-n, eye), 1.0)
-    )
+    return matrix_float4x4(rows: [
+        float4(u.x, u.y, u.z, dot(-u, eye)),
+        float4(v.x, v.y, v.z, dot(-v, eye)),
+        float4(n.x, n.y, n.z, dot(-n, eye)),
+        float4(0.0, 0.0, 0.0, 1.0)
+    ])
 }
 
 func lookAt(eye: float3, direction: float3, up: float3) -> matrix_float4x4

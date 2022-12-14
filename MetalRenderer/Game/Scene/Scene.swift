@@ -154,8 +154,6 @@ class Scene
         
         sceneConstants.skyViewMatrix = camera.viewMatrix
         
-        sceneConstants.skyViewMatrix[3] = .zero
-        
         sceneConstants.projectionMatrix = camera.projectionMatrix
         
         sceneConstants.cameraPosition = camera.transform.position

@@ -108,7 +108,7 @@ final class PlayerMovement
     private func trace_ground()
     {
         var point = transform.position
-        point.y -= 0.25
+        point.z -= 0.25
         
         let hitResult = scene.trace(start: transform.position, end: point, mins: player_mins, maxs: player_maxs)
 

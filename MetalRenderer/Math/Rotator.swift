@@ -23,8 +23,8 @@ struct Rotator
         let cy = cos(yaw.radians)
         let sy = sin(yaw.radians)
 
-//        let dir = float3(cp * cy, cp * sy, -sp)
-        let dir = float3(cp * cy, -sp, -cp * sy)
+        let dir = float3(cp * cy, cp * sy, -sp)
+//        let dir = float3(cp * cy, -sp, -cp * sy)
 
         return normalize(dir)
     }
@@ -40,17 +40,17 @@ struct Rotator
         let cr = cos(roll.radians)
         let sr = sin(roll.radians)
 
-//        let dir = float3(
-//            -1 * sr * sp * cy - 1 * cr * -sy,
-//            -1 * sr * sp * sy - 1 * cr * cy,
-//            -1 * sr * cp
-//        )
-        
         let dir = float3(
-            -1 * sr * sp * cy + cr * sy,
-            -1 * sr * cp,
-            sr * sp * sy + cr * cy
+            -1 * sr * sp * cy - 1 * cr * -sy,
+            -1 * sr * sp * sy - 1 * cr * cy,
+            -1 * sr * cp
         )
+        
+//        let dir = float3(
+//            -1 * sr * sp * cy + cr * sy,
+//            -1 * sr * cp,
+//            sr * sp * sy + cr * cy
+//        )
 
         return normalize(dir)
     }
@@ -66,17 +66,17 @@ struct Rotator
         let cr = cos(roll.radians)
         let sr = sin(roll.radians)
 
-//        let dir = float3(
-//            cr * sp * cy - sr * -sy,
-//            cr * sp * sy - sr * cy,
-//            cr * cp
-//        )
-        
         let dir = float3(
             cr * sp * cy + sr * sy,
-            cr * cp,
-            -cr * sp * sy + sr * cy
+            cr * sp * sy - sr * cy,
+            cr * cp
         )
+        
+//        let dir = float3(
+//            cr * sp * cy + sr * sy,
+//            cr * cp,
+//            -cr * sp * sy + sr * cy
+//        )
 
         return normalize(dir)
     }

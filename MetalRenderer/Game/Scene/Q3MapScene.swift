@@ -46,7 +46,7 @@ class Q3MapScene: Scene
                 let angle = Float(spawnPoint["angle"]!)!
                 
                 let transform = Transform()
-                transform.position = float3(origin[0], origin[2] - 25, -origin[1])
+                transform.position = float3(origin[0], origin[1], origin[2] - 25)
                 transform.rotation = Rotator(pitch: 0, yaw: angle, roll: 0)
                 
                 if i == 0
@@ -76,6 +76,13 @@ class Q3MapScene: Scene
         var sceneUniforms = sceneConstants
         var modelConstants = ModelConstants()
 //        modelConstants.modelMatrix.scale(axis: float3(repeating: scale))
+        
+//        modelConstants.modelMatrix = matrix_float4x4(rows: [
+//            float4(1, 0, 0, 0),
+//            float4(0, 0, 1, 0),
+//            float4(0, -1, 0, 0),
+//            float4(0, 0, 0, 1)
+//        ])
         
         encoder?.setVertexBytes(&sceneUniforms, length: SceneConstants.stride, index: 1)
         encoder?.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
