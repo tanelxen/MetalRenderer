@@ -76,8 +76,7 @@ class DeferredRenderer: NSObject
     
     fileprivate func update()
     {
-        let dt = 1.0 / preferredFramesPerSecond
-        GameTime.update(deltaTime: dt)
+        GameTime.update()
         
         scene.update()
     }
