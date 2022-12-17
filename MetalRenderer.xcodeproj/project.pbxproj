@@ -179,6 +179,7 @@
 		8A84536A27ADA45100E25638 /* TextureManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A84536927ADA45100E25638 /* TextureManager.swift */; };
 		8A8B047627AED50C004A2537 /* room.mtl in Resources */ = {isa = PBXBuildFile; fileRef = 8A8B047527AED50C004A2537 /* room.mtl */; };
 		8A9977D029492CC400B48C70 /* Rotator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A9977CF29492CC400B48C70 /* Rotator.swift */; };
+		8A9977D9294BA82C00B48C70 /* Q3MapCollision.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD4567027B5D207009C43F4 /* Q3MapCollision.swift */; };
 		8A9C235827A4D5AA00965D21 /* Octree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A9C235727A4D5AA00965D21 /* Octree.swift */; };
 		8A9C235A27A4DB4100965D21 /* Wireframe.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8A9C235927A4DB4100965D21 /* Wireframe.metal */; };
 		8A9C764D27A8856F00D3BC90 /* PipelineState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A9C764C27A8856F00D3BC90 /* PipelineState.swift */; };
@@ -188,7 +189,6 @@
 		8AA6C3ED2793111100DCB7B7 /* Material.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AA6C3EC2793111100DCB7B7 /* Material.swift */; };
 		8AA6C3EF27935AC600DCB7B7 /* sphere.obj in Resources */ = {isa = PBXBuildFile; fileRef = 8AA6C3EE27935AC600DCB7B7 /* sphere.obj */; };
 		8AB9EEF927C00C7D008C33B2 /* Barney.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB9EEF827C00C7D008C33B2 /* Barney.swift */; };
-		8AB9EEFB27C0611C008C33B2 /* Q3MapTrace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB9EEFA27C0611C008C33B2 /* Q3MapTrace.swift */; };
 		8ABA755427B73248001AC1F5 /* duck.dae in Resources */ = {isa = PBXBuildFile; fileRef = 8ABA755227B72F16001AC1F5 /* duck.dae */; settings = {ATTRIBUTES = ("--decompress", ); }; };
 		8ABA755527B732F9001AC1F5 /* barney.mdl in Resources */ = {isa = PBXBuildFile; fileRef = 8A14296F27B4343500A9ED50 /* barney.mdl */; };
 		8ABA755927B746F5001AC1F5 /* shotgun.md3 in Resources */ = {isa = PBXBuildFile; fileRef = 8ABA755827B746F5001AC1F5 /* shotgun.md3 */; };
@@ -196,7 +196,6 @@
 		8ABA755F27B749FE001AC1F5 /* head.mdc in Resources */ = {isa = PBXBuildFile; fileRef = 8ABA755E27B749FE001AC1F5 /* head.mdc */; };
 		8ABAABCE27A709310091D260 /* Lighting.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8ABAABCD27A709310091D260 /* Lighting.metal */; };
 		8AC1658C278FBB8B00E1816A /* Scene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AC1658B278FBB8B00E1816A /* Scene.swift */; };
-		8AD4567127B5D207009C43F4 /* Q3MapCollision.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD4567027B5D207009C43F4 /* Q3MapCollision.swift */; };
 		8AE5332027BEEA8B00A80C1E /* GoldSrcMDL in Frameworks */ = {isa = PBXBuildFile; productRef = 8AE5331F27BEEA8B00A80C1E /* GoldSrcMDL */; };
 		8AE7F5702946965B00CD40BE /* PlayerMovement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AE7F56F2946965B00CD40BE /* PlayerMovement.swift */; };
 		8AEB11C527C146AF008FC445 /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AEB11C427C146AF008FC445 /* Player.swift */; };
@@ -397,7 +396,6 @@
 		8AA6C3EC2793111100DCB7B7 /* Material.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Material.swift; sourceTree = "<group>"; };
 		8AA6C3EE27935AC600DCB7B7 /* sphere.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = sphere.obj; sourceTree = "<group>"; };
 		8AB9EEF827C00C7D008C33B2 /* Barney.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Barney.swift; sourceTree = "<group>"; };
-		8AB9EEFA27C0611C008C33B2 /* Q3MapTrace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Q3MapTrace.swift; sourceTree = "<group>"; };
 		8ABA755227B72F16001AC1F5 /* duck.dae */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml.dae; path = duck.dae; sourceTree = "<group>"; };
 		8ABA755827B746F5001AC1F5 /* shotgun.md3 */ = {isa = PBXFileReference; lastKnownFileType = file; path = shotgun.md3; sourceTree = "<group>"; };
 		8ABA755A27B748F6001AC1F5 /* characterMedium.fbx */ = {isa = PBXFileReference; lastKnownFileType = file; path = characterMedium.fbx; sourceTree = "<group>"; };
@@ -697,7 +695,6 @@
 				8A4DB2F027AEC8F700DB6A1F /* ShadowTestScene.swift */,
 				8A75016127B08F84001F63F6 /* Q3MapScene.swift */,
 				8AD4567027B5D207009C43F4 /* Q3MapCollision.swift */,
-				8AB9EEFA27C0611C008C33B2 /* Q3MapTrace.swift */,
 				8A9C235727A4D5AA00965D21 /* Octree.swift */,
 				8A9EE2CB27A5A1C5000A15C1 /* AABB.swift */,
 			);
@@ -1114,11 +1111,11 @@
 				8A9C235A27A4DB4100965D21 /* Wireframe.metal in Sources */,
 				8A62323D2796282F00B1757C /* Instanced.metal in Sources */,
 				8A5DBB4F27A9D26A0088F693 /* Shadowmap.metal in Sources */,
-				8AD4567127B5D207009C43F4 /* Q3MapCollision.swift in Sources */,
 				8AE7F5702946965B00CD40BE /* PlayerMovement.swift in Sources */,
 				8A7500BA27AF0C7B001F63F6 /* SponzaScene.swift in Sources */,
 				8A33E705279B77070023D6C0 /* ssao.metal in Sources */,
 				8A0D271E279043DD00F2D9E6 /* SimpleQuad.swift in Sources */,
+				8A9977D9294BA82C00B48C70 /* Q3MapCollision.swift in Sources */,
 				8A420531279749AF00473A9D /* SkySphere.swift in Sources */,
 				8AEB11C527C146AF008FC445 /* Player.swift in Sources */,
 				8A22EAC2278F8BE000A8CD7D /* DeferredRenderer.swift in Sources */,
@@ -1164,7 +1161,6 @@
 				8A5EDFE027B99EED007166E4 /* WorldMesh.metal in Sources */,
 				8AA6C3ED2793111100DCB7B7 /* Material.swift in Sources */,
 				8A56D713278E058200D3FE2B /* AppDelegate.swift in Sources */,
-				8AB9EEFB27C0611C008C33B2 /* Q3MapTrace.swift in Sources */,
 				8A22EACA278FA89A00A8CD7D /* Math.swift in Sources */,
 				8A9977D029492CC400B48C70 /* Rotator.swift in Sources */,
 			);

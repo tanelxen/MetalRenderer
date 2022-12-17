@@ -165,11 +165,22 @@ class Q3Map
     
     fileprivate func readTextures() -> Array<Q3Texture>
     {
+        struct Texture
+        {
+            let name: String
+            let surfaceFlags: Int32
+            let contentFlags: Int32
+        }
+
         return readEntry(Lumps.textures.rawValue, length: 72) { buffer in
-            
-            Q3Texture(texureName: buffer.getASCIIUntilNull(64),
-                      surfaceFlags: buffer.getInt32(),
-                      contentFlags: buffer.getInt32())
+
+            let name = (buffer.getASCII(64)! as String).trimmingCharacters(in: .nulls)
+            let flags = buffer.getInt32()
+            let content = buffer.getInt32()
+
+            return Q3Texture(texureName: name,
+                      surfaceFlags: flags,
+                      contentFlags: content)
         }
     }
     
@@ -233,8 +244,7 @@ class Q3Map
         let planes = readLump(.planes, as: Plane.self).map { p -> Q3Plane in
             
             let normal = float3(p.normal.x, p.normal.y, p.normal.z)
-            let type = PlaneType(normal: normal)
-            return Q3Plane(normal: normal, distance: p.dist, type: type)
+            return Q3Plane(normal: normal, distance: p.dist)
         }
 
         return planes
@@ -258,8 +268,7 @@ class Q3Map
         
         let nodes = readLump(.nodes, as: Node.self).map {
             Q3Node(plane: Int($0.plane),
-                   front: Int($0.front),
-                   back: Int($0.back),
+                   child: [Int($0.front), Int($0.back)],
                    mins: float3(Float($0.mins.x), Float($0.mins.y), Float($0.mins.z)),
                    maxs: float3(Float($0.maxs.x), Float($0.maxs.y), Float($0.maxs.z)))
         }
@@ -459,4 +468,9 @@ extension Data {
     func subdata(in range: ClosedRange<Index>) -> Data {
         return subdata(in: range.lowerBound ..< range.upperBound + 1)
     }
+}
+
+extension CharacterSet
+{
+    static let nulls = CharacterSet(charactersIn: "\0")
 }

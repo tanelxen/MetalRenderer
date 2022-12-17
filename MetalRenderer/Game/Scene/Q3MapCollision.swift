@@ -13,337 +13,315 @@ struct HitResult
     var start: float3 = .zero
     var end: float3 = .zero
     
-    var point: float3 = .zero
-    var normal: float3?
+    var mins: float3 = .zero
+    var maxs: float3 = .zero
     
-    var fraction: Float = 0.0
+    var flags: Int = 0
+    
+    var offsets: [float3] = .init(repeating: .zero, count: 8)
+    
+    var endpos: float3 = .zero
+    
+    var frac: Float = 0.0
+    
     var plane: Q3Plane?
 }
 
-struct ContentType: OptionSet
-{
-    let rawValue: Int32
+fileprivate let CONTENTS_SOLID: Int32 = 1
 
-    static let solid = ContentType(rawValue: 1 << 0)
+fileprivate struct PlaneInfo
+{
+    let type: PlaneType
+    let signbits: Int
+    
+    init(normal: float3)
+    {
+        type = PlaneType(normal: normal)
+        
+        var bits = 0
+        
+        for i in 0...2
+        {
+            if normal[i] < 0 {
+                bits |= 1 << i
+            }
+        }
+        
+        signbits = bits
+    }
 }
+
+fileprivate let SURF_CLIP_EPSILON: Float = 0.125
+
+fileprivate let TW_STARTS_OUT: Int  = 1 << 1
+fileprivate let TW_ENDS_OUT: Int    = 1 << 2
+fileprivate let TW_ALL_SOLID: Int   = 1 << 3
 
 class Q3MapCollision
 {
-//    private var outputFraction: Float = 0.0
-//    private var outputEnd: float3 = .zero
-    private var outputStartOut = false
-    private var outputAllSolid = false
-    
-    private let EPSILON: Float = 0.125
-    
-    private enum TraceType
-    {
-        case TT_RAY
-        case TT_SPHERE
-        case TT_BOX
-    }
-
-    private var traceType: TraceType = .TT_RAY
-    private var traceRadius: Float = 0.0
-    private var traceMins: float3 = .zero
-    private var traceMaxs: float3 = .zero
-    private var traceExtents: float3 = .zero
-    
     private let q3map: Q3Map
+    private var planesInfo: [PlaneInfo] = []
     
     init(q3map: Q3Map)
     {
         self.q3map = q3map
+        
+        initPlanesInfo()
+    }
+    
+    private func initPlanesInfo()
+    {
+        planesInfo = q3map.planes.map { PlaneInfo(normal: $0.normal) }
     }
     
     func traceRay(result: inout HitResult, start inputStart: float3, end inputEnd: float3)
     {
-        traceType = .TT_RAY
-        Trace(result: &result, start: inputStart, end: inputEnd)
+        traceBox(result: &result, start: inputStart, end: inputEnd, mins: .zero, maxs: .zero)
     }
+    
+    func traceBox(result work: inout HitResult, start: float3, end: float3, mins: float3, maxs: float3)
+    {
+        work.flags = 0
+        work.frac = 1.0
+        
+        // Делаем симетричный AABB для упрощения проверок
+        for i in 0...2
+        {
+            let offset = (mins[i] + maxs[i]) * 0.5
+            
+            work.mins[i] = mins[i] - offset
+            work.maxs[i] = maxs[i] - offset
+            work.start[i] = start[i] + offset
+            work.end[i] = end[i] + offset
+        }
 
-    func traceSphere(result: inout HitResult, start inputStart: float3, end inputEnd: float3, inputRadius: Float)
-    {
-        traceType = .TT_SPHERE
-        traceRadius = inputRadius
-        Trace(result: &result, start: inputStart, end: inputEnd)
-    }
-    
-    func traceBox(result: inout HitResult, start inputStart: float3, end inputEnd: float3, mins inputMins: float3, maxs inputMaxs: float3)
-    {
-        if inputMins == .zero && inputMaxs == .zero
-        {
-            // the user TraceBox, but this is actually a ray
-            return traceRay(result: &result, start: inputStart, end: inputEnd)
-        }
-        else
-        {
-            // setup for a box
-            traceType = .TT_BOX
-            traceMins = inputMins
-            traceMaxs = inputMaxs
-            
-            traceExtents.x = -traceMins.x > traceMaxs.x ? -traceMins.x : traceMaxs.x
-            traceExtents.y = -traceMins.y > traceMaxs.y ? -traceMins.y : traceMaxs.y
-            traceExtents.z = -traceMins.z > traceMaxs.z ? -traceMins.z : traceMaxs.z
-            
-            Trace(result: &result, start: inputStart, end: inputEnd)
-        }
-    }
-    
-    private func Trace(result: inout HitResult, start inputStart: float3, end inputEnd: float3)
-    {
-        outputStartOut = true
-        outputAllSolid = false
-        
-        result.start = inputStart
-        result.end = inputEnd
-        result.point = inputEnd
-        
-        result.fraction = 1.0
-//        result.normal = nil
-//        result.plane = nil
+        work.offsets[0][0] = work.mins[0]
+        work.offsets[0][1] = work.mins[1]
+        work.offsets[0][2] = work.mins[2]
+
+        work.offsets[1][0] = work.maxs[0]
+        work.offsets[1][1] = work.mins[1]
+        work.offsets[1][2] = work.mins[2]
+
+        work.offsets[2][0] = work.mins[0]
+        work.offsets[2][1] = work.maxs[1]
+        work.offsets[2][2] = work.mins[2]
+
+        work.offsets[3][0] = work.maxs[0]
+        work.offsets[3][1] = work.maxs[1]
+        work.offsets[3][2] = work.mins[2]
+
+        work.offsets[4][0] = work.mins[0]
+        work.offsets[4][1] = work.mins[1]
+        work.offsets[4][2] = work.maxs[2]
+
+        work.offsets[5][0] = work.maxs[0]
+        work.offsets[5][1] = work.mins[1]
+        work.offsets[5][2] = work.maxs[2]
+
+        work.offsets[6][0] = work.mins[0]
+        work.offsets[6][1] = work.maxs[1]
+        work.offsets[6][2] = work.maxs[2]
+
+        work.offsets[7][0] = work.maxs[0]
+        work.offsets[7][1] = work.maxs[1]
+        work.offsets[7][2] = work.maxs[2]
 
         // walk through the BSP tree
-        CheckNode(result: &result, nodeIndex: 0, startFraction: 0.0, endFraction: 1.0, start: inputStart, end: inputEnd)
+        trace_node(&work, 0, 0, 1, work.start, work.end)
 
-        if result.fraction == 1.0
+        if work.frac == 1.0
         {
             // nothing blocked the trace
-            result.point = inputEnd
+            work.endpos = end
         }
         else
         {
             // collided with something
-            result.point = inputStart + result.fraction * (inputEnd - inputStart)
+            work.endpos = start + work.frac * (end - start)
         }
     }
     
-    private func CheckNode(result: inout HitResult, nodeIndex: Int, startFraction: Float, endFraction: Float, start: float3, end: float3)
+    private func trace_node(_ work: inout HitResult, _ index: Int, _ start_frac: Float, _ end_frac: Float, _ start: float3, _ end: float3)
     {
         // this is a leaf
-        if nodeIndex < 0
+        if index < 0
         {
-            CheckLeaf(result: &result, index: -(nodeIndex + 1))
+            trace_leaf(&work, -(index + 1))
             return
         }
         
-        var offset: Float = 0.0
-        
-        let node = q3map.nodes[nodeIndex]
+        let node = q3map.nodes[index]
         let plane = q3map.planes[node.plane]
+        let plane_type = planesInfo[node.plane].type
         
-        // ======================================
-        if traceType == .TT_RAY
-        {
-            offset = 0
-        }
-        else if traceType == .TT_SPHERE
-        {
-            offset = traceRadius
-        }
-        else if traceType == .TT_BOX
-        {
-            // this is just a dot product, but we want the absolute values
-            offset = abs(traceExtents[0] * plane.normal[0]) + abs(traceExtents[1] * plane.normal[1]) + abs(traceExtents[2] * plane.normal[2])
-        }
-        // ======================================
+        let offset: Float
+        let start_distance: Float
+        let end_distance: Float
         
-        let startDistance = dot(start, plane.normal) - plane.distance
-        let endDistance = dot(end, plane.normal) - plane.distance
-        
-        if startDistance >= offset && endDistance >= offset // both points are in front of the plane
+        if plane_type.rawValue < 3
         {
-            // so check the front child
-            CheckNode(result: &result, nodeIndex: node.front, startFraction: startFraction, endFraction: endFraction, start: start, end: end)
+            start_distance = start[plane_type.rawValue] - plane.distance
+            end_distance = end[plane_type.rawValue] - plane.distance
+            offset = work.maxs[plane_type.rawValue]
+        }
+        else
+        {
+            start_distance = dot(start, plane.normal) - plane.distance
+            end_distance = dot(end, plane.normal) - plane.distance
+
+            if work.maxs == work.mins {
+                offset = 0
+            } else {
+                /* "this is silly" - id Software */
+                offset = 2048
+            }
+        }
+        
+        if start_distance >= offset + 1 && end_distance >= offset + 1
+        {
+            trace_node(&work, node.child[0], start_frac, end_frac, start, end)
             return
         }
         
-        if startDistance < -offset && endDistance < -offset // both points are behind the plane
+        if start_distance < -offset - 1 && end_distance < -offset - 1
         {
-            // so check the back child
-            CheckNode(result: &result, nodeIndex: node.back, startFraction: startFraction, endFraction: endFraction, start: start, end: end)
+            trace_node(&work, node.child[1], start_frac, end_frac, start, end)
             return
         }
         
         // the line spans the splitting plane
         
         var side: Int
-        var fraction1, fraction2, middleFraction: Float
-        var middle: float3
+        var frac1, frac2, mid_frac: Float
+        var mid: float3
+
+        // split the segment into two
+        if start_distance < end_distance
+        {
+            side = 1 // back
+            let idistance = 1.0 / (start_distance - end_distance)
+            frac1 = (start_distance - offset + SURF_CLIP_EPSILON) * idistance
+            frac2 = (start_distance + offset + SURF_CLIP_EPSILON) * idistance
+        }
+        else if (end_distance < start_distance)
+        {
+            side = 0 // front
+            let idistance = 1.0 / (start_distance - end_distance)
+            frac1 = (start_distance + offset + SURF_CLIP_EPSILON) * idistance
+            frac2 = (start_distance - offset - SURF_CLIP_EPSILON) * idistance
+        }
+        else
+        {
+            side = 0 // front
+            frac1 = 1
+            frac2 = 0
+        }
+
+        frac1 = max(0, min(1, frac1))
+        frac2 = max(0, min(1, frac2))
+
+        // calculate the middle point for the first side
+        mid_frac = start_frac + (end_frac - start_frac) * frac1
+        mid = start + (end - start) * frac1
         
-        let inverseDistance: Float = 1.0 / (startDistance - endDistance)
 
-        // STEP 1: split the segment into two
-        if startDistance < endDistance
-        {
-            side = 1; // back
-            fraction1 = (startDistance - offset + EPSILON) * inverseDistance
-            fraction2 = (startDistance + offset + EPSILON) * inverseDistance
-        }
-        else if (endDistance < startDistance)
-        {
-            side = 0; // front
-            fraction1 = (startDistance + offset + EPSILON) * inverseDistance
-            fraction2 = (startDistance - offset - EPSILON) * inverseDistance
-        }
-        else
-        {
-            side = 0; // front
-            fraction1 = 1.0
-            fraction2 = 0.0
-        }
+        // check the first side
+        trace_node(&work, node.child[side], start_frac, mid_frac, start, mid)
 
-        fraction1 = max(0, min(1, fraction1))
-        fraction2 = max(0, min(1, fraction2))
+        // calculate the middle point for the second side
+        mid_frac = start_frac + (end_frac - start_frac) * frac2
+        mid = start + (end - start) * frac2
 
-        // STEP 3: calculate the middle point for the first side
-        middleFraction = startFraction + (endFraction - startFraction) * fraction1
-        middle = start + fraction1 * (end - start)
-        
-
-        // STEP 4: check the first side
-        if side == 0
-        {
-            CheckNode(result: &result, nodeIndex: node.front, startFraction: startFraction, endFraction: middleFraction, start: start, end: middle)
-        }
-        else
-        {
-            CheckNode(result: &result, nodeIndex: node.back, startFraction: startFraction, endFraction: middleFraction, start: start, end: middle)
-        }
-
-        // STEP 5: calculate the middle point for the second side
-        middleFraction = startFraction + (endFraction - startFraction) * fraction2
-        middle = start + fraction2 * (end - start)
-
-        // STEP 6: check the second side
-        if side == 0
-        {
-            CheckNode(result: &result, nodeIndex: node.back, startFraction: middleFraction, endFraction: endFraction, start: middle, end: end)
-        }
-        else
-        {
-            CheckNode(result: &result, nodeIndex: node.front, startFraction: middleFraction, endFraction: endFraction, start: middle, end: end)
-        }
+        // check the second side
+        trace_node(&work, node.child[side^1], mid_frac, end_frac, mid, end)
     }
     
-    private func CheckLeaf(result: inout HitResult, index: Int)
+    private func trace_leaf(_ work: inout HitResult, _ index: Int)
     {
         let leaf = q3map.leafs[index]
         
         for i in 0 ..< leaf.n_leafbrushes
         {
-            let leafbrush = Int(q3map.leafbrushes[leaf.leafbrush + i])
-            var brush = q3map.brushes[leafbrush]
+            let brush_index = Int(q3map.leafbrushes[leaf.leafbrush + i])
+            var brush = q3map.brushes[brush_index]
             
-//            let texture = q3map.textures[brush.texture]
-//            let contentFlags = ContentType(rawValue: texture.contentFlags)
+            let contentFlags = q3map.textures[brush.texture].contentFlags
             
-            if brush.brushside > 0 // && contentFlags.contains(.solid)
+            if brush.brushside > 0 && (contentFlags & CONTENTS_SOLID != 0)
             {
-                CheckBrush(result: &result, brush: &brush)
+                trace_brush(&work, &brush)
+                
+                if work.frac != 1 {
+                    return
+                }
             }
         }
     }
     
-    private func CheckBrush(result: inout HitResult, brush: inout Q3Brush)
+    private func trace_brush(_ work: inout HitResult, _ brush: inout Q3Brush)
     {
-        var startFraction: Float = -1.0
-        var endFraction: Float = 1.0
-        var startsOut = false
-        var endsOut = false
-        
-        var closestPlaneIndex: Int = -1
+        var start_frac: Float = -1.0
+        var end_frac: Float = 1.0
+        var closest_plane: Q3Plane?
         
         for i in 0 ..< brush.numBrushsides
         {
-            let brushSide = q3map.brushSides[brush.brushside + i]
-            let plane = q3map.planes[brushSide.plane]
+            let side_index = brush.brushside + i
+            let plane_index = q3map.brushSides[side_index].plane
+            let plane = q3map.planes[plane_index]
+            let signbits = planesInfo[plane_index].signbits
             
-            var startDistance: Float = 0
-            var endDistance: Float = 0
-            
-            if traceType == .TT_RAY
-            {
-                startDistance = dot(result.start, plane.normal) - plane.distance
-                endDistance = dot(result.end, plane.normal) - plane.distance
-            }
-            else if traceType == .TT_SPHERE
-            {
-                startDistance = dot(result.start, plane.normal) - (plane.distance + traceRadius)
-                endDistance = dot(result.end, plane.normal) - (plane.distance + traceRadius)
-            }
-            else if traceType == .TT_BOX
-            {
-                var offset: float3 = .zero
-                
-                offset.x = plane.normal.x < 0 ? traceMaxs.x : traceMins.x
-                offset.y = plane.normal.y < 0 ? traceMaxs.y : traceMins.y
-                offset.z = plane.normal.z < 0 ? traceMaxs.z : traceMins.z
+            let dist = plane.distance - dot(work.offsets[signbits], plane.normal)
 
-                startDistance =
-                    (result.start[0] + offset[0]) * plane.normal[0] +
-                    (result.start[1] + offset[1]) * plane.normal[1] +
-                    (result.start[2] + offset[2]) * plane.normal[2] - plane.distance
-                
-                endDistance =
-                    (result.end[0] + offset[0]) * plane.normal[0] +
-                    (result.end[1] + offset[1]) * plane.normal[1] +
-                    (result.end[2] + offset[2]) * plane.normal[2] - plane.distance
-            }
+            let start_distance = dot(work.start, plane.normal) - dist
+            let end_distance = dot(work.end, plane.normal) - dist
 
-            if startDistance > 0
+            if start_distance > 0
             {
-                startsOut = true
+                work.flags |= TW_STARTS_OUT
             }
             
-            if endDistance > 0
+            if end_distance > 0
             {
-                endsOut = true
+                work.flags |= TW_ENDS_OUT
             }
 
             // make sure the trace isn't completely on one side of the brush
             // both are in front of the plane, its outside of this brush
-            if (startDistance > 0 && (endDistance >= EPSILON || endDistance >= startDistance)) { return }
+            if (start_distance > 0 && (end_distance >= SURF_CLIP_EPSILON || end_distance >= start_distance)) { return }
             
             // both are behind this plane, it will get clipped by another one
-            if (startDistance <= 0 && endDistance <= 0) { continue }
+            if (start_distance <= 0 && end_distance <= 0) { continue }
             
 
-            // MMM... BEEFY
-            // line is entering into the brush
-            if startDistance > endDistance
+            if start_distance > end_distance
             {
-                let fraction = (startDistance - EPSILON) / (startDistance - endDistance)
+                let frac = (start_distance - SURF_CLIP_EPSILON) / (start_distance - end_distance)
                 
-                if fraction > startFraction
+                if frac > start_frac
                 {
-                    startFraction = fraction
-                    closestPlaneIndex = brushSide.plane
+                    start_frac = frac
+                    closest_plane = plane
                 }
             }
             else // line is leaving the brush
             {
-                let fraction = (startDistance + EPSILON) / (startDistance - endDistance)
+                let frac = (start_distance + SURF_CLIP_EPSILON) / (start_distance - end_distance)
                 
-                endFraction = min(endFraction, fraction)
+                end_frac = min(end_frac, frac)
             }
         }
         
-        if startFraction < endFraction && startFraction > -1 && startFraction < result.fraction
+        if start_frac < end_frac && start_frac > -1 && start_frac < work.frac
         {
-            result.fraction = max(startFraction, 0)
-            
-            if closestPlaneIndex != -1
-            {
-                result.plane = q3map.planes[closestPlaneIndex]
-                result.normal = q3map.planes[closestPlaneIndex].normal
-            }
+            work.frac = max(start_frac, 0)
+            work.plane = closest_plane
         }
         
-        if !startsOut || !endsOut
+        if !((work.flags & (TW_STARTS_OUT | TW_ENDS_OUT)) != 0)
         {
-            result.fraction = 0
+            work.frac = 0
         }
     }
 }

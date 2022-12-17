@@ -37,13 +37,12 @@ class Player
     
     func update()
     {
-        updateInput()
-        
         playerMovement.transform = transform
         
+        updateInput()
         updateMovement()
         
-        camera.transform.position = transform.position + float3(0, 0, 64)
+        camera.transform.position = transform.position + float3(0, 0, 30)
         camera.transform.rotation = transform.rotation
     }
     
@@ -100,7 +99,7 @@ class Player
             transform.rotation.pitch += rotateSpeed * deltaTime
         }
         
-//        playerMovement.isWishJump = Keyboard.isKeyPressed(.space)
+        playerMovement.isWishJump = Keyboard.isKeyPressed(.space)
         
         if Mouse.IsMouseButtonPressed(.right)
         {

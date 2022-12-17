@@ -67,7 +67,6 @@ struct Q3Plane
 {
     let normal: float3
     let distance: Float
-    let type: PlaneType
 }
 
 struct Q3Brush
@@ -86,7 +85,7 @@ struct Q3BrushSide
 struct Q3Node
 {
     let plane: Int
-    let front, back: Int
+    let child: [Int]    // front, back
     let mins: float3
     let maxs: float3
 }

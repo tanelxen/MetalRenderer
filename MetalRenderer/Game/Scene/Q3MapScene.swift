@@ -20,6 +20,8 @@ class Q3MapScene: Scene
     
     private (set) var player: Player?
     
+    private var canUpdate = false
+    
     init()
     {
         super.init(name: "Q3MapScene")
@@ -29,64 +31,63 @@ class Q3MapScene: Scene
     {
         if let url = Bundle.main.url(forResource: "q3dm1", withExtension: "bsp"), let data = try? Data(contentsOf: url)
         {
-            let q3map = Q3Map(data: data)
-            print("bsp file loaded")
-
-            collision = Q3MapCollision(q3map: q3map)
-
-            // get spawn points and set camera position to one
-            let spawnPoints = q3map.entities.filter { entity in
-                entity["classname"] == "info_player_deathmatch"
-            }
-            
-            for i in 0 ..< spawnPoints.count
-            {
-                let spawnPoint = spawnPoints[i]
-                let origin = spawnPoint["origin"]!.split(separator: " ").map { Float($0)! }
-                let angle = Float(spawnPoint["angle"]!)!
-                
-                let transform = Transform()
-                transform.position = float3(origin[0], origin[1], origin[2])
-                transform.rotation = Rotator(pitch: 0, yaw: angle, roll: 0)
-                
-                if i == 1
-                {
-                    transform.position.z += 1
-                    
-                    let player = Player(scene: self)
-                    player.transform = transform
-                    player.posses()
-
-                    self.player = player
-                }
-                else
-                {
-                    transform.position.z -= 25
-                    
-                    let barney = Barney(scene: self)
-                    barney.transform = transform
-                    
-                    entities.append(barney)
-                }
-            }
-
-            bspMesh = BSPMesh(device: Engine.device, map: q3map)
-            print("bsp mesh created")
+            loadMap(with: data)
         }
+    }
+    
+    private func loadMap(with data: Data)
+    {
+        let q3map = Q3Map(data: data)
+        print("bsp file loaded")
+
+        collision = Q3MapCollision(q3map: q3map)
+
+        // get spawn points and set camera position to one
+        let spawnPoints = q3map.entities.filter { entity in
+            entity["classname"] == "info_player_deathmatch"
+        }
+        
+        for i in 0 ..< spawnPoints.count
+        {
+            let spawnPoint = spawnPoints[i]
+            let origin = spawnPoint["origin"]!.split(separator: " ").map { Float($0)! }
+            let angle = Float(spawnPoint["angle"]!)!
+            
+            let transform = Transform()
+            transform.position = float3(origin[0], origin[1], origin[2])
+            transform.rotation = Rotator(pitch: 0, yaw: angle, roll: 0)
+            
+            if i == 0
+            {
+                transform.position.z += 60
+                
+//                    transform.position = float3(346, -394, 20.125)
+                
+                let player = Player(scene: self)
+                player.transform = transform
+                player.posses()
+
+                self.player = player
+            }
+            else
+            {
+                transform.position.z -= 25
+                
+                let barney = Barney(scene: self)
+                barney.transform = transform
+                
+                entities.append(barney)
+            }
+        }
+
+        bspMesh = BSPMesh(device: Engine.device, map: q3map)
+        print("bsp mesh created")
     }
     
     func renderWorld(with encoder: MTLRenderCommandEncoder?)
     {
         var sceneUniforms = sceneConstants
         var modelConstants = ModelConstants()
-//        modelConstants.modelMatrix.scale(axis: float3(repeating: scale))
-        
-//        modelConstants.modelMatrix = matrix_float4x4(rows: [
-//            float4(1, 0, 0, 0),
-//            float4(0, 0, 1, 0),
-//            float4(0, -1, 0, 0),
-//            float4(0, 0, 0, 1)
-//        ])
         
         encoder?.setVertexBytes(&sceneUniforms, length: SceneConstants.stride, index: 1)
         encoder?.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
@@ -129,7 +130,7 @@ class Q3MapScene: Scene
         var hitResult = HitResult()
         collision.traceRay(result: &hitResult, start: end, end: start)
         
-        return hitResult.fraction >= 1
+        return hitResult.frac >= 1
     }
     
     func trace(start: float3, end: float3, mins: float3, maxs: float3) -> HitResult
