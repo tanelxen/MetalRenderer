@@ -46,6 +46,8 @@ final class PlayerMovement
     var forwardmove: Float = 0.0
     var rightmove: Float = 0.0
     
+    var cl_forwardspeed: Float = 400.0
+    
     var isWishJump = false
     
     var isNoclip = false
@@ -108,7 +110,7 @@ final class PlayerMovement
         }
         
         var direction: float3 = .zero
-        direction += forward * forwardmove * MovementConstants.cl_forwardspeed
+        direction += forward * forwardmove * cl_forwardspeed
         direction += right * rightmove * MovementConstants.cl_sidespeed
         
         var wishspeed = simd.length(direction)

@@ -59,10 +59,6 @@ class Q3MapScene: Scene
             
             if i == 0
             {
-                transform.position.z += 60
-                
-//                    transform.position = float3(346, -394, 20.125)
-                
                 let player = Player(scene: self)
                 player.transform = transform
                 player.posses()
@@ -71,7 +67,7 @@ class Q3MapScene: Scene
             }
             else
             {
-                transform.position.z -= 25
+//                transform.position.z -= 25
                 
                 let barney = Barney(scene: self)
                 barney.transform = transform
@@ -118,7 +114,10 @@ class Q3MapScene: Scene
             
             entity.transform.updateModelMatrix()
             
-            var modelConstants = ModelConstants(modelMatrix: entity.transform.matrix)
+            var modelMatrix = entity.transform.matrix
+            modelMatrix.translate(direction: float3(0, 0, -25))
+            
+            var modelConstants = ModelConstants(modelMatrix: modelMatrix)
             encoder?.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
             
             entity.mesh?.renderWithEncoder(encoder!)
