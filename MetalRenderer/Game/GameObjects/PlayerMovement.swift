@@ -25,6 +25,7 @@ fileprivate enum MovementConstants
 
 fileprivate let OVERCLIP: Float = 1.001
 fileprivate let MAX_CLIP_PLANES: Int = 5
+fileprivate let STEPSIZE: Float = 18
 
 fileprivate let MOVEMENT_JUMP: Int              = 1 << 1
 fileprivate let MOVEMENT_JUMP_THIS_FRAME: Int   = 1 << 2
@@ -74,18 +75,18 @@ final class PlayerMovement
         
         trace_ground()
         apply_inputs()
+        
+        movement &= ~MOVEMENT_JUMP_THIS_FRAME
 
         if !isNoclip
         {
             let gravity = (movement & MOVEMENT_JUMPING) != 0
-            slide(gravity: gravity)
+            step_slide(gravity: gravity)
         }
         else
         {
             transform.position += velocity * GameTime.deltaTime
         }
-
-        movement &= ~MOVEMENT_JUMP_THIS_FRAME
     }
     
     private func apply_inputs()
@@ -93,9 +94,18 @@ final class PlayerMovement
         var forward = transform.rotation.forward
         var right = transform.rotation.right
         
-        // При обычном движении нам не нужна составляющая z
         forward.z = 0
         right.z = 0
+        
+        if let normal = self.ground_normal
+        {
+            // Проецируем вектора на плоскость для движения по ней
+            forward = clip_velocity(forward, normal: normal, overbounce: OVERCLIP)
+            right = clip_velocity(right, normal: normal, overbounce: OVERCLIP)
+            
+            nrm3(&forward)
+            nrm3(&right)
+        }
         
         var direction: float3 = .zero
         direction += forward * forwardmove * MovementConstants.cl_forwardspeed
@@ -155,7 +165,7 @@ final class PlayerMovement
         
         let hitResult = scene.trace(start: transform.position, end: point, mins: player_mins, maxs: player_maxs)
 
-        if hitResult.frac == 1 || (movement & MOVEMENT_JUMP_THIS_FRAME) != 0
+        if hitResult.fraction == 1 || (movement & MOVEMENT_JUMP_THIS_FRAME) != 0
         {
             movement |= MOVEMENT_JUMPING
             ground_normal = nil
@@ -241,10 +251,68 @@ final class PlayerMovement
         velocity.z = zspeed
     }
     
-    private func slide(gravity: Bool)
+    private func step_slide(gravity: Bool)
     {
-//        let position = transform.position
+        var start_o = transform.position
+        var start_v = velocity
         
+        if slide(gravity: gravity) == false
+        {
+            // we got exactly where we wanted to go first try
+            return
+        }
+        
+        var down = start_o
+        down.z -= STEPSIZE
+
+        var trace = scene.trace(start: start_o, end: down, mins: player_mins, maxs: player_maxs)
+
+        var up = float3(0, 0, 1)
+        
+        // never step up when you still have up velocity
+        if velocity.z > 0 && (trace.fraction == 1.0 || dot(trace.plane!.normal, up) < 0.7)
+        {
+            return
+        }
+
+        up = start_o
+        up.z += STEPSIZE
+        
+        // test the player position if they were a stepheight higher
+        trace = scene.trace(start: up, end: up, mins: player_mins, maxs: player_maxs)
+        
+        if trace.allsolid
+        {
+            // can't step up
+            return
+        }
+
+        // try slidemove from this position
+        transform.position = up
+        velocity = start_v
+        
+        slide(gravity: gravity)
+
+        // push down the final amount
+        down = transform.position
+        down.z -= STEPSIZE
+        
+        trace = scene.trace(start: transform.position, end: down, mins: player_mins, maxs: player_maxs)
+        
+        if !trace.allsolid
+        {
+            transform.position = trace.endpos
+        }
+        
+        if trace.fraction < 1.0
+        {
+            velocity = clip_velocity(velocity, normal: trace.plane!.normal, overbounce: OVERCLIP)
+        }
+    }
+    
+    @discardableResult
+    private func slide(gravity: Bool) -> Bool
+    {
         var planes: [float3] = []
         
         var end_velocity: float3 = .zero
@@ -278,26 +346,38 @@ final class PlayerMovement
         var vel = velocity
         nrm3(&vel)
         planes.append(vel)
+        
+        var n_bumps = 0
 
-        for _ in 0...3
+        while n_bumps < 4
         {
+            defer { n_bumps += 1 }
+            
             /* calculate future position and attempt the move */
             let end = transform.position + velocity * time_left
             let work = scene.trace(start: transform.position, end: end, mins: player_mins, maxs: player_maxs)
+            
+            if work.allsolid
+            {
+                // entity is completely trapped in another solid
+                // don't build up falling damage, but allow sideways acceleration
+                velocity.z = 0
+                return true
+            }
 
-            if work.frac > 0
+            if work.fraction > 0
             {
                 transform.position = work.endpos
             }
 
             /* if nothing blocked us we are done */
-            if work.frac == 1 { break }
+            if work.fraction == 1 { break }
 
-            time_left -= time_left * work.frac
+            time_left -= time_left * work.fraction
 
             if planes.count >= MAX_CLIP_PLANES {
                 velocity = .zero
-                return //1
+                return true
             }
 
             /*
@@ -363,7 +443,7 @@ final class PlayerMovement
                         if dot(clipped, planes[k]) >= 0.1 { continue }
                         
                         velocity = .zero
-                        return
+                        return true
                     }
                 }
 
@@ -379,7 +459,7 @@ final class PlayerMovement
             velocity = end_velocity
         }
 
-        return //n_bumps != 0
+        return n_bumps != 0
     }
 
 }

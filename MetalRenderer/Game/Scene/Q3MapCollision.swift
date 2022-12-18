@@ -16,15 +16,16 @@ struct HitResult
     var mins: float3 = .zero
     var maxs: float3 = .zero
     
-    var flags: Int = 0
-    
     var offsets: [float3] = .init(repeating: .zero, count: 8)
     
     var endpos: float3 = .zero
     
-    var frac: Float = 0.0
+    var fraction: Float = 0.0
     
     var plane: Q3Plane?
+    
+    var startsolid = false
+    var allsolid = false
 }
 
 fileprivate let CONTENTS_SOLID: Int32 = 1
@@ -53,10 +54,6 @@ fileprivate struct PlaneInfo
 
 fileprivate let SURF_CLIP_EPSILON: Float = 0.125
 
-fileprivate let TW_STARTS_OUT: Int  = 1 << 1
-fileprivate let TW_ENDS_OUT: Int    = 1 << 2
-fileprivate let TW_ALL_SOLID: Int   = 1 << 3
-
 class Q3MapCollision
 {
     private let q3map: Q3Map
@@ -81,8 +78,7 @@ class Q3MapCollision
     
     func traceBox(result work: inout HitResult, start: float3, end: float3, mins: float3, maxs: float3)
     {
-        work.flags = 0
-        work.frac = 1.0
+        work.fraction = 1
         
         // Делаем симетричный AABB для упрощения проверок
         for i in 0...2
@@ -128,9 +124,9 @@ class Q3MapCollision
         work.offsets[7][2] = work.maxs[2]
 
         // walk through the BSP tree
-        trace_node(&work, 0, 0, 1, work.start, work.end)
+        trace_node(work: &work, index: 0, start_frac: 0, end_frac: 1, start: work.start, end: work.end)
 
-        if work.frac == 1.0
+        if work.fraction == 1.0
         {
             // nothing blocked the trace
             work.endpos = end
@@ -138,16 +134,16 @@ class Q3MapCollision
         else
         {
             // collided with something
-            work.endpos = start + work.frac * (end - start)
+            work.endpos = start + work.fraction * (end - start)
         }
     }
     
-    private func trace_node(_ work: inout HitResult, _ index: Int, _ start_frac: Float, _ end_frac: Float, _ start: float3, _ end: float3)
+    private func trace_node(work: inout HitResult, index: Int, start_frac: Float, end_frac: Float, start: float3, end: float3)
     {
         // this is a leaf
         if index < 0
         {
-            trace_leaf(&work, -(index + 1))
+            trace_leaf(at: -(index + 1), with: &work)
             return
         }
         
@@ -180,13 +176,13 @@ class Q3MapCollision
         
         if start_distance >= offset + 1 && end_distance >= offset + 1
         {
-            trace_node(&work, node.child[0], start_frac, end_frac, start, end)
+            trace_node(work: &work, index: node.child[0], start_frac: start_frac, end_frac: end_frac, start: start, end: end)
             return
         }
         
         if start_distance < -offset - 1 && end_distance < -offset - 1
         {
-            trace_node(&work, node.child[1], start_frac, end_frac, start, end)
+            trace_node(work: &work, index: node.child[1], start_frac: start_frac, end_frac: end_frac, start: start, end: end)
             return
         }
         
@@ -227,43 +223,46 @@ class Q3MapCollision
         
 
         // check the first side
-        trace_node(&work, node.child[side], start_frac, mid_frac, start, mid)
+        trace_node(work: &work, index: node.child[side], start_frac: start_frac, end_frac: mid_frac, start: start, end: mid)
 
         // calculate the middle point for the second side
         mid_frac = start_frac + (end_frac - start_frac) * frac2
         mid = start + (end - start) * frac2
 
         // check the second side
-        trace_node(&work, node.child[side^1], mid_frac, end_frac, mid, end)
+        trace_node(work: &work, index: node.child[side^1], start_frac: mid_frac, end_frac: end_frac, start: mid, end: end)
     }
     
-    private func trace_leaf(_ work: inout HitResult, _ index: Int)
+    private func trace_leaf(at index: Int, with work: inout HitResult)
     {
         let leaf = q3map.leafs[index]
         
         for i in 0 ..< leaf.n_leafbrushes
         {
             let brush_index = Int(q3map.leafbrushes[leaf.leafbrush + i])
-            var brush = q3map.brushes[brush_index]
+            let brush = q3map.brushes[brush_index]
             
             let contentFlags = q3map.textures[brush.texture].contentFlags
             
             if brush.brushside > 0 && (contentFlags & CONTENTS_SOLID != 0)
             {
-                trace_brush(&work, &brush)
+                trace_brush(brush, work: &work)
                 
-                if work.frac != 1 {
+                if work.allsolid {
                     return
                 }
             }
         }
     }
     
-    private func trace_brush(_ work: inout HitResult, _ brush: inout Q3Brush)
+    private func trace_brush(_ brush: Q3Brush, work: inout HitResult)
     {
         var start_frac: Float = -1.0
         var end_frac: Float = 1.0
         var closest_plane: Q3Plane?
+        
+        var getout = false
+        var startout = false
         
         for i in 0 ..< brush.numBrushsides
         {
@@ -279,12 +278,12 @@ class Q3MapCollision
 
             if start_distance > 0
             {
-                work.flags |= TW_STARTS_OUT
+                startout = true
             }
             
             if end_distance > 0
             {
-                work.flags |= TW_ENDS_OUT
+                getout = true // endpoint is not in solid
             }
 
             // make sure the trace isn't completely on one side of the brush
@@ -313,15 +312,24 @@ class Q3MapCollision
             }
         }
         
-        if start_frac < end_frac && start_frac > -1 && start_frac < work.frac
+        if !startout
         {
-            work.frac = max(start_frac, 0)
-            work.plane = closest_plane
+            // original point was inside brush
+            work.startsolid = true
+            
+            if !getout
+            {
+                work.allsolid = true
+                work.fraction = 0
+            }
+            
+            return
         }
         
-        if !((work.flags & (TW_STARTS_OUT | TW_ENDS_OUT)) != 0)
+        if start_frac < end_frac && start_frac > -1 && start_frac < work.fraction
         {
-            work.frac = 0
+            work.fraction = max(start_frac, 0)
+            work.plane = closest_plane
         }
     }
 }

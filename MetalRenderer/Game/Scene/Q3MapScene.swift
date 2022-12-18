@@ -29,7 +29,7 @@ class Q3MapScene: Scene
     
     override func build()
     {
-        if let url = Bundle.main.url(forResource: "q3dm1", withExtension: "bsp"), let data = try? Data(contentsOf: url)
+        if let url = Bundle.main.url(forResource: "q3dm7", withExtension: "bsp"), let data = try? Data(contentsOf: url)
         {
             loadMap(with: data)
         }
@@ -130,7 +130,7 @@ class Q3MapScene: Scene
         var hitResult = HitResult()
         collision.traceRay(result: &hitResult, start: end, end: start)
         
-        return hitResult.frac >= 1
+        return hitResult.fraction >= 1
     }
     
     func trace(start: float3, end: float3, mins: float3, maxs: float3) -> HitResult
