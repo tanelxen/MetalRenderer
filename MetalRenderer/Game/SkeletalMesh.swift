@@ -29,16 +29,7 @@ class SkeletalMesh
         
         for mdlMesh in mdl.meshes
         {
-            let metalToQuake = simd_float4x4(rows: [
-                simd_float4(1, 0, 0, 0),
-                simd_float4(0, 0, -1, 0),
-                simd_float4(0, 1, 0, 0),
-                simd_float4(0, 0, 0, 1)
-            ])
-
-            let vertices = mdlMesh.vertexBuffer.map( { SkeletalMeshVertex(position: metalToQuake * $0.position, texCoord: $0.texCoord) } )
-            
-//            let vertices = mdlMesh.vertexBuffer.map( { SkeletalMeshVertex(position: $0.position, texCoord: $0.texCoord) } )
+            let vertices = mdlMesh.vertexBuffer.map( { SkeletalMeshVertex(position: $0.position, texCoord: $0.texCoord) } )
             let indices = mdlMesh.indexBuffer.map( { UInt32($0) } )
             
             let vertexBuffer = Engine.device.makeBuffer(bytes: vertices, length: vertices.count * MemoryLayout<SkeletalMeshVertex>.stride, options: [])

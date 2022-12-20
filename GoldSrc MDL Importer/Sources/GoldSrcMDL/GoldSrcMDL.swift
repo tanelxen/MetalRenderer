@@ -342,7 +342,7 @@ public class GoldSrcMDL
             
             meshVerts.append(
                 MeshVertex(
-                    position: float3(transformed_pos.x, transformed_pos.z, -transformed_pos.y),
+                    position: transformed_pos,
                     texCoord: verticesData[i].uv
                 )
             )
