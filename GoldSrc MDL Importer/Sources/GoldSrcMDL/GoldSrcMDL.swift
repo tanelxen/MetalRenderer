@@ -10,8 +10,9 @@ import simd
 
 public struct MeshVertex
 {
-    public let position: SIMD3<Float>
+    public let position: SIMD3<Float> // позиция вершины до применения матрицы
     public let texCoord: SIMD2<Float>
+    public let boneIndex: Int  // индекс матрицы в массиве sequences.frames.bonetransforms
 }
 
 public struct Mesh
@@ -29,11 +30,24 @@ public struct Texture
     public let height: Int
 }
 
+public struct Frame
+{
+    public let bonetransforms: [matrix_float4x4]
+}
+
+public struct Sequence
+{
+    public let name: String
+    public let frames: [Frame]
+}
+
 public class GoldSrcMDL
 {
     public var modelName = ""
     public var meshes: [Mesh] = []
     public var textures: [Texture] = []
+    
+    public var sequences: [Sequence] = []
     
     private var buffer: BinaryReader
     
@@ -45,7 +59,7 @@ public class GoldSrcMDL
     private var mdlBodyparts: [mstudiobodyparts_t] = []
     private var mdlModels: [mstudiomodel_t] = []
     
-    private var bonetransforms: [matrix_float4x4] = []
+//    private var bonetransforms: [matrix_float4x4] = []
     
     private var mdlSequences: [mstudioseqdesc_t] = []
     private var mdlAnimations: [[mstudioanim_t]] = []
@@ -335,15 +349,19 @@ public class GoldSrcMDL
 
         for i in 0 ..< vertNumber
         {
-            let transformed_pos = applyBoneTransforms(position: verticesData[i].pos,
-                                                      vertIndex: verticesData[i].vindex,
-                                                      vertBoneBuffer: bones,
-                                                      boneTransforms: bonetransforms)
+//            let transformed_pos = applyBoneTransforms(position: verticesData[i].pos,
+//                                                      vertIndex: verticesData[i].vindex,
+//                                                      vertBoneBuffer: bones,
+//                                                      boneTransforms: bonetransforms)
+            
+            let vertIndex = verticesData[i].vindex
+            let boneIndex = Int(bones[vertIndex])
             
             meshVerts.append(
                 MeshVertex(
-                    position: transformed_pos,
-                    texCoord: verticesData[i].uv
+                    position: verticesData[i].pos,
+                    texCoord: verticesData[i].uv,
+                    boneIndex: boneIndex
                 )
             )
         }
@@ -375,7 +393,35 @@ public class GoldSrcMDL
         
         self.mdlBones = buffer.readItems(offset: mdlHeader.boneindex, count: mdlHeader.numbones)
         
-        bonetransforms = calcRotations(sequenceIndex: 0, frame: 0)
+//        for sequenceIndex in 0 ..< mdlSequences.count
+//        {
+//            var label = mdlSequences[sequenceIndex].label
+//
+//            let name = withUnsafePointer(to: &label) { ptr -> String in
+//               return String(cString: UnsafeRawPointer(ptr).assumingMemoryBound(to: CChar.self))
+//            }
+//
+//            var frames: [Frame] = []
+//
+//            for frameIndex in 0 ..< 1// mdlSequences[sequenceIndex].numframes
+//            {
+//                let bonetransforms = calcRotations(sequenceIndex: sequenceIndex, frame: Int(frameIndex))
+//                let frame = Frame(bonetransforms: bonetransforms)
+//
+//                frames.append(frame)
+//            }
+//
+//            let sequence = Sequence(name: name, frames: frames)
+//            sequences.append(sequence)
+//        }
+        
+//        bonetransforms = calcRotations(sequenceIndex: 0, frame: 0)
+        
+        sequences.append(
+            Sequence(name: "idle", frames: [
+                Frame(bonetransforms: calcRotations(sequenceIndex: 0, frame: 0))
+            ])
+        )
     }
     
     private func calcRotations(sequenceIndex: Int, frame: Int, s: Float = 0) -> [matrix_float4x4]

@@ -17,6 +17,7 @@ struct VertexIn
 {
     float3 position [[attribute(0)]];
     float2 textureCoord [[attribute(1)]];
+    uint boneIndex [[attribute(2)]];
 };
 
 struct VertexOut
@@ -29,21 +30,17 @@ vertex VertexOut skeletal_mesh_vs
 (
     const VertexIn           vIn             [[ stage_in ]],
     constant SceneConstants  &viewConstants  [[ buffer(1) ]],
-    constant ModelConstants  &modelConstants [[ buffer(2) ]]
+    constant ModelConstants  &modelConstants [[ buffer(2) ]],
+    constant float4x4        *boneTransforms [[ buffer(3) ]]
 )
 {
-//    float4x4 quakeToMetal = float4x4(
-//        1, 0, 0, 0,
-//        0, 0, 1, 0,
-//        0, -1, 0, 0,
-//        0, 0, 0, 1
-//    );
-    
     float4x4 mvp = viewConstants.projectionMatrix * viewConstants.viewMatrix * modelConstants.modelMatrix;
     
     VertexOut data;
     
-    data.position = mvp * float4(vIn.position, 1.0);
+    float4x4 boneTransform = boneTransforms[vIn.boneIndex];
+    
+    data.position = mvp * boneTransform * float4(vIn.position, 1.0);
     data.textureCoord = vIn.textureCoord;
     
     return data;

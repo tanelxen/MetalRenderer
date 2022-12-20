@@ -13,6 +13,8 @@ class SkeletalMesh
     private var meshes: [SkeletalMeshData] = []
     //private var textures: [MTLTexture] = []
     
+    private var bonetransforms: [matrix_float4x4]
+    
     init?(name: String, ext: String)
     {
         guard let url = Bundle.main.url(forResource: name, withExtension: ext) else { return nil }
@@ -27,9 +29,14 @@ class SkeletalMesh
             TextureManager.shared.createTexture($0.name, bytes: $0.data, width: $0.width, height: $0.height)
         }
         
+        bonetransforms = mdl.sequences.first!.frames.first!.bonetransforms
+        
         for mdlMesh in mdl.meshes
         {
-            let vertices = mdlMesh.vertexBuffer.map( { SkeletalMeshVertex(position: $0.position, texCoord: $0.texCoord) } )
+            let vertices = mdlMesh.vertexBuffer.map {
+                SkeletalMeshVertex(position: $0.position, texCoord: $0.texCoord, boneIndex: uint($0.boneIndex))
+            }
+            
             let indices = mdlMesh.indexBuffer.map( { UInt32($0) } )
             
             let vertexBuffer = Engine.device.makeBuffer(bytes: vertices, length: vertices.count * MemoryLayout<SkeletalMeshVertex>.stride, options: [])
@@ -53,6 +60,9 @@ class SkeletalMesh
     
     func renderWithEncoder(_ encoder: MTLRenderCommandEncoder)
     {
+        let length = float4x4.stride * bonetransforms.count
+        encoder.setVertexBytes(&bonetransforms, length: length, index: 3)
+        
         for mesh in meshes
         {
             encoder.setVertexBuffer(mesh.vertexBuffer, offset: 0, index: 0)
@@ -83,6 +93,12 @@ class SkeletalMesh
         descriptor.attributes[1].offset = offset
         offset += float2.size
         
+        // Bone Index
+        descriptor.attributes[2].format = .uint
+        descriptor.attributes[2].bufferIndex = 0
+        descriptor.attributes[2].offset = offset
+        offset += UInt32.size
+        
         descriptor.layouts[0].stride = SkeletalMeshVertex.stride
         
         return descriptor
@@ -101,4 +117,5 @@ private struct SkeletalMeshVertex: sizeable
 {
     let position: float3
     let texCoord: float2
+    let boneIndex: uint
 }

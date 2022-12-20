@@ -42,7 +42,7 @@ class Player
         updateInput()
         updateMovement()
         
-        camera.transform.position = transform.position + float3(0, 0, 30)
+        camera.transform.position = transform.position + float3(0, 0, 40)
         camera.transform.rotation = transform.rotation
     }
     
