@@ -10,28 +10,42 @@ import GoldSrcMDL
 
 class SkeletalMesh
 {
+    private static var cache: [URL: ValveModel] = [:]
+    
     private var meshes: [SkeletalMeshData] = []
     //private var textures: [MTLTexture] = []
     
-    private var bonetransforms: [matrix_float4x4]
+    private var cur_frame: Int = 0
+    private var frames: [[matrix_float4x4]]
     
     init?(name: String, ext: String)
     {
         guard let url = Bundle.main.url(forResource: name, withExtension: ext) else { return nil }
-        guard let data = try? Data(contentsOf: url) else { return nil }
         
-        let mdl = GoldSrcMDL(data: data)
+        let model: ValveModel
+        
+        if let mdl = SkeletalMesh.cache[url]
+        {
+            model = mdl
+        }
+        else if let data = try? Data(contentsOf: url)
+        {
+            model = GoldSrcMDL(data: data).valveModel
+            SkeletalMesh.cache[url] = model
+        }
+        else
+        {
+            return nil
+        }
         
         let assetURL = Bundle.main.url(forResource: "dev_256", withExtension: "jpeg")!
         let devTexture = TextureManager.shared.getTexture(url: assetURL, origin: .topLeft)!
         
-        let textures = mdl.textures.map {
+        let textures = model.textures.map {
             TextureManager.shared.createTexture($0.name, bytes: $0.data, width: $0.width, height: $0.height)
         }
         
-        bonetransforms = mdl.sequences.first!.frames.first!.bonetransforms
-        
-        for mdlMesh in mdl.meshes
+        for mdlMesh in model.meshes
         {
             let vertices = mdlMesh.vertexBuffer.map {
                 SkeletalMeshVertex(position: $0.position, texCoord: $0.texCoord, boneIndex: uint($0.boneIndex))
@@ -56,10 +70,16 @@ class SkeletalMesh
             
             meshes.append(mesh)
         }
+        
+        let walk = model.sequences.first(where: { $0.name == "walk" || $0.name == "walk1" }) ?? model.sequences.first!
+
+        frames = walk.frames.map { $0.bonetransforms }
     }
     
     func renderWithEncoder(_ encoder: MTLRenderCommandEncoder)
     {
+        var bonetransforms = frames[cur_frame]
+        
         let length = float4x4.stride * bonetransforms.count
         encoder.setVertexBytes(&bonetransforms, length: length, index: 3)
         
@@ -73,6 +93,13 @@ class SkeletalMesh
                                           indexType: .uint32,
                                           indexBuffer: mesh.indexBuffer,
                                           indexBufferOffset: 0)
+        }
+        
+        cur_frame += 1
+        
+        if cur_frame >= frames.count
+        {
+            cur_frame = 0
         }
     }
     

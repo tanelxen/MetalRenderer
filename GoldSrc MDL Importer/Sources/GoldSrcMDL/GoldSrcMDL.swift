@@ -41,13 +41,28 @@ public struct Sequence
     public let frames: [Frame]
 }
 
-public class GoldSrcMDL
+public struct ValveModel
 {
     public var modelName = ""
     public var meshes: [Mesh] = []
     public var textures: [Texture] = []
-    
     public var sequences: [Sequence] = []
+}
+
+public class GoldSrcMDL
+{
+    public var valveModel: ValveModel {
+        ValveModel(modelName: self.modelName,
+                   meshes: self.meshes,
+                   textures: self.textures,
+                   sequences: self.sequences)
+    }
+    
+    private var modelName = ""
+    private var meshes: [Mesh] = []
+    private var textures: [Texture] = []
+    
+    private var sequences: [Sequence] = []
     
     private var buffer: BinaryReader
     
@@ -62,10 +77,9 @@ public class GoldSrcMDL
 //    private var bonetransforms: [matrix_float4x4] = []
     
     private var mdlSequences: [mstudioseqdesc_t] = []
+    private var mdlSeqGroups: [mstudioseqgroup_t] = []
     private var mdlAnimations: [[mstudioanim_t]] = []
     private var mdlBones: [mstudiobone_t] = []
-    
-    private let animValues = AnimValues()
     
     private let bytes: UnsafeRawPointer
     
@@ -76,6 +90,12 @@ public class GoldSrcMDL
         
         readHeader()
         readTextures()
+        
+        mdlSeqGroups = buffer.readItems(offset: mdlHeader.seqgroupindex, count: mdlHeader.numseqgroups)
+        
+        readSequences()
+        
+        mdlBones = buffer.readItems(offset: mdlHeader.boneindex, count: mdlHeader.numbones)
         
         setupBones()
         
@@ -379,7 +399,7 @@ public class GoldSrcMDL
         return transform * position
     }
     
-    private func setupBones()
+    private func readSequences()
     {
         self.mdlSequences = buffer.readItems(offset: mdlHeader.seqindex, count: mdlHeader.numseq)
         
@@ -388,40 +408,31 @@ public class GoldSrcMDL
             let anims: [mstudioanim_t] = buffer.readItems(offset: sequence.animindex, count: mdlHeader.numbones)
             self.mdlAnimations.append(anims)
         }
-        
-        animValues.parse(data: buffer.data, seqs: self.mdlSequences, anims: self.mdlAnimations, numBones: Int(mdlHeader.numbones))
-        
-        self.mdlBones = buffer.readItems(offset: mdlHeader.boneindex, count: mdlHeader.numbones)
-        
-//        for sequenceIndex in 0 ..< mdlSequences.count
-//        {
-//            var label = mdlSequences[sequenceIndex].label
-//
-//            let name = withUnsafePointer(to: &label) { ptr -> String in
-//               return String(cString: UnsafeRawPointer(ptr).assumingMemoryBound(to: CChar.self))
-//            }
-//
-//            var frames: [Frame] = []
-//
-//            for frameIndex in 0 ..< 1// mdlSequences[sequenceIndex].numframes
-//            {
-//                let bonetransforms = calcRotations(sequenceIndex: sequenceIndex, frame: Int(frameIndex))
-//                let frame = Frame(bonetransforms: bonetransforms)
-//
-//                frames.append(frame)
-//            }
-//
-//            let sequence = Sequence(name: name, frames: frames)
-//            sequences.append(sequence)
-//        }
-        
-//        bonetransforms = calcRotations(sequenceIndex: 0, frame: 0)
-        
-        sequences.append(
-            Sequence(name: "idle", frames: [
-                Frame(bonetransforms: calcRotations(sequenceIndex: 0, frame: 0))
-            ])
-        )
+    }
+    
+    private func setupBones()
+    {
+        for sequenceIndex in 0 ..< mdlSequences.count
+        {
+            var label = mdlSequences[sequenceIndex].label
+
+            let name = withUnsafePointer(to: &label) { ptr -> String in
+               return String(cString: UnsafeRawPointer(ptr).assumingMemoryBound(to: CChar.self))
+            }
+
+            var frames: [Frame] = []
+
+            for frameIndex in 0 ..< mdlSequences[sequenceIndex].numframes
+            {
+                let bonetransforms = calcRotations(sequenceIndex: sequenceIndex, frame: Int(frameIndex))
+                let frame = Frame(bonetransforms: bonetransforms)
+
+                frames.append(frame)
+            }
+
+            let sequence = Sequence(name: name, frames: frames)
+            sequences.append(sequence)
+        }
     }
     
     private func calcRotations(sequenceIndex: Int, frame: Int, s: Float = 0) -> [matrix_float4x4]
@@ -456,6 +467,8 @@ public class GoldSrcMDL
         var angle1 = float3()
         var angle2 = float3()
         
+        let animStructLength = MemoryLayout<mstudioanim_t>.size
+        
         let bone_value = [bone.value.0, bone.value.1, bone.value.2,
                           bone.value.3, bone.value.4, bone.value.5]
         
@@ -464,6 +477,44 @@ public class GoldSrcMDL
         
         let animOffset = [anim.offset.0, anim.offset.1, anim.offset.2,
                           anim.offset.3, anim.offset.4, anim.offset.5]
+        
+        let reader = BinaryReader(data: buffer.data)
+        
+        func getTotal(_ index: Int, axis: Int) -> Int
+        {
+            let animationIndex = Int(mdlSequences[sequenceIndex].animindex) + boneIndex * animStructLength
+            
+            let offset = animationIndex + Int(animOffset[axis + 3]) + index * MemoryLayout<Int16>.size
+            
+            reader.position = offset + MemoryLayout<UInt8>.size
+            let total = reader.getUInt8()
+            
+            return Int(total)
+        }
+        
+        func getValue(_ index: Int, axis: Int) -> Float
+        {
+            let animationIndex = Int(mdlSequences[sequenceIndex].animindex) + boneIndex * animStructLength
+            
+            let offset = animationIndex + Int(animOffset[axis + 3]) + index * MemoryLayout<Int16>.size
+            
+            reader.position = offset
+            let value = reader.getInt16()
+
+            return Float(value)
+        }
+        
+        func getValid(_ index: Int, axis: Int) -> Int
+        {
+            let animationIndex = Int(mdlSequences[sequenceIndex].animindex) + boneIndex * animStructLength
+            
+            let offset = animationIndex + Int(animOffset[axis + 3]) + index * MemoryLayout<Int16>.size
+
+            reader.position = offset
+            let valid = reader.getUInt8()
+            
+            return Int(valid)
+        }
         
         for axis in 0 ..< 3
         {
@@ -475,62 +526,50 @@ public class GoldSrcMDL
             }
             else
             {
-                func getTotal(_ index: Int) -> Int {
-                    let total = animValues.get(sequenceIndex, boneIndex, axis, index, .TOTAL)
-                    return total
-                }
-                
-                func getValue(_ index: Int) -> Float {
-                    let value = animValues.get(sequenceIndex, boneIndex, axis, index, .VALUE)
-                    return Float(value)
-                }
-                
-                func getValid(_ index: Int) -> Int {
-                    let valid = animValues.get(sequenceIndex, boneIndex, axis, index, .VALID)
-                    return valid
-                }
-                
                 var i = 0
                 var k = frame
 
-                while getTotal(i) <= k
+                while getTotal(i, axis: axis) <= k
                 {
-                    k -= getTotal(i)
-                    i += getValid(i) + 1
+                    k -= getTotal(i, axis: axis)
+                    i += getValid(i, axis: axis) + 1
                 }
                 
+                let valid = getValid(i, axis: axis)
+                let total = getTotal(i, axis: axis)
+                
                 // Bah, missing blend!
-                if getValid(i) > k
+                if valid > k
                 {
-                    angle1[axis] = getValue(i + k + 1)
+                    angle1[axis] = getValue(i + k + 1, axis: axis)
 
-                    if getValid(i) > k + 1
+                    if valid > k + 1
                     {
-                        angle2[axis] = getValue(i + k + 2)
+                        angle2[axis] = getValue(i + k + 2, axis: axis)
                     }
                     else
                     {
-                        if (getTotal(i) > k + 1)
+                        if total > k + 1
                         {
                             angle2[axis] = angle1[axis]
                         }
                         else
                         {
-                            angle2[axis] = getValue(i + getValid(i) + 2)
+                            angle2[axis] = getValue(i + valid + 2, axis: axis)
                         }
                     }
                 }
                 else
                 {
-                    angle1[axis] = getValue(i + getValid(i))
+                    angle1[axis] = getValue(i + valid, axis: axis)
 
-                    if (getTotal(i) > k + 1)
+                    if total > k + 1
                     {
                         angle2[axis] = angle1[axis]
                     }
                     else
                     {
-                        angle2[axis] = getValue(i + getValid(i) + 2)
+                        angle2[axis] = getValue(i + valid + 2, axis: axis)
                     }
                 }
 
@@ -559,12 +598,6 @@ public class GoldSrcMDL
     {
         var boneTransforms: [matrix_float4x4] = []
         
-//        var pos = positions
-//
-//        if seqDesc.motiontype & 1 == 1 { pos[Int(seqDesc.motionbone)][0] = 0 }
-//        if seqDesc.motiontype & 2 == 2 { pos[Int(seqDesc.motionbone)][1] = 0 }
-//        if seqDesc.motiontype & 2 == 2 { pos[Int(seqDesc.motionbone)][2] = 0 }
-
         for i in 0 ..< bones.count
         {
             var boneMatrix = matrix_float4x4.init(quaternions[i])
