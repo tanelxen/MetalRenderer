@@ -182,10 +182,42 @@ struct mstudioanim_t
 }
 
 // animation frames
-struct mstudioanimvalue_t
+
+/*
+ Структура AnimValue это адаптация оригинального mstudioanimvalue_t.
+ Так как это union, то здесь хранится только по одному Int16 представляющему значение value.
+ Значение valid получается как первая половина от value в виде UInt8.
+ Значение total получается как вторая половина от value в виде UInt8.
+ 
+ typedef union
+ {
+     struct {
+         byte    valid;
+         byte    total;
+     } num;
+     short        value;
+ } mstudioanimvalue_t;
+ */
+
+struct AnimValue
 {
-    let valid: UInt8
-    let total: UInt8
-    let value: UInt16
+    private let raw_value: Int16
+    
+    init(_ raw: Int16)
+    {
+        self.raw_value = raw
+    }
+    
+    var value: Float {
+        return Float(raw_value)
+    }
+    
+    var total: Int {
+        return Int(raw_value >> 8)
+    }
+    
+    var valid: Int {
+        return Int(raw_value & 0x00FF)
+    }
 }
 

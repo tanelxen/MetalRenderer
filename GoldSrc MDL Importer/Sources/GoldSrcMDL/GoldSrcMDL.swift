@@ -480,19 +480,7 @@ public class GoldSrcMDL
         
         let reader = BinaryReader(data: buffer.data)
         
-        func getTotal(_ index: Int, axis: Int) -> Int
-        {
-            let animationIndex = Int(mdlSequences[sequenceIndex].animindex) + boneIndex * animStructLength
-            
-            let offset = animationIndex + Int(animOffset[axis + 3]) + index * MemoryLayout<Int16>.size
-            
-            reader.position = offset + MemoryLayout<UInt8>.size
-            let total = reader.getUInt8()
-            
-            return Int(total)
-        }
-        
-        func getValue(_ index: Int, axis: Int) -> Float
+        func getAnimValue(_ index: Int, axis: Int) -> AnimValue
         {
             let animationIndex = Int(mdlSequences[sequenceIndex].animindex) + boneIndex * animStructLength
             
@@ -501,19 +489,7 @@ public class GoldSrcMDL
             reader.position = offset
             let value = reader.getInt16()
 
-            return Float(value)
-        }
-        
-        func getValid(_ index: Int, axis: Int) -> Int
-        {
-            let animationIndex = Int(mdlSequences[sequenceIndex].animindex) + boneIndex * animStructLength
-            
-            let offset = animationIndex + Int(animOffset[axis + 3]) + index * MemoryLayout<Int16>.size
-
-            reader.position = offset
-            let valid = reader.getUInt8()
-            
-            return Int(valid)
+            return AnimValue(value)
         }
         
         for axis in 0 ..< 3
@@ -528,24 +504,28 @@ public class GoldSrcMDL
             {
                 var i = 0
                 var k = frame
+                
+                var animValue = getAnimValue(i, axis: axis)
 
-                while getTotal(i, axis: axis) <= k
+                while animValue.total <= k
                 {
-                    k -= getTotal(i, axis: axis)
-                    i += getValid(i, axis: axis) + 1
+                    k -= animValue.total
+                    i += animValue.valid + 1
+                    
+                    animValue = getAnimValue(i, axis: axis)
                 }
                 
-                let valid = getValid(i, axis: axis)
-                let total = getTotal(i, axis: axis)
+                let valid = animValue.valid
+                let total = animValue.total
                 
                 // Bah, missing blend!
                 if valid > k
                 {
-                    angle1[axis] = getValue(i + k + 1, axis: axis)
+                    angle1[axis] = getAnimValue(i + k + 1, axis: axis).value
 
                     if valid > k + 1
                     {
-                        angle2[axis] = getValue(i + k + 2, axis: axis)
+                        angle2[axis] = getAnimValue(i + k + 2, axis: axis).value
                     }
                     else
                     {
@@ -555,13 +535,13 @@ public class GoldSrcMDL
                         }
                         else
                         {
-                            angle2[axis] = getValue(i + valid + 2, axis: axis)
+                            angle2[axis] = getAnimValue(i + valid + 2, axis: axis).value
                         }
                     }
                 }
                 else
                 {
-                    angle1[axis] = getValue(i + valid, axis: axis)
+                    angle1[axis] = getAnimValue(i + valid, axis: axis).value
 
                     if total > k + 1
                     {
@@ -569,7 +549,7 @@ public class GoldSrcMDL
                     }
                     else
                     {
-                        angle2[axis] = getValue(i + valid + 2, axis: axis)
+                        angle2[axis] = getAnimValue(i + valid + 2, axis: axis).value
                     }
                 }
 
