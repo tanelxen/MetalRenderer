@@ -25,6 +25,8 @@ class Barney
         self.scene = scene
         self.mesh = SkeletalMesh(name: "barney", ext: "mdl")
         
+        mesh?.sequenceName = "walk"
+        
         playerMovement.scene = scene
         playerMovement.cl_forwardspeed = 120
     }
@@ -43,6 +45,23 @@ class Barney
         playerMovement.transform = transform
         playerMovement.update()
         transform.position = playerMovement.transform.position
+        
+        if playerMovement.forwardmove != 0
+        {
+            setSequence(name: "walk")
+        }
+        else
+        {
+            setSequence(name: "idle1")
+        }
+    }
+    
+    private func setSequence(name: String)
+    {
+        if mesh?.sequenceName != name
+        {
+            mesh?.sequenceName = name
+        }
     }
     
     private func look()
