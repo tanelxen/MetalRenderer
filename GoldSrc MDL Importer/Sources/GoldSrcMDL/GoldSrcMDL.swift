@@ -39,6 +39,7 @@ public struct Sequence
 {
     public let name: String
     public let frames: [Frame]
+    public let fps: Float
 }
 
 public struct ValveModel
@@ -419,6 +420,8 @@ public class GoldSrcMDL
             let name = withUnsafePointer(to: &label) { ptr -> String in
                return String(cString: UnsafeRawPointer(ptr).assumingMemoryBound(to: CChar.self))
             }
+            
+            let fps = mdlSequences[sequenceIndex].fps
 
             var frames: [Frame] = []
 
@@ -430,12 +433,12 @@ public class GoldSrcMDL
                 frames.append(frame)
             }
 
-            let sequence = Sequence(name: name, frames: frames)
+            let sequence = Sequence(name: name, frames: frames, fps: fps)
             sequences.append(sequence)
         }
     }
     
-    private func calcRotations(sequenceIndex: Int, frame: Int, s: Float = 0) -> [matrix_float4x4]
+    private func calcRotations(sequenceIndex: Int, frame: Int) -> [matrix_float4x4]
     {
         var boneQuaternions: [simd_quatf] = []
         var bonePositions: [float3] = []
@@ -443,17 +446,12 @@ public class GoldSrcMDL
         for boneIndex in 0 ..< mdlBones.count
         {
             let q = calcBoneQuaternion(frame: frame,
-                                       bone: mdlBones[boneIndex],
-                                       anim: mdlAnimations[sequenceIndex][boneIndex],
                                        sequenceIndex: sequenceIndex,
-                                       boneIndex: boneIndex,
-                                       s: s)
+                                       boneIndex: boneIndex)
             
             let pos = calcBonePosition(frame: frame,
-                                       s: s,
-                                       bone: mdlBones[boneIndex],
-                                       anim: mdlAnimations[sequenceIndex][boneIndex],
-                                       animindex: UInt16(sequenceIndex))
+                                       sequenceIndex: sequenceIndex,
+                                       boneIndex: boneIndex)
             
             boneQuaternions.append(q)
             bonePositions.append(pos)
@@ -462,12 +460,10 @@ public class GoldSrcMDL
         return calcBoneTransforms(quaternions: boneQuaternions, positions: bonePositions, bones: mdlBones)
     }
     
-    private func calcBoneQuaternion(frame: Int, bone: mstudiobone_t, anim: mstudioanim_t, sequenceIndex: Int, boneIndex: Int, s: Float) -> simd_quatf
+    private func calcBoneQuaternion(frame: Int, sequenceIndex: Int, boneIndex: Int) -> simd_quatf
     {
-        var angle1 = float3()
-        var angle2 = float3()
-        
-        let animStructLength = MemoryLayout<mstudioanim_t>.size
+        let bone = mdlBones[boneIndex]
+        let anim = mdlAnimations[sequenceIndex][boneIndex]
         
         let bone_value = [bone.value.0, bone.value.1, bone.value.2,
                           bone.value.3, bone.value.4, bone.value.5]
@@ -482,6 +478,7 @@ public class GoldSrcMDL
         
         func getAnimValue(_ index: Int, axis: Int) -> AnimValue
         {
+            let animStructLength = MemoryLayout<mstudioanim_t>.size
             let animationIndex = Int(mdlSequences[sequenceIndex].animindex) + boneIndex * animStructLength
             
             let offset = animationIndex + Int(animOffset[axis + 3]) + index * MemoryLayout<Int16>.size
@@ -492,13 +489,14 @@ public class GoldSrcMDL
             return AnimValue(value)
         }
         
+        var angle = float3()
+        
         for axis in 0 ..< 3
         {
             if animOffset[axis + 3] == 0
             {
                 // default
-                angle1[axis] = bone_value[axis + 3]
-                angle2[axis] = angle1[axis]
+                angle[axis] = bone_value[axis + 3]
             }
             else
             {
@@ -515,63 +513,87 @@ public class GoldSrcMDL
                     animValue = getAnimValue(i, axis: axis)
                 }
                 
-                let valid = animValue.valid
-                let total = animValue.total
-                
                 // Bah, missing blend!
-                if valid > k
+                if animValue.valid > k
                 {
-                    angle1[axis] = getAnimValue(i + k + 1, axis: axis).value
-
-                    if valid > k + 1
-                    {
-                        angle2[axis] = getAnimValue(i + k + 2, axis: axis).value
-                    }
-                    else
-                    {
-                        if total > k + 1
-                        {
-                            angle2[axis] = angle1[axis]
-                        }
-                        else
-                        {
-                            angle2[axis] = getAnimValue(i + valid + 2, axis: axis).value
-                        }
-                    }
+                    angle[axis] = getAnimValue(i + k + 1, axis: axis).value
                 }
                 else
                 {
-                    angle1[axis] = getAnimValue(i + valid, axis: axis).value
-
-                    if total > k + 1
-                    {
-                        angle2[axis] = angle1[axis]
-                    }
-                    else
-                    {
-                        angle2[axis] = getAnimValue(i + valid + 2, axis: axis).value
-                    }
+                    angle[axis] = getAnimValue(i + animValue.valid, axis: axis).value
                 }
 
-                angle1[axis] = bone_value[axis + 3] + angle1[axis] * bone_scale[axis + 3]
-                angle2[axis] = bone_value[axis + 3] + angle2[axis] * bone_scale[axis + 3]
+                angle[axis] = bone_value[axis + 3] + angle[axis] * bone_scale[axis + 3]
             }
         }
         
-        if angle1 == angle2
-        {
-            return anglesToQuaternion(angle1)
-        }
-
-        let q1 = anglesToQuaternion(angle1)
-        let q2 = anglesToQuaternion(angle2)
-        
-        return simd_slerp(q1, q2, s)
+        return anglesToQuaternion(angle)
     }
     
-    private func calcBonePosition(frame: Int, s: Float, bone: mstudiobone_t, anim: mstudioanim_t, animindex: UInt16) -> float3
+    private func calcBonePosition(frame: Int, sequenceIndex: Int, boneIndex: Int) -> float3
     {
-        return float3(bone.value.0, bone.value.1, bone.value.2)
+        let bone = mdlBones[boneIndex]
+        let anim = mdlAnimations[sequenceIndex][boneIndex]
+        
+        let bone_value = [bone.value.0, bone.value.1, bone.value.2,
+                          bone.value.3, bone.value.4, bone.value.5]
+        
+        let bone_scale = [bone.scale.0, bone.scale.1, bone.scale.2,
+                          bone.scale.3, bone.scale.4, bone.scale.5]
+        
+        let animOffset = [anim.offset.0, anim.offset.1, anim.offset.2,
+                          anim.offset.3, anim.offset.4, anim.offset.5]
+        
+        let reader = BinaryReader(data: buffer.data)
+        
+        func getAnimValue(_ index: Int, axis: Int) -> AnimValue
+        {
+            let animStructLength = MemoryLayout<mstudioanim_t>.size
+            let animationIndex = Int(mdlSequences[sequenceIndex].animindex) + boneIndex * animStructLength
+            
+            let offset = animationIndex + Int(animOffset[axis]) + index * MemoryLayout<Int16>.size
+            
+            reader.position = offset
+            let value = reader.getInt16()
+
+            return AnimValue(value)
+        }
+        
+        var pos = float3()
+        
+        for axis in 0 ..< 3
+        {
+            // default
+            pos[axis] = bone_value[axis]
+            
+            if animOffset[axis] != 0
+            {
+                var i = 0
+                var k = frame
+                
+                var animValue = getAnimValue(i, axis: axis)
+
+                while animValue.total <= k
+                {
+                    k -= animValue.total
+                    i += animValue.valid + 1
+                    
+                    animValue = getAnimValue(i, axis: axis)
+                }
+                
+                // Bah, missing blend!
+                if animValue.valid > k
+                {
+                    pos[axis] += getAnimValue(i + k + 1, axis: axis).value * bone_scale[axis]
+                }
+                else
+                {
+                    pos[axis] += getAnimValue(i + animValue.valid, axis: axis).value * bone_scale[axis]
+                }
+            }
+        }
+        
+        return pos
     }
     
     private func calcBoneTransforms(quaternions: [simd_quatf], positions: [float3], bones: [mstudiobone_t]) -> [matrix_float4x4]
