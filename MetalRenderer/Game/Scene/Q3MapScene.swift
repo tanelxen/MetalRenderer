@@ -59,19 +59,15 @@ class Q3MapScene: Scene
             
             if i == 0
             {
-                let player = Player(scene: self)
-                player.transform = transform
-                player.posses()
-
-                self.player = player
+                player = Player(scene: self)
+                player?.transform = transform
+                player?.posses()
             }
             else
             {
-//                transform.position.z -= 25
-                
                 let barney = Barney(scene: self)
                 barney.transform = transform
-                
+
                 entities.append(barney)
             }
         }
@@ -121,6 +117,33 @@ class Q3MapScene: Scene
             encoder?.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
             
             entity.mesh?.renderWithEncoder(encoder!)
+        }
+    }
+    
+    func renderPlayer(with encoder: MTLRenderCommandEncoder?)
+    {
+        var sceneUniforms = self.sceneConstants
+        encoder?.setVertexBytes(&sceneUniforms, length: SceneConstants.stride, index: 1)
+        
+        if let player = player
+        {
+            let transform = player.camera.transform
+            
+            var modelMatrix = matrix_identity_float4x4
+            
+            modelMatrix.rotate(angle: -transform.rotation.pitch.radians, axis: .y_axis)
+            modelMatrix.rotate(angle: -transform.rotation.yaw.radians, axis: .z_axis)
+            
+            modelMatrix.translate(direction: -transform.position)
+            
+            modelMatrix = modelMatrix.inverse
+            
+            modelMatrix.translate(direction: float3(-2, 4, 0))
+            
+            var modelConstants = ModelConstants(modelMatrix: modelMatrix)
+            encoder?.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
+            
+            player.mesh?.renderWithEncoder(encoder!)
         }
     }
     

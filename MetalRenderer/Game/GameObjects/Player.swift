@@ -10,6 +10,7 @@ import simd
 class Player
 {
     var transform = Transform()
+    var mesh: SkeletalMesh?
     
     let camera = PlayerCamera()
     
@@ -24,6 +25,9 @@ class Player
     init(scene: Q3MapScene)
     {
         self.scene = scene
+        self.mesh = SkeletalMesh(name: "v_9mmhandgun", ext: "mdl")
+        
+        mesh?.sequenceName = "idle3"
         
         CameraManager.shared.mainCamera = camera
         

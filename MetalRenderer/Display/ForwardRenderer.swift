@@ -190,6 +190,9 @@ class ForwardRenderer: NSObject
             
             renderEncoder?.setRenderPipelineState(_skeletalMeshPipelineState)
             scene.renderSkeletalMeshes(with: renderEncoder)
+        
+//            renderEncoder?.setRenderPipelineState(_skeletalMeshPipelineState)
+            scene.renderPlayer(with: renderEncoder)
 
         renderEncoder?.popDebugGroup()
         

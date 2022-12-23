@@ -196,6 +196,8 @@
 		8ABA755F27B749FE001AC1F5 /* head.mdc in Resources */ = {isa = PBXBuildFile; fileRef = 8ABA755E27B749FE001AC1F5 /* head.mdc */; };
 		8ABAABCE27A709310091D260 /* Lighting.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8ABAABCD27A709310091D260 /* Lighting.metal */; };
 		8AC1658C278FBB8B00E1816A /* Scene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AC1658B278FBB8B00E1816A /* Scene.swift */; };
+		8AC79EBA29551CE300B85350 /* v_shotgun.mdl in Resources */ = {isa = PBXBuildFile; fileRef = 8AC79EB829551CE300B85350 /* v_shotgun.mdl */; };
+		8AC79EBD295526C900B85350 /* v_9mmhandgun.mdl in Resources */ = {isa = PBXBuildFile; fileRef = 8AC79EBC295526C900B85350 /* v_9mmhandgun.mdl */; };
 		8AE5332027BEEA8B00A80C1E /* GoldSrcMDL in Frameworks */ = {isa = PBXBuildFile; productRef = 8AE5331F27BEEA8B00A80C1E /* GoldSrcMDL */; };
 		8AE7F5702946965B00CD40BE /* PlayerMovement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AE7F56F2946965B00CD40BE /* PlayerMovement.swift */; };
 		8AEB11C527C146AF008FC445 /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AEB11C427C146AF008FC445 /* Player.swift */; };
@@ -402,6 +404,8 @@
 		8ABA755E27B749FE001AC1F5 /* head.mdc */ = {isa = PBXFileReference; lastKnownFileType = file; path = head.mdc; sourceTree = "<group>"; };
 		8ABAABCD27A709310091D260 /* Lighting.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Lighting.metal; sourceTree = "<group>"; };
 		8AC1658B278FBB8B00E1816A /* Scene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Scene.swift; sourceTree = "<group>"; };
+		8AC79EB829551CE300B85350 /* v_shotgun.mdl */ = {isa = PBXFileReference; lastKnownFileType = file; path = v_shotgun.mdl; sourceTree = "<group>"; };
+		8AC79EBC295526C900B85350 /* v_9mmhandgun.mdl */ = {isa = PBXFileReference; lastKnownFileType = file; path = v_9mmhandgun.mdl; sourceTree = "<group>"; };
 		8AD4567027B5D207009C43F4 /* Q3MapCollision.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Q3MapCollision.swift; sourceTree = "<group>"; };
 		8AE7F56F2946965B00CD40BE /* PlayerMovement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerMovement.swift; sourceTree = "<group>"; };
 		8AE7F5712946988900CD40BE /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = main.c; path = "../../../../Downloads/q3playground-master/main.c"; sourceTree = "<group>"; };
@@ -473,6 +477,8 @@
 		8A14296E27B4342600A9ED50 /* HL1Model */ = {
 			isa = PBXGroup;
 			children = (
+				8AC79EBC295526C900B85350 /* v_9mmhandgun.mdl */,
+				8AC79EB829551CE300B85350 /* v_shotgun.mdl */,
 				8A14296F27B4343500A9ED50 /* barney.mdl */,
 				8A5EDFF727BD2308007166E4 /* shell.mdl */,
 				8A5EDFF527BD081C007166E4 /* can.mdl */,
@@ -981,6 +987,7 @@
 				8A75009827AEDD32001F63F6 /* resourceStone.obj in Resources */,
 				8A75009A27AEDD32001F63F6 /* signpost.obj in Resources */,
 				8A62322C2796064300B1757C /* tree_pineTallA_detailed.obj in Resources */,
+				8AC79EBD295526C900B85350 /* v_9mmhandgun.mdl in Resources */,
 				8A62322D2796064300B1757C /* tree_pineRoundC.mtl in Resources */,
 				8A75007A27AEDD31001F63F6 /* rockA.mtl in Resources */,
 				8A75008427AEDD31001F63F6 /* tentHalf.mtl in Resources */,
@@ -1051,6 +1058,7 @@
 				8A7500B627AEDD32001F63F6 /* grass.mtl in Resources */,
 				8A0D273C2790BA3900F2D9E6 /* skull.jpg in Resources */,
 				8A7500A027AEDD32001F63F6 /* campfire.obj in Resources */,
+				8AC79EBA29551CE300B85350 /* v_shotgun.mdl in Resources */,
 				8A62323B27961D8000B1757C /* flower_yellowA.obj in Resources */,
 				8A7500B327AEDD32001F63F6 /* structureBase.mtl in Resources */,
 				8A75008927AEDD31001F63F6 /* rockA.obj in Resources */,
