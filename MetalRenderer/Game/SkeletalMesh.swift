@@ -16,7 +16,18 @@ class SkeletalMesh
     //private var textures: [MTLTexture] = []
     
     private var cur_frame: Int = 0
+    private var cur_frame_time: Float = 0.0
     private var frames: [[matrix_float4x4]]
+    
+    private var cur_anim_duration: Float = 1.0
+    
+    private var sequences: [Sequence] = []
+    
+    var sequenceName: String = "idle" {
+        didSet {
+            initSequence()
+        }
+    }
     
     init?(name: String, ext: String)
     {
@@ -71,9 +82,21 @@ class SkeletalMesh
             meshes.append(mesh)
         }
         
-        let walk = model.sequences.first(where: { $0.name == "walk" || $0.name == "walk1" }) ?? model.sequences.first!
+        sequences = model.sequences
+        
+        frames = []
+        initSequence()
+    }
+    
+    private func initSequence()
+    {
+        let seq = sequences.first(where: { $0.name == sequenceName }) ?? sequences.first!
 
-        frames = walk.frames.map { $0.bonetransforms }
+        frames = seq.frames.map { $0.bonetransforms }
+        cur_frame = 0
+        
+        cur_frame_time = 0.0
+        cur_anim_duration = Float(seq.frames.count) / seq.fps
     }
     
     func renderWithEncoder(_ encoder: MTLRenderCommandEncoder)
@@ -95,12 +118,14 @@ class SkeletalMesh
                                           indexBufferOffset: 0)
         }
         
-        cur_frame += 1
+        cur_frame_time += GameTime.deltaTime
         
-        if cur_frame >= frames.count
+        if cur_frame_time >= cur_anim_duration
         {
-            cur_frame = 0
+            cur_frame_time = 0
         }
+        
+        cur_frame = Int( Float(frames.count) * (cur_frame_time / cur_anim_duration) )
     }
     
     static func vertexDescriptor() -> MTLVertexDescriptor
