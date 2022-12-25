@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8A01E0FB2957529800ED82C9 /* Waypoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A01E0FA2957529800ED82C9 /* Waypoint.swift */; };
 		8A0D271827901DF100F2D9E6 /* Input.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A0D271727901DF100F2D9E6 /* Input.swift */; };
 		8A0D271A27901E2400F2D9E6 /* KeyCodes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A0D271927901E2400F2D9E6 /* KeyCodes.swift */; };
 		8A0D271C279033A100F2D9E6 /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A0D271B279033A100F2D9E6 /* Camera.swift */; };
@@ -22,6 +23,7 @@
 		8A0D273D2790BA3900F2D9E6 /* skull.mtl in Resources */ = {isa = PBXBuildFile; fileRef = 8A0D273A2790BA3900F2D9E6 /* skull.mtl */; };
 		8A0D27422790C88300F2D9E6 /* LightNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A0D27412790C88300F2D9E6 /* LightNode.swift */; };
 		8A14297227B4438100A9ED50 /* textures in Resources */ = {isa = PBXBuildFile; fileRef = 8A14297127B4438100A9ED50 /* textures */; };
+		8A1456E7295799EE00E92E68 /* NavigationGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A1456E6295799EE00E92E68 /* NavigationGraph.swift */; };
 		8A22EAB3278F735D00A8CD7D /* Engine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A22EAB2278F735D00A8CD7D /* Engine.swift */; };
 		8A22EAB9278F7E7100A8CD7D /* VertexDescriptorLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A22EAB8278F7E7100A8CD7D /* VertexDescriptorLibrary.swift */; };
 		8A22EAC0278F880700A8CD7D /* GameObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A22EABF278F880700A8CD7D /* GameObject.swift */; };
@@ -210,6 +212,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		8A01E0FA2957529800ED82C9 /* Waypoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Waypoint.swift; sourceTree = "<group>"; };
 		8A0D271727901DF100F2D9E6 /* Input.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Input.swift; sourceTree = "<group>"; };
 		8A0D271927901E2400F2D9E6 /* KeyCodes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyCodes.swift; sourceTree = "<group>"; };
 		8A0D271B279033A100F2D9E6 /* Camera.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Camera.swift; sourceTree = "<group>"; };
@@ -226,6 +229,7 @@
 		8A0D27412790C88300F2D9E6 /* LightNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LightNode.swift; sourceTree = "<group>"; };
 		8A14296F27B4343500A9ED50 /* barney.mdl */ = {isa = PBXFileReference; lastKnownFileType = file; path = barney.mdl; sourceTree = "<group>"; };
 		8A14297127B4438100A9ED50 /* textures */ = {isa = PBXFileReference; lastKnownFileType = folder; path = textures; sourceTree = "<group>"; };
+		8A1456E6295799EE00E92E68 /* NavigationGraph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationGraph.swift; sourceTree = "<group>"; };
 		8A22EAB2278F735D00A8CD7D /* Engine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Engine.swift; sourceTree = "<group>"; };
 		8A22EAB8278F7E7100A8CD7D /* VertexDescriptorLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VertexDescriptorLibrary.swift; sourceTree = "<group>"; };
 		8A22EABF278F880700A8CD7D /* GameObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameObject.swift; sourceTree = "<group>"; };
@@ -611,6 +615,8 @@
 				8AEB11C427C146AF008FC445 /* Player.swift */,
 				8AE7F56F2946965B00CD40BE /* PlayerMovement.swift */,
 				8AE7F5712946988900CD40BE /* main.c */,
+				8A01E0FA2957529800ED82C9 /* Waypoint.swift */,
+				8A1456E6295799EE00E92E68 /* NavigationGraph.swift */,
 			);
 			path = GameObjects;
 			sourceTree = "<group>";
@@ -1106,6 +1112,7 @@
 				8A56D72A278E10F600D3FE2B /* GBuffer.metal in Sources */,
 				8A22EAB3278F735D00A8CD7D /* Engine.swift in Sources */,
 				8A75015827B03653001F63F6 /* Billboard.swift in Sources */,
+				8A1456E7295799EE00E92E68 /* NavigationGraph.swift in Sources */,
 				8A0D272227907F0200F2D9E6 /* Common.metal in Sources */,
 				8A0D27292790981F00F2D9E6 /* TextureLibrary.swift in Sources */,
 				8A22EAB9278F7E7100A8CD7D /* VertexDescriptorLibrary.swift in Sources */,
@@ -1139,6 +1146,7 @@
 				8A5EDFD827B912AB007166E4 /* GeometryRenderPass.swift in Sources */,
 				8A56D718278E058200D3FE2B /* MetalRenderer.xcdatamodeld in Sources */,
 				8A42053B2797B03400473A9D /* SkySphere.metal in Sources */,
+				8A01E0FB2957529800ED82C9 /* Waypoint.swift in Sources */,
 				8A22EAC6278F940600A8CD7D /* Renderable.swift in Sources */,
 				8AEB11C727C14DCA008FC445 /* Frustum.swift in Sources */,
 				8A9C235827A4D5AA00965D21 /* Octree.swift in Sources */,

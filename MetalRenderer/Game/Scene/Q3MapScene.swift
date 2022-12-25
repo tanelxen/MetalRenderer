@@ -18,6 +18,8 @@ class Q3MapScene: Scene
     
     private var entities: [Barney] = []
     
+    private let navigation = NavigationGraph()
+    
     private (set) var player: Player?
     
     private var canUpdate = false
@@ -33,6 +35,8 @@ class Q3MapScene: Scene
         {
             loadMap(with: data)
         }
+        
+        navigation.load(named: "q3dm7")
     }
     
     private func loadMap(with data: Data)
@@ -63,17 +67,35 @@ class Q3MapScene: Scene
                 player?.transform = transform
                 player?.posses()
             }
-            else
-            {
-                let barney = Barney(scene: self)
-                barney.transform = transform
-
-                entities.append(barney)
-            }
+//            else
+//            {
+//                let barney = Barney(scene: self)
+//                barney.transform = transform
+//
+//                entities.append(barney)
+//            }
         }
 
         bspMesh = BSPMesh(device: Engine.device, map: q3map)
         print("bsp mesh created")
+        
+        Keyboard.onKeyDown = { key in
+            
+            if key == .q
+            {
+                self.makeWaypoint()
+            }
+            
+            if key == .e
+            {
+                self.removeWaypoint()
+            }
+            
+            if key == .r
+            {
+                self.navigation.save(named: "q3dm7")
+            }
+        }
     }
     
     func renderWorld(with encoder: MTLRenderCommandEncoder?)
@@ -147,6 +169,14 @@ class Q3MapScene: Scene
         }
     }
     
+    func renderWaypoints(with encoder: MTLRenderCommandEncoder?)
+    {
+        var sceneUniforms = self.sceneConstants
+        encoder?.setVertexBytes(&sceneUniforms, length: SceneConstants.stride, index: 1)
+        
+        navigation.render(with: encoder)
+    }
+    
     func trace(start: float3, end: float3) -> Bool
     {
         var hitResult = HitResult()
@@ -167,4 +197,70 @@ class Q3MapScene: Scene
     {
         player?.update()
     }
+    
+    private func makeWaypoint()
+    {
+        let forward = CameraManager.shared.mainCamera.transform.rotation.forward
+        
+        let start = CameraManager.shared.mainCamera.transform.position
+        let end = start + forward * 1024
+        
+        var hitResult = HitResult()
+        collision.traceRay(result: &hitResult, start: start, end: end)
+        
+        if hitResult.fraction != 1
+        {
+            let waypoint = Waypoint()
+            waypoint.transform.position = hitResult.endpos
+            waypoint.transform.position.z += waypoint.maxBounds.z
+            
+            navigation.add(waypoint)
+        }
+    }
+    
+    private func removeWaypoint()
+    {
+        let start = CameraManager.shared.mainCamera.transform.position
+        let dir = CameraManager.shared.mainCamera.transform.rotation.forward
+        
+        let index = navigation.findIntersectedByRay(start: start, dir: dir, dist: 256)
+        
+        if index != -1
+        {
+            navigation.remove(at: index)
+        }
+    }
+    
+    private func clickMouse(at: float2)
+    {
+    }
+}
+
+func intersection(orig: float3, dir: float3, mins: float3, maxs: float3, t: Float) -> Bool
+{
+    var dirfrac = float3()
+    
+    dirfrac.x = 1.0 / dir.x
+    dirfrac.y = 1.0 / dir.y
+    dirfrac.z = 1.0 / dir.z
+    
+    let tx1 = (mins.x - orig.x) * dirfrac.x
+    let tx2 = (maxs.x - orig.x) * dirfrac.x
+
+    var tmin = min(tx1, tx2)
+    var tmax = max(tx1, tx2)
+
+    let ty1 = (mins.y - orig.y) * dirfrac.y
+    let ty2 = (maxs.y - orig.y) * dirfrac.y
+
+    tmin = max(tmin, min(ty1, ty2))
+    tmax = min(tmax, max(ty1, ty2))
+
+    let tz1 = (mins.z - orig.z) * dirfrac.z
+    let tz2 = (maxs.z - orig.z) * dirfrac.z
+
+    tmin = max(tmin, min(tz1, tz2))
+    tmax = min(tmax, max(tz1, tz2))
+
+    return tmax >= max(0, tmin) && tmin < t
 }

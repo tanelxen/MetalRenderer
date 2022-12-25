@@ -14,6 +14,20 @@ enum Keyboard
     {
         guard Int(keyCode) < KEY_COUNT else { return }
         
+        if keys[Int(keyCode)] != isPressed
+        {
+            let key = KeyCodes(rawValue: keyCode)!
+            
+            if isPressed
+            {
+                onKeyDown?(key)
+            }
+            else
+            {
+                onKeyUp?(key)
+            }
+        }
+        
         keys[Int(keyCode)] = isPressed
     }
     
@@ -23,6 +37,9 @@ enum Keyboard
         
         return keys[Int(keyCode.rawValue)]
     }
+    
+    static var onKeyDown: ((KeyCodes) -> Void)?
+    static var onKeyUp: ((KeyCodes) -> Void)?
 }
 
 enum MouseCodes: Int
@@ -44,8 +61,18 @@ enum Mouse
     private static var lastWheelPosition: Float = 0.0
     private static var scrollWheelChange: Float = 0.0
     
+    static var onLeftMouseDown: ((float2) -> Void)?
+    
     static func setMouseButton(_ button: Int, isPressed: Bool)
     {
+        if mouseButtonList[button] != isPressed
+        {
+            if button == 0, isPressed
+            {
+                onLeftMouseDown?(overallMousePosition)
+            }
+        }
+        
         mouseButtonList[button] = isPressed
     }
     

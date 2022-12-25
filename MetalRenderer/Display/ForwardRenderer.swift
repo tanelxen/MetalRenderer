@@ -20,6 +20,7 @@ class ForwardRenderer: NSObject
     private var _worldMeshPipelineState: MTLRenderPipelineState!
     private var _staticMeshPipelineState: MTLRenderPipelineState!
     private var _skeletalMeshPipelineState: MTLRenderPipelineState!
+    private var _simplePipelineState: MTLRenderPipelineState!
     
     private var _skyCubeTexture: MTLTexture!
     private let _skybox = Skybox()
@@ -40,6 +41,7 @@ class ForwardRenderer: NSObject
         createWorldMeshPipelineState()
         createStaticMeshPipelineState()
         createSkeletalMeshPipelineState()
+        createSimplePipelineState()
         
         preferredFramesPerSecond = Float(view.preferredFramesPerSecond)
     }
@@ -120,6 +122,21 @@ class ForwardRenderer: NSObject
         _skeletalMeshPipelineState = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
     }
     
+    private func createSimplePipelineState()
+    {
+        let descriptor = MTLRenderPipelineDescriptor()
+        
+        descriptor.colorAttachments[0].pixelFormat = Preferences.colorPixelFormat
+        descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
+
+        descriptor.vertexFunction = Engine.defaultLibrary.makeFunction(name: "wireframe_vertex_shader")
+        descriptor.fragmentFunction = Engine.defaultLibrary.makeFunction(name: "wireframe_fragment_shader")
+
+        descriptor.label = "Simple Render Pipeline State"
+
+        _simplePipelineState = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
+    }
+    
     // MARK: - DO PASSES
     
     private func doMainRenderPass(with commandBuffer: MTLCommandBuffer?, in view: MTKView)
@@ -192,7 +209,21 @@ class ForwardRenderer: NSObject
             scene.renderSkeletalMeshes(with: renderEncoder)
         
 //            renderEncoder?.setRenderPipelineState(_skeletalMeshPipelineState)
-            scene.renderPlayer(with: renderEncoder)
+//            scene.renderPlayer(with: renderEncoder)
+
+        renderEncoder?.popDebugGroup()
+        
+        // Waypoints
+
+        renderEncoder?.pushDebugGroup("Waypoints Render")
+
+            renderEncoder?.setDepthStencilState(DepthStencilStateLibrary[.less])
+        
+            renderEncoder?.setFrontFacing(.clockwise)
+            renderEncoder?.setCullMode(.back)
+            
+            renderEncoder?.setRenderPipelineState(_simplePipelineState)
+            scene.renderWaypoints(with: renderEncoder)
 
         renderEncoder?.popDebugGroup()
         
