@@ -129,8 +129,8 @@ class ForwardRenderer: NSObject
         descriptor.colorAttachments[0].pixelFormat = Preferences.colorPixelFormat
         descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
 
-        descriptor.vertexFunction = Engine.defaultLibrary.makeFunction(name: "wireframe_vertex_shader")
-        descriptor.fragmentFunction = Engine.defaultLibrary.makeFunction(name: "wireframe_fragment_shader")
+        descriptor.vertexFunction = Engine.defaultLibrary.makeFunction(name: "wireframe_vs")
+        descriptor.fragmentFunction = Engine.defaultLibrary.makeFunction(name: "wireframe_fs")
 
         descriptor.label = "Simple Render Pipeline State"
 

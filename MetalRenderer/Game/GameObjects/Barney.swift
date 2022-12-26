@@ -20,6 +20,9 @@ class Barney
     
     private var isSeePlayer = false
     
+    private var route: [float3] = []
+    private var routeIndex = -1 // индекс точки в маршруте, к которой мы следуем
+    
     init(scene: Q3MapScene)
     {
         self.scene = scene
@@ -35,7 +38,9 @@ class Barney
     {
         playerMovement.forwardmove = 0
         
-        look()
+//        look()
+        
+        updateRoute()
         
         if isSeePlayer
         {
@@ -56,6 +61,12 @@ class Barney
         }
     }
     
+    func moveBy(route: [float3])
+    {
+        self.route = route
+        self.routeIndex = 0
+    }
+    
     private func setSequence(name: String)
     {
         if mesh?.sequenceName != name
@@ -72,6 +83,32 @@ class Barney
         let playerEye = player.transform.position + float3(0, 0, 64)
 
         isSeePlayer = scene!.trace(start: myEye, end: playerEye)
+    }
+    
+    private func updateRoute()
+    {
+        guard route.count > 0 else { return }
+        guard routeIndex != -1 else { return }
+        
+        if routeIndex >= route.count
+        {
+            routeIndex = -1
+            return
+        }
+        
+        let start = transform.position
+        let end = route[routeIndex]
+        
+        if length(end - start) < 32
+        {
+            routeIndex += 1
+            return
+        }
+        
+        let dir = normalize(end - start)
+        
+        transform.rotation.yaw = atan2(dir.y, dir.x).degrees
+        moveForward()
     }
     
     private func moveToPlayer(minDist: Float)

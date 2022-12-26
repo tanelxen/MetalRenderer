@@ -23,6 +23,7 @@ struct Vertex: sizeable
 struct ModelConstants: sizeable
 {
     var modelMatrix = matrix_identity_float4x4
+    var color = float3(1, 1, 1)
 }
 
 struct SkeletalConstants: sizeable

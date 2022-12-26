@@ -37,6 +37,8 @@ class Q3MapScene: Scene
         }
         
         navigation.load(named: "q3dm7")
+        navigation.scene = self
+        navigation.build()
     }
     
     private func loadMap(with data: Data)
@@ -67,13 +69,13 @@ class Q3MapScene: Scene
                 player?.transform = transform
                 player?.posses()
             }
-//            else
-//            {
-//                let barney = Barney(scene: self)
-//                barney.transform = transform
-//
-//                entities.append(barney)
-//            }
+            else if i == 6
+            {
+                let barney = Barney(scene: self)
+                barney.transform = transform
+
+                entities.append(barney)
+            }
         }
 
         bspMesh = BSPMesh(device: Engine.device, map: q3map)
@@ -94,6 +96,16 @@ class Q3MapScene: Scene
             if key == .r
             {
                 self.navigation.save(named: "q3dm7")
+            }
+            
+            if key == .n
+            {
+                let start = self.entities.first!.transform.position
+                let end = self.player!.transform.position
+                
+                let route = self.navigation.makeRoute(from: start, to: end)
+                
+                self.entities.first!.moveBy(route: route)
             }
         }
     }

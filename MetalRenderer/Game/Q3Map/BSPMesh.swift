@@ -17,6 +17,12 @@ struct IndexGroupKey: Hashable
     var hashValue: Int {
         return texture.hashValue ^ lightmap.hashValue
     }
+    
+    func hash(into hasher: inout Hasher)
+    {
+        let value = texture.hashValue ^ lightmap.hashValue
+        hasher.combine(value)
+    }
 }
 
 func ==(lhs: IndexGroupKey, rhs: IndexGroupKey) -> Bool

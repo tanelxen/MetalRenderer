@@ -47,6 +47,7 @@ struct ShadowConstants
 struct ModelConstants
 {
     float4x4 modelMatrix;
+    float3 color;
 };
 
 struct MaterialConstants

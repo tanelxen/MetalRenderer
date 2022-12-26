@@ -12,6 +12,8 @@ final class Waypoint
 {
     var transform = Transform()
     
+    private (set) var neighbors: [(Float, Int)] = []
+    
     private (set) var minBounds: float3 = .zero
     private (set) var maxBounds: float3 = float3(16, 16, 16)
     
@@ -26,6 +28,11 @@ final class Waypoint
     init()
     {
         setup()
+    }
+    
+    func add(neighbor: Int, distance: Float)
+    {
+        neighbors.append((distance, neighbor))
     }
     
     private func setup()
