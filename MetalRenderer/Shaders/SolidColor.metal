@@ -21,10 +21,10 @@ struct VertexOut
     float3 color;
 };
 
-vertex VertexOut wireframe_vs(constant float3           *vertices       [[ buffer(0) ]],
-                              constant SceneConstants   &viewConstants  [[ buffer(1) ]],
-                              constant ModelConstants   &modelConstants [[ buffer(2) ]],
-                              uint                      vertexID        [[ vertex_id ]])
+vertex VertexOut solid_color_vs(constant float3           *vertices       [[ buffer(0) ]],
+                                constant SceneConstants   &viewConstants  [[ buffer(1) ]],
+                                constant ModelConstants   &modelConstants [[ buffer(2) ]],
+                                uint                      vertexID        [[ vertex_id ]])
 {
     float4x4 mvp = viewConstants.projectionMatrix * viewConstants.viewMatrix * modelConstants.modelMatrix;
     
@@ -36,7 +36,7 @@ vertex VertexOut wireframe_vs(constant float3           *vertices       [[ buffe
     return data;
 }
 
-fragment half4 wireframe_fs(VertexOut vOut [[ stage_in ]])
+fragment half4 solid_color_fs(VertexOut vOut [[ stage_in ]])
 {
     return half4(vOut.color.r, vOut.color.g, vOut.color.b, 1.0);
 }

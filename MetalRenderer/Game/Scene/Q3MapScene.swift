@@ -44,9 +44,13 @@ class Q3MapScene: Scene
     private func loadMap(with data: Data)
     {
         let q3map = Q3Map(data: data)
-        print("bsp file loaded")
+        print("bsp file was loaded")
+        
+        bspMesh = BSPMesh(device: Engine.device, map: q3map)
+        print("bsp mesh was created")
 
         collision = Q3MapCollision(q3map: q3map)
+        print("collision was created")
 
         // get spawn points and set camera position to one
         let spawnPoints = q3map.entities.filter { entity in
@@ -77,9 +81,8 @@ class Q3MapScene: Scene
                 entities.append(barney)
             }
         }
-
-        bspMesh = BSPMesh(device: Engine.device, map: q3map)
-        print("bsp mesh created")
+        
+        print("entities were created")
         
         Keyboard.onKeyDown = { key in
             
@@ -187,6 +190,14 @@ class Q3MapScene: Scene
         encoder?.setVertexBytes(&sceneUniforms, length: SceneConstants.stride, index: 1)
         
         navigation.render(with: encoder)
+    }
+    
+    func renderNavmesh(with encoder: MTLRenderCommandEncoder?)
+    {
+        var sceneUniforms = self.sceneConstants
+        encoder?.setVertexBytes(&sceneUniforms, length: SceneConstants.stride, index: 1)
+        
+        bspMesh?.renderFacedUp(encoder!)
     }
     
     func trace(start: float3, end: float3) -> Bool

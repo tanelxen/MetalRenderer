@@ -31,7 +31,7 @@ class Barney
         mesh?.sequenceName = "walk"
         
         playerMovement.scene = scene
-        playerMovement.cl_forwardspeed = 120
+        playerMovement.cl_forwardspeed = 110
     }
     
     func update()

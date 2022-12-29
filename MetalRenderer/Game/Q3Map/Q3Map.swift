@@ -138,7 +138,7 @@ class Q3Map
     fileprivate func readHeaders()
     {
         // Magic should always equal IBSP for Q3 maps
-        let magic = buffer.getASCII(4)!
+        let magic = buffer.getASCII(4)
         assert(magic == "IBSP", "Magic must be equal to \"IBSP\"")
         
         // Version should always equal 0x2e for Q3 maps
@@ -174,7 +174,7 @@ class Q3Map
 
         return readEntry(Lumps.textures.rawValue, length: 72) { buffer in
 
-            let name = (buffer.getASCII(64)! as String).trimmingCharacters(in: .nulls)
+            let name = buffer.getASCII(64)//.trimmingCharacters(in: .nulls)
             let flags = buffer.getInt32()
             let content = buffer.getInt32()
 
@@ -211,11 +211,12 @@ class Q3Map
         }
         
         let vertices = readLump(.vertexes, as: Vertex.self).map {
-            Q3Vertex(position: float4($0.position.x, $0.position.y, $0.position.z, 1.0),
-                     normal: float4($0.normal.x, $0.normal.y, $0.normal.z, 0.0),
-                     color: float4(Float($0.color.r) / 255, Float($0.color.g) / 255, Float($0.color.b) / 255, Float($0.color.a) / 255),
-                     textureCoord: float2($0.textureCoord.x, $0.textureCoord.y),
-                     lightmapCoord: float2($0.lightmapCoord.x, $0.lightmapCoord.y))
+            
+            Q3Vertex(
+                position: float3($0.position.x, $0.position.y, $0.position.z),
+                textureCoord: float2($0.textureCoord.x, $0.textureCoord.y),
+                lightmapCoord: float2($0.lightmapCoord.x, $0.lightmapCoord.y)
+            )
         }
 
         return vertices
@@ -439,29 +440,13 @@ class Q3Map
         
         let offset = Int(entry.offset)
         let length = Int(entry.length)
+        let count = length / MemoryLayout<T>.size
         
-        let itemsCount = Int(entry.length) / Int(MemoryLayout<T>.size)
+        let pointer = (buffer.data.bytes + offset).bindMemory(to: T.self, capacity: count)
+        let buffer = UnsafeBufferPointer(start: pointer, count: count)
         
-        let range = offset ..< (offset + length)
-        let lumpData = buffer.data.subdata(in: range)
-        
-        let arr: [T] = lumpData.withUnsafeBytes {
-//            Array(UnsafeBufferPointer<UInt32>
-            Array(UnsafeBufferPointer<T>(start: $0, count: itemsCount))
-        }
-        
-        return arr
+        return Array(buffer)
     }
-    
-//    fileprivate func swizzle(_ v: float3) -> float3
-//    {
-//        return float3(v.x, v.z, -v.y)
-//    }
-//    
-//    fileprivate func swizzle(_ v: float4) -> float4
-//    {
-//        return float4(v.x, v.z, -v.y, 1)
-//    }
 }
 
 extension Data {

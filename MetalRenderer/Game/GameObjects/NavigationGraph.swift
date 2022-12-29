@@ -43,10 +43,10 @@ final class NavigationGraph
                 if tested[j] { continue }
                 
                 let endPod = end.transform.position
+                let dist = length(endPod - startPos)
                 
-                if scene.trace(start: startPos, end: endPod)
+                if scene.trace(start: startPos, end: endPod), dist < 560
                 {
-                    let dist = length(endPod - startPos)
                     let link = Link(start: start, end: end, distance: dist)
                     
                     links.append(link)

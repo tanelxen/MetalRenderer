@@ -15,11 +15,9 @@ using namespace metal;
 
 struct VertexIn
 {
-    float4 position [[attribute(0)]];
-    float4 normal [[attribute(1)]];
-    float4 color [[attribute(2)]];
-    float2 textureCoord [[attribute(3)]];
-    float2 lightmapCoord [[attribute(4)]];
+    float3 position [[attribute(0)]];
+    float2 textureCoord [[attribute(1)]];
+    float2 lightmapCoord [[attribute(2)]];
 };
 
 struct VertexOut
@@ -36,18 +34,11 @@ vertex VertexOut world_mesh_vs
     constant ModelConstants  &modelConstants [[ buffer(2) ]]
 )
 {
-//    float4x4 quakeToMetal = float4x4(
-//        1, 0, 0, 0,
-//        0, 0, 1, 0,
-//        0, -1, 0, 0,
-//        0, 0, 0, 1
-//    );
-    
     float4x4 mvp = viewConstants.projectionMatrix * viewConstants.viewMatrix * modelConstants.modelMatrix;
     
     VertexOut data;
     
-    data.position = mvp * vIn.position;
+    data.position = mvp * float4(vIn.position, 1);
     data.textureCoord = vIn.textureCoord;
     data.lightmapCoord = vIn.lightmapCoord;
     

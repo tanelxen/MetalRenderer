@@ -20,7 +20,7 @@ class ForwardRenderer: NSObject
     private var _worldMeshPipelineState: MTLRenderPipelineState!
     private var _staticMeshPipelineState: MTLRenderPipelineState!
     private var _skeletalMeshPipelineState: MTLRenderPipelineState!
-    private var _simplePipelineState: MTLRenderPipelineState!
+    private var _solidColorPipelineState: MTLRenderPipelineState!
     
     private var _skyCubeTexture: MTLTexture!
     private let _skybox = Skybox()
@@ -41,7 +41,7 @@ class ForwardRenderer: NSObject
         createWorldMeshPipelineState()
         createStaticMeshPipelineState()
         createSkeletalMeshPipelineState()
-        createSimplePipelineState()
+        createSolidColorPipelineState()
         
         preferredFramesPerSecond = Float(view.preferredFramesPerSecond)
     }
@@ -122,19 +122,19 @@ class ForwardRenderer: NSObject
         _skeletalMeshPipelineState = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
     }
     
-    private func createSimplePipelineState()
+    private func createSolidColorPipelineState()
     {
         let descriptor = MTLRenderPipelineDescriptor()
         
         descriptor.colorAttachments[0].pixelFormat = Preferences.colorPixelFormat
         descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
 
-        descriptor.vertexFunction = Engine.defaultLibrary.makeFunction(name: "wireframe_vs")
-        descriptor.fragmentFunction = Engine.defaultLibrary.makeFunction(name: "wireframe_fs")
+        descriptor.vertexFunction = Engine.defaultLibrary.makeFunction(name: "solid_color_vs")
+        descriptor.fragmentFunction = Engine.defaultLibrary.makeFunction(name: "solid_color_fs")
 
-        descriptor.label = "Simple Render Pipeline State"
+        descriptor.label = "Solid Color Render Pipeline State"
 
-        _simplePipelineState = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
+        _solidColorPipelineState = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
     }
     
     // MARK: - DO PASSES
@@ -208,24 +208,36 @@ class ForwardRenderer: NSObject
             renderEncoder?.setRenderPipelineState(_skeletalMeshPipelineState)
             scene.renderSkeletalMeshes(with: renderEncoder)
         
-//            renderEncoder?.setRenderPipelineState(_skeletalMeshPipelineState)
-//            scene.renderPlayer(with: renderEncoder)
+            renderEncoder?.setRenderPipelineState(_skeletalMeshPipelineState)
+            scene.renderPlayer(with: renderEncoder)
 
         renderEncoder?.popDebugGroup()
         
         // Waypoints
-
         renderEncoder?.pushDebugGroup("Waypoints Render")
 
             renderEncoder?.setDepthStencilState(DepthStencilStateLibrary[.less])
-        
+
             renderEncoder?.setFrontFacing(.clockwise)
             renderEncoder?.setCullMode(.back)
-            
-            renderEncoder?.setRenderPipelineState(_simplePipelineState)
+
+            renderEncoder?.setRenderPipelineState(_solidColorPipelineState)
             scene.renderWaypoints(with: renderEncoder)
 
         renderEncoder?.popDebugGroup()
+        
+//        // Navmesh
+//        renderEncoder?.pushDebugGroup("Navmesh Render")
+//
+//            renderEncoder?.setDepthStencilState(DepthStencilStateLibrary[.less])
+//
+//            renderEncoder?.setFrontFacing(.clockwise)
+//            renderEncoder?.setCullMode(.back)
+//
+//            renderEncoder?.setRenderPipelineState(_solidColorPipelineState)
+//            scene.renderNavmesh(with: renderEncoder)
+//
+//        renderEncoder?.popDebugGroup()
         
         renderEncoder?.endEncoding()
     }

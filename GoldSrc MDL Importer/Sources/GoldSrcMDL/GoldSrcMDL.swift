@@ -474,8 +474,6 @@ public class GoldSrcMDL
         let animOffset = [anim.offset.0, anim.offset.1, anim.offset.2,
                           anim.offset.3, anim.offset.4, anim.offset.5]
         
-        let reader = BinaryReader(data: buffer.data)
-        
         func getAnimValue(_ index: Int, axis: Int) -> AnimValue
         {
             let animStructLength = MemoryLayout<mstudioanim_t>.size
@@ -483,8 +481,8 @@ public class GoldSrcMDL
             
             let offset = animationIndex + Int(animOffset[axis + 3]) + index * MemoryLayout<Int16>.size
             
-            reader.position = offset
-            let value = reader.getInt16()
+            buffer.position = offset
+            let value = buffer.getInt16()
 
             return AnimValue(value)
         }
@@ -544,8 +542,6 @@ public class GoldSrcMDL
         let animOffset = [anim.offset.0, anim.offset.1, anim.offset.2,
                           anim.offset.3, anim.offset.4, anim.offset.5]
         
-        let reader = BinaryReader(data: buffer.data)
-        
         func getAnimValue(_ index: Int, axis: Int) -> AnimValue
         {
             let animStructLength = MemoryLayout<mstudioanim_t>.size
@@ -553,8 +549,8 @@ public class GoldSrcMDL
             
             let offset = animationIndex + Int(animOffset[axis]) + index * MemoryLayout<Int16>.size
             
-            reader.position = offset
-            let value = reader.getInt16()
+            buffer.position = offset
+            let value = buffer.getInt16()
 
             return AnimValue(value)
         }

@@ -58,6 +58,10 @@ class BSPMesh
     var vertexBuffer: MTLBuffer! = nil
     var faceMeshes: Array<FaceMesh> = []
     
+    var facedUpCount = 0
+    var facedUpIndiciesBuffer: MTLBuffer! = nil
+    var facedUpVertexBuffer: MTLBuffer! = nil
+    
     init(device: MTLDevice, map: Q3Map)
     {
         self.device = device
@@ -87,6 +91,8 @@ class BSPMesh
         
         vertexBuffer = device.makeBuffer(bytes: map.vertices, length: map.vertices.count * MemoryLayout<Q3Vertex>.size, options: MTLResourceOptions())
         
+        var facedUp: [UInt32] = []
+        
         for (key, indices) in groupedIndices
         {
             let url = URL(fileURLWithPath: "Contents/Resources/" + key.texture + ".jpg", relativeTo: Bundle.main.bundleURL)
@@ -104,7 +110,62 @@ class BSPMesh
             let faceMesh = FaceMesh(texture: texture, lightmap: lightmap, indexCount: indices.count, indexBuffer: buffer!)
             
             faceMeshes.append(faceMesh)
+            
+            var i = 0
+
+            while i < indices.count
+            {
+                let i0 = Int(indices[i + 0])
+                let v0 = map.vertices[i0].position
+
+                let i1 = Int(indices[i + 1])
+                let v1 = map.vertices[i1].position
+
+                let i2 = Int(indices[i + 2])
+                let v2 = map.vertices[i2].position
+
+                if isFacedUp(v0: v0, v1: v1, v2: v2) && v0.z < 8
+                {
+                    facedUp.append(contentsOf: [indices[i + 0], indices[i + 1], indices[i + 2]])
+                }
+
+                i += 3
+            }
         }
+        
+        typealias VertexPair = (float3, UInt32)
+        var vertexPairs: [VertexPair] = []
+        
+        var indicies: [UInt32] = []
+        
+        for originalIndex in facedUp
+        {
+            if let index = vertexPairs.firstIndex(where: { $0.1 == originalIndex })
+            {
+                indicies.append(UInt32(index))
+            }
+            else
+            {
+                let pos = map.vertices[Int(originalIndex)].position
+                let new = (pos, originalIndex)
+                
+                indicies.append(UInt32(vertexPairs.count))
+                vertexPairs.append(new)
+            }
+        }
+        
+        facedUpCount = indicies.count
+        facedUpIndiciesBuffer = device.makeBuffer(bytes: indicies,
+                                          length: indicies.count * MemoryLayout<UInt32>.size,
+                                          options: MTLResourceOptions())
+        
+        let vertices = vertexPairs.map { $0.0 }
+        
+        facedUpVertexBuffer = device.makeBuffer(bytes: vertices,
+                                                length: vertices.count * MemoryLayout<float3>.size,
+                                                options: MTLResourceOptions())
+        
+        
     }
     
     func renderWithEncoder(_ encoder: MTLRenderCommandEncoder)
@@ -117,6 +178,23 @@ class BSPMesh
         }
     }
     
+    func renderFacedUp(_ encoder: MTLRenderCommandEncoder)
+    {
+        var modelConstants = ModelConstants()
+        modelConstants.modelMatrix.translate(direction: float3(0, 0, 0.2))
+        modelConstants.color = float3(0.3, 0.3, 0.3)
+        
+        encoder.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
+        
+        encoder.setVertexBuffer(facedUpVertexBuffer, offset: 0, index: 0)
+        
+        encoder.drawIndexedPrimitives(type: .triangle,
+                                      indexCount: facedUpCount,
+                                      indexType: .uint32,
+                                      indexBuffer: facedUpIndiciesBuffer,
+                                      indexBufferOffset: 0)
+    }
+    
     static func vertexDescriptor() -> MTLVertexDescriptor
     {
         let descriptor = MTLVertexDescriptor()
@@ -124,32 +202,20 @@ class BSPMesh
         
         // Position
         descriptor.attributes[0].offset = offset
-        descriptor.attributes[0].format = .float4
+        descriptor.attributes[0].format = .float3
         descriptor.attributes[0].bufferIndex = 0
-        offset += MemoryLayout<float4>.size
-        
-        // Normal
-        descriptor.attributes[1].offset = offset
-        descriptor.attributes[1].format = .float4
-        descriptor.attributes[1].bufferIndex = 0
-        offset += MemoryLayout<float4>.size
-        
-        // Color
-        descriptor.attributes[2].offset = offset
-        descriptor.attributes[2].format = .float4
-        descriptor.attributes[2].bufferIndex = 0
-        offset += MemoryLayout<float4>.size
+        offset += MemoryLayout<float3>.size
         
         // Texure Coordinates
-        descriptor.attributes[3].offset = offset
-        descriptor.attributes[3].format = .float2
-        descriptor.attributes[3].bufferIndex = 0
+        descriptor.attributes[1].offset = offset
+        descriptor.attributes[1].format = .float2
+        descriptor.attributes[1].bufferIndex = 0
         offset += MemoryLayout<float2>.size
         
         // Lightmap Coordinates
-        descriptor.attributes[4].offset = offset
-        descriptor.attributes[4].format = .float2
-        descriptor.attributes[4].bufferIndex = 0
+        descriptor.attributes[2].offset = offset
+        descriptor.attributes[2].format = .float2
+        descriptor.attributes[2].bufferIndex = 0
         offset += MemoryLayout<float2>.size
         
         descriptor.layouts[0].stepFunction = .perVertex
@@ -159,3 +225,9 @@ class BSPMesh
     }
 }
 
+func isFacedUp(v0: float3, v1: float3, v2: float3) -> Bool
+{
+    let normal = normalize(cross(v1 - v0, v1 - v2))
+    
+    return dot(normal, .z_axis) > 0.99
+}

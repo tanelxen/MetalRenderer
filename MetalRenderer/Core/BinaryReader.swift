@@ -10,12 +10,12 @@ import Foundation
 class BinaryReader
 {
     var position: Int
-    var data: Data
+    var data: NSData
     
     init(data: Data)
     {
         position = 0
-        self.data = data
+        self.data = data as NSData
     }
     
     func reset()
@@ -35,86 +35,52 @@ class BinaryReader
     
     func getInt8() -> Int8
     {
-        return getNumber(0)
+        return getNumber()
     }
     
     func getUInt8() -> UInt8
     {
-        return getNumber(0)
+        return getNumber()
     }
     
     func getInt16() -> Int16
     {
-        return getNumber(0)
+        return getNumber()
     }
     
     func getUInt16() -> UInt16
     {
-        return getNumber(0)
+        return getNumber()
     }
     
     func getInt32() -> Int32
     {
-        return getNumber(0)
+        return getNumber()
     }
 
     func getUInt32() -> UInt32
     {
-        return getNumber(0)
+        return getNumber()
     }
     
     func getFloat32() -> Float32
     {
-        return getNumber(0)
+        return getNumber()
     }
     
-    func getASCII(_ length: Int) -> NSString?
+    func getASCII(_ length: Int) -> String
     {
-        let strData = data.subdata(in: position..<(position + length))
-        position += length
-        return NSString(bytes: (strData as NSData).bytes, length: length, encoding: String.Encoding.ascii.rawValue)
-    }
-
-    func getASCIIUntilNull(_ max: Int, skipAhead: Bool = true) -> String
-    {
-        var chars: [CChar] = []
-        var iterations = 0
+        let pointer = (data.bytes + position).bindMemory(to: CChar.self, capacity: length)
+        position += length * MemoryLayout<CChar>.size
         
-        while true
-        {
-            let char = getInt8()
-            chars.append(char)
-            iterations += 1
-            
-            if char == 0 || iterations >= max {
-                break
-            }
-        }
-        
-        if skipAhead {
-            position += max
-        } else {
-            position += iterations
-        }
-        
-        return chars.withUnsafeBufferPointer({ buffer in
-            return String(cString: buffer.baseAddress!)
-        })
+        return String(cString: pointer, encoding: .ascii)!
     }
     
-    fileprivate func getNumber<T>(_ zero: T) -> T
+    fileprivate func getNumber<T>() -> T
     {
-        var x = zero
-        (data as NSData).getBytes(&x, range: NSMakeRange(position, MemoryLayout<T>.size))
+        let value = (data.bytes + position).bindMemory(to: T.self, capacity: 1).pointee
         position += MemoryLayout<T>.size
-        return x
+        
+        return value
     }
-}
-
-func decode<T>(data: NSData) -> T
-{
-    let pointer = UnsafeMutablePointer<T>.allocate(capacity: MemoryLayout.size(ofValue:T.self))
-    data.getBytes(pointer, length: MemoryLayout<T>.size)
-    
-    return pointer.move()
 }
