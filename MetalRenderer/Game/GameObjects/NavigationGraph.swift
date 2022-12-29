@@ -28,7 +28,18 @@ final class NavigationGraph
     
     func build()
     {
+        linkVisibleNodes()
+        rejectInlineLinks()
+        
+        print("Links were built")
+    }
+    
+    private func linkVisibleNodes()
+    {
         guard let scene = self.scene else { return }
+        
+        links = []
+        waypoints.forEach { $0.neighbors = [] }
         
         var tested: [Bool] = Array.init(repeating: false, count: waypoints.count)
         
@@ -45,7 +56,7 @@ final class NavigationGraph
                 let endPod = end.transform.position
                 let dist = length(endPod - startPos)
                 
-                if scene.trace(start: startPos, end: endPod), dist < 560
+                if scene.trace(start: startPos, end: endPod)
                 {
                     let link = Link(start: start, end: end, distance: dist)
                     
@@ -62,8 +73,61 @@ final class NavigationGraph
             link.start.add(neighbor: endIndex, distance: link.distance)
             link.end.add(neighbor: startIndex, distance: link.distance)
         }
+    }
+    
+    private func rejectInlineLinks()
+    {
+        for i in 0 ..< waypoints.count
+        {
+            let srcNode = waypoints[i]
+            
+            for (_, j) in srcNode.neighbors
+            {
+                let checkNode = waypoints[j]
+                
+                var dirToCheckNode = checkNode.transform.position - srcNode.transform.position
+                let distToCheckNode = length(dirToCheckNode)
+                
+                dirToCheckNode = normalize(dirToCheckNode)
+                
+                for (_, k) in srcNode.neighbors
+                {
+                    if k == j { continue }
+                    
+                    let testNode = waypoints[k]
+                    
+                    var dirToTestNode = testNode.transform.position - srcNode.transform.position
+                    let distToTestNode = length(dirToTestNode)
+                    
+                    dirToTestNode = normalize(dirToTestNode)
+                    
+                    if dot(dirToCheckNode, dirToTestNode) >= 0.968
+                    {
+                        if distToTestNode < distToCheckNode
+                        {
+                            print("REJECTED Node_\(j) through Node_\(k)")
+                            
+                            srcNode.neighbors.removeAll(where: { $0.1 == j })
+                            
+                            break
+                        }
+                    }
+                }
+            }
+        }
         
-        print("Links were built")
+        links = []
+        
+        for src in waypoints
+        {
+            for (dist, i) in src.neighbors
+            {
+                let dest = waypoints[i]
+                let link = Link(start: src, end: dest, distance: dist)
+                
+                links.append(link)
+            }
+        }
     }
     
     func load(named: String)

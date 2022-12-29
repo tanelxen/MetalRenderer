@@ -98,6 +98,7 @@ class Q3MapScene: Scene
             
             if key == .r
             {
+                self.navigation.build()
                 self.navigation.save(named: "q3dm7")
             }
             
