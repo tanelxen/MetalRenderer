@@ -40,7 +40,6 @@
 		8A42053B2797B03400473A9D /* SkySphere.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8A42053A2797B03400473A9D /* SkySphere.metal */; };
 		8A42053D27981D2F00473A9D /* Compose.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8A42053C27981D2F00473A9D /* Compose.metal */; };
 		8A42053F279820C500473A9D /* room.obj in Resources */ = {isa = PBXBuildFile; fileRef = 8A42053E279820C500473A9D /* room.obj */; };
-		8A45609E295A0C2F0049F296 /* NavMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A45609D295A0C2F0049F296 /* NavMesh.swift */; };
 		8A4DB2F127AEC8F700DB6A1F /* ShadowTestScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A4DB2F027AEC8F700DB6A1F /* ShadowTestScene.swift */; };
 		8A56D713278E058200D3FE2B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A56D712278E058200D3FE2B /* AppDelegate.swift */; };
 		8A56D718278E058200D3FE2B /* MetalRenderer.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 8A56D716278E058200D3FE2B /* MetalRenderer.xcdatamodeld */; };
@@ -250,7 +249,6 @@
 		8A42053C27981D2F00473A9D /* Compose.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Compose.metal; sourceTree = "<group>"; };
 		8A42053E279820C500473A9D /* room.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = room.obj; sourceTree = "<group>"; };
 		8A42054427987C3500473A9D /* MetalRenderer-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MetalRenderer-Bridging-Header.h"; sourceTree = "<group>"; };
-		8A45609D295A0C2F0049F296 /* NavMesh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavMesh.swift; sourceTree = "<group>"; };
 		8A4DB2F027AEC8F700DB6A1F /* ShadowTestScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShadowTestScene.swift; sourceTree = "<group>"; };
 		8A56D70F278E058200D3FE2B /* MetalRenderer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MetalRenderer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8A56D712278E058200D3FE2B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -414,7 +412,6 @@
 		8AC79EBC295526C900B85350 /* v_9mmhandgun.mdl */ = {isa = PBXFileReference; lastKnownFileType = file; path = v_9mmhandgun.mdl; sourceTree = "<group>"; };
 		8AD4567027B5D207009C43F4 /* Q3MapCollision.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Q3MapCollision.swift; sourceTree = "<group>"; };
 		8AE7F56F2946965B00CD40BE /* PlayerMovement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerMovement.swift; sourceTree = "<group>"; };
-		8AE7F5712946988900CD40BE /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = main.c; path = "../../../../Downloads/q3playground-master/main.c"; sourceTree = "<group>"; };
 		8AEB11C427C146AF008FC445 /* Player.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
 		8AEB11C627C14DCA008FC445 /* Frustum.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Frustum.swift; sourceTree = "<group>"; };
 		8AEB11C827C1524C008FC445 /* CameraManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraManager.swift; sourceTree = "<group>"; };
@@ -616,7 +613,6 @@
 				8AB9EEF827C00C7D008C33B2 /* Barney.swift */,
 				8AEB11C427C146AF008FC445 /* Player.swift */,
 				8AE7F56F2946965B00CD40BE /* PlayerMovement.swift */,
-				8AE7F5712946988900CD40BE /* main.c */,
 				8A01E0FA2957529800ED82C9 /* Waypoint.swift */,
 				8A1456E6295799EE00E92E68 /* NavigationGraph.swift */,
 			);
@@ -770,7 +766,6 @@
 				8A75016827B0966A001F63F6 /* Q3EntityParser.swift */,
 				8A75016A27B097DC001F63F6 /* Bezier.swift */,
 				8A75016C27B098CE001F63F6 /* BSPMesh.swift */,
-				8A45609D295A0C2F0049F296 /* NavMesh.swift */,
 			);
 			path = Q3Map;
 			sourceTree = "<group>";
@@ -1144,7 +1139,6 @@
 				8A75016D27B098CE001F63F6 /* BSPMesh.swift in Sources */,
 				8A0D27362790A7A200F2D9E6 /* Mesh.swift in Sources */,
 				8A4DB2F127AEC8F700DB6A1F /* ShadowTestScene.swift in Sources */,
-				8A45609E295A0C2F0049F296 /* NavMesh.swift in Sources */,
 				8A56D728278E091900D3FE2B /* GameView.swift in Sources */,
 				8A5EDFDC27B95726007166E4 /* LightingRenderPass.swift in Sources */,
 				8A5EDFD827B912AB007166E4 /* GeometryRenderPass.swift in Sources */,
