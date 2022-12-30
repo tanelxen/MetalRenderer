@@ -30,6 +30,7 @@ final class NavigationGraph
     {
         linkVisibleNodes()
         rejectInlineLinks()
+        rejectUnreachableLinks()
         
         print("Links were built")
     }
@@ -128,6 +129,162 @@ final class NavigationGraph
                 links.append(link)
             }
         }
+    }
+    
+    private func rejectUnreachableLinks()
+    {
+        let testHull = TestHull()
+        
+        for i in 0 ..< waypoints.count
+        {
+            let srcNode = waypoints[i]
+            
+            for (dist, j) in srcNode.neighbors
+            {
+                let saveFlags = testHull.flags
+                testHull.transform.position = srcNode.transform.position
+                
+                let destNode = waypoints[j]
+                
+                var dir = normalize(destNode.transform.position - srcNode.transform.position)
+                dir.z = 0
+//                let yaw = atan2(dir.y, dir.x).degrees
+                
+                var isFailed = false
+                var step: Float = 0
+                
+                while step < dist, !isFailed
+                {
+                    var stepSize = testHull.STEP_SIZE
+                    
+                    if (step + stepSize) >= (dist - 1)
+                    {
+                        stepSize = (dist - step) - 1
+                    }
+                    
+                    if !moveTest(testHull: testHull, move: dir * stepSize)
+                    {
+                        isFailed = true
+                        break
+                    }
+                    
+                    step += testHull.STEP_SIZE
+                }
+                
+                if !isFailed
+                {
+                    // Если где-то заплутали, провалились и прошли больше, чем ожидалось
+                    let wayLength = length(testHull.transform.position - destNode.transform.position)
+                    isFailed = wayLength > 64
+                }
+                
+                if isFailed
+                {
+                    print("REJECTED unreachable Node_\(i) through Node_\(j)")
+                    srcNode.neighbors.removeAll(where: { $0.1 == j })
+                    
+                    testHull.flags = saveFlags
+                }
+            }
+        }
+        
+        links = []
+        
+        for src in waypoints
+        {
+            for (dist, i) in src.neighbors
+            {
+                let dest = waypoints[i]
+                let link = Link(start: src, end: dest, distance: dist)
+                
+                links.append(link)
+            }
+        }
+    }
+    
+    private func moveTest(testHull ent: TestHull, move: float3) -> Bool
+    {
+//        ent.transform.position += dir * stepSize
+//        return true
+        
+        let oldorg = ent.transform.position
+        var neworg = oldorg + move
+        
+        let temp = ent.stepsize
+        
+        neworg.z += temp
+        
+        var end = neworg
+        end.z -= temp * 2.0
+        
+        var trace = scene!.trace(start: neworg, end: end, mins: ent.mins, maxs: ent.maxs)
+
+        // Застряли
+        if trace.allsolid { return false }
+        
+        // Тестовый луч исходит из плотной среды
+        if trace.startsolid
+        {
+            // Попробуем опуститься чуть ниже и повторить
+            neworg.z -= temp
+            trace = scene!.trace(start: neworg, end: end, mins: ent.mins, maxs: ent.maxs)
+
+            if trace.allsolid || trace.startsolid { return false }
+        }
+        
+        // Свободно прошли
+        if trace.fraction == 1.0
+        {
+            if ent.flags & FL_PARTIALGROUND != 0
+            {
+                ent.transform.position += move
+                //SV_LinkEdict( ent, true )
+                ent.flags &= ~FL_ONGROUND
+                
+                return true
+            }
+            
+            return false
+        }
+        else
+        {
+            ent.transform.position = trace.endpos
+
+            if checkBottom(testHull: ent) == false
+            {
+                if ent.flags & FL_PARTIALGROUND != 0
+                {
+//                    if( relink ) SV_LinkEdict( ent, true )
+                    return true
+                }
+
+                ent.transform.position = oldorg
+                return false
+            }
+            else
+            {
+                ent.flags &= ~FL_PARTIALGROUND
+                ent.ground_normal = trace.plane?.normal
+//                if( relink ) SV_LinkEdict( ent, true )
+
+                return true
+            }
+        }
+    }
+    
+    private func checkBottom(testHull ent: TestHull) -> Bool
+    {
+//        let start = ent.transform.position
+//        let end = start + float3(0, 0, -1)
+//
+//        let trace = scene!.trace(start: start, end: end, mins: ent.mins, maxs: ent.maxs)
+//
+//        if trace.fraction == 1
+//        {
+//            return false
+//        }
+        
+        return true
     }
     
     func load(named: String)
@@ -414,3 +571,20 @@ struct Queue<T>
         return elements.last
     }
 }
+
+class TestHull
+{
+    var transform = Transform()
+    
+    var flags: UInt = 0
+    var ground_normal: float3?
+    
+    let mins = float3( -16, -16, 0 )
+    let maxs = float3( 16, 16, 32 )
+    
+    let STEP_SIZE: Float = 16
+    let stepsize: Float = 16
+}
+
+private let FL_ONGROUND: UInt         = 1 << 9    // At rest / on the ground
+private let FL_PARTIALGROUND: UInt    = 1 << 10   // not all corners are valid
