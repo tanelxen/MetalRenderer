@@ -18,10 +18,6 @@ enum Engine
         self.device = device
         self.commandQueue = device.makeCommandQueue()
         self.defaultLibrary = device.makeDefaultLibrary()
-        
-        TextureLibrary.initialize()
-        VertexDescriptorLibrary.initialize()
-        DepthStencilStateLibrary.intitialize()
     }
 }
 

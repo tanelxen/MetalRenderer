@@ -6,10 +6,13 @@
 //
 
 import MetalKit
-//import Assimp
 
-class Q3MapScene: Scene
+class Q3MapScene
 {
+    private (set) var sceneConstants = SceneConstants()
+    
+    private let skybox = Skybox()
+    
     private var bspMesh: BSPMesh?
     
     private var staticMesh: StaticMesh?
@@ -26,10 +29,10 @@ class Q3MapScene: Scene
     
     init()
     {
-        super.init(name: "Q3MapScene")
+        build()
     }
     
-    override func build()
+    private func build()
     {
         if let url = Bundle.main.url(forResource: "q3dm7", withExtension: "bsp"), let data = try? Data(contentsOf: url)
         {
@@ -46,7 +49,7 @@ class Q3MapScene: Scene
         let q3map = Q3Map(data: data)
         print("bsp file was loaded")
         
-        bspMesh = BSPMesh(device: Engine.device, map: q3map)
+        bspMesh = BSPMesh(map: q3map)
         print("bsp mesh was created")
 
         collision = Q3MapCollision(q3map: q3map)
@@ -112,6 +115,15 @@ class Q3MapScene: Scene
                 self.entities.first!.moveBy(route: route)
             }
         }
+    }
+    
+    func renderSky(with encoder: MTLRenderCommandEncoder?)
+    {
+        var sceneUniforms = sceneConstants
+        
+        encoder?.setVertexBytes(&sceneUniforms, length: SceneConstants.stride, index: 1)
+
+        skybox.renderWithEncoder(encoder!)
     }
     
     func renderWorld(with encoder: MTLRenderCommandEncoder?)
@@ -193,14 +205,6 @@ class Q3MapScene: Scene
         navigation.render(with: encoder)
     }
     
-    func renderNavmesh(with encoder: MTLRenderCommandEncoder?)
-    {
-        var sceneUniforms = self.sceneConstants
-        encoder?.setVertexBytes(&sceneUniforms, length: SceneConstants.stride, index: 1)
-        
-        bspMesh?.renderFacedUp(encoder!)
-    }
-    
     func trace(start: float3, end: float3) -> Bool
     {
         var hitResult = HitResult()
@@ -217,9 +221,27 @@ class Q3MapScene: Scene
         return hitResult
     }
     
-    override func doUpdate()
+    final func update()
+    {
+        CameraManager.shared.update()
+        
+        // Update game logic
+        doUpdate()
+        
+        updateSceneConstants()
+    }
+    
+    private func doUpdate()
     {
         player?.update()
+    }
+    
+    private func updateSceneConstants()
+    {
+        let camera = CameraManager.shared.mainCamera
+        
+        sceneConstants.viewMatrix = camera.viewMatrix
+        sceneConstants.projectionMatrix = camera.projectionMatrix
     }
     
     private func makeWaypoint()

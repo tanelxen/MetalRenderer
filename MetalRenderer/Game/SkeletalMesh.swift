@@ -64,8 +64,13 @@ class SkeletalMesh
             
             let indices = mdlMesh.indexBuffer.map( { UInt32($0) } )
             
-            let vertexBuffer = Engine.device.makeBuffer(bytes: vertices, length: vertices.count * MemoryLayout<SkeletalMeshVertex>.stride, options: [])
-            let indexBuffer = Engine.device.makeBuffer(bytes: indices, length: indices.count * MemoryLayout<UInt32>.stride, options: [])
+            let vertexBuffer = Engine.device.makeBuffer(bytes: vertices,
+                                                        length: vertices.count * MemoryLayout<SkeletalMeshVertex>.stride,
+                                                        options: [])
+            
+            let indexBuffer = Engine.device.makeBuffer(bytes: indices,
+                                                       length: indices.count * MemoryLayout<UInt32>.stride,
+                                                       options: [])
             
             var texture = devTexture
             

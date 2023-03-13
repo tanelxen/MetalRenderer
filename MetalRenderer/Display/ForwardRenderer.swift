@@ -16,14 +16,27 @@ class ForwardRenderer: NSObject
         return screenSize.x / screenSize.y
     }
     
-    private var _skyboxPipelineState: MTLRenderPipelineState!
-    private var _worldMeshPipelineState: MTLRenderPipelineState!
-    private var _staticMeshPipelineState: MTLRenderPipelineState!
-    private var _skeletalMeshPipelineState: MTLRenderPipelineState!
-    private var _solidColorPipelineState: MTLRenderPipelineState!
+    private var skyboxPipelineState: MTLRenderPipelineState!
+    private var worldMeshPipelineState: MTLRenderPipelineState!
+    private var staticMeshPipelineState: MTLRenderPipelineState!
+    private var skeletalMeshPipelineState: MTLRenderPipelineState!
+    private var solidColorPipelineState: MTLRenderPipelineState!
     
-    private var _skyCubeTexture: MTLTexture!
-    private let _skybox = Skybox()
+    private var regularStencilState: MTLDepthStencilState = {
+        let descriptor = MTLDepthStencilDescriptor()
+        descriptor.isDepthWriteEnabled = true
+        descriptor.depthCompareFunction = .less
+        descriptor.label = "Regular"
+        return Engine.device.makeDepthStencilState(descriptor: descriptor)!
+    }()
+    
+    private var skyStencilState: MTLDepthStencilState = {
+        let descriptor = MTLDepthStencilDescriptor()
+        descriptor.isDepthWriteEnabled = false
+        descriptor.depthCompareFunction = .lessEqual
+        descriptor.label = "Sky"
+        return Engine.device.makeDepthStencilState(descriptor: descriptor)!
+    }()
     
     private let scene = Q3MapScene()
     
@@ -34,8 +47,6 @@ class ForwardRenderer: NSObject
         super.init()
         
         mtkView(view, drawableSizeWillChange: view.drawableSize)
-        
-        _skyCubeTexture = TextureManager.shared.loadCubeTexture(imageName: "night-sky")
         
         createSkyboxPipelineState()
         createWorldMeshPipelineState()
@@ -55,7 +66,6 @@ class ForwardRenderer: NSObject
     fileprivate func update()
     {
         GameTime.update()
-        
         scene.update()
     }
     
@@ -70,11 +80,11 @@ class ForwardRenderer: NSObject
 
         descriptor.vertexFunction = Engine.defaultLibrary.makeFunction(name: "skybox_vertex_shader")
         descriptor.fragmentFunction = Engine.defaultLibrary.makeFunction(name: "skybox_fragment_shader")
-        descriptor.vertexDescriptor = _skybox.vertexDescriptor
+        descriptor.vertexDescriptor = Skybox.vertexDescriptor()
 
         descriptor.label = "Skybox Pipeline State"
 
-        _skyboxPipelineState = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
+        skyboxPipelineState = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
     }
     
     private func createWorldMeshPipelineState()
@@ -89,7 +99,7 @@ class ForwardRenderer: NSObject
 
         descriptor.label = "World Mesh Pipeline State"
 
-        _worldMeshPipelineState = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
+        worldMeshPipelineState = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
     }
     
     private func createStaticMeshPipelineState()
@@ -104,7 +114,7 @@ class ForwardRenderer: NSObject
 
         descriptor.label = "Static Mesh Pipeline State"
 
-        _staticMeshPipelineState = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
+        staticMeshPipelineState = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
     }
     
     private func createSkeletalMeshPipelineState()
@@ -119,7 +129,7 @@ class ForwardRenderer: NSObject
 
         descriptor.label = "Skeletal Mesh Pipeline State"
 
-        _skeletalMeshPipelineState = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
+        skeletalMeshPipelineState = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
     }
     
     private func createSolidColorPipelineState()
@@ -134,7 +144,7 @@ class ForwardRenderer: NSObject
 
         descriptor.label = "Solid Color Render Pipeline State"
 
-        _solidColorPipelineState = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
+        solidColorPipelineState = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
     }
     
     // MARK: - DO PASSES
@@ -147,97 +157,43 @@ class ForwardRenderer: NSObject
         
         renderEncoder?.label = "Main Pass Command Encoder"
         
+        renderEncoder?.setFrontFacing(.clockwise)
+        renderEncoder?.setCullMode(.back)
+        
         // SKYBOX
-
         renderEncoder?.pushDebugGroup("Skybox Render")
-
-        renderEncoder?.setDepthStencilState(DepthStencilStateLibrary[.sky])
-        renderEncoder?.setRenderPipelineState(_skyboxPipelineState)
-
-        var sceneConstants = scene.sceneConstants
-        renderEncoder?.setVertexBytes(&sceneConstants, length: SceneConstants.stride, index: 1)
-
-        renderEncoder?.setFragmentTexture(_skyCubeTexture, index: 1)
-
-        _skybox.render(with: renderEncoder!)
-
+            renderEncoder?.setDepthStencilState(skyStencilState)
+            renderEncoder?.setRenderPipelineState(skyboxPipelineState)
+            scene.renderSky(with: renderEncoder)
         renderEncoder?.popDebugGroup()
         
+        renderEncoder?.setDepthStencilState(regularStencilState)
+        
         // WORLD MESH
-
         renderEncoder?.pushDebugGroup("World Mesh Render")
-
-            renderEncoder?.setDepthStencilState(DepthStencilStateLibrary[.less])
-
-            renderEncoder?.setFrontFacing(.clockwise)
-            renderEncoder?.setCullMode(.back)
-
-            renderEncoder?.setRenderPipelineState(_worldMeshPipelineState)
+            renderEncoder?.setRenderPipelineState(worldMeshPipelineState)
             scene.renderWorld(with: renderEncoder)
-
         renderEncoder?.popDebugGroup()
         
         
         // STATIC MESHES
-
         renderEncoder?.pushDebugGroup("Static Meshes Render")
-
-            renderEncoder?.setDepthStencilState(DepthStencilStateLibrary[.less])
-        
-            renderEncoder?.setFrontFacing(.clockwise)
-            renderEncoder?.setCullMode(.back)
-            
-//            renderEncoder?.setTriangleFillMode(.lines)
-            
-            renderEncoder?.setRenderPipelineState(_staticMeshPipelineState)
+            renderEncoder?.setRenderPipelineState(staticMeshPipelineState)
             scene.renderStaticMeshes(with: renderEncoder)
-
         renderEncoder?.popDebugGroup()
         
         // SKELETAL MESHES
-
         renderEncoder?.pushDebugGroup("Skeletal Meshes Render")
-
-            renderEncoder?.setDepthStencilState(DepthStencilStateLibrary[.less])
-        
-            renderEncoder?.setFrontFacing(.clockwise)
-            renderEncoder?.setCullMode(.back)
-            
-    //        renderEncoder?.setTriangleFillMode(.lines)
-            
-            renderEncoder?.setRenderPipelineState(_skeletalMeshPipelineState)
+            renderEncoder?.setRenderPipelineState(skeletalMeshPipelineState)
             scene.renderSkeletalMeshes(with: renderEncoder)
-        
-            renderEncoder?.setRenderPipelineState(_skeletalMeshPipelineState)
             scene.renderPlayer(with: renderEncoder)
-
         renderEncoder?.popDebugGroup()
         
-        // Waypoints
+        // WAYPOINTS
         renderEncoder?.pushDebugGroup("Waypoints Render")
-
-            renderEncoder?.setDepthStencilState(DepthStencilStateLibrary[.less])
-
-            renderEncoder?.setFrontFacing(.clockwise)
-            renderEncoder?.setCullMode(.back)
-
-            renderEncoder?.setRenderPipelineState(_solidColorPipelineState)
+            renderEncoder?.setRenderPipelineState(solidColorPipelineState)
             scene.renderWaypoints(with: renderEncoder)
-
         renderEncoder?.popDebugGroup()
-        
-//        // Navmesh
-//        renderEncoder?.pushDebugGroup("Navmesh Render")
-//
-//            renderEncoder?.setDepthStencilState(DepthStencilStateLibrary[.less])
-//
-//            renderEncoder?.setFrontFacing(.clockwise)
-//            renderEncoder?.setCullMode(.back)
-//
-//            renderEncoder?.setRenderPipelineState(_solidColorPipelineState)
-//            scene.renderNavmesh(with: renderEncoder)
-//
-//        renderEncoder?.popDebugGroup()
         
         renderEncoder?.endEncoding()
     }
@@ -245,16 +201,14 @@ class ForwardRenderer: NSObject
     private func render(in view: MTKView)
     {
         guard let drawable = view.currentDrawable else { return }
-        
 
-        let compositeCommandBuffer = Engine.commandQueue.makeCommandBuffer()
-        compositeCommandBuffer?.label = "Main Pass Command Buffer"
+        let commandBuffer = Engine.commandQueue.makeCommandBuffer()
+        commandBuffer?.label = "Main Pass Command Buffer"
         
-        doMainRenderPass(with: compositeCommandBuffer, in: view)
+        doMainRenderPass(with: commandBuffer, in: view)
 
-        compositeCommandBuffer?.present(drawable)
-        
-        compositeCommandBuffer?.commit()
+        commandBuffer?.present(drawable)
+        commandBuffer?.commit()
     }
 }
 
