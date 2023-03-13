@@ -14,6 +14,9 @@ final class NavigationGraph
     private var waypoints: [Waypoint] = []
     private var links: [Link] = []
     
+    private let testHull = TestHull()
+    private var testHullWay: [float3] = []
+    
     private var nearest = -1
     
     func add(_ waypoint: Waypoint)
@@ -28,6 +31,7 @@ final class NavigationGraph
     
     func build()
     {
+        testHull.setup()
         linkVisibleNodes()
         rejectInlineLinks()
         rejectUnreachableLinks()
@@ -133,8 +137,6 @@ final class NavigationGraph
     
     private func rejectUnreachableLinks()
     {
-        let testHull = TestHull()
-        
         for i in 0 ..< waypoints.count
         {
             let srcNode = waypoints[i]
@@ -204,30 +206,24 @@ final class NavigationGraph
     
     private func moveTest(testHull ent: TestHull, move: float3) -> Bool
     {
-//        ent.transform.position += dir * stepSize
-//        return true
-        
         let oldorg = ent.transform.position
-        var neworg = oldorg + move
         
-        let temp = ent.stepsize
+        testHullWay.append(oldorg)
         
-        neworg.z += temp
+        let neworg = oldorg + move
+        let neworgUp = neworg + float3(0, 0, ent.stepsize)
+        let neworgDown = neworg + float3(0, 0, -ent.stepsize)
         
-        var end = neworg
-        end.z -= temp * 2.0
-        
-        var trace = scene!.trace(start: neworg, end: end, mins: ent.mins, maxs: ent.maxs)
+        var trace = scene!.trace(start: neworgUp, end: neworgDown, mins: ent.mins, maxs: ent.maxs)
 
-        // Застряли
+        // Наш AABB не может пройти с запасом сверху и снизу
         if trace.allsolid { return false }
         
-        // Тестовый луч исходит из плотной среды
+        // Сверху есть преграда, возможно мы проходим впритык
         if trace.startsolid
         {
-            // Попробуем опуститься чуть ниже и повторить
-            neworg.z -= temp
-            trace = scene!.trace(start: neworg, end: end, mins: ent.mins, maxs: ent.maxs)
+            // Попробуем не подниматься и повторить
+            trace = scene!.trace(start: neworg, end: neworgDown, mins: ent.mins, maxs: ent.maxs)
 
             if trace.allsolid || trace.startsolid { return false }
         }
@@ -416,13 +412,13 @@ final class NavigationGraph
     
     func render(with encoder: MTLRenderCommandEncoder?)
     {
-        for (index, waypoint) in waypoints.enumerated()
+        for waypoint in waypoints
         {
             waypoint.transform.updateModelMatrix()
             
             var modelConstants = ModelConstants()
             modelConstants.modelMatrix = waypoint.transform.matrix
-            modelConstants.color = (index == nearest) ? float3(0, 0, 1) : float3(1, 0, 0)
+            modelConstants.color = float3(1, 0, 0)
             
             encoder?.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
             
@@ -437,6 +433,14 @@ final class NavigationGraph
         for link in links
         {
             link.render(with: encoder)
+        }
+        
+        for position in testHullWay
+        {
+            testHull.transform.position = position
+            testHull.transform.updateModelMatrix()
+            
+            testHull.render(with: encoder)
         }
     }
     
@@ -580,10 +584,73 @@ class TestHull
     var ground_normal: float3?
     
     let mins = float3( -16, -16, 0 )
-    let maxs = float3( 16, 16, 32 )
+    let maxs = float3( 16, 16, 72 )
     
     let STEP_SIZE: Float = 16
     let stepsize: Float = 16
+    
+    private var _vertices: [float3] = []
+    private var _indicies: [UInt16] = []
+    
+    private var _verticesBuffer: MTLBuffer!
+    private var _indiciesBuffer: MTLBuffer!
+    
+    func setup()
+    {
+//        let center = (mins + maxs) * 0.5
+        let minBounds = mins// - center
+        let maxBounds = maxs// - center
+        
+        _vertices = [
+            float3(minBounds.x, maxBounds.y, maxBounds.z), //frontLeftTop       0
+            float3(minBounds.x, minBounds.y, maxBounds.z), //frontLeftBottom    1
+            float3(maxBounds.x, maxBounds.y, maxBounds.z), //frontRightTop      2
+            float3(maxBounds.x, minBounds.y, maxBounds.z), //frontRightBottom   3
+            float3(minBounds.x, maxBounds.y, minBounds.z), //backLeftTop        4
+            float3(minBounds.x, minBounds.y, minBounds.z), //backLeftBottom     5
+            float3(maxBounds.x, maxBounds.y, minBounds.z), //backRightTop       6
+            float3(maxBounds.x, minBounds.y, minBounds.z), //backRightBottom    7
+        ]
+        
+        _indicies = [
+            0, 1,
+            2, 3,
+            4, 5,
+            6, 7,
+            
+            0, 2,
+            1, 3,
+            4, 6,
+            5, 7,
+            
+            0, 4,
+            1, 5,
+            2, 6,
+            3, 7
+        ]
+        
+        _verticesBuffer = Engine.device.makeBuffer(bytes: _vertices, length: MemoryLayout<float3>.stride * _vertices.count, options: [])
+        _indiciesBuffer = Engine.device.makeBuffer(bytes: _indicies, length: MemoryLayout<UInt16>.size * _indicies.count, options: [])
+    }
+    
+    func render(with encoder: MTLRenderCommandEncoder?)
+    {
+        guard _verticesBuffer != nil else { return }
+        
+        var modelConstants = ModelConstants()
+        modelConstants.color = float3(0, 0, 1)
+        modelConstants.modelMatrix = transform.matrix
+        
+        encoder?.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
+        
+        encoder?.setVertexBuffer(_verticesBuffer, offset: 0, index: 0)
+
+        encoder?.drawIndexedPrimitives(type: .line,
+                                       indexCount: _indicies.count,
+                                       indexType: .uint16,
+                                       indexBuffer: _indiciesBuffer,
+                                       indexBufferOffset: 0)
+    }
 }
 
 private let FL_ONGROUND: UInt         = 1 << 9    // At rest / on the ground
