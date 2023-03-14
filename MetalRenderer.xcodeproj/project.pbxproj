@@ -20,7 +20,6 @@
 		8A22EACA278FA89A00A8CD7D /* Math.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A22EAC9278FA89A00A8CD7D /* Math.swift */; };
 		8A42053B2797B03400473A9D /* Skybox.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8A42053A2797B03400473A9D /* Skybox.metal */; };
 		8A56D713278E058200D3FE2B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A56D712278E058200D3FE2B /* AppDelegate.swift */; };
-		8A56D718278E058200D3FE2B /* MetalRenderer.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 8A56D716278E058200D3FE2B /* MetalRenderer.xcdatamodeld */; };
 		8A56D71A278E058400D3FE2B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8A56D719278E058400D3FE2B /* Assets.xcassets */; };
 		8A56D71D278E058400D3FE2B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8A56D71B278E058400D3FE2B /* Main.storyboard */; };
 		8A56D728278E091900D3FE2B /* GameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A56D727278E091900D3FE2B /* GameView.swift */; };
@@ -88,11 +87,11 @@
 		8A1456E6295799EE00E92E68 /* NavigationGraph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationGraph.swift; sourceTree = "<group>"; };
 		8A22EAB2278F735D00A8CD7D /* Engine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Engine.swift; sourceTree = "<group>"; };
 		8A22EAC9278FA89A00A8CD7D /* Math.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Math.swift; sourceTree = "<group>"; };
+		8A23888B29C0BCF700373C91 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		8A42053A2797B03400473A9D /* Skybox.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Skybox.metal; sourceTree = "<group>"; };
 		8A42054427987C3500473A9D /* MetalRenderer-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MetalRenderer-Bridging-Header.h"; sourceTree = "<group>"; };
 		8A56D70F278E058200D3FE2B /* MetalRenderer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MetalRenderer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8A56D712278E058200D3FE2B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		8A56D717278E058200D3FE2B /* MetalRenderer.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = MetalRenderer.xcdatamodel; sourceTree = "<group>"; };
 		8A56D719278E058400D3FE2B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8A56D71C278E058400D3FE2B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		8A56D71E278E058400D3FE2B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -263,6 +262,7 @@
 		8A56D706278E058200D3FE2B = {
 			isa = PBXGroup;
 			children = (
+				8A23888B29C0BCF700373C91 /* README.md */,
 				8A56D711278E058200D3FE2B /* MetalRenderer */,
 				8A56D710278E058200D3FE2B /* Products */,
 				8AE5331E27BEEA8B00A80C1E /* Frameworks */,
@@ -297,7 +297,6 @@
 				8A56D719278E058400D3FE2B /* Assets.xcassets */,
 				8A56D71E278E058400D3FE2B /* Info.plist */,
 				8A56D71F278E058400D3FE2B /* MetalRenderer.entitlements */,
-				8A56D716278E058200D3FE2B /* MetalRenderer.xcdatamodeld */,
 				8A42054427987C3500473A9D /* MetalRenderer-Bridging-Header.h */,
 			);
 			path = "Other Files";
@@ -475,7 +474,6 @@
 				8AA0652C279AB45E00492D26 /* Utils.swift in Sources */,
 				8A75016D27B098CE001F63F6 /* BSPMesh.swift in Sources */,
 				8A56D728278E091900D3FE2B /* GameView.swift in Sources */,
-				8A56D718278E058200D3FE2B /* MetalRenderer.xcdatamodeld in Sources */,
 				8A42053B2797B03400473A9D /* Skybox.metal in Sources */,
 				8A01E0FB2957529800ED82C9 /* Waypoint.swift in Sources */,
 				8AEB11C727C14DCA008FC445 /* Frustum.swift in Sources */,
@@ -712,19 +710,6 @@
 			productName = GoldSrcMDL;
 		};
 /* End XCSwiftPackageProductDependency section */
-
-/* Begin XCVersionGroup section */
-		8A56D716278E058200D3FE2B /* MetalRenderer.xcdatamodeld */ = {
-			isa = XCVersionGroup;
-			children = (
-				8A56D717278E058200D3FE2B /* MetalRenderer.xcdatamodel */,
-			);
-			currentVersion = 8A56D717278E058200D3FE2B /* MetalRenderer.xcdatamodel */;
-			path = MetalRenderer.xcdatamodeld;
-			sourceTree = "<group>";
-			versionGroupType = wrapper.xcdatamodel;
-		};
-/* End XCVersionGroup section */
 	};
 	rootObject = 8A56D707278E058200D3FE2B /* Project object */;
 }
