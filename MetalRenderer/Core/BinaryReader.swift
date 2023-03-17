@@ -70,13 +70,18 @@ class BinaryReader
     
     func getASCII(_ length: Int) -> String
     {
-        let pointer = (data.bytes + position).bindMemory(to: CChar.self, capacity: length)
-        position += length * MemoryLayout<CChar>.size
+        let range = NSRange(location: position, length: length)
+        let strData = data.subdata(with: range)
         
-        return String(cString: pointer, encoding: .ascii)!
+        position += length
+        
+        return strData.withUnsafeBytes { (ptr: UnsafeRawBufferPointer) in
+            let pointer = ptr.baseAddress!.assumingMemoryBound(to: CChar.self)
+            return String(cString: pointer, encoding: .ascii) ?? ""
+        }
     }
     
-    fileprivate func getNumber<T>() -> T
+    private func getNumber<T>() -> T
     {
         let value = (data.bytes + position).bindMemory(to: T.self, capacity: 1).pointee
         position += MemoryLayout<T>.size
