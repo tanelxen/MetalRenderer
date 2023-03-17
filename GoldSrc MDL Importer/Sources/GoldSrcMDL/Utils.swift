@@ -64,28 +64,12 @@ typealias Chars64 = (CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar,
                      CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar,
                      CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar)
 
-func charsToString(_ chars: Chars64) -> String
+func charsToString<T>(_ chars: T) -> String
 {
     var bytes = chars
     
-    return withUnsafePointer(to: &bytes) { ptr -> String in
-       return String(cString: UnsafeRawPointer(ptr).assumingMemoryBound(to: CChar.self))
+    return withUnsafeBytes(of: &bytes) { rawPtr in
+        let ptr = rawPtr.baseAddress!.assumingMemoryBound(to: CChar.self)
+        return String(cString: ptr)
     }
-}
-
-func charsToString(_ chars: (CChar, CChar, CChar, CChar)) -> String
-{
-    var bytes = chars
-    
-    return withUnsafePointer(to: &bytes) { ptr -> String in
-       return String(cString: UnsafeRawPointer(ptr).assumingMemoryBound(to: CChar.self))
-    }
-}
-
-func decode<T>(data: NSData) -> T
-{
-    let pointer = UnsafeMutablePointer<T>.allocate(capacity: MemoryLayout.size(ofValue:T.self))
-    data.getBytes(pointer, length: MemoryLayout<T>.size)
-    
-    return pointer.move()
 }

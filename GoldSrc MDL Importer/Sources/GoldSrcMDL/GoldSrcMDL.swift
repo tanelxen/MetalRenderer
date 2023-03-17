@@ -108,11 +108,7 @@ public class GoldSrcMDL
         let pData = UnsafeMutableRawPointer(mutating: self.bytes)
         self.mdlHeader = pData.load(as: studiohdr_t.self)
         
-        var nameBytes = mdlHeader.name
-
-        modelName = withUnsafePointer(to: &nameBytes) { ptr -> String in
-           return String(cString: UnsafeRawPointer(ptr).assumingMemoryBound(to: CChar.self))
-        }
+        modelName = charsToString(mdlHeader.name)
     }
     
     private func readTextures()
@@ -166,13 +162,7 @@ public class GoldSrcMDL
             imageBuffer[pixelOffset + 3] = 255 // alpha
         }
         
-        var nameBytes = textureInfo.name
-
-        let name: String = withUnsafePointer(to: &nameBytes) { ptr -> String in
-           return String(cString: UnsafeRawPointer(ptr).assumingMemoryBound(to: CChar.self))
-        }
-        
-        return Texture(name: name,
+        return Texture(name: charsToString(textureInfo.name),
                        data: imageBuffer,
                        width: Int(textureInfo.width),
                        height: Int(textureInfo.height))
@@ -415,12 +405,6 @@ public class GoldSrcMDL
     {
         for sequenceIndex in 0 ..< mdlSequences.count
         {
-            var label = mdlSequences[sequenceIndex].label
-
-            let name = withUnsafePointer(to: &label) { ptr -> String in
-               return String(cString: UnsafeRawPointer(ptr).assumingMemoryBound(to: CChar.self))
-            }
-            
             let fps = mdlSequences[sequenceIndex].fps
 
             var frames: [Frame] = []
@@ -432,6 +416,9 @@ public class GoldSrcMDL
 
                 frames.append(frame)
             }
+            
+            let label = mdlSequences[sequenceIndex].label
+            let name = charsToString(label)
 
             let sequence = Sequence(name: name, frames: frames, fps: fps)
             sequences.append(sequence)
