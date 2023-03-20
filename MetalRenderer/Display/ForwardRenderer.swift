@@ -61,6 +61,9 @@ class ForwardRenderer: NSObject
     {
         ForwardRenderer.screenSize.x = Float(size.width)
         ForwardRenderer.screenSize.y = Float(size.height)
+        
+        //TODO: переписать под сущность Viewport
+        CameraManager.shared.mainCamera.updateViewport()
     }
     
     fileprivate func update()

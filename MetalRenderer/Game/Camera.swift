@@ -49,6 +49,8 @@ class Camera
         
         return float3(world.x, transform.position.y, world.y)
     }
+    
+    func updateViewport() { }
 }
 
 class PlayerCamera: Camera
@@ -87,6 +89,11 @@ class PlayerCamera: Camera
 //        let target = transform.position + transform.rotation.forward
 //        return lookAt(eye: transform.position, target: target, up: up)
 //    }
+    
+    override func updateViewport()
+    {
+        _projectionMatrix = matrix_float4x4.perspective(degreesFov: 65, aspectRatio: ForwardRenderer.aspectRatio, near: 0.1, far: 5000)
+    }
 }
 
 class DebugCamera: Camera

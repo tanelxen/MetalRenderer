@@ -49,7 +49,6 @@
 		8A77906627B1717F004BC255 /* q3dm2.bsp in Resources */ = {isa = PBXBuildFile; fileRef = 8A77906427B17103004BC255 /* q3dm2.bsp */; };
 		8A77906727B17181004BC255 /* q3dm1.bsp in Resources */ = {isa = PBXBuildFile; fileRef = 8A77906327B17103004BC255 /* q3dm1.bsp */; };
 		8A77906827B17184004BC255 /* q3dm0.bsp in Resources */ = {isa = PBXBuildFile; fileRef = 8A77906527B17103004BC255 /* q3dm0.bsp */; };
-		8A78063E27B339A8005871F8 /* d1_trainstation_05.bsp in Resources */ = {isa = PBXBuildFile; fileRef = 8A78063D27B339A8005871F8 /* d1_trainstation_05.bsp */; };
 		8A78064527B33CF0005871F8 /* q3dm4.bsp in Resources */ = {isa = PBXBuildFile; fileRef = 8A78063F27B33CF0005871F8 /* q3dm4.bsp */; };
 		8A78064627B33CF0005871F8 /* q3dm5.bsp in Resources */ = {isa = PBXBuildFile; fileRef = 8A78064027B33CF0005871F8 /* q3dm5.bsp */; };
 		8A78064727B33CF0005871F8 /* q3dm7.bsp in Resources */ = {isa = PBXBuildFile; fileRef = 8A78064127B33CF0005871F8 /* q3dm7.bsp */; };
@@ -123,7 +122,6 @@
 		8A77906327B17103004BC255 /* q3dm1.bsp */ = {isa = PBXFileReference; lastKnownFileType = file; path = q3dm1.bsp; sourceTree = "<group>"; };
 		8A77906427B17103004BC255 /* q3dm2.bsp */ = {isa = PBXFileReference; lastKnownFileType = file; path = q3dm2.bsp; sourceTree = "<group>"; };
 		8A77906527B17103004BC255 /* q3dm0.bsp */ = {isa = PBXFileReference; lastKnownFileType = file; path = q3dm0.bsp; sourceTree = "<group>"; };
-		8A78063D27B339A8005871F8 /* d1_trainstation_05.bsp */ = {isa = PBXFileReference; lastKnownFileType = file; path = d1_trainstation_05.bsp; sourceTree = "<group>"; };
 		8A78063F27B33CF0005871F8 /* q3dm4.bsp */ = {isa = PBXFileReference; lastKnownFileType = file; path = q3dm4.bsp; sourceTree = "<group>"; };
 		8A78064027B33CF0005871F8 /* q3dm5.bsp */ = {isa = PBXFileReference; lastKnownFileType = file; path = q3dm5.bsp; sourceTree = "<group>"; };
 		8A78064127B33CF0005871F8 /* q3dm7.bsp */ = {isa = PBXFileReference; lastKnownFileType = file; path = q3dm7.bsp; sourceTree = "<group>"; };
@@ -171,7 +169,6 @@
 			isa = PBXGroup;
 			children = (
 				8A14296E27B4342600A9ED50 /* HL1Model */,
-				8A78063C27B3399A005871F8 /* HL2Map */,
 				8A75016327B0913D001F63F6 /* Q3Map */,
 				8A77906027B14E6D004BC255 /* dev_256.jpeg */,
 			);
@@ -346,14 +343,6 @@
 			path = Q3Map;
 			sourceTree = "<group>";
 		};
-		8A78063C27B3399A005871F8 /* HL2Map */ = {
-			isa = PBXGroup;
-			children = (
-				8A78063D27B339A8005871F8 /* d1_trainstation_05.bsp */,
-			);
-			path = HL2Map;
-			sourceTree = "<group>";
-		};
 		8AE5331E27BEEA8B00A80C1E /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -441,7 +430,6 @@
 				8A5EDFF627BD081C007166E4 /* can.mdl in Resources */,
 				8A5EE00027BD2559007166E4 /* zombie.mdl in Resources */,
 				8A5EE00427BD2A08007166E4 /* scientist.mdl in Resources */,
-				8A78063E27B339A8005871F8 /* d1_trainstation_05.bsp in Resources */,
 				8ABA755527B732F9001AC1F5 /* barney.mdl in Resources */,
 				8A78064A27B33CF0005871F8 /* q3dm8.bsp in Resources */,
 				8AC79EBA29551CE300B85350 /* v_shotgun.mdl in Resources */,
