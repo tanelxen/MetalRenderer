@@ -30,6 +30,35 @@ class TextureManager
         _commandQueue = Engine.device.makeCommandQueue()!
     }
     
+    func getTexture(for path: String, origin: MTKTextureLoader.Origin = .topLeft) -> MTLTexture?
+    {
+        if URL(string: path)!.pathExtension.isEmpty
+        {
+            if let url = ResourceManager.getURL(for: path + ".jpg")
+            {
+                return getTexture(url: url, origin: origin)
+            }
+            else if let url = ResourceManager.getURL(for: path + ".jpeg")
+            {
+                return getTexture(url: url, origin: origin)
+            }
+            else if let url = ResourceManager.getURL(for: path + ".tga")
+            {
+                return getTexture(url: url, origin: origin)
+            }
+            else
+            {
+                return nil
+            }
+        }
+        
+        guard let url = ResourceManager.getURL(for: path) else {
+            return nil
+        }
+        
+        return getTexture(url: url, origin: origin)
+    }
+    
     func getTexture(url: URL, origin: MTKTextureLoader.Origin = .topLeft) -> MTLTexture?
     {
         let fileName = url.lastPathComponent
@@ -48,9 +77,9 @@ class TextureManager
             texture = try _textureLoader.newTexture(URL: url, options: options)
             texture?.label = fileName
         }
-        catch let error as NSError
+        catch
         {
-            print("ERROR::CREATING::TEXTURE::__\(fileName)__::\(error)")
+            print("Can't create texture \(fileName)")
         }
         
         _cache[fileName] = texture

@@ -29,9 +29,9 @@ class SkeletalMesh
         }
     }
     
-    init?(name: String, ext: String)
+    init?(name: String)
     {
-        guard let url = Bundle.main.url(forResource: name, withExtension: ext) else { return nil }
+        guard let url = ResourceManager.getURL(for: name) else { return nil }
         
         let model: ValveModel
         
@@ -49,8 +49,7 @@ class SkeletalMesh
             return nil
         }
         
-        let assetURL = Bundle.main.url(forResource: "dev_256", withExtension: "jpeg")!
-        let devTexture = TextureManager.shared.getTexture(url: assetURL, origin: .topLeft)!
+        let devTexture = TextureManager.shared.getTexture(for: "Assets/dev_256.jpeg")!
         
         let textures = model.textures.map {
             TextureManager.shared.createTexture($0.name, bytes: $0.data, width: $0.width, height: $0.height)

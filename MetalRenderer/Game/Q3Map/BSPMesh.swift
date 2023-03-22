@@ -18,8 +18,7 @@ class BSPMesh
     {
         self.map = map
         
-        let assetURL = Bundle.main.url(forResource: "dev_256", withExtension: "jpeg")!
-        let devTexture = TextureManager.shared.getTexture(url: assetURL, origin: .topLeft)!
+        let devTexture = TextureManager.shared.getTexture(for: "Assets/dev_256.jpeg")!
         
         var groupedIndices: Dictionary<IndexGroupKey, [UInt32]> = Dictionary()
         
@@ -45,9 +44,7 @@ class BSPMesh
         
         for (key, indices) in groupedIndices
         {
-            let url = URL(fileURLWithPath: "Contents/Resources/" + key.texture + ".jpg", relativeTo: Bundle.main.bundleURL)
-            
-            let texture = TextureManager.shared.getTexture(url: url) ?? devTexture
+            let texture = TextureManager.shared.getTexture(for: "Assets/q3/" + key.texture) ?? devTexture
 
             let lightmap = key.lightmap >= 0
                 ? TextureManager.shared.loadLightmap(map.lightmaps[key.lightmap])

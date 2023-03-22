@@ -34,7 +34,7 @@ class Q3MapScene
     
     private func build()
     {
-        if let url = Bundle.main.url(forResource: "q3dm7", withExtension: "bsp"), let data = try? Data(contentsOf: url)
+        if let data = ResourceManager.getData(for: "Assets/q3/maps/q3dm7.bsp")
         {
             loadMap(with: data)
         }

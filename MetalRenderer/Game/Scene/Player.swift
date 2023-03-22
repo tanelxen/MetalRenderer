@@ -25,7 +25,7 @@ class Player
     init(scene: Q3MapScene)
     {
         self.scene = scene
-        self.mesh = SkeletalMesh(name: "v_9mmhandgun", ext: "mdl")
+        self.mesh = SkeletalMesh(name: "Assets/hl/models/v_9mmhandgun.mdl")
         
         mesh?.sequenceName = "idle3"
         

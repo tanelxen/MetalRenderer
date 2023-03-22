@@ -26,7 +26,7 @@ class Barney
     init(scene: Q3MapScene)
     {
         self.scene = scene
-        self.mesh = SkeletalMesh(name: "barney", ext: "mdl")
+        self.mesh = SkeletalMesh(name: "Assets/hl/models/barney.mdl")
         
         mesh?.sequenceName = "walk"
         
