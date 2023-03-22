@@ -87,3 +87,37 @@ final class Waypoint
     }
 }
 
+extension Waypoint: Codable
+{
+    enum CodingKeys: String, CodingKey {
+        case position
+    }
+    
+    convenience init(from decoder: Decoder) throws
+    {
+        self.init()
+        
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        transform.position = try values.decode(float3.self, forKey: .position)
+    }
+
+    func encode(to encoder: Encoder) throws
+    {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(transform.position, forKey: .position)
+    }
+}
+
+extension Waypoint: Hashable
+{
+    func hash(into hasher: inout Hasher)
+    {
+        let value = transform.position.hashValue
+        hasher.combine(value)
+    }
+}
+
+func ==(lhs: Waypoint, rhs: Waypoint) -> Bool
+{
+    return lhs.transform.position == rhs.transform.position
+}

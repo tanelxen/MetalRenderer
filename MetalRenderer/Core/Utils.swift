@@ -10,14 +10,16 @@ import MetalKit
 
 enum Utils
 {
-    static func timeProfile(_ label: String, closure: () -> Void)
+    static func timeProfile<Result>(_ label: String, closure: () -> Result) -> Result
     {
         let start = CFAbsoluteTimeGetCurrent()
-
-        closure()
+        
+        let result = closure()
 
         let diff = (CFAbsoluteTimeGetCurrent() - start) * 1000
         print("\(label) \(diff) ms")
+        
+        return result
     }
     
     static func createTexture(data: [float4], width: Int, height: Int) -> MTLTexture?

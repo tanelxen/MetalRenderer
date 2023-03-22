@@ -10,10 +10,9 @@ import GoldSrcMDL
 
 class SkeletalMesh
 {
-    private static var cache: [URL: ValveModel] = [:]
+    private static var cache: [String: ValveModel] = [:]
     
     private var meshes: [SkeletalMeshData] = []
-    //private var textures: [MTLTexture] = []
     
     private var cur_frame: Int = 0
     private var cur_frame_time: Float = 0.0
@@ -31,25 +30,21 @@ class SkeletalMesh
     
     init?(name: String)
     {
-        guard let url = ResourceManager.getURL(for: name) else { return nil }
-        
         let model: ValveModel
         
-        if let mdl = SkeletalMesh.cache[url]
+        if let mdl = SkeletalMesh.cache[name]
         {
             model = mdl
         }
-        else if let data = try? Data(contentsOf: url)
+        else if let data = ResourceManager.getData(for: name)
         {
             model = GoldSrcMDL(data: data).valveModel
-            SkeletalMesh.cache[url] = model
+            SkeletalMesh.cache[name] = model
         }
         else
         {
             return nil
         }
-        
-        let devTexture = TextureManager.shared.getTexture(for: "Assets/dev_256.jpeg")!
         
         let textures = model.textures.map {
             TextureManager.shared.createTexture($0.name, bytes: $0.data, width: $0.width, height: $0.height)
@@ -71,7 +66,7 @@ class SkeletalMesh
                                                        length: indices.count * MemoryLayout<UInt32>.stride,
                                                        options: [])
             
-            var texture = devTexture
+            var texture = TextureManager.shared.devTexture
             
             if mdlMesh.textureIndex != -1, mdlMesh.textureIndex < textures.count
             {

@@ -18,8 +18,6 @@ class BSPMesh
     {
         self.map = map
         
-        let devTexture = TextureManager.shared.getTexture(for: "Assets/dev_256.jpeg")!
-        
         var groupedIndices: Dictionary<IndexGroupKey, [UInt32]> = Dictionary()
         
         for face in map.faces
@@ -44,7 +42,7 @@ class BSPMesh
         
         for (key, indices) in groupedIndices
         {
-            let texture = TextureManager.shared.getTexture(for: "Assets/q3/" + key.texture) ?? devTexture
+            let texture = TextureManager.shared.getTexture(for: "Assets/q3/" + key.texture) ?? TextureManager.shared.devTexture!
 
             let lightmap = key.lightmap >= 0
                 ? TextureManager.shared.loadLightmap(map.lightmaps[key.lightmap])

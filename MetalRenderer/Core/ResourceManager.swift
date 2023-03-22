@@ -45,4 +45,17 @@ enum ResourceManager
         
         return data
     }
+    
+    private static let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+    
+    static func URLInDocuments(for path: String) -> URL
+    {
+        return documentDirectory.appendingPathComponent(path)
+    }
+    
+    static func dataInDocuments(for path: String) throws -> Data
+    {
+        let url = URLInDocuments(for: path)
+        return try Data(contentsOf: url)
+    }
 }

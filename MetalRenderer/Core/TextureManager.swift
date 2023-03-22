@@ -11,6 +11,8 @@ class TextureManager
 {
     static let shared: TextureManager = TextureManager(with: Engine.device)
     
+    private (set) var devTexture: MTLTexture!
+    
     private let _textureLoader: MTKTextureLoader
     private var _cache: [String: MTLTexture] = [:]
     
@@ -28,6 +30,8 @@ class TextureManager
     {
         _textureLoader = MTKTextureLoader(device: Engine.device)
         _commandQueue = Engine.device.makeCommandQueue()!
+        
+        devTexture = getTexture(for: "Assets/dev_256.jpeg")!
     }
     
     func getTexture(for path: String, origin: MTKTextureLoader.Origin = .topLeft) -> MTLTexture?

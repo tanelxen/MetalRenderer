@@ -110,10 +110,7 @@ final class NavigationGraph
                     {
                         if distToTestNode < distToCheckNode
                         {
-                            print("REJECTED Node_\(j) through Node_\(k)")
-                            
                             srcNode.neighbors.removeAll(where: { $0.1 == j })
-                            
                             break
                         }
                     }
@@ -285,18 +282,17 @@ final class NavigationGraph
     
     func load(named: String)
     {
-        let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-        
-        let pathWithFileName = documentDirectory.appendingPathComponent("\(named).nav")
-        
-        let decoder = JSONDecoder()
-
         do
         {
-            let data = try Data(contentsOf: pathWithFileName)
+            let url = ResourceManager.URLInDocuments(for: "\(named).nav")
+            let data = try Data(contentsOf: url)
+            
+            let decoder = JSONDecoder()
             let graph = try decoder.decode(NavigationGraph.self, from: data)
             
             waypoints = graph.waypoints
+            
+            print("Navigation Graph was loaded from", url)
         }
         catch
         {
@@ -306,17 +302,15 @@ final class NavigationGraph
     
     func save(named: String)
     {
-        let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-        
-        let pathWithFileName = documentDirectory.appendingPathComponent("\(named).nav")
-        
-        let jsonEncoder = JSONEncoder()
-        
         do
         {
+            let jsonEncoder = JSONEncoder()
             let jsonData = try jsonEncoder.encode(self)
-            try jsonData.write(to: pathWithFileName)
-            print("Navigation Graph was saved at", pathWithFileName)
+            
+            let url = ResourceManager.URLInDocuments(for: "\(named).nav")
+            try jsonData.write(to: url)
+            
+            print("Navigation Graph was saved to", url)
         }
         catch
         {
@@ -485,27 +479,6 @@ extension NavigationGraph: Codable
     }
 }
 
-extension Waypoint: Codable
-{
-    enum CodingKeys: String, CodingKey {
-        case position
-    }
-    
-    convenience init(from decoder: Decoder) throws
-    {
-        self.init()
-        
-        let values = try decoder.container(keyedBy: CodingKeys.self)
-        transform.position = try values.decode(float3.self, forKey: .position)
-    }
-
-    func encode(to encoder: Encoder) throws
-    {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(transform.position, forKey: .position)
-    }
-}
-
 struct Link
 {
     let start: Waypoint
@@ -538,21 +511,7 @@ struct Link
     }
 }
 
-extension Waypoint: Hashable
-{
-    func hash(into hasher: inout Hasher)
-    {
-        let value = transform.position.hashValue
-        hasher.combine(value)
-    }
-}
-
-func ==(lhs: Waypoint, rhs: Waypoint) -> Bool
-{
-    return lhs.transform.position == rhs.transform.position
-}
-
-struct Queue<T>
+private struct Queue<T>
 {
     private var elements: [T] = []
 
@@ -576,7 +535,7 @@ struct Queue<T>
     }
 }
 
-class TestHull
+private class TestHull
 {
     var transform = Transform()
     
