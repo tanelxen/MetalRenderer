@@ -10,23 +10,36 @@ import MetalKit
 class GameView: MTKView
 {
     private var renderer: MTKViewDelegate!
+    private let hudView = HudView()
     
-    required init(coder: NSCoder)
+    init()
     {
-        super.init(coder: coder)
-        
-        self.device = MTLCreateSystemDefaultDevice()
+        super.init(frame: .zero, device: MTLCreateSystemDefaultDevice())
         
         Engine.ignite(device: device!)
         
         self.clearColor = .init(red: 0.02, green: 0.02, blue: 0.03, alpha: 1.0)
         self.colorPixelFormat = Preferences.colorPixelFormat
         self.depthStencilPixelFormat = Preferences.depthStencilPixelFormat
-        self.framebufferOnly = false
         
         renderer = ForwardRenderer(view: self)
         
         self.delegate = renderer
+        
+        
+        addSubview(hudView)
+        hudView.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            hudView.leftAnchor.constraint(equalTo: safeAreaLayoutGuide.leftAnchor),
+            hudView.rightAnchor.constraint(equalTo: safeAreaLayoutGuide.rightAnchor),
+            hudView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
+            hudView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor)
+        ])
+    }
+    
+    required init(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 }
 

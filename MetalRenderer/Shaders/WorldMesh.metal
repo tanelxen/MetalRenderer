@@ -47,6 +47,10 @@ vertex VertexOut world_mesh_vs
 
 constexpr sampler sampler2d(min_filter::linear, mag_filter::linear, address::repeat);
 
+half4 adjustExposure(half4 color, float value) {
+    return (1.0 + value) * color;
+}
+
 fragment half4 world_mesh_fs
 (
     VertexOut         vOut        [[ stage_in ]],
@@ -58,5 +62,5 @@ fragment half4 world_mesh_fs
     half4 albedo = albedoMap.sample(sampler2d, vOut.textureCoord);
     half4 lighting = lightMap.sample(sampler2d, vOut.lightmapCoord);
     
-    return albedo * lighting;
+    return adjustExposure(albedo * lighting, 1.8);
 }
