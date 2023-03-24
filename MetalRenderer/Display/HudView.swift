@@ -9,6 +9,41 @@ import Cocoa
 
 class HudView: NSView
 {
+    static let shared = HudView()
+    
+    var gameState: GameState = .start
+    {
+        didSet
+        {
+            switch gameState
+            {
+                case .start:
+                    crosshairView2.isHidden = true
+                    crosshairView3.isHidden = true
+                    healthView.isHidden = true
+                    
+                case .loading:
+                    crosshairView2.isHidden = true
+                    crosshairView3.isHidden = true
+                    healthView.isHidden = true
+                    loaderView.startAnimation(nil)
+                    
+                case .ready:
+                    crosshairView2.isHidden = false
+                    crosshairView3.isHidden = false
+                    healthView.isHidden = false
+                    loaderView.stopAnimation(nil)
+            }
+        }
+    }
+    
+    enum GameState
+    {
+        case start
+        case loading
+        case ready
+    }
+    
     private let loaderView: NSProgressIndicator = {
         let view = NSProgressIndicator()
         view.translatesAutoresizingMaskIntoConstraints = false

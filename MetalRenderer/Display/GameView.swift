@@ -10,7 +10,7 @@ import MetalKit
 class GameView: MTKView
 {
     private var renderer: MTKViewDelegate!
-    private let hudView = HudView()
+    private let hudView = HudView.shared
     
     init()
     {
@@ -22,11 +22,6 @@ class GameView: MTKView
         self.colorPixelFormat = Preferences.colorPixelFormat
         self.depthStencilPixelFormat = Preferences.depthStencilPixelFormat
         
-        renderer = ForwardRenderer(view: self)
-        
-        self.delegate = renderer
-        
-        
         addSubview(hudView)
         hudView.translatesAutoresizingMaskIntoConstraints = false
         
@@ -36,6 +31,12 @@ class GameView: MTKView
             hudView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
             hudView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor)
         ])
+        
+        hudView.gameState = .start
+        
+        let renderer = ForwardRenderer(view: self)
+        self.renderer = renderer
+        self.delegate = renderer
     }
     
     required init(coder: NSCoder) {

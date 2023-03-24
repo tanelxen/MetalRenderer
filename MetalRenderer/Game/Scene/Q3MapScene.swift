@@ -25,11 +25,15 @@ class Q3MapScene
     
     private (set) var player: Player?
     
-    private var canUpdate = false
+    private var isReady = false
     
     init()
     {
-        build()
+        HudView.shared.gameState = .loading
+        
+        DispatchQueue.global().async {
+            self.build()
+        }
     }
     
     private func build()
@@ -39,22 +43,15 @@ class Q3MapScene
             loadMap(with: data)
         }
         
-        navigation.load(named: "q3dm7")
-        navigation.scene = self
-        navigation.build()
+        DispatchQueue.global().async {
+            self.navigation.load(named: "q3dm7")
+            self.navigation.scene = self
+            self.navigation.build()
+        }
     }
     
-    private func loadMap(with data: Data)
+    private func spawn(with q3map: Q3Map)
     {
-        let q3map = Q3Map(data: data)
-        print("bsp file was loaded")
-        
-        bspMesh = BSPMesh(map: q3map)
-        print("bsp mesh was created")
-
-        collision = Q3MapCollision(q3map: q3map)
-        print("collision was created")
-
         // get spawn points and set camera position to one
         let spawnPoints = q3map.entities.filter { entity in
             entity["classname"] == "info_player_deathmatch"
@@ -86,6 +83,27 @@ class Q3MapScene
         }
         
         print("entities were created")
+    }
+    
+    private func loadMap(with data: Data)
+    {
+        let q3map = Q3Map(data: data)
+        print("bsp file was loaded")
+        
+        bspMesh = BSPMesh(map: q3map)
+        print("bsp mesh was created")
+
+        collision = Q3MapCollision(q3map: q3map)
+        print("collision was created")
+        
+        DispatchQueue.global().async {
+            self.spawn(with: q3map)
+            
+            DispatchQueue.main.async {
+                self.isReady = true
+                HudView.shared.gameState = .ready
+            }
+        }
         
         Keyboard.onKeyDown = { key in
             
@@ -128,6 +146,8 @@ class Q3MapScene
     
     func renderWorld(with encoder: MTLRenderCommandEncoder?)
     {
+        guard isReady else { return }
+        
         var sceneUniforms = sceneConstants
         var modelConstants = ModelConstants()
         
@@ -139,6 +159,8 @@ class Q3MapScene
     
     func renderStaticMeshes(with encoder: MTLRenderCommandEncoder?)
     {
+        guard isReady else { return }
+        
         var sceneUniforms = sceneConstants
         var modelConstants = ModelConstants()
         modelConstants.modelMatrix.scale(axis: float3(repeating: 1))
@@ -151,6 +173,8 @@ class Q3MapScene
     
     func renderSkeletalMeshes(with encoder: MTLRenderCommandEncoder?)
     {
+        guard isReady else { return }
+        
         var sceneUniforms = self.sceneConstants
         encoder?.setVertexBytes(&sceneUniforms, length: SceneConstants.stride, index: 1)
         
@@ -172,6 +196,8 @@ class Q3MapScene
     
     func renderPlayer(with encoder: MTLRenderCommandEncoder?)
     {
+        guard isReady else { return }
+        
         var sceneUniforms = self.sceneConstants
         encoder?.setVertexBytes(&sceneUniforms, length: SceneConstants.stride, index: 1)
         
@@ -199,6 +225,8 @@ class Q3MapScene
     
     func renderWaypoints(with encoder: MTLRenderCommandEncoder?)
     {
+        guard isReady else { return }
+        
         var sceneUniforms = self.sceneConstants
         encoder?.setVertexBytes(&sceneUniforms, length: SceneConstants.stride, index: 1)
         
@@ -223,6 +251,8 @@ class Q3MapScene
     
     final func update()
     {
+        guard isReady else { return }
+        
         CameraManager.shared.update()
         
         // Update game logic
