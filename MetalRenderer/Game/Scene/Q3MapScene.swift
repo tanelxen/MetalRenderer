@@ -102,6 +102,8 @@ class Q3MapScene
             DispatchQueue.main.async {
                 self.isReady = true
                 HudView.shared.gameState = .ready
+                AudioEngine.start()
+                AudioEngine.play(file: "Half-Life13.mp3")
             }
         }
         

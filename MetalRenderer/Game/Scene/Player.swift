@@ -22,6 +22,11 @@ class Player
     
     private var playerMovement = PlayerMovement()
     
+    private let footsteps = ["pl_step1.wav",
+                             "pl_step2.wav",
+                             "pl_step3.wav",
+                             "pl_step4.wav"]
+    
     init(scene: Q3MapScene)
     {
         self.scene = scene
@@ -32,6 +37,12 @@ class Player
         CameraManager.shared.mainCamera = camera
         
         playerMovement.scene = scene
+        
+        playerMovement.playStepsSound = { [weak self] in
+            if let footstep = self?.footsteps.randomElement() {
+                AudioEngine.play(file: footstep)
+            }
+        }
     }
     
     func posses()

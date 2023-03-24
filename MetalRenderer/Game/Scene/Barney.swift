@@ -23,6 +23,11 @@ class Barney
     private var route: [float3] = []
     private var routeIndex = -1 // индекс точки в маршруте, к которой мы следуем
     
+    private let footsteps = ["pl_step1.wav",
+                             "pl_step2.wav",
+                             "pl_step3.wav",
+                             "pl_step4.wav"]
+    
     init(scene: Q3MapScene)
     {
         self.scene = scene
@@ -32,6 +37,12 @@ class Barney
         
         playerMovement.scene = scene
         playerMovement.cl_forwardspeed = 110
+        
+        playerMovement.playStepsSound = { [weak self] in
+            if let footstep = self?.footsteps.randomElement() {
+                AudioEngine.play(file: footstep)
+            }
+        }
     }
     
     func update()

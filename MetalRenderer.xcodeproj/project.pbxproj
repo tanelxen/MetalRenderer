@@ -28,6 +28,12 @@
 		8A5EDFEE27BC1BB3007166E4 /* SkeletalMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5EDFED27BC1BB3007166E4 /* SkeletalMesh.swift */; };
 		8A5EDFF027BC205B007166E4 /* SkeletalMesh.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8A5EDFEF27BC205B007166E4 /* SkeletalMesh.metal */; };
 		8A6E035229CDDA1500609C3A /* halflife2.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8A6E035129CDDA1500609C3A /* halflife2.ttf */; };
+		8A6E036A29CE3BA300609C3A /* Half-Life13.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 8A6E036529CE3BA300609C3A /* Half-Life13.mp3 */; };
+		8A6E036B29CE3BA300609C3A /* pl_step1.wav in Resources */ = {isa = PBXBuildFile; fileRef = 8A6E036629CE3BA300609C3A /* pl_step1.wav */; };
+		8A6E036C29CE3BA300609C3A /* pl_step3.wav in Resources */ = {isa = PBXBuildFile; fileRef = 8A6E036729CE3BA300609C3A /* pl_step3.wav */; };
+		8A6E036D29CE3BA300609C3A /* pl_step2.wav in Resources */ = {isa = PBXBuildFile; fileRef = 8A6E036829CE3BA300609C3A /* pl_step2.wav */; };
+		8A6E036E29CE3BA300609C3A /* pl_step4.wav in Resources */ = {isa = PBXBuildFile; fileRef = 8A6E036929CE3BA300609C3A /* pl_step4.wav */; };
+		8A6E037329CE51D600609C3A /* AudioEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A6E037229CE51D600609C3A /* AudioEngine.swift */; };
 		8A75015E27B08E25001F63F6 /* BinaryReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A75015D27B08E25001F63F6 /* BinaryReader.swift */; };
 		8A75016027B08EFD001F63F6 /* Q3Map.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A75015F27B08EFD001F63F6 /* Q3Map.swift */; };
 		8A75016227B08F84001F63F6 /* Q3MapScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A75016127B08F84001F63F6 /* Q3MapScene.swift */; };
@@ -81,6 +87,12 @@
 		8A5EDFED27BC1BB3007166E4 /* SkeletalMesh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkeletalMesh.swift; sourceTree = "<group>"; };
 		8A5EDFEF27BC205B007166E4 /* SkeletalMesh.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = SkeletalMesh.metal; sourceTree = "<group>"; };
 		8A6E035129CDDA1500609C3A /* halflife2.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = halflife2.ttf; sourceTree = "<group>"; };
+		8A6E036529CE3BA300609C3A /* Half-Life13.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "Half-Life13.mp3"; sourceTree = "<group>"; };
+		8A6E036629CE3BA300609C3A /* pl_step1.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = pl_step1.wav; sourceTree = "<group>"; };
+		8A6E036729CE3BA300609C3A /* pl_step3.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = pl_step3.wav; sourceTree = "<group>"; };
+		8A6E036829CE3BA300609C3A /* pl_step2.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = pl_step2.wav; sourceTree = "<group>"; };
+		8A6E036929CE3BA300609C3A /* pl_step4.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = pl_step4.wav; sourceTree = "<group>"; };
+		8A6E037229CE51D600609C3A /* AudioEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioEngine.swift; sourceTree = "<group>"; };
 		8A75015D27B08E25001F63F6 /* BinaryReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BinaryReader.swift; sourceTree = "<group>"; };
 		8A75015F27B08EFD001F63F6 /* Q3Map.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Q3Map.swift; sourceTree = "<group>"; };
 		8A75016127B08F84001F63F6 /* Q3MapScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Q3MapScene.swift; sourceTree = "<group>"; };
@@ -149,6 +161,7 @@
 				8A8D0E9329CB6CD500721A7D /* ResourceManager.swift */,
 				8A84536927ADA45100E25638 /* TextureManager.swift */,
 				8A75015D27B08E25001F63F6 /* BinaryReader.swift */,
+				8A6E037229CE51D600609C3A /* AudioEngine.swift */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -227,6 +240,7 @@
 			isa = PBXGroup;
 			children = (
 				8AB6DE2629CBCA19005BCBB7 /* Fonts */,
+				8A6E036429CE3BA300609C3A /* Sounds */,
 				8A56D719278E058400D3FE2B /* Assets.xcassets */,
 				8A56D71E278E058400D3FE2B /* Info.plist */,
 				8A56D71F278E058400D3FE2B /* MetalRenderer.entitlements */,
@@ -248,6 +262,18 @@
 				8A1456E6295799EE00E92E68 /* NavigationGraph.swift */,
 			);
 			path = Scene;
+			sourceTree = "<group>";
+		};
+		8A6E036429CE3BA300609C3A /* Sounds */ = {
+			isa = PBXGroup;
+			children = (
+				8A6E036529CE3BA300609C3A /* Half-Life13.mp3 */,
+				8A6E036629CE3BA300609C3A /* pl_step1.wav */,
+				8A6E036729CE3BA300609C3A /* pl_step3.wav */,
+				8A6E036829CE3BA300609C3A /* pl_step2.wav */,
+				8A6E036929CE3BA300609C3A /* pl_step4.wav */,
+			);
+			path = Sounds;
 			sourceTree = "<group>";
 		};
 		8A716BC127B2E18E003D5BEE /* Q3Map */ = {
@@ -341,8 +367,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				8A6E035229CDDA1500609C3A /* halflife2.ttf in Resources */,
+				8A6E036A29CE3BA300609C3A /* Half-Life13.mp3 in Resources */,
 				8A56D71A278E058400D3FE2B /* Assets.xcassets in Resources */,
+				8A6E036E29CE3BA300609C3A /* pl_step4.wav in Resources */,
 				8A8D130E29CB6D4800721A7D /* Assets in Resources */,
+				8A6E036C29CE3BA300609C3A /* pl_step3.wav in Resources */,
+				8A6E036D29CE3BA300609C3A /* pl_step2.wav in Resources */,
+				8A6E036B29CE3BA300609C3A /* pl_step1.wav in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -359,6 +390,7 @@
 				8A0D272227907F0200F2D9E6 /* Common.metal in Sources */,
 				8AB9EEF927C00C7D008C33B2 /* Barney.swift in Sources */,
 				8A75016927B0966A001F63F6 /* Q3EntityParser.swift in Sources */,
+				8A6E037329CE51D600609C3A /* AudioEngine.swift in Sources */,
 				8A5EDFEE27BC1BB3007166E4 /* SkeletalMesh.swift in Sources */,
 				8A9C235A27A4DB4100965D21 /* SolidColor.metal in Sources */,
 				8AE7F5702946965B00CD40BE /* PlayerMovement.swift in Sources */,
@@ -526,7 +558,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = Q9T2S8AD86;
-				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_HARDENED_RUNTIME = NO;
 				INFOPLIST_FILE = "$(SRCROOT)/MetalRenderer/Other Files/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -552,7 +584,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = Q9T2S8AD86;
-				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_HARDENED_RUNTIME = NO;
 				INFOPLIST_FILE = "$(SRCROOT)/MetalRenderer/Other Files/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

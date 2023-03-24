@@ -6,6 +6,7 @@
 //
 
 import simd
+import Foundation
 
 fileprivate enum MovementConstants
 {
@@ -46,7 +47,7 @@ final class PlayerMovement
     var forwardmove: Float = 0.0
     var rightmove: Float = 0.0
     
-    var cl_forwardspeed: Float = 400.0
+    var cl_forwardspeed: Float = 200.0
     
     var isWishJump = false
     
@@ -62,6 +63,10 @@ final class PlayerMovement
     private let player_maxs = float3( 15, 15, 32 )
     
     private var movement: Int = 0
+    
+    var playStepsSound: (() -> Void)?
+    private var lastStepDate = Date()
+    private let stepDistance = 64.0
     
     // Произвести все вычисления столкновений и обновить position и velocity
     func update()
@@ -88,6 +93,19 @@ final class PlayerMovement
         else
         {
             transform.position += velocity * GameTime.deltaTime
+        }
+        
+        let speed = Double(length(velocity))
+        
+        if speed > 10 && (forwardmove != 0 || rightmove != 0) && ground_normal != nil
+        {
+            let dt = stepDistance / speed
+            
+            if -lastStepDate.timeIntervalSinceNow > dt
+            {
+                lastStepDate = Date()
+                playStepsSound?()
+            }
         }
     }
     

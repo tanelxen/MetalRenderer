@@ -13,7 +13,7 @@ class AppDelegate: NSObject, NSApplicationDelegate
 
     func applicationDidFinishLaunching(_ notification: Notification)
     {
-        let frame = CGRect(x: 0, y: 0, width: 1080, height: 720) //NSScreen.main?.frame
+        let frame = CGRect(x: 0, y: 0, width: 640, height: 480) //NSScreen.main?.frame
         
         window = NSWindow(contentRect: frame,
                           styleMask: [.titled, .closable, .miniaturizable, .resizable],
