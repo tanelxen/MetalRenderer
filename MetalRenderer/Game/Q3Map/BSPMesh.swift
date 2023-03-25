@@ -23,6 +23,7 @@ class BSPMesh
         for face in map.faces
         {
             if (face.textureName == "noshader") { continue }
+            if (face.textureName.contains("sky")) { continue }
             
             let key = IndexGroupKey(
                 texture: face.textureName,

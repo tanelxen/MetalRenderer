@@ -83,7 +83,6 @@ class ForwardRenderer: NSObject
 
         descriptor.vertexFunction = Engine.defaultLibrary.makeFunction(name: "skybox_vertex_shader")
         descriptor.fragmentFunction = Engine.defaultLibrary.makeFunction(name: "skybox_fragment_shader")
-        descriptor.vertexDescriptor = Skybox.vertexDescriptor()
 
         descriptor.label = "Skybox Pipeline State"
 
@@ -160,7 +159,7 @@ class ForwardRenderer: NSObject
         
         renderEncoder?.label = "Main Pass Command Encoder"
         
-        renderEncoder?.setFrontFacing(.clockwise)
+        renderEncoder?.setFrontFacing(.counterClockwise)
         renderEncoder?.setCullMode(.back)
         
         // SKYBOX
@@ -169,6 +168,9 @@ class ForwardRenderer: NSObject
             renderEncoder?.setRenderPipelineState(skyboxPipelineState)
             scene.renderSky(with: renderEncoder)
         renderEncoder?.popDebugGroup()
+        
+        renderEncoder?.setFrontFacing(.clockwise)
+        renderEncoder?.setCullMode(.back)
         
         renderEncoder?.setDepthStencilState(regularStencilState)
         

@@ -9,73 +9,51 @@ import MetalKit
 
 class Skybox
 {
-    private let mesh: MTKMesh
-    private let texture: MTLTexture!
+    private let vertexCount: Int
+    private let vertexBuffer: MTLBuffer
+    private let texture: MTLTexture
     
     init()
     {
-        let allocator = MTKMeshBufferAllocator(device: Engine.device)
+//        let A = float3(-1.0,  1.0,  1.0)
+//        let B = float3(-1.0, -1.0,  1.0)
+//        let C = float3( 1.0, -1.0,  1.0)
+//        let D = float3( 1.0,  1.0,  1.0)
+//
+//        let Q = float3(-1.0,  1.0, -1.0)
+//        let R = float3( 1.0,  1.0, -1.0)
+//        let S = float3(-1.0, -1.0, -1.0)
+//        let T = float3( 1.0, -1.0, -1.0)
         
-        let cube = MDLMesh(boxWithExtent: [1,1,1], segments: [1, 1, 1],
-                           inwardNormals: true, geometryType: .triangles,
-                           allocator: allocator)
+        let A = float3(-1.0,  1.0,  1.0)
+        let B = float3(-1.0,  1.0, -1.0)
+        let C = float3( 1.0,  1.0, -1.0)
+        let D = float3( 1.0,  1.0,  1.0)
+        let Q = float3(-1.0, -1.0,  1.0)
+        let R = float3( 1.0, -1.0,  1.0)
+        let S = float3(-1.0, -1.0, -1.0)
+        let T = float3( 1.0, -1.0, -1.0)
         
-        mesh = try! MTKMesh(mesh: cube, device: Engine.device)
+        let vertices: [float3] = [
+            A,B,C, A,C,D,   //Front
+            R,T,S, Q,R,S,   //Back
+            
+            Q,S,B, Q,B,A,   //Left
+            D,C,T, D,T,R,   //Right
+            
+            Q,A,D, Q,D,R,   //Top
+            B,S,T, B,T,C    //Bot
+        ]
         
-        texture = TextureManager.shared.loadCubeTexture(imageName: "night-sky")
+        vertexCount = vertices.count
+        vertexBuffer = Engine.device.makeBuffer(bytes: vertices, length: vertexCount * float3.stride)!
+        texture = TextureManager.shared.loadCubeTexture(imageName: "night-sky")!
     }
     
     func renderWithEncoder(_ encoder: MTLRenderCommandEncoder)
     {
-        encoder.setFragmentTexture(texture, index: 1)
-        encoder.setVertexBuffer(mesh.vertexBuffers[0].buffer, offset: 0, index: 0)
-        
-        let submesh = mesh.submeshes[0]
-
-        encoder.drawIndexedPrimitives(type: .triangle,
-                                      indexCount: submesh.indexCount,
-                                      indexType: submesh.indexType,
-                                      indexBuffer: submesh.indexBuffer.buffer,
-                                      indexBufferOffset: 0)
-    }
-    
-    static func vertexDescriptor() -> MTLVertexDescriptor
-    {
-        let descriptor = MTLVertexDescriptor()
-        var offset: Int = 0
-        
-        // Position
-        descriptor.attributes[0].format = .float4
-        descriptor.attributes[0].bufferIndex = 0
-        descriptor.attributes[0].offset = offset
-        offset += float4.size
-        
-        // Normal
-        descriptor.attributes[1].format = .float4
-        descriptor.attributes[1].bufferIndex = 0
-        descriptor.attributes[1].offset = offset
-        offset += float4.size
-        
-        // Color
-        descriptor.attributes[2].format = .float4
-        descriptor.attributes[2].bufferIndex = 0
-        descriptor.attributes[2].offset = offset
-        offset += float4.size
-        
-        // UV0
-        descriptor.attributes[3].format = .float2
-        descriptor.attributes[3].bufferIndex = 0
-        descriptor.attributes[3].offset = offset
-        offset += float2.size
-        
-        // UV1
-        descriptor.attributes[4].format = .float2
-        descriptor.attributes[4].bufferIndex = 0
-        descriptor.attributes[4].offset = offset
-        offset += float2.size
-        
-        descriptor.layouts[0].stride = offset
-        
-        return descriptor
+        encoder.setFragmentTexture(texture, index: 0)
+        encoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
+        encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertexCount)
     }
 }

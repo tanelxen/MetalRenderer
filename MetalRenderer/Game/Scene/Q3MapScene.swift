@@ -139,6 +139,8 @@ class Q3MapScene
     
     func renderSky(with encoder: MTLRenderCommandEncoder?)
     {
+        guard isReady else { return }
+        
         var sceneUniforms = sceneConstants
         
         encoder?.setVertexBytes(&sceneUniforms, length: SceneConstants.stride, index: 1)

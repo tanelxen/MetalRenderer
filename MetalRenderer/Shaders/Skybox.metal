@@ -9,15 +9,6 @@
 #include "Common.metal"
 using namespace metal;
 
-struct VertexIn
-{
-    float4 position [[attribute(0)]];
-    float4 normal [[attribute(1)]];
-    float4 color [[attribute(2)]];
-    float2 textureCoord [[attribute(3)]];
-    float2 lightmapCoord [[attribute(4)]];
-};
-
 struct VertexOut
 {
     float4 position [[ position ]];
@@ -26,23 +17,29 @@ struct VertexOut
 
 vertex VertexOut skybox_vertex_shader
 (
-    const VertexIn          vIn             [[ stage_in ]],
-    constant SceneConstants &viewConstants  [[ buffer(1) ]],
-    constant ModelConstants &modelConstants [[ buffer(2) ]]
+    constant float3           *vertices       [[ buffer(0) ]],
+    constant SceneConstants   &viewConstants  [[ buffer(1) ]],
+    constant ModelConstants   &modelConstants [[ buffer(2) ]],
+    uint                      vertexID        [[ vertex_id ]]
 )
 {
-
+    float4 position = float4(vertices[vertexID], 1);
+    
     float4x4 skyViewMatrix = viewConstants.viewMatrix;
+    
+    // Делаем бесконечный масштаб
     skyViewMatrix[3][0] = 0;
     skyViewMatrix[3][1] = 0;
     skyViewMatrix[3][2] = 0;
     skyViewMatrix[3][3] = 1;
      
     VertexOut out;
-    out.position = (viewConstants.projectionMatrix * skyViewMatrix * vIn.position).xyww;
-    out.texCoords = vIn.position.xyz;
+    out.position = (viewConstants.projectionMatrix * skyViewMatrix * position).xyww;
+    out.texCoords = position.xyz;
     
-    out.texCoords.x = -out.texCoords.x;
+    // переворачиваем под видовую матрицу в системе quake
+    out.texCoords = out.texCoords.xzy;
+    out.texCoords.z = -out.texCoords.z;
     
     return out;
 }
@@ -50,8 +47,7 @@ vertex VertexOut skybox_vertex_shader
 fragment half4 skybox_fragment_shader
 (
     VertexOut          data            [[ stage_in ]],
-    texture2d<float>   baseColorMap    [[ texture(0) ]],
-    texturecube<float> cubeTexture     [[ texture(1) ]]
+    texturecube<float> cubeTexture     [[ texture(0) ]]
 )
 {
     constexpr sampler default_sampler;
