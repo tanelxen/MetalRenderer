@@ -18,9 +18,11 @@ class SkeletalMesh
     private var cur_frame_time: Float = 0.0
     private var frames: [[matrix_float4x4]]
     
-    private var cur_anim_duration: Float = 1.0
+    private (set) var cur_anim_duration: Float = 1.0
     
     private var sequences: [Sequence] = []
+    
+    private (set) var groundSpeed: Float = 0
     
     var sequenceName: String = "idle" {
         didSet {
@@ -96,6 +98,8 @@ class SkeletalMesh
         
         cur_frame_time = 0.0
         cur_anim_duration = Float(seq.frames.count) / seq.fps
+        
+        groundSpeed = seq.groundSpeed
     }
     
     func renderWithEncoder(_ encoder: MTLRenderCommandEncoder)

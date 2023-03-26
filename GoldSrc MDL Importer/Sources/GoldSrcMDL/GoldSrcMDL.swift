@@ -40,6 +40,7 @@ public struct Sequence
     public let name: String
     public let frames: [Frame]
     public let fps: Float
+    public let groundSpeed: Float
 }
 
 public struct ValveModel
@@ -406,6 +407,7 @@ public class GoldSrcMDL
         for sequenceIndex in 0 ..< mdlSequences.count
         {
             let fps = mdlSequences[sequenceIndex].fps
+            let numframes = mdlSequences[sequenceIndex].numframes
 
             var frames: [Frame] = []
 
@@ -419,8 +421,12 @@ public class GoldSrcMDL
             
             let label = mdlSequences[sequenceIndex].label
             let name = charsToString(label)
+            
+            let movement = mdlSequences[sequenceIndex].linearmovement
+            var groundSpeed = sqrt(movement.x * movement.x + movement.y * movement.y + movement.z * movement.z)
+            groundSpeed = groundSpeed * fps / (Float(numframes) - 1)
 
-            let sequence = Sequence(name: name, frames: frames, fps: fps)
+            let sequence = Sequence(name: name, frames: frames, fps: fps, groundSpeed: groundSpeed)
             sequences.append(sequence)
         }
     }

@@ -17,6 +17,8 @@ class Barney
     private weak var scene: Q3MapScene?
     
     private var playerMovement = PlayerMovement()
+    private var forwardmove: Float = 0
+    private var cl_forwardspeed: Float = 0
     
     private var isSeePlayer = false
     
@@ -47,7 +49,7 @@ class Barney
     
     func update()
     {
-        playerMovement.forwardmove = 0
+        forwardmove = 0
         
 //        look()
         
@@ -58,11 +60,15 @@ class Barney
             moveToPlayer(minDist: 128)
         }
         
-        playerMovement.transform = transform
-        playerMovement.update()
-        transform.position = playerMovement.transform.position
+//        playerMovement.transform = transform
+//        playerMovement.update()
+//        transform.position = playerMovement.transform.position
         
-        if playerMovement.forwardmove != 0
+        let direction = transform.rotation.forward * forwardmove * cl_forwardspeed
+        transform.position += direction * GameTime.deltaTime
+        
+        
+        if forwardmove != 0
         {
             setSequence(name: "walk")
         }
@@ -83,6 +89,7 @@ class Barney
         if mesh?.sequenceName != name
         {
             mesh?.sequenceName = name
+            cl_forwardspeed = (mesh?.groundSpeed ?? 0)
         }
     }
     
@@ -142,6 +149,6 @@ class Barney
     
     private func moveForward()
     {
-        playerMovement.forwardmove = 1
+        forwardmove = 1
     }
 }
