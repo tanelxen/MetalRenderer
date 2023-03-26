@@ -6,6 +6,7 @@
 //
 
 import MetalKit
+import Quake3BSP
 
 class Q3MapScene
 {

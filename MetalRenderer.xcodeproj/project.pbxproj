@@ -34,12 +34,7 @@
 		8A6E036D29CE3BA300609C3A /* pl_step2.wav in Resources */ = {isa = PBXBuildFile; fileRef = 8A6E036829CE3BA300609C3A /* pl_step2.wav */; };
 		8A6E036E29CE3BA300609C3A /* pl_step4.wav in Resources */ = {isa = PBXBuildFile; fileRef = 8A6E036929CE3BA300609C3A /* pl_step4.wav */; };
 		8A6E037329CE51D600609C3A /* AudioEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A6E037229CE51D600609C3A /* AudioEngine.swift */; };
-		8A75015E27B08E25001F63F6 /* BinaryReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A75015D27B08E25001F63F6 /* BinaryReader.swift */; };
-		8A75016027B08EFD001F63F6 /* Q3Map.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A75015F27B08EFD001F63F6 /* Q3Map.swift */; };
 		8A75016227B08F84001F63F6 /* Q3MapScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A75016127B08F84001F63F6 /* Q3MapScene.swift */; };
-		8A75016727B095E8001F63F6 /* Q3Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A75016627B095E8001F63F6 /* Q3Types.swift */; };
-		8A75016927B0966A001F63F6 /* Q3EntityParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A75016827B0966A001F63F6 /* Q3EntityParser.swift */; };
-		8A75016B27B097DC001F63F6 /* Bezier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A75016A27B097DC001F63F6 /* Bezier.swift */; };
 		8A75016D27B098CE001F63F6 /* BSPMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A75016C27B098CE001F63F6 /* BSPMesh.swift */; };
 		8A84536A27ADA45100E25638 /* TextureManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A84536927ADA45100E25638 /* TextureManager.swift */; };
 		8A8D0E9429CB6CD500721A7D /* ResourceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A8D0E9329CB6CD500721A7D /* ResourceManager.swift */; };
@@ -52,7 +47,8 @@
 		8AA0652C279AB45E00492D26 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AA0652B279AB45E00492D26 /* Utils.swift */; };
 		8AA6C3EB2792EBB300DCB7B7 /* Transform.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AA6C3EA2792EBB300DCB7B7 /* Transform.swift */; };
 		8AB9EEF927C00C7D008C33B2 /* Barney.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB9EEF827C00C7D008C33B2 /* Barney.swift */; };
-		8AE5332027BEEA8B00A80C1E /* GoldSrcMDL in Frameworks */ = {isa = PBXBuildFile; productRef = 8AE5331F27BEEA8B00A80C1E /* GoldSrcMDL */; };
+		8AC4BB0129D0FF2000BD875B /* Quake3BSP in Frameworks */ = {isa = PBXBuildFile; productRef = 8AC4BB0029D0FF2000BD875B /* Quake3BSP */; };
+		8AC4BB0329D1004700BD875B /* GoldSrcMDL in Frameworks */ = {isa = PBXBuildFile; productRef = 8AC4BB0229D1004700BD875B /* GoldSrcMDL */; };
 		8AE7F5702946965B00CD40BE /* PlayerMovement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AE7F56F2946965B00CD40BE /* PlayerMovement.swift */; };
 		8AE8101B29CEC08D003A681E /* pl_gun3.wav in Resources */ = {isa = PBXBuildFile; fileRef = 8AE8101829CEC08D003A681E /* pl_gun3.wav */; };
 		8AE8D0BF29D0D9F100292135 /* PipelineStates.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AE8D0BE29D0D9F100292135 /* PipelineStates.swift */; };
@@ -95,12 +91,7 @@
 		8A6E036829CE3BA300609C3A /* pl_step2.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = pl_step2.wav; sourceTree = "<group>"; };
 		8A6E036929CE3BA300609C3A /* pl_step4.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = pl_step4.wav; sourceTree = "<group>"; };
 		8A6E037229CE51D600609C3A /* AudioEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioEngine.swift; sourceTree = "<group>"; };
-		8A75015D27B08E25001F63F6 /* BinaryReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BinaryReader.swift; sourceTree = "<group>"; };
-		8A75015F27B08EFD001F63F6 /* Q3Map.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Q3Map.swift; sourceTree = "<group>"; };
 		8A75016127B08F84001F63F6 /* Q3MapScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Q3MapScene.swift; sourceTree = "<group>"; };
-		8A75016627B095E8001F63F6 /* Q3Types.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Q3Types.swift; sourceTree = "<group>"; };
-		8A75016827B0966A001F63F6 /* Q3EntityParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Q3EntityParser.swift; sourceTree = "<group>"; };
-		8A75016A27B097DC001F63F6 /* Bezier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bezier.swift; sourceTree = "<group>"; };
 		8A75016C27B098CE001F63F6 /* BSPMesh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BSPMesh.swift; sourceTree = "<group>"; };
 		8A84536927ADA45100E25638 /* TextureManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureManager.swift; sourceTree = "<group>"; };
 		8A8D0E9329CB6CD500721A7D /* ResourceManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResourceManager.swift; sourceTree = "<group>"; };
@@ -127,7 +118,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8AE5332027BEEA8B00A80C1E /* GoldSrcMDL in Frameworks */,
+				8AC4BB0129D0FF2000BD875B /* Quake3BSP in Frameworks */,
+				8AC4BB0329D1004700BD875B /* GoldSrcMDL in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -165,7 +157,6 @@
 				8AA0652B279AB45E00492D26 /* Utils.swift */,
 				8A8D0E9329CB6CD500721A7D /* ResourceManager.swift */,
 				8A84536927ADA45100E25638 /* TextureManager.swift */,
-				8A75015D27B08E25001F63F6 /* BinaryReader.swift */,
 				8A6E037229CE51D600609C3A /* AudioEngine.swift */,
 			);
 			path = Core;
@@ -285,10 +276,6 @@
 		8A716BC127B2E18E003D5BEE /* Q3Map */ = {
 			isa = PBXGroup;
 			children = (
-				8A75015F27B08EFD001F63F6 /* Q3Map.swift */,
-				8A75016627B095E8001F63F6 /* Q3Types.swift */,
-				8A75016827B0966A001F63F6 /* Q3EntityParser.swift */,
-				8A75016A27B097DC001F63F6 /* Bezier.swift */,
 				8A75016C27B098CE001F63F6 /* BSPMesh.swift */,
 			);
 			path = Q3Map;
@@ -326,7 +313,8 @@
 			);
 			name = MetalRenderer;
 			packageProductDependencies = (
-				8AE5331F27BEEA8B00A80C1E /* GoldSrcMDL */,
+				8AC4BB0029D0FF2000BD875B /* Quake3BSP */,
+				8AC4BB0229D1004700BD875B /* GoldSrcMDL */,
 			);
 			productName = MetalRenderer;
 			productReference = 8A56D70F278E058200D3FE2B /* MetalRenderer.app */;
@@ -396,7 +384,6 @@
 				8A1456E7295799EE00E92E68 /* NavigationGraph.swift in Sources */,
 				8A0D272227907F0200F2D9E6 /* Common.metal in Sources */,
 				8AB9EEF927C00C7D008C33B2 /* Barney.swift in Sources */,
-				8A75016927B0966A001F63F6 /* Q3EntityParser.swift in Sources */,
 				8A6E037329CE51D600609C3A /* AudioEngine.swift in Sources */,
 				8A5EDFEE27BC1BB3007166E4 /* SkeletalMesh.swift in Sources */,
 				8A9C235A27A4DB4100965D21 /* SolidColor.metal in Sources */,
@@ -415,19 +402,15 @@
 				8A8D0E9429CB6CD500721A7D /* ResourceManager.swift in Sources */,
 				8A5EDFE227B9B76D007166E4 /* StaticMesh.swift in Sources */,
 				8A0D271C279033A100F2D9E6 /* Camera.swift in Sources */,
-				8A75016B27B097DC001F63F6 /* Bezier.swift in Sources */,
 				8A56D72C278E61CD00D3FE2B /* MetalTypes.swift in Sources */,
 				8AA6C3EB2792EBB300DCB7B7 /* Transform.swift in Sources */,
 				8AEB11C927C1524C008FC445 /* CameraManager.swift in Sources */,
 				8A75016227B08F84001F63F6 /* Q3MapScene.swift in Sources */,
-				8A75016727B095E8001F63F6 /* Q3Types.swift in Sources */,
 				8A0D272727908D5A00F2D9E6 /* GameTime.swift in Sources */,
 				8A5EDFDE27B998A2007166E4 /* ForwardRenderer.swift in Sources */,
 				8A0D27242790808400F2D9E6 /* Sizeable.swift in Sources */,
 				8AF27E3527ACA5BC0025E4F4 /* Skybox.swift in Sources */,
-				8A75016027B08EFD001F63F6 /* Q3Map.swift in Sources */,
 				8AE8D0BF29D0D9F100292135 /* PipelineStates.swift in Sources */,
-				8A75015E27B08E25001F63F6 /* BinaryReader.swift in Sources */,
 				8A84536A27ADA45100E25638 /* TextureManager.swift in Sources */,
 				8A0D271827901DF100F2D9E6 /* Input.swift in Sources */,
 				8A5EDFE027B99EED007166E4 /* WorldMesh.metal in Sources */,
@@ -630,7 +613,11 @@
 /* End XCConfigurationList section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		8AE5331F27BEEA8B00A80C1E /* GoldSrcMDL */ = {
+		8AC4BB0029D0FF2000BD875B /* Quake3BSP */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Quake3BSP;
+		};
+		8AC4BB0229D1004700BD875B /* GoldSrcMDL */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = GoldSrcMDL;
 		};

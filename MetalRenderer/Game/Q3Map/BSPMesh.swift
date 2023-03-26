@@ -5,8 +5,8 @@
 //  Created by Fedor Artemenkov on 07.02.2022.
 //
 
-import simd
 import MetalKit
+import Quake3BSP
 
 class BSPMesh
 {

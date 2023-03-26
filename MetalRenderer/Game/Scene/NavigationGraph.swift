@@ -6,6 +6,7 @@
 //
 
 import MetalKit
+import Quake3BSP
 
 final class NavigationGraph
 {

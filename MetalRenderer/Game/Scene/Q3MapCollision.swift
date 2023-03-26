@@ -5,8 +5,8 @@
 //  Created by Fedor Artemenkov on 11.02.2022.
 //
 
-import Foundation
 import simd
+import Quake3BSP
 
 struct HitResult
 {

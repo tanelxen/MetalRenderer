@@ -7,114 +7,27 @@
 
 import Foundation
 
-private struct Q3DirectoryEntry
+public class Q3Map
 {
-    var offset: Int32 = 0
-    var length: Int32 = 0
-}
-
-private struct Q3PolygonFace
-{
-    let indices: Array<UInt32>
+    public var entities: Array<Dictionary<String, String>> = []
+    public var vertices: Array<Q3Vertex> = []
+    public var faces: Array<Q3Face> = []
+    public var textures: Array<Q3Texture> = []
+    public var lightmaps: Array<Q3Lightmap> = []
+    public var planes: [Q3Plane] = []
+    public var brushes: [Q3Brush] = []
+    public var brushSides: [Q3BrushSide] = []
+    public var nodes: [Q3Node] = []
+    public var leafs: [Q3Leaf] = []
+    public var leaffaces: [Int32] = []
+    public var leafbrushes: [Int32] = []
     
-    init(meshverts: [UInt32], firstVertex: Int, firstMeshvert: Int, meshvertCount: Int)
-    {
-        let meshvertIndices = firstMeshvert..<(firstMeshvert + meshvertCount)
-        indices = meshvertIndices.map { meshverts[$0] + UInt32(firstVertex) }
-    }
-}
-
-private struct Q3PatchFace
-{
-    var vertices: Array<Q3Vertex> = []
-    fileprivate var indices: Array<UInt32> = []
-    
-    init(vertices: Array<Q3Vertex>, firstVertex: Int, vertexCount: Int, size: (Int, Int))
-    {
-        let numPatchesX = ((size.0) - 1) / 2
-        let numPatchesY = ((size.1) - 1) / 2
-        let numPatches = numPatchesX * numPatchesY
-        
-        for patchNumber in 0 ..< numPatches
-        {
-            // Find the x & y of this patch in the grid
-            let xStep = patchNumber % numPatchesX
-            let yStep = patchNumber / numPatchesX
-            
-            // Initialise the vertex grid
-            var vertexGrid: [[Q3Vertex]] = Array(
-                repeating: Array(
-                    repeating: Q3Vertex(),
-                    count: Int(size.1)
-                ),
-                count: Int(size.0)
-            )
-            
-            var gridX = 0
-            var gridY = 0
-            
-            for index in firstVertex..<(firstVertex + vertexCount)
-            {
-                // Place the vertices from the face in the vertex grid
-                vertexGrid[gridX][gridY] = vertices[index]
-                
-                gridX += 1
-                
-                if gridX == Int(size.0) {
-                    gridX = 0
-                    gridY += 1
-                }
-            }
-            
-            let vi = 2 * xStep
-            let vj = 2 * yStep
-            var controlVertices: [Q3Vertex] = []
-            
-            for i in 0..<3 {
-                for j in 0..<3 {
-                    controlVertices.append(vertexGrid[Int(vi + j)][Int(vj + i)])
-                }
-            }
-            
-            let bezier = Bezier(controls: controlVertices)
-            
-            self.indices.append(
-                contentsOf: bezier.indices.map { i in i + UInt32(self.vertices.count) }
-            )
-            
-            self.vertices.append(contentsOf: bezier.vertices)
-        }
-    }
-    
-    func offsetIndices(_ offset: UInt32) -> Array<UInt32>
-    {
-        return self.indices.map { $0 + offset }
-    }
-}
-
-
-class Q3Map
-{
-    var entities: Array<Dictionary<String, String>> = []
-    var vertices: Array<Q3Vertex> = []
-    var faces: Array<Q3Face> = []
-    var textures: Array<Q3Texture> = []
-    var lightmaps: Array<Q3Lightmap> = []
-    
-    var planes: [Q3Plane] = []
-    var brushes: [Q3Brush] = []
-    var brushSides: [Q3BrushSide] = []
-    var nodes: [Q3Node] = []
-    var leafs: [Q3Leaf] = []
-    var leaffaces: [Int32] = []
-    var leafbrushes: [Int32] = []
-    
-    fileprivate var buffer: BinaryReader
-    fileprivate var directoryEntries: Array<Q3DirectoryEntry> = []
-    fileprivate var meshverts: Array<UInt32> = []
+    private var buffer: BinaryReader
+    private var directoryEntries: Array<Q3DirectoryEntry> = []
+    private var meshverts: Array<UInt32> = []
     
     // Read the map data from an NSData buffer containing the bsp file
-    init(data: Data)
+    public init(data: Data)
     {
         buffer = BinaryReader(data: data)
         
@@ -135,7 +48,7 @@ class Q3Map
         faces = readFaces()
     }
     
-    fileprivate func readHeaders()
+    private func readHeaders()
     {
         // Magic should always equal IBSP for Q3 maps
         let magic = buffer.getASCII(4)
@@ -153,7 +66,7 @@ class Q3Map
         }
     }
     
-    fileprivate func readEntities() -> Array<Dictionary<String, String>>
+    private func readEntities() -> Array<Dictionary<String, String>>
     {
         let chars = readLump(.entities, as: CChar.self)
         let entities = String(cString: chars)
@@ -163,7 +76,7 @@ class Q3Map
         return parser.parse()
     }
     
-    fileprivate func readTextures() -> Array<Q3Texture>
+    private func readTextures() -> Array<Q3Texture>
     {
         struct Texture
         {
@@ -174,7 +87,7 @@ class Q3Map
 
         return readEntry(Lumps.textures.rawValue, length: 72) { buffer in
 
-            let name = buffer.getASCII(64)//.trimmingCharacters(in: .nulls)
+            let name = buffer.getASCII(64)
             let flags = buffer.getInt32()
             let content = buffer.getInt32()
 
@@ -369,7 +282,7 @@ class Q3Map
         }
     }
     
-    fileprivate func readFaces() -> Array<Q3Face>
+    private func readFaces() -> Array<Q3Face>
     {
         return readEntry(13, length: 104) { buffer in
             
@@ -430,7 +343,7 @@ class Q3Map
         }
     }
     
-    fileprivate func readEntry<T>(_ index: Int, length: Int, each: (BinaryReader) -> T?) -> Array<T>
+    private func readEntry<T>(_ index: Int, length: Int, each: (BinaryReader) -> T?) -> Array<T>
     {
         let entry = directoryEntries[index]
         let itemCount = Int(entry.length) / length
@@ -468,9 +381,4 @@ extension Data {
     func subdata(in range: ClosedRange<Index>) -> Data {
         return subdata(in: range.lowerBound ..< range.upperBound + 1)
     }
-}
-
-extension CharacterSet
-{
-    static let nulls = CharacterSet(charactersIn: "\0")
 }
