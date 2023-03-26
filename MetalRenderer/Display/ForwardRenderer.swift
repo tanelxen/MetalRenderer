@@ -16,12 +16,7 @@ class ForwardRenderer: NSObject
         return screenSize.x / screenSize.y
     }
     
-    private var skyboxPipelineState: MTLRenderPipelineState!
-    private var worldMeshLightmappedPipelineState: MTLRenderPipelineState!
-    private var worldMeshVertexlitPipelineState: MTLRenderPipelineState!
-    private var staticMeshPipelineState: MTLRenderPipelineState!
-    private var skeletalMeshPipelineState: MTLRenderPipelineState!
-    private var solidColorPipelineState: MTLRenderPipelineState!
+    private var pipelineStates: PipelineStates!
     
     private var regularStencilState: MTLDepthStencilState = {
         let descriptor = MTLDepthStencilDescriptor()
@@ -49,12 +44,7 @@ class ForwardRenderer: NSObject
         
         mtkView(view, drawableSizeWillChange: view.drawableSize)
         
-        createSkyboxPipelineState()
-        createWorldMeshLightmappedPipelineState()
-        createWorldMeshVertexlitPipelineState()
-        createStaticMeshPipelineState()
-        createSkeletalMeshPipelineState()
-        createSolidColorPipelineState()
+        pipelineStates = PipelineStates()
         
         preferredFramesPerSecond = Float(view.preferredFramesPerSecond)
     }
@@ -74,98 +64,6 @@ class ForwardRenderer: NSObject
         scene.update()
     }
     
-    // MARK: - STATES
-    
-    private func createSkyboxPipelineState()
-    {
-        let descriptor = MTLRenderPipelineDescriptor()
-        
-        descriptor.colorAttachments[0].pixelFormat = Preferences.colorPixelFormat
-        descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
-
-        descriptor.vertexFunction = Engine.defaultLibrary.makeFunction(name: "skybox_vertex_shader")
-        descriptor.fragmentFunction = Engine.defaultLibrary.makeFunction(name: "skybox_fragment_shader")
-
-        descriptor.label = "Skybox Pipeline State"
-
-        skyboxPipelineState = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
-    }
-    
-    private func createWorldMeshLightmappedPipelineState()
-    {
-        let descriptor = MTLRenderPipelineDescriptor()
-        descriptor.colorAttachments[0].pixelFormat = Preferences.colorPixelFormat
-        descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
-
-        descriptor.vertexFunction = Engine.defaultLibrary.makeFunction(name: "world_mesh_vs")
-        descriptor.fragmentFunction = Engine.defaultLibrary.makeFunction(name: "world_mesh_lightmapped_fs")
-        descriptor.vertexDescriptor = BSPMesh.vertexDescriptor()
-
-        descriptor.label = "World Mesh Lightmapped Pipeline State"
-
-        worldMeshLightmappedPipelineState = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
-    }
-    
-    private func createWorldMeshVertexlitPipelineState()
-    {
-        let descriptor = MTLRenderPipelineDescriptor()
-        descriptor.colorAttachments[0].pixelFormat = Preferences.colorPixelFormat
-        descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
-
-        descriptor.vertexFunction = Engine.defaultLibrary.makeFunction(name: "world_mesh_vs")
-        descriptor.fragmentFunction = Engine.defaultLibrary.makeFunction(name: "world_mesh_vertexlit_fs")
-        descriptor.vertexDescriptor = BSPMesh.vertexDescriptor()
-
-        descriptor.label = "World Mesh Vertexlit Pipeline State"
-
-        worldMeshVertexlitPipelineState = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
-    }
-    
-    private func createStaticMeshPipelineState()
-    {
-        let descriptor = MTLRenderPipelineDescriptor()
-        descriptor.colorAttachments[0].pixelFormat = Preferences.colorPixelFormat
-        descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
-
-        descriptor.vertexFunction = Engine.defaultLibrary.makeFunction(name: "static_mesh_vs")
-        descriptor.fragmentFunction = Engine.defaultLibrary.makeFunction(name: "static_mesh_fs")
-        descriptor.vertexDescriptor = StaticMesh.vertexDescriptor()
-
-        descriptor.label = "Static Mesh Pipeline State"
-
-        staticMeshPipelineState = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
-    }
-    
-    private func createSkeletalMeshPipelineState()
-    {
-        let descriptor = MTLRenderPipelineDescriptor()
-        descriptor.colorAttachments[0].pixelFormat = Preferences.colorPixelFormat
-        descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
-
-        descriptor.vertexFunction = Engine.defaultLibrary.makeFunction(name: "skeletal_mesh_vs")
-        descriptor.fragmentFunction = Engine.defaultLibrary.makeFunction(name: "skeletal_mesh_fs")
-        descriptor.vertexDescriptor = SkeletalMesh.vertexDescriptor()
-
-        descriptor.label = "Skeletal Mesh Pipeline State"
-
-        skeletalMeshPipelineState = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
-    }
-    
-    private func createSolidColorPipelineState()
-    {
-        let descriptor = MTLRenderPipelineDescriptor()
-        
-        descriptor.colorAttachments[0].pixelFormat = Preferences.colorPixelFormat
-        descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
-
-        descriptor.vertexFunction = Engine.defaultLibrary.makeFunction(name: "solid_color_vs")
-        descriptor.fragmentFunction = Engine.defaultLibrary.makeFunction(name: "solid_color_fs")
-
-        descriptor.label = "Solid Color Render Pipeline State"
-
-        solidColorPipelineState = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
-    }
-    
     // MARK: - DO PASSES
     
     private func doMainRenderPass(with commandBuffer: MTLCommandBuffer?, in view: MTKView)
@@ -182,7 +80,7 @@ class ForwardRenderer: NSObject
         // SKYBOX
         renderEncoder?.pushDebugGroup("Skybox Render")
             renderEncoder?.setDepthStencilState(skyStencilState)
-            renderEncoder?.setRenderPipelineState(skyboxPipelineState)
+            renderEncoder?.setRenderPipelineState(pipelineStates.skybox)
             scene.renderSky(with: renderEncoder)
         renderEncoder?.popDebugGroup()
         
@@ -193,30 +91,22 @@ class ForwardRenderer: NSObject
         
         // WORLD MESH
         renderEncoder?.pushDebugGroup("World Mesh Render")
-            renderEncoder?.setRenderPipelineState(worldMeshLightmappedPipelineState)
+            renderEncoder?.setRenderPipelineState(pipelineStates.worldMeshLightmapped)
             scene.renderWorldLightmapped(with: renderEncoder)
         
-            renderEncoder?.setRenderPipelineState(worldMeshVertexlitPipelineState)
+            renderEncoder?.setRenderPipelineState(pipelineStates.worldMeshVertexlit)
             scene.renderWorldVertexlit(with: renderEncoder)
-        renderEncoder?.popDebugGroup()
-        
-        
-        // STATIC MESHES
-        renderEncoder?.pushDebugGroup("Static Meshes Render")
-            renderEncoder?.setRenderPipelineState(staticMeshPipelineState)
-            scene.renderStaticMeshes(with: renderEncoder)
         renderEncoder?.popDebugGroup()
         
         // SKELETAL MESHES
         renderEncoder?.pushDebugGroup("Skeletal Meshes Render")
-            renderEncoder?.setRenderPipelineState(skeletalMeshPipelineState)
+            renderEncoder?.setRenderPipelineState(pipelineStates.skeletalMesh)
             scene.renderSkeletalMeshes(with: renderEncoder)
-            scene.renderPlayer(with: renderEncoder)
         renderEncoder?.popDebugGroup()
         
         // WAYPOINTS
         renderEncoder?.pushDebugGroup("Waypoints Render")
-            renderEncoder?.setRenderPipelineState(solidColorPipelineState)
+            renderEncoder?.setRenderPipelineState(pipelineStates.solidColor)
             scene.renderWaypoints(with: renderEncoder)
         renderEncoder?.popDebugGroup()
         

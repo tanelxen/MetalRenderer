@@ -209,9 +209,11 @@ class Q3MapScene
             
             entity.mesh?.renderWithEncoder(encoder!)
         }
+        
+        renderPlayer(with: encoder)
     }
     
-    func renderPlayer(with encoder: MTLRenderCommandEncoder?)
+    private func renderPlayer(with encoder: MTLRenderCommandEncoder?)
     {
         guard isReady else { return }
         
