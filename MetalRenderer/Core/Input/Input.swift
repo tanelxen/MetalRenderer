@@ -20,11 +20,7 @@ enum Keyboard
             
             if isPressed
             {
-                onKeyDown?(key)
-            }
-            else
-            {
-                onKeyUp?(key)
+                keyDownListeners.forEach { $0?(key) }
             }
         }
         
@@ -38,8 +34,15 @@ enum Keyboard
         return keys[Int(keyCode.rawValue)]
     }
     
-    static var onKeyDown: ((KeyCodes) -> Void)?
-    static var onKeyUp: ((KeyCodes) -> Void)?
+    typealias KeyListener = (KeyCodes) -> Void
+    
+    static var onKeyDown: (KeyListener)? {
+        willSet {
+            keyDownListeners.append(newValue)
+        }
+    }
+    
+    private static var keyDownListeners: [KeyListener?] = []
 }
 
 enum MouseCodes: Int
@@ -61,7 +64,8 @@ enum Mouse
     private static var lastWheelPosition: Float = 0.0
     private static var scrollWheelChange: Float = 0.0
     
-    static var onLeftMouseDown: ((float2) -> Void)?
+    static var onLeftMouseDown: (() -> Void)?
+    static var onLeftMouseUp: (() -> Void)?
     
     static func setMouseButton(_ button: Int, isPressed: Bool)
     {
@@ -69,7 +73,11 @@ enum Mouse
         {
             if button == 0, isPressed
             {
-                onLeftMouseDown?(overallMousePosition)
+                onLeftMouseDown?()
+            }
+            else
+            {
+                onLeftMouseUp?()
             }
         }
         

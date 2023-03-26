@@ -19,6 +19,8 @@ enum AudioEngine
     
     static func play(file: String)
     {
+        guard engine != nil else { return }
+        
         var sound = sounds[file]
         
         if sound == nil
@@ -59,6 +61,8 @@ enum AudioEngine
                 
                 players[format] = player
             }
+            
+            player?.stop()
             
             player?.scheduleFile(audioFile, at: nil, completionHandler: nil)
             player?.play()

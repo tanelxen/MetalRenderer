@@ -54,6 +54,7 @@
 		8AB9EEF927C00C7D008C33B2 /* Barney.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB9EEF827C00C7D008C33B2 /* Barney.swift */; };
 		8AE5332027BEEA8B00A80C1E /* GoldSrcMDL in Frameworks */ = {isa = PBXBuildFile; productRef = 8AE5331F27BEEA8B00A80C1E /* GoldSrcMDL */; };
 		8AE7F5702946965B00CD40BE /* PlayerMovement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AE7F56F2946965B00CD40BE /* PlayerMovement.swift */; };
+		8AE8101B29CEC08D003A681E /* pl_gun3.wav in Resources */ = {isa = PBXBuildFile; fileRef = 8AE8101829CEC08D003A681E /* pl_gun3.wav */; };
 		8AEB11C527C146AF008FC445 /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AEB11C427C146AF008FC445 /* Player.swift */; };
 		8AEB11C727C14DCA008FC445 /* Frustum.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AEB11C627C14DCA008FC445 /* Frustum.swift */; };
 		8AEB11C927C1524C008FC445 /* CameraManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AEB11C827C1524C008FC445 /* CameraManager.swift */; };
@@ -112,6 +113,7 @@
 		8AB9EEF827C00C7D008C33B2 /* Barney.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Barney.swift; sourceTree = "<group>"; };
 		8AD4567027B5D207009C43F4 /* Q3MapCollision.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Q3MapCollision.swift; sourceTree = "<group>"; };
 		8AE7F56F2946965B00CD40BE /* PlayerMovement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerMovement.swift; sourceTree = "<group>"; };
+		8AE8101829CEC08D003A681E /* pl_gun3.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = pl_gun3.wav; sourceTree = "<group>"; };
 		8AEB11C427C146AF008FC445 /* Player.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
 		8AEB11C627C14DCA008FC445 /* Frustum.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Frustum.swift; sourceTree = "<group>"; };
 		8AEB11C827C1524C008FC445 /* CameraManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraManager.swift; sourceTree = "<group>"; };
@@ -272,6 +274,7 @@
 				8A6E036729CE3BA300609C3A /* pl_step3.wav */,
 				8A6E036829CE3BA300609C3A /* pl_step2.wav */,
 				8A6E036929CE3BA300609C3A /* pl_step4.wav */,
+				8AE8101829CEC08D003A681E /* pl_gun3.wav */,
 			);
 			path = Sounds;
 			sourceTree = "<group>";
@@ -373,6 +376,7 @@
 				8A8D130E29CB6D4800721A7D /* Assets in Resources */,
 				8A6E036C29CE3BA300609C3A /* pl_step3.wav in Resources */,
 				8A6E036D29CE3BA300609C3A /* pl_step2.wav in Resources */,
+				8AE8101B29CEC08D003A681E /* pl_gun3.wav in Resources */,
 				8A6E036B29CE3BA300609C3A /* pl_step1.wav in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
