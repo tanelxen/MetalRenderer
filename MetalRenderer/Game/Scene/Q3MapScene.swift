@@ -148,7 +148,7 @@ class Q3MapScene
         skybox.renderWithEncoder(encoder!)
     }
     
-    func renderWorld(with encoder: MTLRenderCommandEncoder?)
+    func renderWorldLightmapped(with encoder: MTLRenderCommandEncoder?)
     {
         guard isReady else { return }
         
@@ -158,7 +158,20 @@ class Q3MapScene
         encoder?.setVertexBytes(&sceneUniforms, length: SceneConstants.stride, index: 1)
         encoder?.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
         
-        bspMesh?.renderWithEncoder(encoder!)
+        bspMesh?.renderLightmapped(with: encoder!)
+    }
+    
+    func renderWorldVertexlit(with encoder: MTLRenderCommandEncoder?)
+    {
+        guard isReady else { return }
+        
+        var sceneUniforms = sceneConstants
+        var modelConstants = ModelConstants()
+        
+        encoder?.setVertexBytes(&sceneUniforms, length: SceneConstants.stride, index: 1)
+        encoder?.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
+        
+        bspMesh?.renderVertexlit(with: encoder!)
     }
     
     func renderStaticMeshes(with encoder: MTLRenderCommandEncoder?)

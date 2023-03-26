@@ -12,18 +12,49 @@ class BSPMesh
 {
     private let map: Q3Map
     private var vertexBuffer: MTLBuffer! = nil
-    private var faceMeshes: Array<FaceMesh> = []
+    private var lightmappedFaces: [LightmappedMesh] = []
+    private var vertexlitFaces: [VertexlitMesh] = []
     
     init(map: Q3Map)
     {
         self.map = map
         
+        let lenght = map.vertices.count * MemoryLayout<Q3Vertex>.size
+        vertexBuffer = Engine.device.makeBuffer(bytes: map.vertices, length: lenght)
+        
+        createLightmappedFaces()
+        createVertexlitFaces()
+    }
+    
+    func renderLightmapped(with encoder: MTLRenderCommandEncoder)
+    {
+        encoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
+        
+        for mesh in lightmappedFaces
+        {
+            mesh.render(with: encoder)
+        }
+    }
+    
+    func renderVertexlit(with encoder: MTLRenderCommandEncoder)
+    {
+        encoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
+        
+        for mesh in vertexlitFaces
+        {
+            mesh.render(with: encoder)
+        }
+    }
+    
+    private func createLightmappedFaces()
+    {
         var groupedIndices: Dictionary<IndexGroupKey, [UInt32]> = Dictionary()
         
         for face in map.faces
         {
-            if (face.textureName == "noshader") { continue }
-            if (face.textureName.contains("sky")) { continue }
+            if face.textureName == "noshader" { continue }
+            if face.textureName.contains("sky") { continue }
+            if face.type == .mesh { continue }
             
             let key = IndexGroupKey(
                 texture: face.textureName,
@@ -37,10 +68,6 @@ class BSPMesh
             groupedIndices[key]?.append(contentsOf: face.vertexIndices)
         }
         
-        vertexBuffer = Engine.device.makeBuffer(bytes: map.vertices,
-                                                length: map.vertices.count * MemoryLayout<Q3Vertex>.size,
-                                                options: [])
-        
         for (key, indices) in groupedIndices
         {
             let texture = TextureManager.shared.getTexture(for: "Assets/q3/" + key.texture) ?? TextureManager.shared.devTexture!
@@ -49,23 +76,49 @@ class BSPMesh
                 ? TextureManager.shared.loadLightmap(map.lightmaps[key.lightmap])
                 : TextureManager.shared.whiteTexture()
             
-            let buffer = Engine.device.makeBuffer(bytes: indices,
-                                                  length: indices.count * MemoryLayout<UInt32>.size,
-                                                  options: [])
+            let lenght = indices.count * MemoryLayout<UInt32>.size
+            let buffer = Engine.device.makeBuffer(bytes: indices, length: lenght)
             
-            let faceMesh = FaceMesh(texture: texture, lightmap: lightmap, indexCount: indices.count, indexBuffer: buffer!)
+            let mesh = LightmappedMesh(texture: texture,
+                                       lightmap: lightmap,
+                                       indexCount: indices.count,
+                                       indexBuffer: buffer!)
             
-            faceMeshes.append(faceMesh)
+            lightmappedFaces.append(mesh)
         }
     }
     
-    func renderWithEncoder(_ encoder: MTLRenderCommandEncoder)
+    private func createVertexlitFaces()
     {
-        encoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
+        var groupedIndices: Dictionary<String, [UInt32]> = Dictionary()
         
-        for faceMesh in faceMeshes
+        for face in map.faces
         {
-            faceMesh.renderWithEncoder(encoder)
+            if face.textureName == "noshader" { continue }
+            if face.textureName.contains("sky") { continue }
+            if face.type != .mesh { continue }
+            
+            let key = face.textureName
+            
+            if groupedIndices[key] == nil {
+                groupedIndices[key] = []
+            }
+            
+            groupedIndices[key]?.append(contentsOf: face.vertexIndices)
+        }
+        
+        for (texture, indices) in groupedIndices
+        {
+            let texture = TextureManager.shared.getTexture(for: "Assets/q3/" + texture) ?? TextureManager.shared.devTexture!
+            
+            let lenght = indices.count * MemoryLayout<UInt32>.size
+            let buffer = Engine.device.makeBuffer(bytes: indices, length: lenght)
+            
+            let mesh = VertexlitMesh(texture: texture,
+                                     indexCount: indices.count,
+                                     indexBuffer: buffer!)
+            
+            vertexlitFaces.append(mesh)
         }
     }
     
@@ -91,6 +144,12 @@ class BSPMesh
         descriptor.attributes[2].format = .float2
         descriptor.attributes[2].bufferIndex = 0
         offset += MemoryLayout<float2>.size
+        
+        // Color
+        descriptor.attributes[3].offset = offset
+        descriptor.attributes[3].format = .float3
+        descriptor.attributes[3].bufferIndex = 0
+        offset += MemoryLayout<float3>.size
         
         descriptor.layouts[0].stepFunction = .perVertex
         descriptor.layouts[0].stride = offset
@@ -120,17 +179,35 @@ private func ==(lhs: IndexGroupKey, rhs: IndexGroupKey) -> Bool
     return lhs.texture == rhs.texture && lhs.lightmap == rhs.lightmap
 }
 
-private struct FaceMesh
+private struct LightmappedMesh
 {
     let texture: MTLTexture
     let lightmap: MTLTexture
     let indexCount: Int
     let indexBuffer: MTLBuffer
     
-    func renderWithEncoder(_ encoder: MTLRenderCommandEncoder)
+    func render(with encoder: MTLRenderCommandEncoder)
     {
         encoder.setFragmentTexture(texture, index: 0)
         encoder.setFragmentTexture(lightmap, index: 1)
+        
+        encoder.drawIndexedPrimitives(type: .triangle,
+                                      indexCount: indexCount,
+                                      indexType: .uint32,
+                                      indexBuffer: indexBuffer,
+                                      indexBufferOffset: 0)
+    }
+}
+
+private struct VertexlitMesh
+{
+    let texture: MTLTexture
+    let indexCount: Int
+    let indexBuffer: MTLBuffer
+    
+    func render(with encoder: MTLRenderCommandEncoder)
+    {
+        encoder.setFragmentTexture(texture, index: 0)
         
         encoder.drawIndexedPrimitives(type: .triangle,
                                       indexCount: indexCount,

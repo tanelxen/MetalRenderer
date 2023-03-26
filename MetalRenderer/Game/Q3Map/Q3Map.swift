@@ -197,25 +197,38 @@ class Q3Map
             struct vec3
             {
                 let x, y, z: Float32
+                
+                var simd: float3 {
+                    float3(x, y, z)
+                }
             }
             
             struct vec2
             {
                 let x, y: Float32
+                
+                var simd: float2 {
+                    float2(x, y)
+                }
             }
             
             struct color
             {
                 let r, g, b, a: UInt8
+                
+                var simd: float3 {
+                    float3(Float(r)/255, Float(g)/255, Float(b)/255)
+                }
             }
         }
         
         let vertices = readLump(.vertexes, as: Vertex.self).map {
             
             Q3Vertex(
-                position: float3($0.position.x, $0.position.y, $0.position.z),
-                textureCoord: float2($0.textureCoord.x, $0.textureCoord.y),
-                lightmapCoord: float2($0.lightmapCoord.x, $0.lightmapCoord.y)
+                position: $0.position.simd,
+                textureCoord: $0.textureCoord.simd,
+                lightmapCoord: $0.lightmapCoord.simd,
+                color: $0.color.simd
             )
         }
 
@@ -386,7 +399,8 @@ class Q3Map
                 return Q3Face(
                     textureName: textureName,
                     lightmapIndex: lightmapIndex,
-                    vertexIndices: polygonFace.indices
+                    vertexIndices: polygonFace.indices,
+                    type: type
                 )
             }
             else if type == .patch
@@ -407,7 +421,8 @@ class Q3Map
                 return Q3Face(
                     textureName: textureName,
                     lightmapIndex: lightmapIndex,
-                    vertexIndices: indices
+                    vertexIndices: indices,
+                    type: type
                 )
             }
             

@@ -10,9 +10,10 @@ import simd
 
 struct Q3Vertex
 {
-    var position: float3 = float3(0, 0, 0)
-    var textureCoord: float2 = float2(0, 0)
-    var lightmapCoord: float2 = float2(0, 0)
+    var position: float3 = .zero
+    var textureCoord: float2 = .zero
+    var lightmapCoord: float2 = .zero
+    var color: float3 = .zero
 }
 
 func +(left: Q3Vertex, right: Q3Vertex) -> Q3Vertex
@@ -55,6 +56,7 @@ struct Q3Face
     let textureName: String
     let lightmapIndex: Int
     let vertexIndices: Array<UInt32>
+    let type: Q3FaceType
 }
 
 struct Q3Plane

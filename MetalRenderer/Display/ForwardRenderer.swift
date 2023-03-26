@@ -17,7 +17,8 @@ class ForwardRenderer: NSObject
     }
     
     private var skyboxPipelineState: MTLRenderPipelineState!
-    private var worldMeshPipelineState: MTLRenderPipelineState!
+    private var worldMeshLightmappedPipelineState: MTLRenderPipelineState!
+    private var worldMeshVertexlitPipelineState: MTLRenderPipelineState!
     private var staticMeshPipelineState: MTLRenderPipelineState!
     private var skeletalMeshPipelineState: MTLRenderPipelineState!
     private var solidColorPipelineState: MTLRenderPipelineState!
@@ -49,7 +50,8 @@ class ForwardRenderer: NSObject
         mtkView(view, drawableSizeWillChange: view.drawableSize)
         
         createSkyboxPipelineState()
-        createWorldMeshPipelineState()
+        createWorldMeshLightmappedPipelineState()
+        createWorldMeshVertexlitPipelineState()
         createStaticMeshPipelineState()
         createSkeletalMeshPipelineState()
         createSolidColorPipelineState()
@@ -89,19 +91,34 @@ class ForwardRenderer: NSObject
         skyboxPipelineState = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
     }
     
-    private func createWorldMeshPipelineState()
+    private func createWorldMeshLightmappedPipelineState()
     {
         let descriptor = MTLRenderPipelineDescriptor()
         descriptor.colorAttachments[0].pixelFormat = Preferences.colorPixelFormat
         descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
 
         descriptor.vertexFunction = Engine.defaultLibrary.makeFunction(name: "world_mesh_vs")
-        descriptor.fragmentFunction = Engine.defaultLibrary.makeFunction(name: "world_mesh_fs")
+        descriptor.fragmentFunction = Engine.defaultLibrary.makeFunction(name: "world_mesh_lightmapped_fs")
         descriptor.vertexDescriptor = BSPMesh.vertexDescriptor()
 
-        descriptor.label = "World Mesh Pipeline State"
+        descriptor.label = "World Mesh Lightmapped Pipeline State"
 
-        worldMeshPipelineState = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
+        worldMeshLightmappedPipelineState = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
+    }
+    
+    private func createWorldMeshVertexlitPipelineState()
+    {
+        let descriptor = MTLRenderPipelineDescriptor()
+        descriptor.colorAttachments[0].pixelFormat = Preferences.colorPixelFormat
+        descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
+
+        descriptor.vertexFunction = Engine.defaultLibrary.makeFunction(name: "world_mesh_vs")
+        descriptor.fragmentFunction = Engine.defaultLibrary.makeFunction(name: "world_mesh_vertexlit_fs")
+        descriptor.vertexDescriptor = BSPMesh.vertexDescriptor()
+
+        descriptor.label = "World Mesh Vertexlit Pipeline State"
+
+        worldMeshVertexlitPipelineState = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
     }
     
     private func createStaticMeshPipelineState()
@@ -176,8 +193,11 @@ class ForwardRenderer: NSObject
         
         // WORLD MESH
         renderEncoder?.pushDebugGroup("World Mesh Render")
-            renderEncoder?.setRenderPipelineState(worldMeshPipelineState)
-            scene.renderWorld(with: renderEncoder)
+            renderEncoder?.setRenderPipelineState(worldMeshLightmappedPipelineState)
+            scene.renderWorldLightmapped(with: renderEncoder)
+        
+            renderEncoder?.setRenderPipelineState(worldMeshVertexlitPipelineState)
+            scene.renderWorldVertexlit(with: renderEncoder)
         renderEncoder?.popDebugGroup()
         
         
