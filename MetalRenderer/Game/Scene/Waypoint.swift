@@ -17,7 +17,7 @@ final class Waypoint
     private (set) var minBounds: float3 = .zero
     private (set) var maxBounds: float3 = float3(16, 16, 16)
     
-    private var _vertices: [vector_float3] = []
+    private var _vertices: [float3] = []
     private var _indicies: [UInt16] = []
     
     private var _verticesBuffer: MTLBuffer!

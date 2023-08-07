@@ -20,6 +20,8 @@ class Q3MapScene
     
     private var collision: Q3MapCollision!
     
+    private var lightGrid: Q3MapLightGrid!
+    
     private var entities: [Barney] = []
     
     private let navigation = NavigationGraph()
@@ -96,6 +98,9 @@ class Q3MapScene
 
         collision = Q3MapCollision(q3map: q3map)
         print("collision was created")
+        
+        lightGrid = Q3MapLightGrid(q3map: q3map)
+        print("light grid was created")
         
         DispatchQueue.global().async {
             self.spawn(with: q3map)
@@ -205,7 +210,9 @@ class Q3MapScene
             var modelMatrix = entity.transform.matrix
             modelMatrix.translate(direction: float3(0, 0, -25))
             
-            var modelConstants = ModelConstants(modelMatrix: modelMatrix)
+            let ambient = lightGrid.ambient(at: entity.transform.position)
+            
+            var modelConstants = ModelConstants(modelMatrix: modelMatrix, color: ambient)
             encoder?.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
             
             entity.mesh?.renderWithEncoder(encoder!)
@@ -236,7 +243,9 @@ class Q3MapScene
             
             modelMatrix.translate(direction: float3(-2, 4, 0))
             
-            var modelConstants = ModelConstants(modelMatrix: modelMatrix)
+            let ambient = lightGrid.ambient(at: transform.position)
+            
+            var modelConstants = ModelConstants(modelMatrix: modelMatrix, color: ambient)
             encoder?.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
             
             player.mesh?.renderWithEncoder(encoder!)

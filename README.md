@@ -10,7 +10,8 @@ Features:
 - Skeletal animation
 - Brush based collision detection
 - Quake-style player movement
-- AI navigation with waypoints and A\*\.
+- AI navigation with waypoints and A\*\
+- Ambient lightning for skeletal meshes (light grid)
 
 ## PREVIEW
 ![screenshot1](https://user-images.githubusercontent.com/14359330/227791248-d1f2995d-838a-46ef-83df-00717d90c687.jpg)
@@ -30,9 +31,9 @@ Later I'm going to refactor all of that. And then perhaps it wll be useful for s
 
 ## TODO
 - [ ] Support Half-Life 2 models and maps
+- [ ] Alpha blending
 - [ ] Material system
 - [ ] Rendering text
-- [ ] Lightning for skeletal meshes
 - [ ] Blending skeletal animations
 - [ ] Improve navigation system
 - [ ] Scene editor with ImGUI

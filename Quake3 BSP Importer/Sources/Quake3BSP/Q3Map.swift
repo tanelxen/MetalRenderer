@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import simd
 
 public class Q3Map
 {
@@ -25,6 +26,9 @@ public class Q3Map
     private var buffer: BinaryReader
     private var directoryEntries: Array<Q3DirectoryEntry> = []
     private var meshverts: Array<UInt32> = []
+    
+    public var models: [Q3Model] = []
+    public var lightgrid: [Q3LightProbe] = []
     
     // Read the map data from an NSData buffer containing the bsp file
     public init(data: Data)
@@ -46,6 +50,9 @@ public class Q3Map
         meshverts = readMeshverts()
         lightmaps = readLightmaps()
         faces = readFaces()
+        
+        models = readModels()
+        lightgrid = readProbes()
     }
     
     private func readHeaders()
@@ -341,6 +348,81 @@ public class Q3Map
             
             return nil
         }
+    }
+    
+    private func readModels() -> [Q3Model]
+    {
+        struct Model
+        {
+            let mins: vec3
+            let maxs: vec3
+            let face: Int32
+            let n_faces: Int32
+            let brush: Int32
+            let n_brushes: Int32
+            
+            struct vec3
+            {
+                let x, y, z: Float32
+                
+                var simd: float3 {
+                    float3(x, y, z)
+                }
+            }
+        }
+        
+        let models = readLump(.models, as: Model.self).map {
+            Q3Model(
+                mins: $0.mins.simd,
+                maxs: $0.maxs.simd,
+                face: Int($0.face),
+                n_faces: Int($0.n_faces),
+                brush: Int($0.brush),
+                n_brushes: Int($0.n_brushes)
+            )
+        }
+
+        return models
+    }
+    
+    private func readProbes() -> [Q3LightProbe]
+    {
+        struct Probe
+        {
+            let ambient: color
+            let directional: color
+            let phi: UInt8
+            let theta: UInt8
+            
+            struct color
+            {
+                let r, g, b: UInt8
+                
+                var simd: float3 {
+                    float3(Float(r)/255, Float(g)/255, Float(b)/255)
+                }
+            }
+        }
+        
+        let probes = readLump(.lightvols, as: Probe.self).map {
+            
+            let phi = (Float($0.phi) - 128)/255 * 180
+            let theta = Float($0.theta)/255 * 360
+            
+            let dir = float3(
+                x: sin(theta) * cos(phi),
+                y: cos(theta) * cos(phi),
+                z: sin(phi)
+            )
+            
+            return Q3LightProbe(
+                ambient: $0.ambient.simd,
+                directional: $0.directional.simd,
+                direction: normalize(dir)
+            )
+        }
+
+        return probes
     }
     
     private func readEntry<T>(_ index: Int, length: Int, each: (BinaryReader) -> T?) -> Array<T>

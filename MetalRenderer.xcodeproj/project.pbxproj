@@ -41,6 +41,7 @@
 		8A8D130E29CB6D4800721A7D /* Assets in Resources */ = {isa = PBXBuildFile; fileRef = 8A8D130D29CB6D4800721A7D /* Assets */; };
 		8A8D131229CBAAC300721A7D /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A8D131129CBAAC300721A7D /* main.swift */; };
 		8A8D131429CBB11200721A7D /* HudView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A8D131329CBB11200721A7D /* HudView.swift */; };
+		8A9186A12A8051E600719E55 /* Q3MapLightGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A9186A02A8051E600719E55 /* Q3MapLightGrid.swift */; };
 		8A9977D029492CC400B48C70 /* Rotator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A9977CF29492CC400B48C70 /* Rotator.swift */; };
 		8A9977D9294BA82C00B48C70 /* Q3MapCollision.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD4567027B5D207009C43F4 /* Q3MapCollision.swift */; };
 		8A9C235A27A4DB4100965D21 /* SolidColor.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8A9C235927A4DB4100965D21 /* SolidColor.metal */; };
@@ -98,6 +99,7 @@
 		8A8D130D29CB6D4800721A7D /* Assets */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Assets; sourceTree = "<group>"; };
 		8A8D131129CBAAC300721A7D /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		8A8D131329CBB11200721A7D /* HudView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HudView.swift; sourceTree = "<group>"; };
+		8A9186A02A8051E600719E55 /* Q3MapLightGrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Q3MapLightGrid.swift; sourceTree = "<group>"; };
 		8A9977CF29492CC400B48C70 /* Rotator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rotator.swift; sourceTree = "<group>"; };
 		8A9C235927A4DB4100965D21 /* SolidColor.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = SolidColor.metal; sourceTree = "<group>"; };
 		8AA0652B279AB45E00492D26 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
@@ -249,6 +251,7 @@
 			isa = PBXGroup;
 			children = (
 				8A75016127B08F84001F63F6 /* Q3MapScene.swift */,
+				8A9186A02A8051E600719E55 /* Q3MapLightGrid.swift */,
 				8AD4567027B5D207009C43F4 /* Q3MapCollision.swift */,
 				8AF27E3427ACA5BC0025E4F4 /* Skybox.swift */,
 				8AB9EEF827C00C7D008C33B2 /* Barney.swift */,
@@ -381,6 +384,7 @@
 			files = (
 				8A0D271A27901E2400F2D9E6 /* KeyCodes.swift in Sources */,
 				8A22EAB3278F735D00A8CD7D /* Engine.swift in Sources */,
+				8A9186A12A8051E600719E55 /* Q3MapLightGrid.swift in Sources */,
 				8A1456E7295799EE00E92E68 /* NavigationGraph.swift in Sources */,
 				8A0D272227907F0200F2D9E6 /* Common.metal in Sources */,
 				8AB9EEF927C00C7D008C33B2 /* Barney.swift in Sources */,
@@ -555,6 +559,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 12.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.tanelxen.MetalRenderer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "MetalRenderer/Other Files/MetalRenderer-Bridging-Header.h";
@@ -581,8 +586,10 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 12.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.tanelxen.MetalRenderer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OBJC_BRIDGING_HEADER = "MetalRenderer/Other Files/MetalRenderer-Bridging-Header.h";
 				SWIFT_PRECOMPILE_BRIDGING_HEADER = YES;
 				SWIFT_VERSION = 5.0;

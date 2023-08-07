@@ -101,6 +101,23 @@ public struct Q3Leaf
     public let n_leafbrushes: Int
 }
 
+public struct Q3Model
+{
+    public let mins: float3
+    public let maxs: float3
+    public let face: Int
+    public let n_faces: Int
+    public let brush: Int
+    public let n_brushes: Int
+}
+
+public struct Q3LightProbe
+{
+    public let ambient: float3      // [r, g, b]
+    public let directional: float3  // [r, g, b]
+    public let direction: float3    // [x, y, z]
+}
+
 enum Lumps: Int
 {
     case entities       // Game-related object descriptions.
