@@ -104,10 +104,10 @@ class ForwardRenderer: NSObject
             scene.renderSkeletalMeshes(with: renderEncoder)
         renderEncoder?.popDebugGroup()
         
-        // WAYPOINTS
-        renderEncoder?.pushDebugGroup("Waypoints Render")
+        // DEBUG
+        renderEncoder?.pushDebugGroup("Debug Render")
             renderEncoder?.setRenderPipelineState(pipelineStates.solidColor)
-            scene.renderWaypoints(with: renderEncoder)
+            scene.renderDebug(with: renderEncoder)
         renderEncoder?.popDebugGroup()
         
         renderEncoder?.endEncoding()

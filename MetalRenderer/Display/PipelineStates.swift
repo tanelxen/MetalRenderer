@@ -89,6 +89,15 @@ class PipelineStates
         let descriptor = MTLRenderPipelineDescriptor()
         
         descriptor.colorAttachments[0].pixelFormat = Preferences.colorPixelFormat
+        
+        descriptor.colorAttachments[0].isBlendingEnabled = true
+        descriptor.colorAttachments[0].rgbBlendOperation = .add
+        descriptor.colorAttachments[0].alphaBlendOperation = .add
+        descriptor.colorAttachments[0].sourceRGBBlendFactor = .sourceAlpha
+        descriptor.colorAttachments[0].sourceAlphaBlendFactor = .one
+        descriptor.colorAttachments[0].destinationRGBBlendFactor = .oneMinusSourceAlpha
+        descriptor.colorAttachments[0].destinationAlphaBlendFactor = .oneMinusSourceAlpha
+        
         descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
 
         descriptor.vertexFunction = Engine.defaultLibrary.makeFunction(name: "solid_color_vs")

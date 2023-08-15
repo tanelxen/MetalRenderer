@@ -15,16 +15,6 @@ class Skybox
     
     init()
     {
-//        let A = float3(-1.0,  1.0,  1.0)
-//        let B = float3(-1.0, -1.0,  1.0)
-//        let C = float3( 1.0, -1.0,  1.0)
-//        let D = float3( 1.0,  1.0,  1.0)
-//
-//        let Q = float3(-1.0,  1.0, -1.0)
-//        let R = float3( 1.0,  1.0, -1.0)
-//        let S = float3(-1.0, -1.0, -1.0)
-//        let T = float3( 1.0, -1.0, -1.0)
-        
         let A = float3(-1.0,  1.0,  1.0)
         let B = float3(-1.0,  1.0, -1.0)
         let C = float3( 1.0,  1.0, -1.0)

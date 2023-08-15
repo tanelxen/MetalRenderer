@@ -17,7 +17,9 @@
 		8A1456E7295799EE00E92E68 /* NavigationGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A1456E6295799EE00E92E68 /* NavigationGraph.swift */; };
 		8A22EAB3278F735D00A8CD7D /* Engine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A22EAB2278F735D00A8CD7D /* Engine.swift */; };
 		8A22EACA278FA89A00A8CD7D /* Math.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A22EAC9278FA89A00A8CD7D /* Math.swift */; };
+		8A247EB62A8B73AD009DC4EF /* Debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A247EB52A8B73AD009DC4EF /* Debug.swift */; };
 		8A42053B2797B03400473A9D /* Skybox.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8A42053A2797B03400473A9D /* Skybox.metal */; };
+		8A4F44F72A8A9D4E0044977A /* BasicShapes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A4F44F62A8A9D4E0044977A /* BasicShapes.swift */; };
 		8A56D71A278E058400D3FE2B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8A56D719278E058400D3FE2B /* Assets.xcassets */; };
 		8A56D728278E091900D3FE2B /* GameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A56D727278E091900D3FE2B /* GameView.swift */; };
 		8A56D72C278E61CD00D3FE2B /* MetalTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A56D72B278E61CD00D3FE2B /* MetalTypes.swift */; };
@@ -71,8 +73,9 @@
 		8A22EAB2278F735D00A8CD7D /* Engine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Engine.swift; sourceTree = "<group>"; };
 		8A22EAC9278FA89A00A8CD7D /* Math.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Math.swift; sourceTree = "<group>"; };
 		8A23888B29C0BCF700373C91 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		8A247EB52A8B73AD009DC4EF /* Debug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Debug.swift; sourceTree = "<group>"; };
 		8A42053A2797B03400473A9D /* Skybox.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Skybox.metal; sourceTree = "<group>"; };
-		8A42054427987C3500473A9D /* MetalRenderer-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MetalRenderer-Bridging-Header.h"; sourceTree = "<group>"; };
+		8A4F44F62A8A9D4E0044977A /* BasicShapes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BasicShapes.swift; sourceTree = "<group>"; };
 		8A56D70F278E058200D3FE2B /* MetalRenderer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MetalRenderer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8A56D719278E058400D3FE2B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8A56D71E278E058400D3FE2B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -142,6 +145,7 @@
 			children = (
 				8A5EDFDD27B998A2007166E4 /* ForwardRenderer.swift */,
 				8AE8D0BE29D0D9F100292135 /* PipelineStates.swift */,
+				8A4F44F62A8A9D4E0044977A /* BasicShapes.swift */,
 				8A56D727278E091900D3FE2B /* GameView.swift */,
 				8A8D131329CBB11200721A7D /* HudView.swift */,
 			);
@@ -242,7 +246,6 @@
 				8A56D719278E058400D3FE2B /* Assets.xcassets */,
 				8A56D71E278E058400D3FE2B /* Info.plist */,
 				8A56D71F278E058400D3FE2B /* MetalRenderer.entitlements */,
-				8A42054427987C3500473A9D /* MetalRenderer-Bridging-Header.h */,
 			);
 			path = "Other Files";
 			sourceTree = "<group>";
@@ -259,6 +262,7 @@
 				8AE7F56F2946965B00CD40BE /* PlayerMovement.swift */,
 				8A01E0FA2957529800ED82C9 /* Waypoint.swift */,
 				8A1456E6295799EE00E92E68 /* NavigationGraph.swift */,
+				8A247EB52A8B73AD009DC4EF /* Debug.swift */,
 			);
 			path = Scene;
 			sourceTree = "<group>";
@@ -330,7 +334,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1250;
-				LastUpgradeCheck = 1250;
+				LastUpgradeCheck = 1420;
 				TargetAttributes = {
 					8A56D70E278E058200D3FE2B = {
 						CreatedOnToolsVersion = 12.5;
@@ -389,6 +393,7 @@
 				8A0D272227907F0200F2D9E6 /* Common.metal in Sources */,
 				8AB9EEF927C00C7D008C33B2 /* Barney.swift in Sources */,
 				8A6E037329CE51D600609C3A /* AudioEngine.swift in Sources */,
+				8A247EB62A8B73AD009DC4EF /* Debug.swift in Sources */,
 				8A5EDFEE27BC1BB3007166E4 /* SkeletalMesh.swift in Sources */,
 				8A9C235A27A4DB4100965D21 /* SolidColor.metal in Sources */,
 				8AE7F5702946965B00CD40BE /* PlayerMovement.swift in Sources */,
@@ -416,6 +421,7 @@
 				8AF27E3527ACA5BC0025E4F4 /* Skybox.swift in Sources */,
 				8AE8D0BF29D0D9F100292135 /* PipelineStates.swift in Sources */,
 				8A84536A27ADA45100E25638 /* TextureManager.swift in Sources */,
+				8A4F44F72A8A9D4E0044977A /* BasicShapes.swift in Sources */,
 				8A0D271827901DF100F2D9E6 /* Input.swift in Sources */,
 				8A5EDFE027B99EED007166E4 /* WorldMesh.metal in Sources */,
 				8A22EACA278FA89A00A8CD7D /* Math.swift in Sources */,
@@ -461,6 +467,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -522,6 +529,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -552,19 +560,22 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = Q9T2S8AD86;
-				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/MetalRenderer/Other Files/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.4;
+				OTHER_SWIFT_FLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = com.tanelxen.MetalRenderer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "MetalRenderer/Other Files/MetalRenderer-Bridging-Header.h";
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_PRECOMPILE_BRIDGING_HEADER = YES;
+				SWIFT_PRECOMPILE_BRIDGING_HEADER = NO;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -579,19 +590,23 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = Q9T2S8AD86;
-				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/MetalRenderer/Other Files/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.4;
+				OTHER_SWIFT_FLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = com.tanelxen.MetalRenderer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_OBJC_BRIDGING_HEADER = "MetalRenderer/Other Files/MetalRenderer-Bridging-Header.h";
-				SWIFT_PRECOMPILE_BRIDGING_HEADER = YES;
+				SWIFT_COMPILATION_MODE = singlefile;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_PRECOMPILE_BRIDGING_HEADER = NO;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;

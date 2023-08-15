@@ -273,8 +273,8 @@ final class PlayerMovement
     
     private func step_slide(gravity: Bool)
     {
-        var start_o = transform.position
-        var start_v = velocity
+        let start_o = transform.position
+        let start_v = velocity
         
         if slide(gravity: gravity) == false
         {

@@ -15,7 +15,7 @@ class AppDelegate: NSObject, NSApplicationDelegate
     {
         let frame = NSScreen.main!.frame
         
-        window = NSWindow(contentRect: frame,
+        window = NSWindow(contentRect: CGRect(x: 0, y: 0, width: 800, height: 600),
                           styleMask: [.titled, .closable, .miniaturizable, .resizable],
                           backing: .buffered,
                           defer: false)

@@ -38,41 +38,41 @@ class Camera
     
     func update() { }
     
-    var mousePositionInWorld: float3
+    func mousePositionInWorld() -> Ray
     {
         let ndc = Mouse.getMouseViewportPosition()
-        let ndc3d = float3(ndc.x, ndc.y, 0)
+        
+        let clipCoords = float4(ndc.x, ndc.y, 0, 1)
         
         let projInv = projectionMatrix.inverse
+        let viewInv = viewMatrix.inverse
         
-        let world = projInv * ndc3d
+        var eyeRayDir = projInv * clipCoords
+        eyeRayDir.z = -1
+        eyeRayDir.w = 0
         
-        return float3(world.x, transform.position.y, world.y)
+        var worldRayDir = (viewInv * eyeRayDir).xyz
+        worldRayDir = normalize(worldRayDir)
+        
+        let eyeRayOrigin = float4(x: 0, y: 0, z: 0, w: 1)
+        let worldRayOrigin = (viewInv * eyeRayOrigin).xyz
+        
+        return Ray(origin: worldRayOrigin, direction: worldRayDir)
     }
     
     func updateViewport() { }
+}
+
+struct Ray
+{
+    var origin: float3
+    var direction: float3
 }
 
 class PlayerCamera: Camera
 {
     override var projectionMatrix: matrix_float4x4 {
         _projectionMatrix
-    }
-    
-//    override var viewMatrix: matrix_float4x4 {
-//        return getViewMatrix()
-//    }
-    
-    override var mousePositionInWorld: float3
-    {
-        let ndc = Mouse.getMouseViewportPosition()
-        let ndc3d = float3(ndc.x, ndc.y, 0)
-        
-        let projInv = _projectionMatrix.inverse
-        
-        let world = transform.matrix * projInv * ndc3d
-        
-        return float3(world.x, transform.position.y, world.y)
     }
     
     private var _projectionMatrix: matrix_float4x4 = matrix_identity_float4x4
@@ -82,13 +82,6 @@ class PlayerCamera: Camera
         super.init()
         _projectionMatrix = matrix_float4x4.perspective(degreesFov: 65, aspectRatio: ForwardRenderer.aspectRatio, near: 0.1, far: 5000)
     }
-    
-//    private func getViewMatrix() -> matrix_float4x4
-//    {
-//        let up = float3(0, 0, 1)
-//        let target = transform.position + transform.rotation.forward
-//        return lookAt(eye: transform.position, target: target, up: up)
-//    }
     
     override func updateViewport()
     {

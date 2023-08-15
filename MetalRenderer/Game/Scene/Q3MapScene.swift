@@ -28,7 +28,11 @@ class Q3MapScene
     
     private (set) var player: Player?
     
+    private (set) var debug = Debug()
+    
     private var isReady = false
+    
+    private (set) static var current: Q3MapScene!
     
     init()
     {
@@ -37,6 +41,8 @@ class Q3MapScene
         DispatchQueue.global().async {
             self.build()
         }
+        
+        Q3MapScene.current = self
     }
     
     private func build()
@@ -252,14 +258,11 @@ class Q3MapScene
         }
     }
     
-    func renderWaypoints(with encoder: MTLRenderCommandEncoder?)
+    func renderDebug(with encoder: MTLRenderCommandEncoder?)
     {
-        guard isReady else { return }
-        
         var sceneUniforms = self.sceneConstants
         encoder?.setVertexBytes(&sceneUniforms, length: SceneConstants.stride, index: 1)
-        
-        navigation.render(with: encoder)
+        debug.render(with: encoder)
     }
     
     func trace(start: float3, end: float3) -> Bool
@@ -305,30 +308,31 @@ class Q3MapScene
     
     private func makeWaypoint()
     {
-        let forward = CameraManager.shared.mainCamera.transform.rotation.forward
+        let ray = CameraManager.shared.mainCamera.mousePositionInWorld()
         
-        let start = CameraManager.shared.mainCamera.transform.position
-        let end = start + forward * 1024
+        let start = ray.origin
+        let end = start + ray.direction * 1024
         
         var hitResult = HitResult()
         collision.traceRay(result: &hitResult, start: start, end: end)
         
+        debug.addLine(start: start, end: end, color: float3(0, 1, 0))
+
         if hitResult.fraction != 1
         {
             let waypoint = Waypoint()
             waypoint.transform.position = hitResult.endpos
-            waypoint.transform.position.z += waypoint.maxBounds.z
-            
+//            waypoint.transform.position.z += waypoint.maxBounds.z
+
             navigation.add(waypoint)
         }
     }
     
     private func removeWaypoint()
     {
-        let start = CameraManager.shared.mainCamera.transform.position
-        let dir = CameraManager.shared.mainCamera.transform.rotation.forward
+        let ray = CameraManager.shared.mainCamera.mousePositionInWorld()
         
-        let index = navigation.findIntersectedByRay(start: start, dir: dir, dist: 256)
+        let index = navigation.findIntersectedByRay(start: ray.origin, dir: ray.direction, dist: 1024)
         
         if index != -1
         {

@@ -233,3 +233,15 @@ func lookAt(eye: float3, direction: float3, up: float3) -> matrix_float4x4
         float4(simd_dot(-u, eye), simd_dot(-v, eye), simd_dot(-n, eye), 1.0)
     )
 }
+
+extension float4
+{
+    init(_ v: float3, _ w: Float)
+    {
+        self.init(x: v.x, y: v.y, z: v.z, w: w)
+    }
+    
+    var xyz: float3 {
+        return float3(x, y, z)
+    }
+}

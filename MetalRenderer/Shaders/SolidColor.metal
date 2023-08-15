@@ -38,5 +38,5 @@ vertex VertexOut solid_color_vs(constant float3           *vertices       [[ buf
 
 fragment half4 solid_color_fs(VertexOut vOut [[ stage_in ]])
 {
-    return half4(vOut.color.r, vOut.color.g, vOut.color.b, 1.0);
+    return half4(vOut.color.r, vOut.color.g, vOut.color.b, 0.3);
 }
