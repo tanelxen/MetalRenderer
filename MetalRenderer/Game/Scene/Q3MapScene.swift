@@ -28,9 +28,7 @@ class Q3MapScene
     
     private (set) var player: Player?
     
-    private (set) var debug = Debug()
-    
-    private var isReady = false
+    private (set) var isReady = false
     
     private (set) static var current: Q3MapScene!
     
@@ -105,7 +103,11 @@ class Q3MapScene
         collision = Q3MapCollision(q3map: q3map)
         print("collision was created")
         
-        lightGrid = Q3MapLightGrid(q3map: q3map)
+        lightGrid = Q3MapLightGrid(
+            minBounds: q3map.models.first!.mins,
+            maxBounds: q3map.models.first!.maxs,
+            colors: q3map.lightgrid.map({ $0.ambient })
+        )
         print("light grid was created")
         
         DispatchQueue.global().async {
@@ -262,7 +264,6 @@ class Q3MapScene
     {
         var sceneUniforms = self.sceneConstants
         encoder?.setVertexBytes(&sceneUniforms, length: SceneConstants.stride, index: 1)
-        debug.render(with: encoder)
     }
     
     func trace(start: float3, end: float3) -> Bool
@@ -315,8 +316,6 @@ class Q3MapScene
         
         var hitResult = HitResult()
         collision.traceRay(result: &hitResult, start: start, end: end)
-        
-        debug.addLine(start: start, end: end, color: float3(0, 1, 0))
 
         if hitResult.fraction != 1
         {

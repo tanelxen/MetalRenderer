@@ -5,7 +5,7 @@
 //  Created by Fedor Artemenkov on 15.08.2023.
 //
 
-import MetalKit
+import Metal
 
 final class Debug
 {
@@ -18,7 +18,7 @@ final class Debug
     
     private struct Cube
     {
-        let modelMatrix: matrix_float4x4
+        let transform: Transform
         let color: float3
     }
     
@@ -27,20 +27,26 @@ final class Debug
     
     private let cubeShape = CubeShape(mins: .zero, maxs: .one)
     
+    static let shared = Debug()
+    
+    private let maxCubes = 1000
+    
+    private var cubesConstantsBuffer: MTLBuffer!
+    
+    init()
+    {
+        cubesConstantsBuffer = Engine.device.makeBuffer(length: ModelConstants.stride(maxCubes), options: [])
+    }
+    
     func addLine(start: float3, end: float3, color: float3)
     {
         let line = Line(start: start, end: end, color: color)
         lines.append(line)
     }
     
-    func addCube(center: float3, size: float3, color: float3)
+    func addCube(transform: Transform, color: float3)
     {
-        let transform = Transform()
-        transform.position = center
-        transform.scale = size
-        transform.updateModelMatrix()
-        
-        let cube = Cube(modelMatrix: transform.matrix, color: color)
+        let cube = Cube(transform: transform, color: color)
         cubes.append(cube)
     }
     
@@ -58,16 +64,28 @@ final class Debug
 
             encoder?.drawPrimitives(type: .line, vertexStart: 0, vertexCount: 2)
         }
+    }
+    
+    func renderInstanced(with encoder: MTLRenderCommandEncoder?)
+    {
+        guard !cubes.isEmpty else { return }
+        
+        var pointer = cubesConstantsBuffer.contents().bindMemory(to: ModelConstants.self, capacity: maxCubes)
         
         for cube in cubes
         {
             var modelConstants = ModelConstants()
             modelConstants.color = cube.color
-            modelConstants.modelMatrix = cube.modelMatrix
-            
-            encoder?.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
-            
-            cubeShape.render(with: encoder)
+
+            cube.transform.updateModelMatrix()
+            modelConstants.modelMatrix = cube.transform.matrix
+
+            pointer.pointee = modelConstants
+            pointer = pointer.advanced(by: 1)
         }
+        
+        encoder?.setVertexBuffer(cubesConstantsBuffer, offset: 0, index: 2)
+        
+        cubeShape.render(with: encoder, instanceCount: cubes.count)
     }
 }

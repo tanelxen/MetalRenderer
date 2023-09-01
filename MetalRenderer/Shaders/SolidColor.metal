@@ -36,7 +36,24 @@ vertex VertexOut solid_color_vs(constant float3           *vertices       [[ buf
     return data;
 }
 
+vertex VertexOut solid_color_inst_vs(constant float3           *vertices       [[ buffer(0) ]],
+                                     constant SceneConstants   &viewConstants  [[ buffer(1) ]],
+                                     constant ModelConstants   *modelConstants [[ buffer(2) ]],
+                                     uint                      vertexID        [[ vertex_id ]],
+                                     uint                      instanceID      [[ instance_id ]])
+{
+    ModelConstants instance = modelConstants[instanceID];
+    float4x4 mvp = viewConstants.projectionMatrix * viewConstants.viewMatrix * instance.modelMatrix;
+    
+    VertexOut data;
+    
+    data.position = mvp * float4(vertices[vertexID], 1);
+    data.color = instance.color;
+    
+    return data;
+}
+
 fragment half4 solid_color_fs(VertexOut vOut [[ stage_in ]])
 {
-    return half4(vOut.color.r, vOut.color.g, vOut.color.b, 0.3);
+    return half4(vOut.color.r, vOut.color.g, vOut.color.b, 0.2);
 }

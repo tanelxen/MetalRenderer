@@ -66,64 +66,68 @@ class ForwardRenderer: NSObject
     
     // MARK: - DO PASSES
     
-    private func doMainRenderPass(with commandBuffer: MTLCommandBuffer?, in view: MTKView)
+    private func doMainRenderPass(with renderEncoder: MTLRenderCommandEncoder)
     {
-        guard let renderPassDescriptor = view.currentRenderPassDescriptor else { return }
+        guard scene.isReady else { return }
         
-        let renderEncoder = commandBuffer?.makeRenderCommandEncoder(descriptor: renderPassDescriptor)
+        renderEncoder.label = "Main Pass Command Encoder"
         
-        renderEncoder?.label = "Main Pass Command Encoder"
-        
-        renderEncoder?.setFrontFacing(.counterClockwise)
-        renderEncoder?.setCullMode(.back)
+        renderEncoder.setFrontFacing(.counterClockwise)
+        renderEncoder.setCullMode(.back)
         
         // SKYBOX
-        renderEncoder?.pushDebugGroup("Skybox Render")
-            renderEncoder?.setDepthStencilState(skyStencilState)
-            renderEncoder?.setRenderPipelineState(pipelineStates.skybox)
+        renderEncoder.pushDebugGroup("Skybox Render")
+            renderEncoder.setDepthStencilState(skyStencilState)
+            renderEncoder.setRenderPipelineState(pipelineStates.skybox)
             scene.renderSky(with: renderEncoder)
-        renderEncoder?.popDebugGroup()
+        renderEncoder.popDebugGroup()
         
-        renderEncoder?.setFrontFacing(.clockwise)
-        renderEncoder?.setCullMode(.back)
+        renderEncoder.setFrontFacing(.clockwise)
+        renderEncoder.setCullMode(.back)
         
-        renderEncoder?.setDepthStencilState(regularStencilState)
+        renderEncoder.setDepthStencilState(regularStencilState)
         
         // WORLD MESH
-        renderEncoder?.pushDebugGroup("World Mesh Render")
-            renderEncoder?.setRenderPipelineState(pipelineStates.worldMeshLightmapped)
+        renderEncoder.pushDebugGroup("World Mesh Render")
+            renderEncoder.setRenderPipelineState(pipelineStates.worldMeshLightmapped)
             scene.renderWorldLightmapped(with: renderEncoder)
         
-            renderEncoder?.setRenderPipelineState(pipelineStates.worldMeshVertexlit)
+            renderEncoder.setRenderPipelineState(pipelineStates.worldMeshVertexlit)
             scene.renderWorldVertexlit(with: renderEncoder)
-        renderEncoder?.popDebugGroup()
+        renderEncoder.popDebugGroup()
         
         // SKELETAL MESHES
-        renderEncoder?.pushDebugGroup("Skeletal Meshes Render")
-            renderEncoder?.setRenderPipelineState(pipelineStates.skeletalMesh)
+        renderEncoder.pushDebugGroup("Skeletal Meshes Render")
+            renderEncoder.setRenderPipelineState(pipelineStates.skeletalMesh)
             scene.renderSkeletalMeshes(with: renderEncoder)
-        renderEncoder?.popDebugGroup()
+        renderEncoder.popDebugGroup()
         
         // DEBUG
-        renderEncoder?.pushDebugGroup("Debug Render")
-            renderEncoder?.setRenderPipelineState(pipelineStates.solidColor)
-            scene.renderDebug(with: renderEncoder)
-        renderEncoder?.popDebugGroup()
+        renderEncoder.pushDebugGroup("Debug Render")
+            renderEncoder.setRenderPipelineState(pipelineStates.solidColor)
+            Debug.shared.render(with: renderEncoder)
         
-        renderEncoder?.endEncoding()
+            renderEncoder.setRenderPipelineState(pipelineStates.solidColorInst)
+            Debug.shared.renderInstanced(with: renderEncoder)
+        renderEncoder.popDebugGroup()
     }
     
     private func render(in view: MTKView)
     {
         guard let drawable = view.currentDrawable else { return }
-
-        let commandBuffer = Engine.commandQueue.makeCommandBuffer()
-        commandBuffer?.label = "Main Pass Command Buffer"
+        guard let passDescriptor = view.currentRenderPassDescriptor else { return }
+        guard let commandBuffer = Engine.commandQueue.makeCommandBuffer() else { return }
         
-        doMainRenderPass(with: commandBuffer, in: view)
+        commandBuffer.label = "Main Pass Command Buffer"
+        
+        if let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: passDescriptor)
+        {
+            doMainRenderPass(with: renderEncoder)
+            renderEncoder.endEncoding()
+        }
 
-        commandBuffer?.present(drawable)
-        commandBuffer?.commit()
+        commandBuffer.present(drawable)
+        commandBuffer.commit()
     }
 }
 

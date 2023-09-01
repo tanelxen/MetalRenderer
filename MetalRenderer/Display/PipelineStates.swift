@@ -14,6 +14,7 @@ class PipelineStates
     private (set) var worldMeshVertexlit: MTLRenderPipelineState!
     private (set) var skeletalMesh: MTLRenderPipelineState!
     private (set) var solidColor: MTLRenderPipelineState!
+    private (set) var solidColorInst: MTLRenderPipelineState!
     
     init()
     {
@@ -21,7 +22,9 @@ class PipelineStates
         createWorldMeshLightmappedPipelineState()
         createWorldMeshVertexlitPipelineState()
         createSkeletalMeshPipelineState()
+        
         createSolidColorPipelineState()
+        createSolidColorInstPipelineState()
     }
     
     private func createSkyboxPipelineState()
@@ -94,7 +97,7 @@ class PipelineStates
         descriptor.colorAttachments[0].rgbBlendOperation = .add
         descriptor.colorAttachments[0].alphaBlendOperation = .add
         descriptor.colorAttachments[0].sourceRGBBlendFactor = .sourceAlpha
-        descriptor.colorAttachments[0].sourceAlphaBlendFactor = .one
+        descriptor.colorAttachments[0].sourceAlphaBlendFactor = .sourceAlpha
         descriptor.colorAttachments[0].destinationRGBBlendFactor = .oneMinusSourceAlpha
         descriptor.colorAttachments[0].destinationAlphaBlendFactor = .oneMinusSourceAlpha
         
@@ -106,5 +109,29 @@ class PipelineStates
         descriptor.label = "Solid Color Render Pipeline State"
 
         solidColor = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
+    }
+    
+    private func createSolidColorInstPipelineState()
+    {
+        let descriptor = MTLRenderPipelineDescriptor()
+        
+        descriptor.colorAttachments[0].pixelFormat = Preferences.colorPixelFormat
+        
+        descriptor.colorAttachments[0].isBlendingEnabled = true
+        descriptor.colorAttachments[0].rgbBlendOperation = .add
+        descriptor.colorAttachments[0].alphaBlendOperation = .add
+        descriptor.colorAttachments[0].sourceRGBBlendFactor = .sourceAlpha
+        descriptor.colorAttachments[0].sourceAlphaBlendFactor = .one
+        descriptor.colorAttachments[0].destinationRGBBlendFactor = .oneMinusSourceAlpha
+        descriptor.colorAttachments[0].destinationAlphaBlendFactor = .oneMinusSourceAlpha
+        
+        descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
+
+        descriptor.vertexFunction = Engine.defaultLibrary.makeFunction(name: "solid_color_inst_vs")
+        descriptor.fragmentFunction = Engine.defaultLibrary.makeFunction(name: "solid_color_fs")
+
+        descriptor.label = "Solid Color Render Pipeline State"
+
+        solidColorInst = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
     }
 }

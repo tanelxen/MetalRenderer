@@ -63,32 +63,32 @@ extension GameView
 {
     override func mouseDown(with event: NSEvent)
     {
-         Mouse.setMouseButton(event.buttonNumber, isPressed: true)
+        Mouse.setMouseButton(event.buttonNumber, isPressed: true)
     }
     
     override func mouseUp(with event: NSEvent)
     {
-         Mouse.setMouseButton(event.buttonNumber, isPressed: false)
+        Mouse.setMouseButton(event.buttonNumber, isPressed: false)
     }
     
     override func rightMouseDown(with event: NSEvent)
     {
-         Mouse.setMouseButton(event.buttonNumber, isPressed: true)
+        Mouse.setMouseButton(event.buttonNumber, isPressed: true)
     }
     
     override func rightMouseUp(with event: NSEvent)
     {
-         Mouse.setMouseButton(event.buttonNumber, isPressed: false)
+        Mouse.setMouseButton(event.buttonNumber, isPressed: false)
     }
     
     override func otherMouseDown(with event: NSEvent)
     {
-         Mouse.setMouseButton(event.buttonNumber, isPressed: true)
+        Mouse.setMouseButton(event.buttonNumber, isPressed: true)
     }
     
     override func otherMouseUp(with event: NSEvent)
     {
-         Mouse.setMouseButton(event.buttonNumber, isPressed: false)
+        Mouse.setMouseButton(event.buttonNumber, isPressed: false)
     }
 }
 
@@ -97,27 +97,27 @@ extension GameView
 {
     override func mouseMoved(with event: NSEvent)
     {
-         setMousePositionChanged(event: event)
+        setMousePositionChanged(event: event)
     }
     
     override func scrollWheel(with event: NSEvent)
     {
-         Mouse.scrollWheel(Float(event.deltaY))
+        Mouse.scrollWheel(Float(event.deltaY))
     }
     
     override func mouseDragged(with event: NSEvent)
     {
-         setMousePositionChanged(event: event)
+        setMousePositionChanged(event: event)
     }
     
     override func rightMouseDragged(with event: NSEvent)
     {
-         setMousePositionChanged(event: event)
+        setMousePositionChanged(event: event)
     }
     
     override func otherMouseDragged(with event: NSEvent)
     {
-         setMousePositionChanged(event: event)
+        setMousePositionChanged(event: event)
     }
     
     private func setMousePositionChanged(event: NSEvent)
@@ -125,25 +125,25 @@ extension GameView
         var location = convert(event.locationInWindow, from: nil)
         location.y = bounds.height - location.y
         
-         let overallLocation = float2(Float(location.x),
-                                      Float(location.y))
+        let overallLocation = float2(Float(location.x),
+                                     Float(location.y))
         
-         let deltaChange = float2(Float(event.deltaX),
-                                  Float(event.deltaY))
+        let deltaChange = float2(Float(event.deltaX),
+                                 Float(event.deltaY))
         
-         Mouse.setMousePositionChange(overallPosition: overallLocation,
-                                      deltaPosition: deltaChange)
+        Mouse.setMousePositionChange(overallPosition: overallLocation,
+                                     deltaPosition: deltaChange)
     }
     
     override func updateTrackingAreas()
     {
-         let area = NSTrackingArea(rect: self.bounds,
-                                   options: [NSTrackingArea.Options.activeAlways,
-                                             NSTrackingArea.Options.mouseMoved,
-                                             NSTrackingArea.Options.enabledDuringMouseDrag],
-                                   owner: self,
-                                   userInfo: nil)
-         self.addTrackingArea(area)
+        let area = NSTrackingArea(rect: self.bounds,
+                                  options: [NSTrackingArea.Options.activeAlways,
+                                            NSTrackingArea.Options.mouseMoved,
+                                            NSTrackingArea.Options.enabledDuringMouseDrag],
+                                  owner: self,
+                                  userInfo: nil)
+        self.addTrackingArea(area)
     }
     
 }

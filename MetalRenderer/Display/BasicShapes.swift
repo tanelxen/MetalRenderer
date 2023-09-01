@@ -101,4 +101,18 @@ final class CubeShape
                                        indexBuffer: indiciesBuffer,
                                        indexBufferOffset: 0)
     }
+    
+    func render(with encoder: MTLRenderCommandEncoder?, instanceCount: Int)
+    {
+        guard verticesBuffer != nil else { return }
+        
+        encoder?.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
+
+        encoder?.drawIndexedPrimitives(type: .triangle,
+                                       indexCount: indicies.count,
+                                       indexType: .uint16,
+                                       indexBuffer: indiciesBuffer,
+                                       indexBufferOffset: 0,
+                                       instanceCount: instanceCount)
+    }
 }

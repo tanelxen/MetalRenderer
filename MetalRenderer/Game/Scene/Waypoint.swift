@@ -10,12 +10,16 @@ import MetalKit
 
 final class Waypoint
 {
-    var transform = Transform()
+    var transform: Transform = {
+        let transform = Transform()
+        transform.scale = float3(16, 16, 16)
+        return transform
+    }()
     
     var neighbors: [(Float, Int)] = []
     
-    private (set) var minBounds: float3 = .zero
-    private (set) var maxBounds: float3 = float3(16, 16, 16)
+    private (set) var minBounds: float3 = float3(-8, -8, -8)
+    private (set) var maxBounds: float3 = float3(8, 8, 8)
     
     func add(neighbor: Int, distance: Float)
     {

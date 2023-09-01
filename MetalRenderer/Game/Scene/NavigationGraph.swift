@@ -24,9 +24,10 @@ final class NavigationGraph
     {
         waypoints.append(waypoint)
         
-        Q3MapScene.current.debug.addCube(center: waypoint.transform.position,
-                                         size: float3(16, 16, 16),
-                                         color: float3(1, 0, 0))
+        Debug.shared.addCube(
+            transform: waypoint.transform,
+            color: float3(1, 0, 0)
+        )
     }
     
     func remove(at index: Int)
@@ -45,10 +46,15 @@ final class NavigationGraph
         // DEBUG
         for link in links
         {
-            Q3MapScene.current.debug.addLine(start: link.start.transform.position,
-                                             end: link.end.transform.position,
-                                             color: float3(1, 1, 0))
+            Debug.shared.addLine(start: link.start.transform.position,
+                                 end: link.end.transform.position,
+                                 color: float3(1, 1, 0))
         }
+    }
+    
+    func getWaypointsTransforms() -> [Transform]
+    {
+        return waypoints.map { $0.transform }
     }
     
     private func linkVisibleNodes()
@@ -306,9 +312,10 @@ final class NavigationGraph
             
             for waypoint in waypoints
             {
-                Q3MapScene.current.debug.addCube(center: waypoint.transform.position,
-                                                 size: float3(16, 16, 16),
-                                                 color: float3(1, 0, 0))
+                Debug.shared.addCube(
+                    transform: waypoint.transform,
+                    color: float3(1, 0, 0)
+                )
             }
             
             print("Navigation Graph was loaded from", url)
