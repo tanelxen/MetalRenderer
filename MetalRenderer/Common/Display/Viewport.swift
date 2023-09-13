@@ -1,0 +1,142 @@
+//
+//  Viewport.swift
+//  MetalRenderer
+//
+//  Created by Fedor Artemenkov on 03.09.2023.
+//
+
+import Foundation
+import Metal
+import simd
+
+/**
+ Класс Viewport инкапсулирует информацию о камере и render target'е
+ И то и другое зависит от размеров области
+ */
+final class Viewport
+{
+    var camera: Camera? {
+        didSet {
+            camera?.updateViewport(width: width, height: height)
+        }
+    }
+    
+    private (set) var renderPass: MTLRenderPassDescriptor?
+    
+    private (set) var minBounds: float2 = .zero
+    private (set) var maxBounds: float2 = float2(600, 600)
+    
+    // Для Retina всегда 2, для обычных - 1
+    var dpi: Float = 2
+    
+    var texture: MTLTexture?
+    
+//    var textureRawPointer: UnsafeMutableRawPointer? {
+//        withUnsafePointer(to: &texture) { ptr in
+//            return UnsafeMutableRawPointer(mutating: ptr)
+//        }
+//    }
+    
+    var width: Int {
+        Int(maxBounds.x - minBounds.x)
+    }
+    
+    var height: Int {
+        Int(maxBounds.y - minBounds.y)
+    }
+    
+    var orthographicMatrix: float4x4 {
+        let left: Float = -Float(width)
+        let right: Float = Float(width)
+        let top: Float = -Float(height)
+        let bottom: Float = Float(height)
+        
+        let near: Float = -1
+        let far: Float = 1
+        
+        return float4x4(
+            [2 / (right - left), 0, 0, 0],
+            [0, 2 / (top - bottom), 0, 0],
+            [0, 0, -1 / (near - far), 0],
+            [(left + right) / (left - right), (top + bottom) / (bottom - top), -far / (near - far), 1]
+        )
+    }
+    
+    private var framebufferWidth: Int {
+        texture?.width ?? 1
+    }
+    
+    private var framebufferHeight: Int {
+        texture?.height ?? 1
+    }
+    
+    private var resizeTask: DispatchWorkItem?
+//    private var taskSize:
+    
+    func changeBounds(min: float2, max: float2)
+    {
+        minBounds = min
+        maxBounds = max
+        
+        if width * 2 != framebufferWidth || height * 2 != framebufferHeight
+        {
+            camera?.updateViewport(width: width, height: height)
+            createRenderPass()
+        }
+    }
+    
+    private func createRenderPass()
+    {
+        let width = width * 2
+        let height = height * 2
+        
+        // ------ BASE COLOR 0 TEXTURE ------
+        let colorTextureDecriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: Preferences.colorPixelFormat,
+                                                                             width: width,
+                                                                             height: height,
+                                                                             mipmapped: false)
+        
+        colorTextureDecriptor.usage = [.renderTarget, .shaderRead]
+        let colorTexture = Engine.device.makeTexture(descriptor: colorTextureDecriptor)!
+        
+        // ------ DEPTH TEXTURE ------
+        let depthTextureDecriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: Preferences.depthStencilPixelFormat,
+                                                                             width: width,
+                                                                             height: height,
+                                                                             mipmapped: false)
+        
+        depthTextureDecriptor.usage = [.renderTarget, .shaderRead]
+        depthTextureDecriptor.storageMode = .private
+        let depthTexture = Engine.device.makeTexture(descriptor: depthTextureDecriptor)!
+        
+        // ------ RENDER PASS ------
+        renderPass = MTLRenderPassDescriptor()
+        
+        renderPass?.colorAttachments[0].texture = colorTexture
+        renderPass?.colorAttachments[0].storeAction = .store
+        renderPass?.colorAttachments[0].loadAction = .clear
+        
+        renderPass?.depthAttachment.texture = depthTexture
+        renderPass?.depthAttachment.storeAction = .store
+        renderPass?.depthAttachment.loadAction = .clear
+        
+        self.texture = colorTexture
+    }
+    
+//    private func updateFramebufferSize(_ size: ImVec2)
+//    {
+//        guard taskSize != size else { return }
+//
+//        resizeTask?.cancel()
+//
+//        let task = DispatchWorkItem { [weak self] in
+//            let size = CGSize(width: CGFloat(size.x), height: CGFloat(size.y))
+//            self?.onViewportResized?(size)
+//        }
+//
+//        resizeTask = task
+//        taskSize = size
+//
+//        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: task)
+//    }
+}

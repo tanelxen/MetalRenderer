@@ -4,14 +4,39 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
-		<key>MetalRenderer.xcscheme_^#shared#^_</key>
+		<key>Game.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>1</integer>
+		</dict>
+		<key>Sandbox.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>0</integer>
 		</dict>
+		<key>lol copy.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>6</integer>
+		</dict>
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
+		<key>8A27DA492AAE39DE0094C9D0</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>8A27DA9D2AAE3DCD0094C9D0</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>8A27DAEB2AAE3E5A0094C9D0</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
 		<key>8A56D70E278E058200D3FE2B</key>
 		<dict>
 			<key>primary</key>

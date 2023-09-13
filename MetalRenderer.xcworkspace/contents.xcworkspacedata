@@ -10,4 +10,7 @@
    <FileRef
       location = "group:Quake3 BSP Importer">
    </FileRef>
+   <FileRef
+      location = "group:ImGui+ImGuizmo">
+   </FileRef>
 </Workspace>
