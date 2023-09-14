@@ -120,9 +120,13 @@
 		8A27DB312AAE3E5A0094C9D0 /* pl_step2.wav in Resources */ = {isa = PBXBuildFile; fileRef = 8A6E036829CE3BA300609C3A /* pl_step2.wav */; };
 		8A27DB322AAE3E5A0094C9D0 /* pl_gun3.wav in Resources */ = {isa = PBXBuildFile; fileRef = 8AE8101829CEC08D003A681E /* pl_gun3.wav */; };
 		8A27DB332AAE3E5A0094C9D0 /* pl_step1.wav in Resources */ = {isa = PBXBuildFile; fileRef = 8A6E036629CE3BA300609C3A /* pl_step1.wav */; };
+		8A53DEFB2AB336DE00EC2C65 /* Particles.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8A53DEFA2AB336DE00EC2C65 /* Particles.metal */; };
+		8A53DEFC2AB336DE00EC2C65 /* Particles.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8A53DEFA2AB336DE00EC2C65 /* Particles.metal */; };
 		8A7C70B62AAFA7D3003FAFDD /* ImGui in Frameworks */ = {isa = PBXBuildFile; productRef = 8A7C70B52AAFA7D3003FAFDD /* ImGui */; };
 		8A7C70B82AAFA7D7003FAFDD /* ImGuizmo in Frameworks */ = {isa = PBXBuildFile; productRef = 8A7C70B72AAFA7D7003FAFDD /* ImGuizmo */; };
 		8A7C70BB2AB09169003FAFDD /* AssetsPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A7C70BA2AB09169003FAFDD /* AssetsPanel.swift */; };
+		8A7C70C12AB26278003FAFDD /* Particles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A7C70C02AB26278003FAFDD /* Particles.swift */; };
+		8A7C70C22AB26278003FAFDD /* Particles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A7C70C02AB26278003FAFDD /* Particles.swift */; };
 		8AAA8F212AAF614400223D1A /* MenuViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AAA8F202AAF614400223D1A /* MenuViewController.swift */; };
 		8AC34E432AAE54E600A6D429 /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AC34E422AAE54E600A6D429 /* GameViewController.swift */; };
 		8AC34E452AAE6E7800A6D429 /* HalfLife.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8AC34E442AAE6E7800A6D429 /* HalfLife.ttf */; };
@@ -151,6 +155,7 @@
 		8A3C60192AAB94E000BE835E /* HierarchyPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HierarchyPanel.swift; sourceTree = "<group>"; };
 		8A42053A2797B03400473A9D /* Skybox.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Skybox.metal; sourceTree = "<group>"; };
 		8A4F44F62A8A9D4E0044977A /* BasicShapes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BasicShapes.swift; sourceTree = "<group>"; };
+		8A53DEFA2AB336DE00EC2C65 /* Particles.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Particles.metal; sourceTree = "<group>"; };
 		8A56D719278E058400D3FE2B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8A56D71E278E058400D3FE2B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8A56D71F278E058400D3FE2B /* MetalRenderer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MetalRenderer.entitlements; sourceTree = "<group>"; };
@@ -171,6 +176,7 @@
 		8A75016127B08F84001F63F6 /* Q3MapScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Q3MapScene.swift; sourceTree = "<group>"; };
 		8A75016C27B098CE001F63F6 /* BSPMesh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BSPMesh.swift; sourceTree = "<group>"; };
 		8A7C70BA2AB09169003FAFDD /* AssetsPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetsPanel.swift; sourceTree = "<group>"; };
+		8A7C70C02AB26278003FAFDD /* Particles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Particles.swift; sourceTree = "<group>"; };
 		8A7EA7AB2AAA5A720024B4BF /* FAIconEnum.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FAIconEnum.swift; sourceTree = "<group>"; };
 		8A7EA7AD2AAA5E660024B4BF /* ImGuiFontLibrary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImGuiFontLibrary.swift; sourceTree = "<group>"; };
 		8A84536927ADA45100E25638 /* TextureManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureManager.swift; sourceTree = "<group>"; };
@@ -287,6 +293,7 @@
 				8A5EDFDF27B99EED007166E4 /* WorldMesh.metal */,
 				8A5EDFE327B9CB4C007166E4 /* StaticMesh.metal */,
 				8A5EDFEF27BC205B007166E4 /* SkeletalMesh.metal */,
+				8A53DEFA2AB336DE00EC2C65 /* Particles.metal */,
 			);
 			path = Shaders;
 			sourceTree = "<group>";
@@ -393,6 +400,7 @@
 				8A01E0FA2957529800ED82C9 /* Waypoint.swift */,
 				8A1456E6295799EE00E92E68 /* NavigationGraph.swift */,
 				8A247EB52A8B73AD009DC4EF /* Debug.swift */,
+				8A7C70C02AB26278003FAFDD /* Particles.swift */,
 			);
 			path = Scene;
 			sourceTree = "<group>";
@@ -584,6 +592,7 @@
 				8A27DA582AAE39DE0094C9D0 /* Barney.swift in Sources */,
 				8A27DA592AAE39DE0094C9D0 /* AudioEngine.swift in Sources */,
 				8A27DA5A2AAE39DE0094C9D0 /* Debug.swift in Sources */,
+				8A7C70C22AB26278003FAFDD /* Particles.swift in Sources */,
 				8A27DA5B2AAE39DE0094C9D0 /* SkeletalMesh.swift in Sources */,
 				8A27DA5C2AAE39DE0094C9D0 /* SolidColor.metal in Sources */,
 				8A27DA5D2AAE39DE0094C9D0 /* PlayerMovement.swift in Sources */,
@@ -607,6 +616,7 @@
 				8A27DA712AAE39DE0094C9D0 /* Transform.swift in Sources */,
 				8A27DA752AAE39DE0094C9D0 /* Q3MapScene.swift in Sources */,
 				8A27DA762AAE39DE0094C9D0 /* GameTime.swift in Sources */,
+				8A53DEFC2AB336DE00EC2C65 /* Particles.metal in Sources */,
 				8A27DA772AAE39DE0094C9D0 /* Viewport.swift in Sources */,
 				8A27DA782AAE39DE0094C9D0 /* ForwardRenderer.swift in Sources */,
 				8A27DA792AAE39DE0094C9D0 /* Sizeable.swift in Sources */,
@@ -630,6 +640,7 @@
 				8A27DAF42AAE3E5A0094C9D0 /* KeyCodes.swift in Sources */,
 				8A27DAF52AAE3E5A0094C9D0 /* Engine.swift in Sources */,
 				8A27DAF62AAE3E5A0094C9D0 /* Q3MapLightGrid.swift in Sources */,
+				8A7C70C12AB26278003FAFDD /* Particles.swift in Sources */,
 				8A27DAF72AAE3E5A0094C9D0 /* EditorLayer.swift in Sources */,
 				8A27DAF82AAE3E5A0094C9D0 /* NavigationGraph.swift in Sources */,
 				8A27DAF92AAE3E5A0094C9D0 /* Common.metal in Sources */,
@@ -642,6 +653,7 @@
 				8A27DB002AAE3E5A0094C9D0 /* main.swift in Sources */,
 				8A27DB012AAE3E5A0094C9D0 /* Q3MapCollision.swift in Sources */,
 				8A27DB022AAE3E5A0094C9D0 /* Player.swift in Sources */,
+				8A53DEFB2AB336DE00EC2C65 /* Particles.metal in Sources */,
 				8A27DB032AAE3E5A0094C9D0 /* StaticMesh.metal in Sources */,
 				8A27DB042AAE3E5A0094C9D0 /* Utils.swift in Sources */,
 				8A27DB052AAE3E5A0094C9D0 /* BSPMesh.swift in Sources */,

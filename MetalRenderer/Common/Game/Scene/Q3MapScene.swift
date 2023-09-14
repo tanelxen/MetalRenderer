@@ -88,6 +88,8 @@ class Q3MapScene
         {
             player?.update()
         }
+        
+        Particles.shared.update()
     }
     
     private func build()

@@ -100,7 +100,7 @@ class PlayerCamera: Camera
 
         let aspectRatio = Float(width) / Float(height)
         
-        _projectionMatrix = matrix_float4x4.perspective(degreesFov: 65, aspectRatio: aspectRatio, near: 0.1, far: 5000)
+        _projectionMatrix = matrix_float4x4.perspective(degreesFov: 65, aspectRatio: aspectRatio, near: 0.01, far: 5000)
     }
 }
 

@@ -35,4 +35,5 @@ struct SceneConstants: sizeable
 {
     var viewMatrix = matrix_identity_float4x4
     var projectionMatrix = matrix_identity_float4x4
+    var viewportSize = float2(x: 1, y: 1)
 }

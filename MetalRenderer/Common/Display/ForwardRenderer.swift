@@ -55,6 +55,8 @@ final class ForwardRenderer
         
             renderEncoder.setRenderPipelineState(pipelineStates.worldMeshVertexlit)
             scene.renderWorldVertexlit(with: renderEncoder)
+        
+            renderEncoder.setFragmentTexture(nil, index: 1)
         renderEncoder.popDebugGroup()
         
         // SKELETAL MESHES
@@ -73,6 +75,17 @@ final class ForwardRenderer
         
         encoder.setRenderPipelineState(pipelineStates.solidColorInst)
         Debug.shared.renderInstanced(with: encoder)
+        
+        encoder.popDebugGroup()
+    }
+    
+    private func drawParticles(with encoder: MTLRenderCommandEncoder)
+    {
+        encoder.pushDebugGroup("Particles Render")
+        
+        encoder.setDepthStencilState(skyStencilState)
+        encoder.setRenderPipelineState(pipelineStates.particles)
+        Particles.shared.render(with: encoder)
         
         encoder.popDebugGroup()
     }
@@ -113,15 +126,17 @@ final class ForwardRenderer
         {
             viewUniforms.viewMatrix = camera.viewMatrix
             viewUniforms.projectionMatrix = camera.projectionMatrix
+            viewUniforms.viewportSize = viewport.maxBounds - viewport.minBounds
         }
         
-        encoder.setVertexBytes(&viewUniforms, length: MemoryLayout<SceneConstants>.size, index: 1)
+        encoder.setVertexBytes(&viewUniforms, length: MemoryLayout<SceneConstants>.stride, index: 1)
         
         if let scene = scene
         {
             drawScene(scene, with: encoder)
         }
         
+        drawParticles(with: encoder)
         drawDebug(with: encoder)
         
         if scene?.isPlaying ?? false

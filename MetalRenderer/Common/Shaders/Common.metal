@@ -12,6 +12,7 @@ struct SceneConstants
 {
     float4x4 viewMatrix;
     float4x4 projectionMatrix;
+    float2 viewportSize;
 };
 
 struct ModelConstants
