@@ -46,9 +46,9 @@ final class Viewport
     }
     
     var orthographicMatrix: float4x4 {
-        let left: Float = -Float(width)
+        let left: Float = 0
         let right: Float = Float(width)
-        let top: Float = -Float(height)
+        let top: Float = 0
         let bottom: Float = Float(height)
         
         let near: Float = -1

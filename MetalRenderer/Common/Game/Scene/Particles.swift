@@ -8,16 +8,17 @@
 import Metal
 import simd
 
-private let sv_gravity: Float = 800.0
+private let sv_gravity: Float = 400.0
 
 final class Particles
 {
     private class Particle
     {
-        var transform: Transform = Transform()
+        var position: float3 = .zero
         var velocity: float3 = .zero
-        var lifespan: Float = 100.0
-        let color: float3 = float3(1, 0, 0)
+        var color: float4 = .one
+        var lifespan: Float = 2
+        let maxLifespan: Float = 2
     }
     
     private var particles: [Particle] = []
@@ -33,17 +34,21 @@ final class Particles
     
     init()
     {
-        constantsBuffer = Engine.device.makeBuffer(length: float3.stride(maxCount), options: [])
-        texture = TextureManager.shared.getTexture(for: "Assets/bubble.tga")
+        constantsBuffer = Engine.device.makeBuffer(length: ParticleVertex.stride(maxCount), options: [])
+        texture = TextureManager.shared.getTexture(for: "Assets/particle_dot.png")
     }
     
     func addParticle(origin: float3, dir: float3)
     {
         let particle = Particle()
-        particle.transform.position = origin
-        particle.transform.scale = float3(repeating: 1)
+        particle.position = origin
         
-        particle.velocity = dir * 6
+        let z_axis = float3(0, 0, 1)
+        let dot = dot(z_axis, dir)
+        
+        let speed = 80 * (1 + dot)
+        
+        particle.velocity = dir * speed
         
         particles.append(particle)
     }
@@ -75,14 +80,13 @@ final class Particles
 
             particle.lifespan -= dt
 
-            if particle.lifespan <= 0
-            {
-                continue
-            }
+            if particle.lifespan <= 0 { continue }
             
-//            particle.velocity.z -= sv_gravity * dt
-
-            particle.transform.position += particle.velocity * dt
+            particle.velocity.z -= sv_gravity * dt
+            particle.position += particle.velocity * dt
+            
+            let alpha = particle.lifespan / particle.maxLifespan
+            particle.color.w = alpha * alpha
         }
     }
     
@@ -90,7 +94,7 @@ final class Particles
     {
         guard !particles.isEmpty else { return }
         
-        var pointer = constantsBuffer.contents().bindMemory(to: float3.self, capacity: maxCount)
+        var pointer = constantsBuffer.contents().bindMemory(to: ParticleVertex.self, capacity: maxCount)
         
         var count: Int = 0
         
@@ -98,13 +102,10 @@ final class Particles
         {
             guard particle.lifespan > 0 else { continue }
             
-//            var modelConstants = ModelConstants()
-//            modelConstants.color = particle.color
-//
-//            particle.transform.updateModelMatrix()
-//            modelConstants.modelMatrix = particle.transform.matrix
+            pointer.pointee.pos = particle.position
+            pointer.pointee.color = particle.color
+            pointer.pointee.size = 8
 
-            pointer.pointee = particle.transform.position
             pointer = pointer.advanced(by: 1)
             
             count += 1
@@ -142,3 +143,10 @@ final class Particles
 //
 //    return normalize(rotatedVector)
 //}
+
+private struct ParticleVertex: sizeable
+{
+    var pos: float3
+    var color: float4
+    var size: Float
+}

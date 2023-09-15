@@ -9,14 +9,15 @@ import MetalKit
 
 class PipelineStates
 {
+    private (set) var basic: MTLRenderPipelineState!
+    private (set) var basicInst: MTLRenderPipelineState!
+    
     private (set) var skybox: MTLRenderPipelineState!
     private (set) var worldMeshLightmapped: MTLRenderPipelineState!
     private (set) var worldMeshVertexlit: MTLRenderPipelineState!
     private (set) var skeletalMesh: MTLRenderPipelineState!
-    private (set) var solidColor: MTLRenderPipelineState!
-    private (set) var solidColorInst: MTLRenderPipelineState!
     private (set) var particles: MTLRenderPipelineState!
-    private (set) var ui: MTLRenderPipelineState!
+    private (set) var userInterface: MTLRenderPipelineState!
     
     init()
     {
@@ -25,12 +26,12 @@ class PipelineStates
         createWorldMeshVertexlitPipelineState()
         createSkeletalMeshPipelineState()
         
-        createSolidColorPipelineState()
-        createSolidColorInstPipelineState()
+        createBasicPipelineState()
+        createBasicInstPipelineState()
         
         createParticlesPipelineState()
         
-        createUIPipelineState()
+        createUserInterfacePipelineState()
     }
     
     private func createSkyboxPipelineState()
@@ -93,7 +94,7 @@ class PipelineStates
         skeletalMesh = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
     }
     
-    private func createSolidColorPipelineState()
+    private func createBasicPipelineState()
     {
         let descriptor = MTLRenderPipelineDescriptor()
         
@@ -109,15 +110,16 @@ class PipelineStates
         
         descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
 
-        descriptor.vertexFunction = Engine.defaultLibrary.makeFunction(name: "solid_color_vs")
-        descriptor.fragmentFunction = Engine.defaultLibrary.makeFunction(name: "solid_color_fs")
+        descriptor.vertexFunction = Engine.defaultLibrary.makeFunction(name: "basic_vs")
+        descriptor.fragmentFunction = Engine.defaultLibrary.makeFunction(name: "basic_fs")
+        descriptor.vertexDescriptor = basicVertexDescriptor()
 
-        descriptor.label = "Solid Color Render Pipeline State"
+        descriptor.label = "Basic Render Pipeline State"
 
-        solidColor = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
+        basic = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
     }
     
-    private func createSolidColorInstPipelineState()
+    private func createBasicInstPipelineState()
     {
         let descriptor = MTLRenderPipelineDescriptor()
         
@@ -133,12 +135,13 @@ class PipelineStates
         
         descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
 
-        descriptor.vertexFunction = Engine.defaultLibrary.makeFunction(name: "solid_color_inst_vs")
-        descriptor.fragmentFunction = Engine.defaultLibrary.makeFunction(name: "solid_color_fs")
+        descriptor.vertexFunction = Engine.defaultLibrary.makeFunction(name: "basic_inst_vs")
+        descriptor.fragmentFunction = Engine.defaultLibrary.makeFunction(name: "basic_fs")
+        descriptor.vertexDescriptor = basicVertexDescriptor()
 
-        descriptor.label = "Solid Color Render Pipeline State"
+        descriptor.label = "Basic Instanced Render Pipeline State"
 
-        solidColorInst = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
+        basicInst = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
     }
     
     private func createParticlesPipelineState()
@@ -159,24 +162,87 @@ class PipelineStates
 
         descriptor.vertexFunction = Engine.defaultLibrary.makeFunction(name: "particle_vs")
         descriptor.fragmentFunction = Engine.defaultLibrary.makeFunction(name: "particle_fs")
+        descriptor.vertexDescriptor = particleVertexDescriptor()
 
         descriptor.label = "Particles Render Pipeline State"
 
         particles = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
     }
     
-    private func createUIPipelineState()
+    private func createUserInterfacePipelineState()
     {
         let descriptor = MTLRenderPipelineDescriptor()
         
         descriptor.colorAttachments[0].pixelFormat = Preferences.colorPixelFormat
+        
+        descriptor.colorAttachments[0].isBlendingEnabled = true
+        descriptor.colorAttachments[0].rgbBlendOperation = .add
+        descriptor.colorAttachments[0].alphaBlendOperation = .add
+        descriptor.colorAttachments[0].sourceRGBBlendFactor = .sourceAlpha
+        descriptor.colorAttachments[0].sourceAlphaBlendFactor = .one
+        descriptor.colorAttachments[0].destinationRGBBlendFactor = .oneMinusSourceAlpha
+        descriptor.colorAttachments[0].destinationAlphaBlendFactor = .oneMinusSourceAlpha
+        
         descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
 
-        descriptor.vertexFunction = Engine.defaultLibrary.makeFunction(name: "ui_vs")
-        descriptor.fragmentFunction = Engine.defaultLibrary.makeFunction(name: "solid_color_fs")
+        descriptor.vertexFunction = Engine.defaultLibrary.makeFunction(name: "user_interface_vs")
+        descriptor.fragmentFunction = Engine.defaultLibrary.makeFunction(name: "user_interface_fs")
+        descriptor.vertexDescriptor = basicVertexDescriptor()
 
         descriptor.label = "UI Render Pipeline State"
 
-        ui = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
+        userInterface = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
+    }
+    
+    private func basicVertexDescriptor() -> MTLVertexDescriptor
+    {
+        let descriptor = MTLVertexDescriptor()
+        var offset = 0
+        
+        // Position
+        descriptor.attributes[0].offset = offset
+        descriptor.attributes[0].format = .float3
+        descriptor.attributes[0].bufferIndex = 0
+        offset += MemoryLayout<float3>.size
+        
+        // Texture Coordinates
+        descriptor.attributes[1].offset = offset
+        descriptor.attributes[1].format = .float2
+        descriptor.attributes[1].bufferIndex = 0
+        offset += MemoryLayout<float2>.size
+        
+        descriptor.layouts[0].stepFunction = .perVertex
+        descriptor.layouts[0].stride = offset
+        
+        return descriptor
+    }
+    
+    private func particleVertexDescriptor() -> MTLVertexDescriptor
+    {
+        let descriptor = MTLVertexDescriptor()
+        var offset = 0
+        
+        // Position
+        descriptor.attributes[0].offset = offset
+        descriptor.attributes[0].format = .float3
+        descriptor.attributes[0].bufferIndex = 0
+        offset += MemoryLayout<float3>.size
+        
+        // Color
+        descriptor.attributes[1].offset = offset
+        descriptor.attributes[1].format = .float4
+        descriptor.attributes[1].bufferIndex = 0
+        offset += MemoryLayout<float4>.size
+        
+        // Size
+        descriptor.attributes[1].offset = offset
+        descriptor.attributes[1].format = .float
+        descriptor.attributes[1].bufferIndex = 0
+        offset += MemoryLayout<Float>.size
+        
+        descriptor.layouts[0].stepFunction = .perVertex
+        descriptor.layouts[0].stride = offset
+        
+        return descriptor
     }
 }

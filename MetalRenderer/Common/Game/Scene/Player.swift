@@ -94,14 +94,7 @@ class Player
         
         if hitResult.fraction > 0, let normal = hitResult.plane?.normal
         {
-//            let tr = Transform()
-//            tr.position = hitResult.endpos
-//            tr.scale = float3(2, 2, 2)
-//
-//            Debug.shared.addCube(transform: tr, color: float3(1, 0, 0))
-            
-//            Debug.shared.addLine(start: origin, end: origin + dir, color: float3(1, 0, 1))
-            
+            Decals.shared.addDecale(origin: hitResult.endpos, normal: normal)
             Particles.shared.addParticles(origin: hitResult.endpos, dir: normal, count: 5)
         }
     }

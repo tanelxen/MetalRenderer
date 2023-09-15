@@ -27,6 +27,14 @@ final class ForwardRenderer
         return Engine.device.makeDepthStencilState(descriptor: descriptor)!
     }()
     
+    private var decalsStencilState: MTLDepthStencilState = {
+        let descriptor = MTLDepthStencilDescriptor()
+        descriptor.isDepthWriteEnabled = true
+        descriptor.depthCompareFunction = .less
+        descriptor.label = "Decal"
+        return Engine.device.makeDepthStencilState(descriptor: descriptor)!
+    }()
+    
     private func drawScene(_ scene: Q3MapScene, with renderEncoder: MTLRenderCommandEncoder)
     {
         guard scene.isReady else { return }
@@ -70,10 +78,12 @@ final class ForwardRenderer
     {
         encoder.pushDebugGroup("Debug Render")
         
-        encoder.setRenderPipelineState(pipelineStates.solidColor)
+        encoder.setFragmentTexture(nil, index: 0)
+        
+        encoder.setRenderPipelineState(pipelineStates.basic)
         Debug.shared.render(with: encoder)
         
-        encoder.setRenderPipelineState(pipelineStates.solidColorInst)
+        encoder.setRenderPipelineState(pipelineStates.basicInst)
         Debug.shared.renderInstanced(with: encoder)
         
         encoder.popDebugGroup()
@@ -83,6 +93,8 @@ final class ForwardRenderer
     {
         encoder.pushDebugGroup("Particles Render")
         
+        encoder.setFragmentTexture(nil, index: 0)
+        
         encoder.setDepthStencilState(skyStencilState)
         encoder.setRenderPipelineState(pipelineStates.particles)
         Particles.shared.render(with: encoder)
@@ -90,27 +102,32 @@ final class ForwardRenderer
         encoder.popDebugGroup()
     }
     
-    private func drawCrosshair(in viewport: Viewport, with encoder: MTLRenderCommandEncoder)
+    private func drawDecals(with encoder: MTLRenderCommandEncoder)
     {
-        encoder.pushDebugGroup("UI Render")
+        encoder.pushDebugGroup("Decals Render")
+        
+        encoder.setFragmentTexture(nil, index: 0)
+        
+        encoder.setDepthStencilState(decalsStencilState)
+        encoder.setRenderPipelineState(pipelineStates.basicInst)
+        Decals.shared.render(with: encoder)
+        
+        encoder.popDebugGroup()
+    }
+    
+    private func drawUserInterface(in viewport: Viewport, with encoder: MTLRenderCommandEncoder)
+    {
+        encoder.pushDebugGroup("User Interface Render")
+        
+        encoder.setCullMode(.none)
+        encoder.setDepthStencilState(skyStencilState)
+        encoder.setRenderPipelineState(pipelineStates.userInterface)
         
         var matrix = viewport.orthographicMatrix
         encoder.setVertexBytes(&matrix, length: MemoryLayout<float4x4>.size, index: 1)
         
-        encoder.setCullMode(.none)
-        encoder.setDepthStencilState(skyStencilState)
-        encoder.setRenderPipelineState(pipelineStates.ui)
-        
-        let size: Float = 3
-        
-        var vertices: [float2] = [
-            float2(-size, -size), float2(size, -size), float2(size, size),
-            float2(-size, -size), float2(size, size), float2(-size, size),
-        ]
-        
-        encoder.setVertexBytes(&vertices, length: MemoryLayout<float2>.stride * vertices.count, index: 0)
-
-        encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices.count)
+        UserInterface.shared.update(width: viewport.width, height: viewport.height)
+        UserInterface.shared.draw(with: encoder)
         
         encoder.popDebugGroup()
     }
@@ -137,12 +154,13 @@ final class ForwardRenderer
         }
         
         drawParticles(with: encoder)
+        drawDecals(with: encoder)
         drawDebug(with: encoder)
         
-        if scene?.isPlaying ?? false
-        {
-            drawCrosshair(in: viewport, with: encoder)
-        }
+//        if scene?.isPlaying ?? false
+//        {
+            drawUserInterface(in: viewport, with: encoder)
+//        }
         
         encoder.endEncoding()
     }

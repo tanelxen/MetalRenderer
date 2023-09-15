@@ -116,3 +116,83 @@ final class CubeShape
                                        instanceCount: instanceCount)
     }
 }
+
+final class QuadShape
+{
+    private var minBounds: float3 = .zero
+    private var maxBounds: float3 = .one
+    
+    private var vertices: [BasicVertex] = []
+    private var verticesBuffer: MTLBuffer!
+    
+    init()
+    {
+        setup()
+    }
+    
+    init(mins: float3, maxs: float3)
+    {
+        minBounds = mins
+        maxBounds = maxs
+        
+        setup()
+    }
+    
+    private func setup()
+    {
+        let center = (minBounds + maxBounds) * 0.5
+        minBounds = minBounds - center
+        maxBounds = maxBounds - center
+        
+        minBounds.z = 0
+        maxBounds.z = 0
+        
+        vertices = [
+            BasicVertex(minBounds.x, minBounds.y, maxBounds.z, 0, 1),
+            BasicVertex(minBounds.x, maxBounds.y, maxBounds.z, 0, 0),
+            BasicVertex(maxBounds.x, minBounds.y, maxBounds.z, 1, 1),
+            BasicVertex(maxBounds.x, maxBounds.y, maxBounds.z, 1, 0)
+        ]
+        
+        verticesBuffer = Engine.device.makeBuffer(
+            bytes: vertices,
+            length: MemoryLayout<BasicVertex>.stride * vertices.count,
+            options: []
+        )
+    }
+    
+    func render(with encoder: MTLRenderCommandEncoder)
+    {
+        guard verticesBuffer != nil else { return }
+        
+        encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
+        
+        encoder.drawPrimitives(type: .triangleStrip,
+                               vertexStart: 0,
+                               vertexCount: vertices.count)
+    }
+    
+    func render(with encoder: MTLRenderCommandEncoder, instanceCount: Int)
+    {
+        guard verticesBuffer != nil else { return }
+        
+        encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
+        
+        encoder.drawPrimitives(type: .triangleStrip,
+                               vertexStart: 0,
+                               vertexCount: vertices.count,
+                               instanceCount: instanceCount)
+    }
+}
+
+private struct BasicVertex
+{
+    let pos: float3
+    let uv: float2
+    
+    init(_ x: Float, _ y: Float, _ z: Float, _ u: Float, _ v: Float)
+    {
+        self.pos = float3(x, y, z)
+        self.uv = float2(u, v)
+    }
+}
