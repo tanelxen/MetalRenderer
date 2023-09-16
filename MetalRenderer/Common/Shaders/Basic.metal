@@ -19,7 +19,7 @@ struct VertexOut
 {
     float4 position [[ position ]];
     float2 textureCoord;
-    float3 color;
+    half4 color;
 };
 
 vertex VertexOut basic_vs(constant VertexIn       *vertices       [[ buffer(0) ]],
@@ -33,7 +33,9 @@ vertex VertexOut basic_vs(constant VertexIn       *vertices       [[ buffer(0) ]
     
     data.position = mvp * float4(vertices[vertexID].position, 1);
     data.textureCoord = vertices[vertexID].textureCoord;
-    data.color = modelConstants.color;
+    
+    float4 color = modelConstants.color;
+    data.color = half4(color);
     
     return data;
 }
@@ -51,7 +53,9 @@ vertex VertexOut basic_inst_vs(constant VertexIn          *vertices       [[ buf
     
     data.position = mvp * float4(vertices[vertexID].position, 1);
     data.textureCoord = vertices[vertexID].textureCoord;
-    data.color = instance.color;
+    
+    float4 color = instance.color;
+    data.color = half4(color);
     
     return data;
 }
@@ -64,7 +68,7 @@ fragment half4 basic_fs
     texture2d<half> texture     [[ texture(0) ]]
 )
 {
-    half4 color = half4(vOut.color.r, vOut.color.g, vOut.color.b, 1.0);
+    half4 color = vOut.color;
     
     if (!is_null_texture(texture))
     {

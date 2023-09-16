@@ -12,10 +12,9 @@ final class Decals
 {
     private class Decal
     {
-//        var transform: Transform = Transform()
         var modelMatrix = matrix_identity_float4x4
         var lifespan: Float = 100.0
-        let color: float3 = float3(1, 1, 1)
+        let color: float4 = float4(1, 1, 1, 1)
     }
     
     private var decals: [Decal] = []

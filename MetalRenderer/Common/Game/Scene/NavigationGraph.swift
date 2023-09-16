@@ -26,7 +26,7 @@ final class NavigationGraph
         
         Debug.shared.addCube(
             transform: waypoint.transform,
-            color: float3(1, 0, 0)
+            color: float4(1, 0, 0, 0.5)
         )
     }
     
@@ -48,7 +48,7 @@ final class NavigationGraph
         {
             Debug.shared.addLine(start: link.start.transform.position,
                                  end: link.end.transform.position,
-                                 color: float3(1, 1, 0))
+                                 color: float4(1, 1, 0, 1))
         }
     }
     
@@ -314,7 +314,7 @@ final class NavigationGraph
             {
                 Debug.shared.addCube(
                     transform: waypoint.transform,
-                    color: float3(1, 0, 0)
+                    color: float4(1, 0, 0, 0.5)
                 )
             }
             

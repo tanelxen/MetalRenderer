@@ -42,9 +42,17 @@ final class SandboxApplication: NSObject
         editor = EditorLayer(view: view, sceneViewport: viewport)
         
         editor?.onLoadNewMap = { [weak self] name in
+            
             self?.scene = Q3MapScene(name: name)
-            self?.viewport.camera?.transform.position = .zero
-            self?.viewport.camera?.transform.rotation = .zero
+            
+            self?.scene.onReady = { [weak self] in
+                
+                if let point = self?.scene?.spawnPoints.first
+                {
+                    self?.viewport.camera?.transform.position = point.position
+                    self?.viewport.camera?.transform.rotation = point.rotation
+                }
+            }
         }
         
         view.delegate = self

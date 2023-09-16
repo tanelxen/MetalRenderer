@@ -18,5 +18,5 @@ struct SceneConstants
 struct ModelConstants
 {
     float4x4 modelMatrix;
-    float3 color;
+    float4 color;
 };

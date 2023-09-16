@@ -13,7 +13,7 @@ final class CubeShape
     private var minBounds: float3 = .zero
     private var maxBounds: float3 = .one
     
-    private var vertices: [float3] = []
+    private var vertices: [BasicVertex] = []
     private var indicies: [UInt16] = []
     
     private var verticesBuffer: MTLBuffer!
@@ -39,15 +39,15 @@ final class CubeShape
         maxBounds = maxBounds - center
         
         vertices = [
-            float3(minBounds.x, minBounds.y, minBounds.z),  // Back     Right   Bottom      0
-            float3(maxBounds.x, minBounds.y, minBounds.z),  // Front    Right   Bottom      1
-            float3(minBounds.x, maxBounds.y, minBounds.z),  // Back     Left    Bottom      2
-            float3(maxBounds.x, maxBounds.y, minBounds.z),  // Front    Left    Bottom      3
+            BasicVertex(minBounds.x, minBounds.y, minBounds.z, 0, 0),  // Back     Right   Bottom      0
+            BasicVertex(maxBounds.x, minBounds.y, minBounds.z, 1, 0),  // Front    Right   Bottom      1
+            BasicVertex(minBounds.x, maxBounds.y, minBounds.z, 0, 1),  // Back     Left    Bottom      2
+            BasicVertex(maxBounds.x, maxBounds.y, minBounds.z, 1, 1),  // Front    Left    Bottom      3
             
-            float3(minBounds.x, minBounds.y, maxBounds.z),  // Back     Right   Top         4
-            float3(maxBounds.x, minBounds.y, maxBounds.z),  // Front    Right   Top         5
-            float3(minBounds.x, maxBounds.y, maxBounds.z),  // Back     Left    Top         6
-            float3(maxBounds.x, maxBounds.y, maxBounds.z)   // Front    Left    Top         7
+            BasicVertex(minBounds.x, minBounds.y, maxBounds.z, 0, 0),  // Back     Right   Top         4
+            BasicVertex(maxBounds.x, minBounds.y, maxBounds.z, 1, 0),  // Front    Right   Top         5
+            BasicVertex(minBounds.x, maxBounds.y, maxBounds.z, 0, 1),  // Back     Left    Top         6
+            BasicVertex(maxBounds.x, maxBounds.y, maxBounds.z, 1, 0)   // Front    Left    Top         7
         ]
         
         indicies = [
@@ -78,7 +78,7 @@ final class CubeShape
         
         verticesBuffer = Engine.device.makeBuffer(
             bytes: vertices,
-            length: MemoryLayout<float3>.stride * vertices.count,
+            length: MemoryLayout<BasicVertex>.stride * vertices.count,
             options: []
         )
         

@@ -17,13 +17,11 @@ class Q3MapScene
     
     private var bspMesh: BSPMesh?
     
-    private var staticMesh: StaticMesh?
-    
     private var collision: Q3MapCollision!
     
     private var lightGrid: Q3MapLightGrid!
     
-    private var spawnPoints: [Transform] = []
+    private (set) var spawnPoints: [Transform] = []
     private var entities: [Barney] = []
     
     private let navigation = NavigationGraph()
@@ -59,7 +57,9 @@ class Q3MapScene
         
         AudioEngine.play(file: "Half-Life13.mp3")
         
-//        spawnBarneys()
+        DispatchQueue.global().async {
+            self.spawnBarneys()
+        }
         
         spawnPlayer()
         
@@ -98,8 +98,8 @@ class Q3MapScene
         {
             loadMap(with: data)
             
-            let url = ResourceManager.URLInDocuments(for: "\(mapName).obj")
-            map?.saveAsOBJ(url: url)
+//            let url = ResourceManager.URLInDocuments(for: "\(mapName).obj")
+//            map?.saveAsOBJ(url: url)
         }
         
 //        DispatchQueue.global().async {
@@ -149,6 +149,7 @@ class Q3MapScene
             barney.transform.rotation = point.rotation
 
             entities.append(barney)
+            break
         }
     }
     
@@ -156,6 +157,9 @@ class Q3MapScene
     {
         let q3map = Q3Map(data: data)
         print("bsp file was loaded")
+        
+        fetchSpawnPoints(for: q3map)
+        print("spawn points were created")
         
         bspMesh = BSPMesh(map: q3map)
         print("bsp mesh was created")
@@ -170,16 +174,12 @@ class Q3MapScene
         )
         print("light grid was created")
         
-        DispatchQueue.global().async {
-            self.fetchSpawnPoints(for: q3map)
-            
-            DispatchQueue.main.async {
-                self.isReady = true
-                self.onReady?()
-            }
-        }
-        
         map = q3map
+        
+        DispatchQueue.main.async {
+            self.isReady = true
+            self.onReady?()
+        }
     }
 }
 
@@ -217,11 +217,11 @@ extension Q3MapScene
         guard isReady else { return }
         
         var modelConstants = ModelConstants()
-        modelConstants.modelMatrix.scale(axis: float3(repeating: 1))
+        modelConstants.color = float4(0, 1.0, 0.0, 0.5)
+//        modelConstants.modelMatrix.scale(axis: float3(repeating: 1))
         
         encoder?.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
         
-        staticMesh?.renderWithEncoder(encoder!)
     }
     
     func renderSkeletalMeshes(with encoder: MTLRenderCommandEncoder?)
@@ -238,8 +238,9 @@ extension Q3MapScene
             modelMatrix.translate(direction: float3(0, 0, -25))
             
             let ambient = lightGrid.ambient(at: entity.transform.position)
+            let color = float4(ambient, 1.0)
             
-            var modelConstants = ModelConstants(modelMatrix: modelMatrix, color: ambient)
+            var modelConstants = ModelConstants(modelMatrix: modelMatrix, color: color)
             encoder?.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
             
             entity.mesh?.renderWithEncoder(encoder!)
@@ -271,8 +272,9 @@ extension Q3MapScene
         modelMatrix.translate(direction: float3(-2, 4, 0))
         
         let ambient = lightGrid.ambient(at: transform.position)
+        let color = float4(ambient, 1.0)
         
-        var modelConstants = ModelConstants(modelMatrix: modelMatrix, color: ambient)
+        var modelConstants = ModelConstants(modelMatrix: modelMatrix, color: color)
         encoder?.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
         
         player.mesh?.renderWithEncoder(encoder!)

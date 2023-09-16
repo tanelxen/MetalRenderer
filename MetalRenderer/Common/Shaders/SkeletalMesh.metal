@@ -24,7 +24,7 @@ struct VertexOut
 {
     float4 position [[ position ]];
     float2 textureCoord;
-    float3 ambient;
+    half4 ambient;
 };
 
 vertex VertexOut skeletal_mesh_vs
@@ -43,7 +43,7 @@ vertex VertexOut skeletal_mesh_vs
     
     data.position = mvp * boneTransform * float4(vIn.position, 1.0);
     data.textureCoord = vIn.textureCoord;
-    data.ambient = modelConstants.color;
+    data.ambient = half4(modelConstants.color);
     
     return data;
 }
@@ -56,11 +56,8 @@ fragment half4 skeletal_mesh_fs
     texture2d<half>   albedoMap   [[ texture(0) ]]
 )
 {
-    
-    half4 ambient = half4(vOut.ambient.r, vOut.ambient.g, vOut.ambient.b, 1.0);
     half4 albedo = albedoMap.sample(sampler2d, vOut.textureCoord);
-    
-    return albedo * ambient;
+    return albedo * vOut.ambient;
 }
 
 

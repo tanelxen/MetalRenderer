@@ -13,41 +13,51 @@ final class Debug
     {
         let start: float3
         let end: float3
-        let color: float3
+        let color: float4
     }
     
-    private struct Cube
+    private struct Shape
     {
         let transform: Transform
-        let color: float3
+        let color: float4
     }
     
     private var lines: [Line] = []
-    private var cubes: [Cube] = []
+    private var cubes: [Shape] = []
+    private var quads: [Shape] = []
     
     private let cubeShape = CubeShape(mins: .zero, maxs: .one)
+    private let quadShape = QuadShape(mins: .zero, maxs: .one)
     
     static let shared = Debug()
     
-    private let maxCubes = 1000
+    private let maxInstances = 10000
     
     private var cubesConstantsBuffer: MTLBuffer!
+    private var quadsConstantsBuffer: MTLBuffer!
     
     init()
     {
-        cubesConstantsBuffer = Engine.device.makeBuffer(length: ModelConstants.stride(maxCubes), options: [])
+        cubesConstantsBuffer = Engine.device.makeBuffer(length: ModelConstants.stride(maxInstances), options: [])
+        quadsConstantsBuffer = Engine.device.makeBuffer(length: ModelConstants.stride(maxInstances), options: [])
     }
     
-    func addLine(start: float3, end: float3, color: float3)
+    func addLine(start: float3, end: float3, color: float4)
     {
         let line = Line(start: start, end: end, color: color)
         lines.append(line)
     }
     
-    func addCube(transform: Transform, color: float3)
+    func addCube(transform: Transform, color: float4)
     {
-        let cube = Cube(transform: transform, color: color)
+        let cube = Shape(transform: transform, color: color)
         cubes.append(cube)
+    }
+    
+    func addQuad(transform: Transform, color: float4)
+    {
+        let quad = Shape(transform: transform, color: color)
+        quads.append(quad)
     }
     
     func render(with encoder: MTLRenderCommandEncoder?)
@@ -59,8 +69,12 @@ final class Debug
 
             encoder?.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
 
-            var vertices = [line.start, line.end]
-            encoder?.setVertexBytes(&vertices, length: MemoryLayout<float3>.stride * 2, index: 0)
+            var vertices = [
+                BasicVertex(line.start.x, line.start.y, line.start.z, 0, 0),
+                BasicVertex(line.end.x, line.end.y, line.end.z, 0, 0)
+            ]
+            
+            encoder?.setVertexBytes(&vertices, length: MemoryLayout<BasicVertex>.stride * 2, index: 0)
 
             encoder?.drawPrimitives(type: .line, vertexStart: 0, vertexCount: 2)
         }
@@ -68,12 +82,20 @@ final class Debug
     
     func renderInstanced(with encoder: MTLRenderCommandEncoder?)
     {
+        drawCubes(with: encoder)
+        drawQuads(with: encoder)
+    }
+    
+    private func drawCubes(with encoder: MTLRenderCommandEncoder?)
+    {
         guard !cubes.isEmpty else { return }
         
-        var pointer = cubesConstantsBuffer.contents().bindMemory(to: ModelConstants.self, capacity: maxCubes)
+        var pointer = cubesConstantsBuffer.contents().bindMemory(to: ModelConstants.self, capacity: maxInstances)
         
-        for cube in cubes
+        for (index, cube) in cubes.enumerated()
         {
+            guard index < maxInstances else { break }
+            
             var modelConstants = ModelConstants()
             modelConstants.color = cube.color
 
@@ -87,5 +109,42 @@ final class Debug
         encoder?.setVertexBuffer(cubesConstantsBuffer, offset: 0, index: 2)
         
         cubeShape.render(with: encoder, instanceCount: cubes.count)
+    }
+    
+    private func drawQuads(with encoder: MTLRenderCommandEncoder?)
+    {
+        guard !quads.isEmpty else { return }
+        
+        var pointer = quadsConstantsBuffer.contents().bindMemory(to: ModelConstants.self, capacity: maxInstances)
+        
+        for (index, quad) in quads.enumerated()
+        {
+            guard index < maxInstances else { break }
+            
+            var modelConstants = ModelConstants()
+            modelConstants.color = quad.color
+
+            quad.transform.updateModelMatrix()
+            modelConstants.modelMatrix = quad.transform.matrix
+
+            pointer.pointee = modelConstants
+            pointer = pointer.advanced(by: 1)
+        }
+        
+        encoder?.setVertexBuffer(quadsConstantsBuffer, offset: 0, index: 2)
+        
+        quadShape.render(with: encoder!, instanceCount: quads.count)
+    }
+}
+
+private struct BasicVertex
+{
+    let pos: float3
+    let uv: float2
+    
+    init(_ x: Float, _ y: Float, _ z: Float, _ u: Float, _ v: Float)
+    {
+        self.pos = float3(x, y, z)
+        self.uv = float2(u, v)
     }
 }
