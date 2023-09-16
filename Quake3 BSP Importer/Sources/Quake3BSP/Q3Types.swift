@@ -13,10 +13,10 @@ public typealias float3 = SIMD3<Float>
 
 public struct Q3Vertex
 {
-    var position: float3 = .zero
-    var textureCoord: float2 = .zero
-    var lightmapCoord: float2 = .zero
-    var color: float3 = .zero
+    public var position: float3 = .zero
+    public var textureCoord: float2 = .zero
+    public var lightmapCoord: float2 = .zero
+    public var color: float3 = .zero
 }
 
 func +(left: Q3Vertex, right: Q3Vertex) -> Q3Vertex

@@ -459,8 +459,61 @@ public class Q3Map
     }
 }
 
-extension Data {
-    func subdata(in range: ClosedRange<Index>) -> Data {
+extension Q3Map
+{
+    public func saveAsOBJ(url: URL)
+    {
+        FileManager.default.createFile(atPath: url.path, contents: nil, attributes: nil)
+        
+        let fileHandle = FileHandle(forWritingAtPath: url.path)!
+        
+        for vertex in vertices
+        {
+            let pos = vertex.position
+            let str = "v \(pos.x) \(pos.z) \(-pos.y)\n"
+            
+            write(str, to: fileHandle)
+        }
+        
+        for face in faces
+        {
+            if face.textureName == "noshader" { continue }
+            if face.textureName.contains("sky") { continue }
+//            if face.type == .mesh { continue }
+            
+            for poly in face.vertexIndices.chunked(into: 3)
+            {
+                let str = "f \(poly[0] + 1) \(poly[2] + 1) \(poly[1] + 1)\n"
+                write(str, to: fileHandle)
+            }
+        }
+    }
+    
+    private func write(_ string: String, to fileHandle: FileHandle)
+    {
+        fileHandle.seekToEndOfFile()
+        
+        if let data = string.data(using: .utf8)
+        {
+            fileHandle.write(data)
+        }
+    }
+}
+
+extension Data
+{
+    func subdata(in range: ClosedRange<Index>) -> Data
+    {
         return subdata(in: range.lowerBound ..< range.upperBound + 1)
+    }
+}
+
+extension Array
+{
+    func chunked(into size: Int) -> [[Element]]
+    {
+        return stride(from: 0, to: count, by: size).map {
+            Array(self[$0 ..< Swift.min($0 + size, count)])
+        }
     }
 }

@@ -97,6 +97,9 @@ class Q3MapScene
         if let data = ResourceManager.getData(for: "Assets/q3/maps/\(mapName).bsp")
         {
             loadMap(with: data)
+            
+            let url = ResourceManager.URLInDocuments(for: "\(mapName).obj")
+            map?.saveAsOBJ(url: url)
         }
         
 //        DispatchQueue.global().async {

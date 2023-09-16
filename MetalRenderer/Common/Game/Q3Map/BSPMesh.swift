@@ -158,6 +158,11 @@ class BSPMesh
     }
 }
 
+extension BSPMesh
+{
+
+}
+
 private struct IndexGroupKey: Hashable
 {
     let texture: String
