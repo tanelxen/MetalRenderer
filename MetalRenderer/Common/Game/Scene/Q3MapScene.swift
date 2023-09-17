@@ -33,6 +33,7 @@ class Q3MapScene
     private (set) static var current: Q3MapScene!
     
     private (set) var brushes: BrushRenderer?
+    private var navmesh: NavigationMesh?
     
     var onReady: (()->Void)?
     
@@ -107,6 +108,11 @@ class Q3MapScene
 //                        }
                     }
                 }
+
+	        	if let url = ResourceManager.getURL(for: "Assets/q3/maps/\(mapName).navmesh")
+        		{
+            		navmesh = NavigationMesh(url: url)
+        		}
             }
         }
         catch
@@ -220,11 +226,12 @@ extension Q3MapScene
         guard isReady else { return }
         
         var modelConstants = ModelConstants()
-        modelConstants.color = float4(0, 1.0, 0.0, 0.5)
+        modelConstants.color = float4(0, 1.0, 0.0, 0.6)
 //        modelConstants.modelMatrix.scale(axis: float3(repeating: 1))
         
         encoder?.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
         
+        navmesh?.renderWithEncoder(encoder!)
     }
     
     func renderSkeletalMeshes(with encoder: MTLRenderCommandEncoder?)

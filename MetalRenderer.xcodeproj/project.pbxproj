@@ -134,6 +134,8 @@
 		8A53DF022AB488A700EC2C65 /* UserInterface.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8A53DF002AB488A700EC2C65 /* UserInterface.metal */; };
 		8A53DF042AB48F4700EC2C65 /* UserInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A53DF032AB48F4700EC2C65 /* UserInterface.swift */; };
 		8A53DF052AB48F4700EC2C65 /* UserInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A53DF032AB48F4700EC2C65 /* UserInterface.swift */; };
+		8A53DF372AB7B48300EC2C65 /* NavigationMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A53DF362AB7B48300EC2C65 /* NavigationMesh.swift */; };
+		8A53DF382AB7B48300EC2C65 /* NavigationMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A53DF362AB7B48300EC2C65 /* NavigationMesh.swift */; };
 		8A5969062ABB2F1D00772AC9 /* Intersection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5969052ABB2F1D00772AC9 /* Intersection.swift */; };
 		8A5969072ABB2F1D00772AC9 /* Intersection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5969052ABB2F1D00772AC9 /* Intersection.swift */; };
 		8A5AE68B2AC0FE0400809790 /* SkeletalMeshAssetSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5AE68A2AC0FE0400809790 /* SkeletalMeshAssetSerializer.swift */; };
@@ -200,6 +202,7 @@
 		8A53DEFD2AB37E5C00EC2C65 /* Decals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Decals.swift; sourceTree = "<group>"; };
 		8A53DF002AB488A700EC2C65 /* UserInterface.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = UserInterface.metal; sourceTree = "<group>"; };
 		8A53DF032AB48F4700EC2C65 /* UserInterface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserInterface.swift; sourceTree = "<group>"; };
+		8A53DF362AB7B48300EC2C65 /* NavigationMesh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationMesh.swift; sourceTree = "<group>"; };
 		8A56D719278E058400D3FE2B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8A56D71E278E058400D3FE2B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8A56D71F278E058400D3FE2B /* MetalRenderer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MetalRenderer.entitlements; sourceTree = "<group>"; };
@@ -474,6 +477,7 @@
 				8AE7F56F2946965B00CD40BE /* PlayerMovement.swift */,
 				8A01E0FA2957529800ED82C9 /* Waypoint.swift */,
 				8A1456E6295799EE00E92E68 /* NavigationGraph.swift */,
+				8A53DF362AB7B48300EC2C65 /* NavigationMesh.swift */,
 				8A247EB52A8B73AD009DC4EF /* Debug.swift */,
 				8A7C70C02AB26278003FAFDD /* Particles.swift */,
 				8A53DEFD2AB37E5C00EC2C65 /* Decals.swift */,
@@ -700,6 +704,7 @@
 				8A27DA652AAE39DE0094C9D0 /* Waypoint.swift in Sources */,
 				8A27DA662AAE39DE0094C9D0 /* main.swift in Sources */,
 				8A5AE68C2AC0FE0400809790 /* SkeletalMeshAssetSerializer.swift in Sources */,
+				8A53DF382AB7B48300EC2C65 /* NavigationMesh.swift in Sources */,
 				8A27DA672AAE39DE0094C9D0 /* Frustum.swift in Sources */,
 				8A27DA692AAE39DE0094C9D0 /* SkeletalMeshAsset.swift in Sources */,
 				8A0C48AD2AC852A50099BEF6 /* WorldAsset.swift in Sources */,
@@ -780,6 +785,7 @@
 				8A27DB0D2AAE3E5A0094C9D0 /* ResourceManager.swift in Sources */,
 				8A27DB0E2AAE3E5A0094C9D0 /* StaticMesh.swift in Sources */,
 				8A0C48AF2AC858E10099BEF6 /* WorldStaticMeshAssetSerializer.swift in Sources */,
+				8A53DF372AB7B48300EC2C65 /* NavigationMesh.swift in Sources */,
 				8A27DB0F2AAE3E5A0094C9D0 /* FAIconEnum.swift in Sources */,
 				8A27DB102AAE3E5A0094C9D0 /* Camera.swift in Sources */,
 				8A27DB112AAE3E5A0094C9D0 /* MetalTypes.swift in Sources */,
