@@ -123,6 +123,48 @@ final class Viewport
         self.texture = colorTexture
     }
     
+    // 0, 0 - left, top
+    // 1, 1 - right, bottom
+    func mousePosition() -> float2
+    {
+        let positionX = minBounds.x
+        let positionY = minBounds.y
+        let sizeX = maxBounds.x - minBounds.x
+        let sizeY = maxBounds.y - minBounds.y
+        
+        let mousePos = Mouse.getMouseWindowPosition()
+        
+        let x = (mousePos.x - positionX) / sizeX
+        let y = (mousePos.y - positionY) / sizeY
+        
+        return float2(x, y)
+    }
+    
+    func mousePositionInWorld() -> Ray
+    {
+        let mouse = mousePosition()
+        
+        let ndcX = mouse.x * 2 - 1
+        let ndcY = (1 - mouse.y) * 2 - 1
+        
+        let clipCoords = float4(ndcX, ndcY, 0, 1)
+        
+        let projInv = camera!.projectionMatrix.inverse
+        let viewInv = camera!.viewMatrix.inverse
+        
+        var eyeRayDir = projInv * clipCoords
+        eyeRayDir.z = -1
+        eyeRayDir.w = 0
+        
+        var worldRayDir = (viewInv * eyeRayDir).xyz
+        worldRayDir = normalize(worldRayDir)
+        
+        let eyeRayOrigin = float4(x: 0, y: 0, z: 0, w: 1)
+        let worldRayOrigin = (viewInv * eyeRayOrigin).xyz
+        
+        return Ray(origin: worldRayOrigin, direction: worldRayDir)
+    }
+    
 //    private func updateFramebufferSize(_ size: ImVec2)
 //    {
 //        guard taskSize != size else { return }

@@ -34,7 +34,7 @@ class Q3MapScene
     
     private (set) static var current: Q3MapScene!
     
-    private var navmesh: NavigationMesh?
+    private (set) var navmesh: NavigationMesh?
     
     var onReady: (()->Void)?
     
@@ -197,6 +197,7 @@ extension Q3MapScene
         guard isReady else { return }
         
         skybox.renderWithEncoder(encoder!)
+        encoder?.setFragmentTexture(nil, index: 0)
     }
     
     func renderWorldLightmapped(with encoder: MTLRenderCommandEncoder?)
@@ -222,12 +223,6 @@ extension Q3MapScene
     func renderStaticMeshes(with encoder: MTLRenderCommandEncoder?)
     {
         guard isReady else { return }
-        
-        var modelConstants = ModelConstants()
-        modelConstants.color = float4(0, 1.0, 0.0, 0.6)
-//        modelConstants.modelMatrix.scale(axis: float3(repeating: 1))
-        
-        encoder?.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
         
         navmesh?.renderWithEncoder(encoder!)
     }

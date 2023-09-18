@@ -91,8 +91,12 @@ final class EditorLayer
         else if event.type == .mouseMoved || event.type == .leftMouseDragged || event.type == .rightMouseDragged
         {
             let deltaChange = float2(Float(event.deltaX), Float(event.deltaY))
+            let posX = Float(event.locationInWindow.x)
+            let posY = Float(view.bounds.height - event.locationInWindow.y)
             
-            Mouse.setMousePositionChange(overallPosition: .zero,
+            debugInfo = "Mouse: \(posX), \(posY)"
+            
+            Mouse.setMousePositionChange(overallPosition: float2(posX, posY),
                                          deltaPosition: deltaChange)
         }
         else if event.type == .leftMouseDown
@@ -220,7 +224,7 @@ final class EditorLayer
         hierarchyPanel.draw()
         viewportPanel.draw()
         
-//        drawDebugPanel()
+        drawDebugPanel()
         assetsPanel.draw()
     }
     
