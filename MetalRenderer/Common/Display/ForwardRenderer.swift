@@ -75,6 +75,7 @@ final class ForwardRenderer
             renderEncoder.setFragmentTexture(nil, index: 1)
         renderEncoder.popDebugGroup()
         
+        // NAVIGATION MESH
         renderEncoder.pushDebugGroup("Navmesh Render")
             renderEncoder.setRenderPipelineState(pipelineStates.basic)
             scene.renderStaticMeshes(with: renderEncoder)
