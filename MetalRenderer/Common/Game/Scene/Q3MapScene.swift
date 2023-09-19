@@ -22,8 +22,6 @@ class Q3MapScene
     private (set) var spawnPoints: [Transform] = []
     private var entities: [Barney] = []
     
-    private let navigation = NavigationGraph()
-    
     private (set) var player: Player?
     
     private (set) var isReady = false
@@ -33,7 +31,8 @@ class Q3MapScene
     private (set) static var current: Q3MapScene!
     
     private (set) var brushes: BrushRenderer?
-    private (set) var navmesh: NavigationMesh?
+//    private let navigation = NavigationGraph()
+    private (set) var navigation: NavigationMesh?
     
     var onReady: (()->Void)?
     
@@ -122,6 +121,14 @@ class Q3MapScene
         
         isReady = true
         Q3MapScene.current = self
+        
+        Keyboard.onKeyDown = { key in
+            
+            if key == .n
+            {
+                self.moveBarneyToPlayer()
+            }
+        }
     }
     
     func startPlaying(in viewport: Viewport)
@@ -167,6 +174,27 @@ class Q3MapScene
         Particles.shared.update()
     }
     
+    private func moveBarneyToPlayer()
+    {
+        guard let start = entities.first?.transform.position else { return }
+        guard let end = player?.transform.position else { return }
+        guard let navigation = navigation else { return }
+        
+        let route = navigation.makeRoute(from: start, to: end)
+        
+        Debug.shared.clear()
+        
+        for point in route
+        {
+            let trans = Transform()
+            trans.position = point
+            trans.scale = float3(repeating: 6)
+
+            Debug.shared.addCube(transform: trans, color: float4(1, 0, 1, 0.5))
+        }
+        
+        entities.first?.moveBy(route: route)
+    }
     private func spawnPlayer()
     {
         guard let point = spawnPoints.first else { return }
@@ -226,7 +254,7 @@ extension Q3MapScene
     {
         guard isReady else { return }
         
-        navmesh?.renderWithEncoder(encoder!)
+        navigation?.renderWithEncoder(encoder!)
     }
     
     func renderSkeletalMeshes(with encoder: MTLRenderCommandEncoder?)
