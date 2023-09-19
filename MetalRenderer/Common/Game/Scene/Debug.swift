@@ -60,6 +60,13 @@ final class Debug
         quads.append(quad)
     }
     
+    func clear()
+    {
+        lines.removeAll()
+        cubes.removeAll()
+        quads.removeAll()
+    }
+    
     func render(with encoder: MTLRenderCommandEncoder?)
     {
         for line in lines
