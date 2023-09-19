@@ -29,6 +29,14 @@ final class NavigationMesh
     private var links: [[Int]] = []
     private var costs: [[Float]] = []
     
+    struct Node
+    {
+        var position: float3 = .zero
+        var neighbors: [(Float, Int)] = []
+    }
+    
+    private var waypoints: [Node] = []
+    
     init?(url: URL)
     {
         do
@@ -40,6 +48,14 @@ final class NavigationMesh
             
             links = buildNeighborIndices(triangleIndices: asset.polys)
             costs = buildDistances(verts: asset.verts, links: links)
+            
+            waypoints = [Node](repeating: Node(), count: asset.verts.count)
+            
+            for i in 0 ..< waypoints.count
+            {
+                waypoints[i].position = asset.verts[i]
+                waypoints[i].neighbors = Array(zip(costs[i], links[i]))
+            }
             
             setupRenderData()
         }
@@ -240,6 +256,124 @@ final class NavigationMesh
     }
 }
 
+extension NavigationMesh
+{
+    func findNearest(from start: float3) -> Int?
+    {
+        var shortest: Float = 999999
+        var nearest = -1
+        
+        for (index, waypoint) in waypoints.enumerated()
+        {
+            let end = waypoint.position
+            
+            let dist = length(end - start)
+            
+            if dist < shortest
+            {
+                shortest = dist
+                nearest = index
+            }
+        }
+        
+        if nearest != -1
+        {
+            return nearest
+        }
+        
+        return nil
+    }
+    
+    func findNearestOnMesh(from start: float3) -> Int?
+    {
+        var nearestVertexIndex: Int?
+        
+        for poly in asset.polys
+        {
+            let v0 = asset.verts[poly[0]]
+            let v1 = asset.verts[poly[1]]
+            let v2 = asset.verts[poly[2]]
+            
+            let rayEnd = start + float3(0, 0, -128)
+            
+            let pointOnMesh = lineIntersectTriangle(v0: v0, v1: v1, v2: v2,
+                                                    start: start, end: rayEnd)
+            
+            if let point = pointOnMesh
+            {
+                let distances = [
+                    length(v0 - point),
+                    length(v1 - point),
+                    length(v2 - point)
+                ]
+                
+                let shortest = distances.min()!
+                let shotestIndex = distances.firstIndex(of: shortest)!
+                
+                nearestVertexIndex = poly[shotestIndex]
+                break
+            }
+        }
+        
+        return nearestVertexIndex
+    }
+    
+    func makeRoute(from startPos: float3, to endPos: float3) -> [float3]
+    {
+        guard let start = findNearest(from: startPos) else { return [] }
+        guard let goal = findNearest(from: endPos) else { return [] }
+        
+        typealias Edge = (Float, Int)
+                
+        var queue = Queue<Edge>()
+        queue.push((0, start))
+        
+        var cost_visited: [Int: Float] = [start: 0]
+        var visited: [Int: Int?] = [start: nil]
+        
+        while let (_, cur_node) = queue.pop()
+        {
+            if cur_node == goal
+            {
+                break
+            }
+            
+            let neighbors = waypoints[cur_node].neighbors
+            
+            for (neigh_cost, neigh_node) in neighbors
+            {
+                let new_cost = (cost_visited[cur_node] ?? 0) + neigh_cost
+                
+                if cost_visited[neigh_node] == nil || new_cost < cost_visited[neigh_node]!
+                {
+                    let neigh_pos = waypoints[neigh_node].position
+                    let priority = new_cost + length(endPos - neigh_pos)
+                    
+                    queue.push((priority, neigh_node))
+                    
+                    cost_visited[neigh_node] = new_cost
+                    visited[neigh_node] = cur_node
+                }
+            }
+        }
+        
+        var indiciesPath = [goal]
+        
+        var cur_node = goal
+
+        while cur_node != start
+        {
+            cur_node = visited[cur_node]!!
+            indiciesPath.append(cur_node)
+        }
+        
+        var path = indiciesPath.reversed().map({ waypoints[$0].position })
+        path.append(endPos)
+        
+        return path
+    }
+}
+
 private struct NavigationMeshAsset: Codable
 {
     let verts: [float3]
@@ -260,5 +394,29 @@ private extension Array where Element: Hashable
         let otherSet = Set(other)
         
         return Array(thisSet.symmetricDifference(otherSet))
+    }
+}
+
+private struct Queue<T>
+{
+    private var elements: [T] = []
+
+    mutating func push(_ value: T)
+    {
+        elements.append(value)
+    }
+
+    mutating func pop() -> T?
+    {
+        guard !elements.isEmpty else { return nil }
+        return elements.removeFirst()
+    }
+
+    var head: T? {
+        return elements.first
+    }
+
+    var tail: T? {
+        return elements.last
     }
 }

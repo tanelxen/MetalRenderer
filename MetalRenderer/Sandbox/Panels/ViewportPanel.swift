@@ -180,7 +180,7 @@ final class ViewportPanel
 //        guard !ImGuizmoIsUsing() else { return }
         
         let ray = viewport.mousePositionInWorld()
-        let navmesh = Q3MapScene.current.navmesh
+        let navmesh = Q3MapScene.current.navigation
 
         navmesh?.selectByRay(start: ray.origin, end: ray.origin + ray.direction * 512)
     }
