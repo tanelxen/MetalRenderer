@@ -60,14 +60,14 @@ class Barney
         
         updateRoute()
         
-        if isSeePlayer
-        {
-            moveToPlayer(minDist: 128)
-        }
+//        if isSeePlayer
+//        {
+//            moveToPlayer(minDist: 128)
+//        }
         
-//        playerMovement.transform = transform
-//        playerMovement.update()
-//        transform.position = playerMovement.transform.position
+        playerMovement.transform = transform
+        playerMovement.update()
+        transform.position = playerMovement.transform.position
         
         let direction = transform.rotation.forward * forwardmove * cl_forwardspeed
         transform.position += direction * GameTime.deltaTime
