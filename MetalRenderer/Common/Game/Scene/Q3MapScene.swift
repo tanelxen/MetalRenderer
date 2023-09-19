@@ -108,10 +108,10 @@ class Q3MapScene
                     }
                 }
 
-	        	if let url = ResourceManager.getURL(for: "Assets/q3/maps/\(mapName).navmesh")
-        		{
-            		navmesh = NavigationMesh(url: url)
-        		}
+                if name == "navmesh.json"
+                {
+                    navigation = NavigationMesh(data: data)
+                }
             }
         }
         catch

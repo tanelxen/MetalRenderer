@@ -37,12 +37,10 @@ final class NavigationMesh
     
     private var waypoints: [Node] = []
     
-    init?(url: URL)
+    init?(data: Data)
     {
         do
         {
-            let data = try Data(contentsOf: url)
-            
             let decoder = JSONDecoder()
             asset = try decoder.decode(NavigationMeshAsset.self, from: data)
             
@@ -258,7 +256,7 @@ final class NavigationMesh
 
 extension NavigationMesh
 {
-    func findNearest(from start: float3) -> Int?
+    private func findNearest(from start: float3) -> Int?
     {
         var shortest: Float = 999999
         var nearest = -1
@@ -284,91 +282,164 @@ extension NavigationMesh
         return nil
     }
     
-    func findNearestOnMesh(from start: float3) -> Int?
+    private func getNearestNodes(from origin: float3, in nodes: [Node]) -> [(index: Int, distance: Float)]
     {
-        var nearestVertexIndex: Int?
+        let maxNum: Int = 3
         
-        for poly in asset.polys
+        var distances = nodes.enumerated().map { ( $0, length($1.position - origin) ) }
+        distances = distances.sorted(by: { $0.1 < $1.1 })
+        
+        distances.removeLast(distances.count - maxNum)
+        
+        return distances
+    }
+    
+    // Получить точку на меше
+    private func pointOnMesh(rayStart: float3, rayEnd: float3) -> (poly: [Int], point: float3)?
+    {
+        var polyIndex: Int?
+        var point: float3?
+        
+        for (index, poly) in asset.polys.enumerated()
         {
             let v0 = asset.verts[poly[0]]
             let v1 = asset.verts[poly[1]]
             let v2 = asset.verts[poly[2]]
             
-            let rayEnd = start + float3(0, 0, -128)
+            point = lineIntersectTriangle(v0: v0, v1: v1, v2: v2,
+                                          start: rayStart, end: rayEnd)
             
-            let pointOnMesh = lineIntersectTriangle(v0: v0, v1: v1, v2: v2,
-                                                    start: start, end: rayEnd)
-            
-            if let point = pointOnMesh
+            if point != nil
             {
-                let distances = [
-                    length(v0 - point),
-                    length(v1 - point),
-                    length(v2 - point)
-                ]
-                
-                let shortest = distances.min()!
-                let shotestIndex = distances.firstIndex(of: shortest)!
-                
-                nearestVertexIndex = poly[shotestIndex]
+                polyIndex = index
                 break
             }
         }
         
-        return nearestVertexIndex
+        if let index = polyIndex, let point = point
+        {
+            return (asset.polys[index], point)
+        }
+        
+        return nil
+    }
+    
+    // Добавить новый узел в граф и вернуть индекс узла
+    private func addExtraNode(at startPos: float3, to nodes: inout [Node]) -> Int?
+    {
+        // Найдена точка на меше
+        if let (poly, point) = pointOnMesh(rayStart: startPos, rayEnd: startPos + float3(0, 0, -128))
+        {
+            // Создаем новый узел
+            var node = Node()
+            node.position = point
+            
+            // Индекс нового узла
+            let nodeIndex = nodes.count
+            
+            // Индексы соседних узлов
+            let i0 = poly[0]
+            let i1 = poly[1]
+            let i2 = poly[2]
+            
+            // Сосоедние узлы
+            let n0 = nodes[i0]
+            let n1 = nodes[i1]
+            let n2 = nodes[i2]
+            
+            // Расстояния до соседних узлов
+            let d0 = length(n0.position - point)
+            let d1 = length(n1.position - point)
+            let d2 = length(n2.position - point)
+            
+            node.neighbors = [
+                (d0, i0),
+                (d1, i1),
+                (d2, i2)
+            ]
+            
+            nodes[i0].neighbors.append( (d0, nodeIndex) )
+            nodes[i1].neighbors.append( (d1, nodeIndex) )
+            nodes[i2].neighbors.append( (d2, nodeIndex) )
+            
+            nodes.append(node)
+            return nodeIndex
+        }
+        
+        // Точка где-то вне меша, попробуем создать
+        let nearestNodes = getNearestNodes(from: startPos, in: nodes)
+        
+        if !nearestNodes.isEmpty
+        {
+            // Создаем новый узел
+            var node = Node()
+            node.position = startPos
+            
+            // Индекс нового узла
+            let nodeIndex = nodes.count
+            
+            for nearestNode in nearestNodes
+            {
+                node.neighbors.append( (nearestNode.distance, nearestNode.index) )
+                nodes[nearestNode.index].neighbors.append( (nearestNode.distance, nodeIndex) )
+            }
+            
+            nodes.append(node)
+            return nodeIndex
+        }
+        
+        return nil
     }
     
     func makeRoute(from startPos: float3, to endPos: float3) -> [float3]
     {
-        guard let start = findNearest(from: startPos) else { return [] }
-        guard let goal = findNearest(from: endPos) else { return [] }
+        var waypoints_copy = waypoints
+        
+        guard let startNode = addExtraNode(at: startPos, to: &waypoints_copy) else { return [] }
+        guard let endNode = addExtraNode(at: endPos, to: &waypoints_copy) else { return [] }
         
         typealias Edge = (Float, Int)
                 
         var queue = Queue<Edge>()
-        queue.push((0, start))
+        queue.push((0, startNode))
         
-        var cost_visited: [Int: Float] = [start: 0]
-        var visited: [Int: Int?] = [start: nil]
+        var cost_visited: [Int: Float] = [startNode: 0]
+        var visited: [Int: Int?] = [startNode: nil]
         
-        while let (_, cur_node) = queue.pop()
+        while let (_, curNode) = queue.pop()
         {
-            if cur_node == goal
-            {
-                break
-            }
+            if curNode == endNode { break }
             
-            let neighbors = waypoints[cur_node].neighbors
+            let neighbors = waypoints_copy[curNode].neighbors
             
-            for (neigh_cost, neigh_node) in neighbors
+            for (neigh_cost, neighNode) in neighbors
             {
-                let new_cost = (cost_visited[cur_node] ?? 0) + neigh_cost
+                let new_cost = (cost_visited[curNode] ?? 0) + neigh_cost
                 
-                if cost_visited[neigh_node] == nil || new_cost < cost_visited[neigh_node]!
+                if cost_visited[neighNode] == nil || new_cost < cost_visited[neighNode]!
                 {
-                    let neigh_pos = waypoints[neigh_node].position
+                    let neigh_pos = waypoints_copy[neighNode].position
                     let priority = new_cost + length(endPos - neigh_pos)
                     
-                    queue.push((priority, neigh_node))
+                    queue.push((priority, neighNode))
                     
-                    cost_visited[neigh_node] = new_cost
-                    visited[neigh_node] = cur_node
+                    cost_visited[neighNode] = new_cost
+                    visited[neighNode] = curNode
                 }
             }
         }
         
-        var indiciesPath = [goal]
+        var indiciesPath = [endNode]
         
-        var cur_node = goal
+        var cur_node = endNode
 
-        while cur_node != start
+        while cur_node != startNode
         {
             cur_node = visited[cur_node]!!
             indiciesPath.append(cur_node)
         }
         
-        var path = indiciesPath.reversed().map({ waypoints[$0].position })
-        path.append(endPos)
+        let path = indiciesPath.reversed().map({ waypoints_copy[$0].position })
         
         return path
     }

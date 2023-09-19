@@ -65,10 +65,10 @@ class Barney
         
         updateRoute()
         
-        if isSeePlayer
-        {
-            moveToPlayer(minDist: 128)
-        }
+//        if isSeePlayer
+//        {
+//            moveToPlayer(minDist: 128)
+//        }
         
         playerMovement.transform = transform
         playerMovement.update()
