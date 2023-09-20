@@ -89,14 +89,8 @@ class Player
         
         let start = camera.transform.position
         let end = start + camera.transform.rotation.forward * 1024
-
-        let hitResult = scene.trace2(start: start, end: end)
         
-        if hitResult.fraction > 0, let normal = hitResult.plane?.normal
-        {
-            Decals.shared.addDecale(origin: hitResult.endpos, normal: normal)
-            Particles.shared.addParticles(origin: hitResult.endpos, dir: normal, count: 5)
-        }
+        scene.makeShoot(start: start, end: end)
     }
     
     private func updateMovement()

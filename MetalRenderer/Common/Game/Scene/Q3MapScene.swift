@@ -308,66 +308,31 @@ extension Q3MapScene
     }
 }
 
-//extension Q3MapScene
-//{
-//    private func makeWaypoint()
-//    {
-//        let ray = CameraManager.shared.mainCamera.mousePositionInWorld()
-//        
-//        let start = ray.origin
-//        let end = start + ray.direction * 1024
-//        
-//        var hitResult = HitResult()
-//        collision.traceRay(result: &hitResult, start: start, end: end)
-//        
-//        if hitResult.fraction != 1
-//        {
-//            let waypoint = Waypoint()
-//            waypoint.transform.position = hitResult.endpos
-//            //            waypoint.transform.position.z += waypoint.maxBounds.z
-//            
-//            navigation.add(waypoint)
-//        }
-//    }
-//    
-//    private func removeWaypoint()
-//    {
-//        let ray = CameraManager.shared.mainCamera.mousePositionInWorld()
-//        
-//        let index = navigation.findIntersectedByRay(start: ray.origin, dir: ray.direction, dist: 1024)
-//        
-//        if index != -1
-//        {
-//            navigation.remove(at: index)
-//        }
-//    }
-//}
-//
-//func intersection(orig: float3, dir: float3, mins: float3, maxs: float3, t: Float) -> Bool
-//{
-//    var dirfrac = float3()
-//    
-//    dirfrac.x = 1.0 / dir.x
-//    dirfrac.y = 1.0 / dir.y
-//    dirfrac.z = 1.0 / dir.z
-//    
-//    let tx1 = (mins.x - orig.x) * dirfrac.x
-//    let tx2 = (maxs.x - orig.x) * dirfrac.x
-//
-//    var tmin = min(tx1, tx2)
-//    var tmax = max(tx1, tx2)
-//
-//    let ty1 = (mins.y - orig.y) * dirfrac.y
-//    let ty2 = (maxs.y - orig.y) * dirfrac.y
-//
-//    tmin = max(tmin, min(ty1, ty2))
-//    tmax = min(tmax, max(ty1, ty2))
-//
-//    let tz1 = (mins.z - orig.z) * dirfrac.z
-//    let tz2 = (maxs.z - orig.z) * dirfrac.z
-//
-//    tmin = max(tmin, min(tz1, tz2))
-//    tmax = min(tmax, max(tz1, tz2))
-//
-//    return tmax >= max(0, tmin) && tmin < t
-//}
+extension Q3MapScene
+{
+    func makeShoot(start: float3, end: float3)
+    {
+        var hitResult = HitResult()
+        collision.traceRay(result: &hitResult, start: start, end: end)
+        
+        let line = Intersection.Line(start: start, end: hitResult.endpos)
+        
+        let aabbs = entities.map {
+            Intersection.AABB(
+                mins: $0.minBounds + $0.transform.position,
+                maxs: $0.maxBounds + $0.transform.position
+            )
+        }
+        
+        if let result = Intersection.findIntersection(line: line, aabbs: aabbs)
+        {
+            Particles.shared.addParticles(origin: result.point, dir: result.normal, count: 5)
+            entities[result.index].takeDamage()
+        }
+        else if hitResult.fraction > 0, let normal = hitResult.plane?.normal
+        {
+            Decals.shared.addDecale(origin: hitResult.endpos, normal: normal)
+            Particles.shared.addParticles(origin: hitResult.endpos, dir: normal, count: 5)
+        }
+    }
+}

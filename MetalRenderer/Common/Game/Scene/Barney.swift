@@ -12,6 +12,9 @@ class Barney
     var transform = Transform()
     var mesh: SkeletalMesh?
     
+    let minBounds = float3( -15, -15, -32 )
+    let maxBounds = float3( 15, 15, 32 )
+    
     private var movementSpeed: Float = 90.0
     
     private weak var scene: Q3MapScene?
@@ -30,12 +33,14 @@ class Barney
                              "pl_step3.wav",
                              "pl_step4.wav"]
     
+    private let hurt = ["donthurtem.wav"]
+    
+    private var curentSequence = "idle1"
+    
     init(scene: Q3MapScene)
     {
         self.scene = scene
         self.mesh = SkeletalMesh(name: "Assets/hl/models/barney.mdl")
-        
-        mesh?.sequenceName = "walk"
         
         playerMovement.scene = scene
         playerMovement.cl_forwardspeed = 110
@@ -82,6 +87,13 @@ class Barney
     {
         self.route = route
         self.routeIndex = 0
+    }
+    
+    func takeDamage()
+    {
+        if let sound = hurt.randomElement() {
+            AudioEngine.play(file: sound)
+        }
     }
     
     private func setSequence(name: String)

@@ -14,6 +14,9 @@ Features:
 - ✅ Ambient lightning for skeletal meshes (light grid)
 - ✅ Sandbox editor based on ImGUI
 - ✅ Pre-game menu for selecting map
+- ✅ Simple particles (CPU driven)
+- ✅ Decals on static geometry
+- ✅ Hit detection with entities
 
 ## PREVIEW
 ![sandbox](https://github.com/tanelxen/MetalRenderer/assets/14359330/5cbeddb3-7f99-4568-b650-dd690c2cf780)
@@ -25,12 +28,18 @@ At this moment the code doesn't look good because I'm experimenting with some te
 Don't take it as production ready game engine. It's just my playground. However, I seek to stay code quite straightforward and understandable.
 Later I'm going to refactor all of that. And then perhaps it will be useful for someone.
 
+## IN PRORESS
+- 🚧 Improving navigation system with navmesh
+- 🚧 Moving to own assets format
+
 ## TODO
+- [ ] Animation system
+- [ ] Player and AI controllers
 - [ ] Integrate Recast for navmesh generating
-- [ ] Improve navigation system
 - [ ] Support Half-Life 2 models and maps
-- [ ] Own assets format (maybe based on json)
+- [ ] GPU driven particle system
 - [ ] Material system
 - [ ] Blending skeletal animations
 - [ ] Rendering UI (besides crosshair)
-- [ ] Refactoring all this stuff
+- [ ] Improve audio engine
+- [ ] ⚠️ Refactoring all this stuff ⚠️
