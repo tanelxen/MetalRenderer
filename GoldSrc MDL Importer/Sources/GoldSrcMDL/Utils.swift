@@ -26,29 +26,29 @@ extension simd_float3
     }
 }
 
-func anglesToQuaternion(_ angles: float3) -> simd_quatf
-{
-    let pitch = angles[0]
-    let roll = angles[1]
-    let yaw = angles[2]
-
-    // FIXME: rescale the inputs to 1/2 angle
-    let cy = cos(yaw * 0.5)
-    let sy = sin(yaw * 0.5)
-    let cp = cos(roll * 0.5)
-    let sp = sin(roll * 0.5)
-    let cr = cos(pitch * 0.5)
-    let sr = sin(pitch * 0.5)
-    
-    let vector = simd_float4(
-        sr * cp * cy - cr * sp * sy,    // X
-        cr * sp * cy + sr * cp * sy,    // Y
-        cr * cp * sy - sr * sp * cy,    // Z
-        cr * cp * cy + sr * sp * sy     // W
-    )
-    
-    return simd_quatf(vector: vector)
-}
+//func anglesToQuaternion(_ angles: float3) -> simd_quatf
+//{
+//    let pitch = angles[0]
+//    let roll = angles[1]
+//    let yaw = angles[2]
+//
+//    // FIXME: rescale the inputs to 1/2 angle
+//    let cy = cos(yaw * 0.5)
+//    let sy = sin(yaw * 0.5)
+//    let cp = cos(roll * 0.5)
+//    let sp = sin(roll * 0.5)
+//    let cr = cos(pitch * 0.5)
+//    let sr = sin(pitch * 0.5)
+//    
+//    let vector = simd_float4(
+//        sr * cp * cy - cr * sp * sy,    // X
+//        cr * sp * cy + sr * cp * sy,    // Y
+//        cr * cp * sy - sr * sp * cy,    // Z
+//        cr * cp * cy + sr * sp * sy     // W
+//    )
+//    
+//    return simd_quatf(vector: vector)
+//}
 
 typealias Chars32 = (CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar,
                      CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar,
