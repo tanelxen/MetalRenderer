@@ -6,61 +6,43 @@
 //
 
 import Foundation
-import GoldSrcMDL
+import simd
 
-struct SkeletalMeshAsset: Codable
+struct SkeletalMeshAsset
 {
-    let name: String
-    let surfaces: [Surface]
-    let textures: [String]
-    
-    init(valveModel: ValveModel)
-    {
-        name = valveModel.modelName
-        
-        surfaces = valveModel.meshes.map {
-            let verticies = $0.vertexBuffer.map {
-                Vertex(position: $0.position, texCoord: $0.texCoord, boneIndex: $0.boneIndex)
-            }
-            
-            return Surface(vertices: verticies, triangles: $0.indexBuffer, textureIndex: $0.textureIndex)
-        }
-        
-        textures = valveModel.textures.map {
-            $0.name
-        }
-    }
+    var name: String = ""
+    var textures: [String] = []
+    var surfaces: [Surface] = []
+    var sequences: [Sequence] = []
+    var vertices: [Vertex] = []
+    var indices: [UInt32] = []
+    var bones: [Int32] = []
 
-    struct Surface: Codable
+    struct Surface
     {
-        let vertices: [Vertex]
-        let triangles: [Int]
+        let firstIndex: Int
+        let indexCount: Int
         let textureIndex: Int
     }
     
-    struct Vertex: Codable
+    struct Vertex
     {
         let position: SIMD3<Float>
         let texCoord: SIMD2<Float>
         let boneIndex: Int
     }
-}
-
-extension SkeletalMeshAsset
-{
-    func save()
+    
+    struct Sequence
     {
-        do
-        {
-            let jsonEncoder = JSONEncoder()
-            let jsonData = try jsonEncoder.encode(self)
-            
-            let url = ResourceManager.URLInDocuments(for: "\(name).json")
-            try jsonData.write(to: url)
-        }
-        catch
-        {
-            print(error.localizedDescription)
-        }
+        let name: String
+        let frames: [Frame]
+        let fps: Float
+        let groundSpeed: Float
+    }
+    
+    struct Frame
+    {
+        let rotationPerBone: [SIMD3<Float>]
+        let positionPerBone: [SIMD3<Float>]
     }
 }

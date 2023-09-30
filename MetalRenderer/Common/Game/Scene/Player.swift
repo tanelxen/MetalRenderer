@@ -33,11 +33,10 @@ class Player
     init(scene: Q3MapScene)
     {
         self.scene = scene
-        self.mesh = SkeletalMesh(name: "Assets/hl/models/v_9mmhandgun.mdl")
+        self.mesh = SkeletalMesh(name: "models/v_9mmhandgun.asset")
         
         playerMovement.scene = scene
         
-        mesh?.sequenceName = "shoot"
         let shootRate = TimeInterval(mesh?.cur_anim_duration ?? 10)
         shootTimer = TimerManager(interval: shootRate)
         

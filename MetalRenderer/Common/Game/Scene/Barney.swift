@@ -40,7 +40,7 @@ class Barney
     init(scene: Q3MapScene)
     {
         self.scene = scene
-        self.mesh = SkeletalMesh(name: "Assets/hl/models/barney.mdl")
+        self.mesh = SkeletalMesh(name: "models/barney.asset")
         
         playerMovement.scene = scene
         playerMovement.cl_forwardspeed = 110

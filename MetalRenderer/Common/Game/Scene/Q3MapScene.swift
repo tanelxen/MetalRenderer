@@ -36,14 +36,19 @@ class Q3MapScene
     
     var onReady: (()->Void)?
     
-    private var mapName: String
-    
-    init(name: String)
+    init(url: URL)
     {
-        mapName = name
-        
-        DispatchQueue.global().async {
-            self.build()
+        do
+        {
+            let data = try Data(contentsOf: url)
+            
+            DispatchQueue.global().async {
+                self.loadMap(with: data)
+            }
+        }
+        catch
+        {
+            print(error.localizedDescription)
         }
         
         Q3MapScene.current = self
@@ -92,23 +97,6 @@ class Q3MapScene
         Particles.shared.update()
     }
     
-    private func build()
-    {
-        if let data = ResourceManager.getData(for: "Assets/q3/maps/\(mapName).bsp")
-        {
-            loadMap(with: data)
-            
-//            let url = ResourceManager.URLInDocuments(for: "\(mapName).obj")
-//            map?.saveAsOBJ(url: url)
-        }
-        
-//        DispatchQueue.global().async {
-//            self.navigation.load(named: "q3dm7")
-//            self.navigation.scene = self
-//            self.navigation.build()
-//        }
-    }
-    
     private func fetchSpawnPoints(for q3map: Q3Map)
     {
         let info_players = q3map.entities.filter { entity in
@@ -149,7 +137,7 @@ class Q3MapScene
             barney.transform.rotation = point.rotation
 
             entities.append(barney)
-            break
+//            break
         }
     }
     

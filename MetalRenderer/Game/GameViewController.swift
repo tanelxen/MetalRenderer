@@ -23,12 +23,12 @@ final class GameViewController: NSViewController
         return view
     }()
     
-    private var mapName: String
+    private var mapURL: URL
     private var application: GameApplication?
     
-    init(mapName: String)
+    init(mapURL: URL)
     {
-        self.mapName = mapName
+        self.mapURL = mapURL
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -50,7 +50,7 @@ final class GameViewController: NSViewController
         
         progressIndicator.startAnimation(nil)
         
-        application?.startGame(mapName: mapName) { [weak self] in
+        application?.startGame(mapURL: mapURL) { [weak self] in
             self?.progressIndicator.stopAnimation(nil)
             self?.setupEventsMonitor()
         }

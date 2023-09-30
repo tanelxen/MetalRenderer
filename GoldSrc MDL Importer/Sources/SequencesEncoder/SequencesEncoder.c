@@ -18,12 +18,13 @@ typedef struct
 
     // Значения для текущего кадра текушей анимации
     vec3_t  frame_pos[MAXSTUDIOBONES];
-    vec4_t  frame_rot[MAXSTUDIOBONES];
-    float   bonematrix[3][4];
+    vec3_t  frame_rot_euler[MAXSTUDIOBONES];
+    vec4_t  frame_rot_quat[MAXSTUDIOBONES];
     
 } t_context;
 
 void calcBoneQuaternion(int frame, mstudiobone_t *pbone, mstudioanim_t *panim, float *q);
+void calcBoneRotation(int frame, mstudiobone_t *pbone, mstudioanim_t *panim, float *angle);
 void calcBonePosition(int frame, mstudiobone_t *pbone, mstudioanim_t *panim, float *pos);
 
 void* createContext(const void* data)
@@ -55,7 +56,8 @@ void calcRotations(int sequence, int frame, void* context)
     
     for (int i = 0; i < ctx->m_studiohdr->numbones; i++, pbone++, panim++)
     {
-        calcBoneQuaternion(frame, pbone, panim, ctx->frame_rot[i]);
+//        calcBoneQuaternion(frame, pbone, panim, ctx->frame_rot_quat[i]);
+        calcBoneRotation(frame, pbone, panim, ctx->frame_rot_euler[i]);
         calcBonePosition(frame, pbone, panim, ctx->frame_pos[i]);
     }
 }
@@ -64,10 +66,10 @@ void getBoneQuatertion(int bone, t_quaternion* rotation, void* context)
 {
     t_context *ctx = (t_context *)context;
     
-    rotation->x =  ctx->frame_rot[bone][0];
-    rotation->y =  ctx->frame_rot[bone][1];
-    rotation->z =  ctx->frame_rot[bone][2];
-    rotation->w =  ctx->frame_rot[bone][3];
+    rotation->x =  ctx->frame_rot_quat[bone][0];
+    rotation->y =  ctx->frame_rot_quat[bone][1];
+    rotation->z =  ctx->frame_rot_quat[bone][2];
+    rotation->w =  ctx->frame_rot_quat[bone][3];
 }
 
 void getBonePosition(int bone, t_vector3f* position, void* context)
@@ -77,6 +79,15 @@ void getBonePosition(int bone, t_vector3f* position, void* context)
     position->x =  ctx->frame_pos[bone][0];
     position->y =  ctx->frame_pos[bone][1];
     position->z =  ctx->frame_pos[bone][2];
+}
+
+void getBoneRotation(int bone, t_vector3f* rotation, void* context)
+{
+    t_context *ctx = (t_context *)context;
+    
+    rotation->x =  ctx->frame_rot_euler[bone][0];
+    rotation->y =  ctx->frame_rot_euler[bone][1];
+    rotation->z =  ctx->frame_rot_euler[bone][2];
 }
 
 void calcBoneQuaternion(int frame, mstudiobone_t *pbone, mstudioanim_t *panim, float *q)
@@ -137,6 +148,41 @@ void calcBoneQuaternion(int frame, mstudiobone_t *pbone, mstudioanim_t *panim, f
     }
 
     AngleQuaternion(angle1, q);
+}
+
+void calcBoneRotation(int frame, mstudiobone_t *pbone, mstudioanim_t *panim, float *angle)
+{
+    int                    j, k;
+    mstudioanimvalue_t    *panimvalue;
+
+    for (j = 0; j < 3; j++)
+    {
+        if (panim->offset[j + 3] == 0)
+        {
+            angle[j] = pbone->value[j + 3]; // default;
+        }
+        else
+        {
+            panimvalue = (mstudioanimvalue_t *)((byte *)panim + panim->offset[j + 3]);
+            k = frame;
+            while (panimvalue->num.total <= k)
+            {
+                k -= panimvalue->num.total;
+                panimvalue += panimvalue->num.valid + 1;
+            }
+            // Bah, missing blend!
+            if (panimvalue->num.valid > k)
+            {
+                angle[j] = panimvalue[k + 1].value;
+            }
+            else
+            {
+                angle[j] = panimvalue[panimvalue->num.valid].value;
+            }
+            
+            angle[j] = pbone->value[j + 3] + angle[j] * pbone->scale[j + 3];
+        }
+    }
 }
 
 void calcBonePosition(int frame, mstudiobone_t *pbone, mstudioanim_t *panim, float *pos)

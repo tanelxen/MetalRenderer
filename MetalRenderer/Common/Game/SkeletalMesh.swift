@@ -6,119 +6,195 @@
 //
 
 import MetalKit
-import GoldSrcMDL
 
-class SkeletalMesh
+final class SkeletalMesh
 {
-    private static var cache: [String: ValveModel] = [:]
+    private var name = ""
+    private static var cache: [String: SkeletalMeshAsset] = [:]
     
-    private var meshes: [SkeletalMeshData] = []
+    private var vertexBuffer: MTLBuffer?
+    private var indexBuffer: MTLBuffer?
+    private var animBuffer: MTLBuffer?
     
-    private var cur_frame: Int = 0
+    private var surfaces: [SkeletalMeshSurface] = []
+    private var bones: [Int] = [] // [parentIndex, parentIndex, ...]
+    
+    private var cur_frame: Float = 0
     private var cur_frame_time: Float = 0.0
-    private var frames: [[matrix_float4x4]]
     
     private (set) var cur_anim_duration: Float = 1.0
     
-    private var sequences: [Sequence] = []
+    private var sequences: [String: SkeletalMeshAsset.Sequence] = [:]
     
     private (set) var groundSpeed: Float = 0
     
-    var sequenceName: String = "idle" {
+    var sequenceName: String? {
         didSet {
-            initSequence()
+            framesCount = 0
+            
+            if let named = sequenceName
+            {
+                initSequence(named: named)
+            }
         }
     }
     
+    private var framesCount = 0
+    
     init?(name: String)
     {
-        let model: ValveModel
+        self.name = name
+        let asset: SkeletalMeshAsset
         
-        if let mdl = SkeletalMesh.cache[name]
+        let baseDir = UserDefaults.standard.url(forKey: "workingDir")!
+        let assetsDir = baseDir.appendingPathComponent("Assets")
+        let packageURL = assetsDir.appendingPathComponent(name)
+        
+        if let cached = Self.cache[name]
         {
-            model = mdl
+            asset = cached
         }
-        else if let data = ResourceManager.getData(for: name)
+        else if let serialized = SkeletalMeshAsset.load(with: packageURL)
         {
-            model = GoldSrcMDL(data: data).valveModel
-            SkeletalMesh.cache[name] = model
+            asset = serialized
+            Self.cache[name] = asset
         }
         else
         {
             return nil
         }
         
-        let textures = model.textures.map {
-            TextureManager.shared.createTexture($0.name, bytes: $0.data, width: $0.width, height: $0.height)
-        }
-        
-        for mdlMesh in model.meshes
-        {
-            let vertices = mdlMesh.vertexBuffer.map {
-                SkeletalMeshVertex(position: $0.position, texCoord: $0.texCoord, boneIndex: uint($0.boneIndex))
-            }
-            
-            let indices = mdlMesh.indexBuffer.map( { UInt32($0) } )
-            
-            let vertexBuffer = Engine.device.makeBuffer(bytes: vertices,
-                                                        length: vertices.count * MemoryLayout<SkeletalMeshVertex>.stride,
-                                                        options: [])
-            
-            let indexBuffer = Engine.device.makeBuffer(bytes: indices,
-                                                       length: indices.count * MemoryLayout<UInt32>.stride,
-                                                       options: [])
-            
-            var texture = TextureManager.shared.devTexture
-            
-            if mdlMesh.textureIndex != -1, mdlMesh.textureIndex < textures.count
-            {
-                texture = textures[mdlMesh.textureIndex]
-            }
-            
-            let mesh = SkeletalMeshData(texture: texture,
-                                        vertexBuffer: vertexBuffer!,
-                                        indexBuffer: indexBuffer!,
-                                        indexCount: indices.count)
-            
-            meshes.append(mesh)
-        }
-        
-        sequences = model.sequences
-        
-        frames = []
-        initSequence()
+        loadFromAsset(asset, folder: packageURL)
     }
     
-    private func initSequence()
+    private func loadFromAsset(_ asset: SkeletalMeshAsset, folder: URL)
     {
-        let seq = sequences.first(where: { $0.name == sequenceName }) ?? sequences.first!
+        let textures = asset.textures.map {
+            let url = folder.appendingPathComponent("\($0).png")
+            return TextureManager.shared.getTexture(url: url)
+        }
+        
+        let vertices = asset.vertices.map {
+            SkeletalMeshVertex(position: $0.position, texCoord: $0.texCoord, boneIndex: UInt32($0.boneIndex))
+        }
+        
+        vertexBuffer = Engine.device.makeBuffer(bytes: vertices,
+                                                length: vertices.count * MemoryLayout<SkeletalMeshVertex>.stride,
+                                                options: [])
+        
+        indexBuffer = Engine.device.makeBuffer(bytes: asset.indices,
+                                               length: asset.indices.count * MemoryLayout<UInt32>.stride,
+                                               options: [])
+        
+        let animBufferSize = asset.bones.count * MemoryLayout<float4x4>.stride
+        animBuffer = Engine.device.makeBuffer(length: animBufferSize, options: [])
+        
+        for surface in asset.surfaces
+        {
+            var texture = TextureManager.shared.devTexture
+            
+            if surface.textureIndex != -1, surface.textureIndex < textures.count
+            {
+                texture = textures[surface.textureIndex]
+            }
+            
+            let mesh = SkeletalMeshSurface(
+                texture: texture,
+                indexCount: surface.indexCount,
+                indexOffset: surface.firstIndex * MemoryLayout<UInt32>.size
+            )
+            
+            surfaces.append(mesh)
+        }
+        
+        sequences = Dictionary(uniqueKeysWithValues: asset.sequences.map{ ($0.name, $0) })
+        bones = asset.bones.map { Int($0) }
+    }
+    
+    private func initSequence(named: String)
+    {
+        guard let seq = sequences[named] else { return }
 
-        frames = seq.frames.map { $0.bonetransforms }
         cur_frame = 0
         
         cur_frame_time = 0.0
         cur_anim_duration = Float(seq.frames.count) / seq.fps
         
         groundSpeed = seq.groundSpeed
+        framesCount = seq.frames.count
+    }
+    
+    private func setPose(named: String, frameIndex: Float)
+    {
+        guard let buffer = self.animBuffer else { return }
+        guard let seq = sequences[named] else { return }
+        
+        let currIndex = Int(floor(frameIndex))
+        let nextIndex = currIndex < seq.frames.count - 1 ? currIndex + 1 : 0
+        
+        let factor = frameIndex - floor(frameIndex)
+        
+        let curr = seq.frames[currIndex]
+        let next = seq.frames[nextIndex]
+        
+        let pointer = buffer.contents().bindMemory(to: float4x4.self, capacity: bones.count)
+        
+        for i in 0 ..< bones.count
+        {
+            let currRotation = anglesToQuaternion(curr.rotationPerBone[i])
+            let nextRotation = anglesToQuaternion(next.rotationPerBone[i])
+            
+            let currPosition = curr.positionPerBone[i]
+            let nextPosition = next.positionPerBone[i]
+            
+            let rotation = currRotation * (1 - factor) + nextRotation * factor
+            let position = currPosition * (1 - factor) + nextPosition * factor
+            
+            var boneMatrix = matrix_float4x4.init(rotation)
+
+            boneMatrix[3].x = position.x
+            boneMatrix[3].y = position.y
+            boneMatrix[3].z = position.z
+
+            let parentIndex = bones[i]
+
+            if parentIndex == -1
+            {
+                // Root bone
+                pointer.advanced(by: i).pointee = boneMatrix
+            }
+            else
+            {
+                let parentMatrix = pointer.advanced(by: parentIndex).pointee
+                let result = matrix_multiply(parentMatrix, boneMatrix)
+
+                pointer.advanced(by: i).pointee = result
+            }
+        }
     }
     
     func renderWithEncoder(_ encoder: MTLRenderCommandEncoder)
     {
-        var bonetransforms = frames[cur_frame]
+        guard let indexBuffer = self.indexBuffer else { return }
+        guard framesCount > 0 else { return }
         
-        let length = float4x4.stride * bonetransforms.count
-        encoder.setVertexBytes(&bonetransforms, length: length, index: 3)
-        
-        for mesh in meshes
+        if let pose = sequenceName
         {
-            encoder.setVertexBuffer(mesh.vertexBuffer, offset: 0, index: 0)
+            setPose(named: pose, frameIndex: cur_frame)
+        }
+        
+        encoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
+        encoder.setVertexBuffer(animBuffer, offset: 0, index: 3)
+        
+        for mesh in surfaces
+        {
             encoder.setFragmentTexture(mesh.texture, index: 0)
             
             encoder.drawIndexedPrimitives(type: .triangle,
                                           indexCount: mesh.indexCount,
                                           indexType: .uint32,
-                                          indexBuffer: mesh.indexBuffer,
-                                          indexBufferOffset: 0)
+                                          indexBuffer: indexBuffer,
+                                          indexBufferOffset: mesh.indexOffset)
         }
         
         cur_frame_time += GameTime.deltaTime
@@ -128,7 +204,7 @@ class SkeletalMesh
             cur_frame_time = 0
         }
         
-        cur_frame = Int( Float(frames.count) * (cur_frame_time / cur_anim_duration) )
+        cur_frame = Float(framesCount) * (cur_frame_time / cur_anim_duration)
     }
     
     static func vertexDescriptor() -> MTLVertexDescriptor
@@ -160,17 +236,43 @@ class SkeletalMesh
     }
 }
 
-private struct SkeletalMeshData
+private struct SkeletalMeshSurface
 {
     let texture: MTLTexture!
-    let vertexBuffer: MTLBuffer
-    let indexBuffer: MTLBuffer
     let indexCount: Int
+    let indexOffset: Int
 }
 
 private struct SkeletalMeshVertex: sizeable
 {
     let position: float3
     let texCoord: float2
-    let boneIndex: uint
+    let boneIndex: UInt32
+}
+
+private extension SkeletalMesh
+{
+    func anglesToQuaternion(_ angles: float3) -> simd_quatf
+    {
+        let pitch = angles[0]
+        let roll = angles[1]
+        let yaw = angles[2]
+    
+        // FIXME: rescale the inputs to 1/2 angle
+        let cy = cos(yaw * 0.5)
+        let sy = sin(yaw * 0.5)
+        let cp = cos(roll * 0.5)
+        let sp = sin(roll * 0.5)
+        let cr = cos(pitch * 0.5)
+        let sr = sin(pitch * 0.5)
+    
+        let vector = simd_float4(
+            sr * cp * cy - cr * sp * sy,    // X
+            cr * sp * cy + sr * cp * sy,    // Y
+            cr * cp * sy - sr * sp * cy,    // Z
+            cr * cp * cy + sr * sp * sy     // W
+        )
+    
+        return simd_quatf(vector: vector)
+    }
 }

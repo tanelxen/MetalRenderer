@@ -54,6 +54,38 @@ enum ResourceManager
         return documentDirectory.appendingPathComponent(path)
     }
     
+    static func folderInDocuments(name: String) -> URL?
+    {
+        let url = documentDirectory.appendingPathComponent(name)
+        
+        if !FileManager.default.fileExists(atPath: url.path) {
+            do {
+                try FileManager.default.createDirectory(atPath: url.path, withIntermediateDirectories: true, attributes: nil)
+            } catch {
+                print(error.localizedDescription)
+                return nil
+            }
+        }
+        
+        return url
+    }
+    
+    static func getOrCreateFolder(named: String, directory: URL) -> URL?
+    {
+        let url = directory.appendingPathComponent(named)
+        
+        if !FileManager.default.fileExists(atPath: url.path) {
+            do {
+                try FileManager.default.createDirectory(atPath: url.path, withIntermediateDirectories: true, attributes: nil)
+            } catch {
+                print(error.localizedDescription)
+                return nil
+            }
+        }
+        
+        return url
+    }
+    
     static func pathInPreferences(for path: String) -> String
     {
         let preferences = libraryDirectory.appendingPathComponent("Preferences")

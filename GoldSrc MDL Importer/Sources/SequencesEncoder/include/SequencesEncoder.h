@@ -27,7 +27,8 @@ void* createContext(const void* data);
 void clearContext(void* context);
 
 void calcRotations(int sequence, int frame, void* context);
-void getBoneQuatertion(int bone, t_quaternion* rotation, void* context);
-void getBonePosition(int bone, t_vector3f* position, void* context);
+//void getBoneQuatertion(int bone, t_quaternion* rotation, void* context);
+void getBoneRotation(int bone, t_vector3f* position, void* context);
+void getBonePosition(int bone, t_vector3f* rotation, void* context);
 
 #endif /* SequencesEncoder_h */

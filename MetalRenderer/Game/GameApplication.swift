@@ -41,10 +41,10 @@ final class GameApplication: NSObject
         AudioEngine.start()
     }
     
-    func startGame(mapName: String, completionHandler: (()->Void)?)
+    func startGame(mapURL: URL, completionHandler: (()->Void)?)
     {
-        scene = Q3MapScene(name: mapName)
-        
+        scene = Q3MapScene(url: mapURL)
+
         scene.onReady = { [unowned self] in
             completionHandler?()
             scene.startPlaying(in: viewport)

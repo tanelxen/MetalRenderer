@@ -11,11 +11,7 @@ let package = Package(
         .library(
             name: "GoldSrcMDL",
             targets: ["GoldSrcMDL"]
-        ),
-//        .executable(
-//            name: "TestApp",
-//            targets: ["TestApp"]
-//        )
+        )
     ],
     dependencies: [],
     targets: [
@@ -26,11 +22,6 @@ let package = Package(
         .target(
             name: "SequencesEncoder",
             dependencies: []
-        ),
-        .executableTarget(
-            name: "TestApp",
-            dependencies: ["GoldSrcMDL"],
-            resources: [.copy("Assets/")]
         )
     ]
 )

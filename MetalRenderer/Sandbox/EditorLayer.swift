@@ -14,13 +14,13 @@ final class EditorLayer
     
     private var debugInfo = ""
     
-    private let iniPath = ResourceManager.pathInPreferences(for: "editor.ini")
+    private var iniPath = ""// ResourceManager.pathInPreferences(for: "editor.ini")
     
     private var viewportPanel: ViewportPanel!
     private var hierarchyPanel: HierarchyPanel!
     private var assetsPanel: AssetsPanel!
     
-    var onLoadNewMap: ((String)->Void)?
+    var onLoadNewMap: ((URL)->Void)?
     
     init(view: MTKView, sceneViewport: Viewport)
     {
@@ -39,11 +39,14 @@ final class EditorLayer
         hierarchyPanel = HierarchyPanel()
         assetsPanel = AssetsPanel()
         
-        assetsPanel.onLoadNewMap = { [weak self] name in
-            self?.onLoadNewMap?(name)
+        assetsPanel.onLoadNewMap = { [weak self] url in
+            self?.onLoadNewMap?(url)
         }
-        
-
+    }
+    
+    func dropFile(_ url: URL)
+    {
+        assetsPanel.dropFile(url)
     }
     
     func handleEvent(_ event: NSEvent)
@@ -249,9 +252,41 @@ final class EditorLayer
 
         ImGuiTheme.loadTheme()
         
-        ImGuiGetIO().pointee.IniFilename = (iniPath as NSString).utf8String
+        if let workingDirURL = UserDefaults.standard.url(forKey: "workingDir")
+        {
+            iniPath = workingDirURL.appendingPathComponent("editor.ini").path
+            ImGuiGetIO().pointee.IniFilename = (iniPath as NSString).utf8String
+        }
+        else
+        {
+            openFileDialog()
+        }
         
         setFonts()
+    }
+    
+    private func openFileDialog()
+    {
+        let dialog = NSOpenPanel()
+
+        dialog.title = "Choose a working directory"
+        dialog.showsResizeIndicator = true
+        dialog.showsHiddenFiles = false
+        dialog.allowsMultipleSelection = false
+        dialog.canChooseDirectories = true
+        dialog.canChooseFiles = false
+
+        if dialog.runModal() == .OK, let workingDirURL = dialog.url
+        {
+            iniPath = workingDirURL.appendingPathComponent("editor.ini").path
+            ImGuiGetIO().pointee.IniFilename = (iniPath as NSString).utf8String
+            
+            UserDefaults.standard.set(workingDirURL, forKey: "workingDir")
+        }
+        else
+        {
+            exit(0)
+        }
     }
 }
 

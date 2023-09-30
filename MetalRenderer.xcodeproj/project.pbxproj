@@ -49,7 +49,6 @@
 		8A27DA812AAE39DE0094C9D0 /* Math.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A22EAC9278FA89A00A8CD7D /* Math.swift */; };
 		8A27DA822AAE39DE0094C9D0 /* Rotator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A9977CF29492CC400B48C70 /* Rotator.swift */; };
 		8A27DA872AAE39DE0094C9D0 /* Quake3BSP in Frameworks */ = {isa = PBXBuildFile; productRef = 8A27DA4A2AAE39DE0094C9D0 /* Quake3BSP */; };
-		8A27DA882AAE39DE0094C9D0 /* GoldSrcMDL in Frameworks */ = {isa = PBXBuildFile; productRef = 8A27DA4B2AAE39DE0094C9D0 /* GoldSrcMDL */; };
 		8A27DA8A2AAE39DE0094C9D0 /* halflife2.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8A6E035129CDDA1500609C3A /* halflife2.ttf */; };
 		8A27DA8B2AAE39DE0094C9D0 /* Half-Life13.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 8A6E036529CE3BA300609C3A /* Half-Life13.mp3 */; };
 		8A27DA8C2AAE39DE0094C9D0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8A56D719278E058400D3FE2B /* Assets.xcassets */; };
@@ -130,11 +129,14 @@
 		8A53DF052AB48F4700EC2C65 /* UserInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A53DF032AB48F4700EC2C65 /* UserInterface.swift */; };
 		8A5969062ABB2F1D00772AC9 /* Intersection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5969052ABB2F1D00772AC9 /* Intersection.swift */; };
 		8A5969072ABB2F1D00772AC9 /* Intersection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5969052ABB2F1D00772AC9 /* Intersection.swift */; };
+		8A5AE68B2AC0FE0400809790 /* SkeletalMeshAssetSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5AE68A2AC0FE0400809790 /* SkeletalMeshAssetSerializer.swift */; };
+		8A5AE68C2AC0FE0400809790 /* SkeletalMeshAssetSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5AE68A2AC0FE0400809790 /* SkeletalMeshAssetSerializer.swift */; };
 		8A7C70B62AAFA7D3003FAFDD /* ImGui in Frameworks */ = {isa = PBXBuildFile; productRef = 8A7C70B52AAFA7D3003FAFDD /* ImGui */; };
 		8A7C70B82AAFA7D7003FAFDD /* ImGuizmo in Frameworks */ = {isa = PBXBuildFile; productRef = 8A7C70B72AAFA7D7003FAFDD /* ImGuizmo */; };
 		8A7C70BB2AB09169003FAFDD /* AssetsPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A7C70BA2AB09169003FAFDD /* AssetsPanel.swift */; };
 		8A7C70C12AB26278003FAFDD /* Particles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A7C70C02AB26278003FAFDD /* Particles.swift */; };
 		8A7C70C22AB26278003FAFDD /* Particles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A7C70C02AB26278003FAFDD /* Particles.swift */; };
+		8A85E13E2AC5F47800923DB5 /* SkeletalMeshAsset+Valve.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A85E13D2AC5F47800923DB5 /* SkeletalMeshAsset+Valve.swift */; };
 		8A9C2E4E2ABA5FFD007E96AA /* donthurtem.wav in Resources */ = {isa = PBXBuildFile; fileRef = 8A9C2E4D2ABA5FFD007E96AA /* donthurtem.wav */; };
 		8A9C2E4F2ABA5FFD007E96AA /* donthurtem.wav in Resources */ = {isa = PBXBuildFile; fileRef = 8A9C2E4D2ABA5FFD007E96AA /* donthurtem.wav */; };
 		8A9C2E512ABA6047007E96AA /* leavealone.wav in Resources */ = {isa = PBXBuildFile; fileRef = 8A9C2E502ABA6046007E96AA /* leavealone.wav */; };
@@ -176,6 +178,7 @@
 		8A56D71F278E058400D3FE2B /* MetalRenderer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MetalRenderer.entitlements; sourceTree = "<group>"; };
 		8A56D72B278E61CD00D3FE2B /* MetalTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalTypes.swift; sourceTree = "<group>"; };
 		8A5969052ABB2F1D00772AC9 /* Intersection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Intersection.swift; sourceTree = "<group>"; };
+		8A5AE68A2AC0FE0400809790 /* SkeletalMeshAssetSerializer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkeletalMeshAssetSerializer.swift; sourceTree = "<group>"; };
 		8A5EDFDD27B998A2007166E4 /* ForwardRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForwardRenderer.swift; sourceTree = "<group>"; };
 		8A5EDFDF27B99EED007166E4 /* WorldMesh.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = WorldMesh.metal; sourceTree = "<group>"; };
 		8A5EDFE127B9B76D007166E4 /* StaticMesh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StaticMesh.swift; sourceTree = "<group>"; };
@@ -196,6 +199,7 @@
 		8A7EA7AB2AAA5A720024B4BF /* FAIconEnum.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FAIconEnum.swift; sourceTree = "<group>"; };
 		8A7EA7AD2AAA5E660024B4BF /* ImGuiFontLibrary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImGuiFontLibrary.swift; sourceTree = "<group>"; };
 		8A84536927ADA45100E25638 /* TextureManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureManager.swift; sourceTree = "<group>"; };
+		8A85E13D2AC5F47800923DB5 /* SkeletalMeshAsset+Valve.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SkeletalMeshAsset+Valve.swift"; sourceTree = "<group>"; };
 		8A8D0E9329CB6CD500721A7D /* ResourceManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResourceManager.swift; sourceTree = "<group>"; };
 		8A8D130D29CB6D4800721A7D /* Assets */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Assets; sourceTree = "<group>"; };
 		8A8D131129CBAAC300721A7D /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
@@ -233,7 +237,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				8A27DA872AAE39DE0094C9D0 /* Quake3BSP in Frameworks */,
-				8A27DA882AAE39DE0094C9D0 /* GoldSrcMDL in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -298,6 +301,7 @@
 				8A5EDFE127B9B76D007166E4 /* StaticMesh.swift */,
 				8A5EDFED27BC1BB3007166E4 /* SkeletalMesh.swift */,
 				8A27DA452AAE2E750094C9D0 /* SkeletalMeshAsset.swift */,
+				8A5AE68A2AC0FE0400809790 /* SkeletalMeshAssetSerializer.swift */,
 				8A53DF032AB48F4700EC2C65 /* UserInterface.swift */,
 			);
 			path = Game;
@@ -343,6 +347,7 @@
 		8A27DA992AAE3C0F0094C9D0 /* Sandbox */ = {
 			isa = PBXGroup;
 			children = (
+				8A85E13C2AC5F45400923DB5 /* Importers */,
 				8ACDB0102A8FADC0005AEE19 /* ImGUI */,
 				8A7C70B92AB0875E003FAFDD /* Panels */,
 				8ACD9A492AA49DD500900F4B /* SandboxApplication.swift */,
@@ -460,6 +465,14 @@
 			path = Panels;
 			sourceTree = "<group>";
 		};
+		8A85E13C2AC5F45400923DB5 /* Importers */ = {
+			isa = PBXGroup;
+			children = (
+				8A85E13D2AC5F47800923DB5 /* SkeletalMeshAsset+Valve.swift */,
+			);
+			path = Importers;
+			sourceTree = "<group>";
+		};
 		8AB6DE2629CBCA19005BCBB7 /* Fonts */ = {
 			isa = PBXGroup;
 			children = (
@@ -507,7 +520,6 @@
 			name = Game;
 			packageProductDependencies = (
 				8A27DA4A2AAE39DE0094C9D0 /* Quake3BSP */,
-				8A27DA4B2AAE39DE0094C9D0 /* GoldSrcMDL */,
 			);
 			productName = MetalRenderer;
 			productReference = 8A27DA962AAE39DE0094C9D0 /* Game.app */;
@@ -635,6 +647,7 @@
 				8A27DA642AAE39DE0094C9D0 /* Skybox.metal in Sources */,
 				8A27DA652AAE39DE0094C9D0 /* Waypoint.swift in Sources */,
 				8A27DA662AAE39DE0094C9D0 /* main.swift in Sources */,
+				8A5AE68C2AC0FE0400809790 /* SkeletalMeshAssetSerializer.swift in Sources */,
 				8A27DA672AAE39DE0094C9D0 /* Frustum.swift in Sources */,
 				8A27DA692AAE39DE0094C9D0 /* SkeletalMeshAsset.swift in Sources */,
 				8A53DEFF2AB37E5C00EC2C65 /* Decals.swift in Sources */,
@@ -675,6 +688,7 @@
 				8A7C70C12AB26278003FAFDD /* Particles.swift in Sources */,
 				8A27DAF72AAE3E5A0094C9D0 /* EditorLayer.swift in Sources */,
 				8A27DAF82AAE3E5A0094C9D0 /* NavigationGraph.swift in Sources */,
+				8A85E13E2AC5F47800923DB5 /* SkeletalMeshAsset+Valve.swift in Sources */,
 				8A27DAF92AAE3E5A0094C9D0 /* Common.metal in Sources */,
 				8A27DAFA2AAE3E5A0094C9D0 /* Barney.swift in Sources */,
 				8A27DAFB2AAE3E5A0094C9D0 /* AudioEngine.swift in Sources */,
@@ -697,6 +711,7 @@
 				8A27DB092AAE3E5A0094C9D0 /* imgui_impl_metal.swift in Sources */,
 				8A27DB0A2AAE3E5A0094C9D0 /* SkeletalMeshAsset.swift in Sources */,
 				8A53DF012AB488A700EC2C65 /* UserInterface.metal in Sources */,
+				8A5AE68B2AC0FE0400809790 /* SkeletalMeshAssetSerializer.swift in Sources */,
 				8A27DB0B2AAE3E5A0094C9D0 /* SkeletalMesh.metal in Sources */,
 				8A27DB0C2AAE3E5A0094C9D0 /* HierarchyPanel.swift in Sources */,
 				8A27DB0D2AAE3E5A0094C9D0 /* ResourceManager.swift in Sources */,
@@ -1005,10 +1020,6 @@
 		8A27DA4A2AAE39DE0094C9D0 /* Quake3BSP */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Quake3BSP;
-		};
-		8A27DA4B2AAE39DE0094C9D0 /* GoldSrcMDL */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = GoldSrcMDL;
 		};
 		8A27DAEC2AAE3E5A0094C9D0 /* Quake3BSP */ = {
 			isa = XCSwiftPackageProductDependency;

@@ -755,8 +755,8 @@ public typealias ImSpanAllocator = OpaquePointer
 	}
 }
 
-@inlinable @discardableResult public func ImGuiBegin(_ name: String? = nil, _ p_open: UnsafeMutablePointer<Bool>!, _ flags: ImGuiWindowFlags) -> Bool {
-	name.withOptionalCString { namePtr in
+@inlinable @discardableResult public func ImGuiBegin(_ name: String, _ p_open: UnsafeMutablePointer<Bool>!, _ flags: ImGuiWindowFlags) -> Bool {
+	name.withCString { namePtr in
 		return igBegin(namePtr,p_open,flags)
 	}
 }
@@ -967,7 +967,7 @@ public typealias ImSpanAllocator = OpaquePointer
 	}
 }
 
-@inlinable @discardableResult public func ImGuiButton(_ label: String? = nil, _ size: ImVec2) -> Bool {
+@inlinable @discardableResult public func ImGuiButton(_ label: String?, _ size: ImVec2 = ImVec2(x: 0, y: 0)) -> Bool {
 	label.withOptionalCString { labelPtr in
 		return igButton(labelPtr,size)
 	}
@@ -4311,16 +4311,16 @@ public typealias ImSpanAllocator = OpaquePointer
 	}
 }
 
-@inlinable public func ImGuiTextV(_ fmt: String? = nil, _ args: CVarArg...) -> Void {
-	fmt.withOptionalCString { fmtPtr in
+@inlinable public func ImGuiTextV(_ fmt: String, _ args: CVarArg...) -> Void {
+	fmt.withCString { fmtPtr in
 		withVaList(args) { varArgsPtr in
 			return igTextV(fmtPtr,varArgsPtr)
 		}
 	}
 }
 
-@inlinable public func ImGuiTextWrappedV(_ fmt: String? = nil, _ args: CVarArg...) -> Void {
-	fmt.withOptionalCString { fmtPtr in
+@inlinable public func ImGuiTextWrappedV(_ fmt: String, _ args: CVarArg...) -> Void {
+	fmt.withCString { fmtPtr in
 		withVaList(args) { varArgsPtr in
 			return igTextWrappedV(fmtPtr,varArgsPtr)
 		}

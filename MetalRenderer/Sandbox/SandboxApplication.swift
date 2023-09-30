@@ -41,9 +41,9 @@ final class SandboxApplication: NSObject
         
         editor = EditorLayer(view: view, sceneViewport: viewport)
         
-        editor?.onLoadNewMap = { [weak self] name in
+        editor?.onLoadNewMap = { [weak self] url in
             
-            self?.scene = Q3MapScene(name: name)
+            self?.scene = Q3MapScene(url: url)
             
             self?.scene.onReady = { [weak self] in
                 
@@ -60,6 +60,11 @@ final class SandboxApplication: NSObject
         setupEventsMonitor()
         
         AudioEngine.start()
+    }
+    
+    func dropFile(_ url: URL)
+    {
+        editor?.dropFile(url)
     }
     
     private func setupEventsMonitor()

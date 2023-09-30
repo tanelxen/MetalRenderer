@@ -27,6 +27,8 @@ final class MenuViewController: NSViewController
     
     private var gameViewController: NSViewController?
     
+    private var mapURLs: [URL] = []
+    
     override func loadView()
     {
         view = NSView()
@@ -37,21 +39,22 @@ final class MenuViewController: NSViewController
     {
         super.viewDidLoad()
         
-        let urls = Bundle.main.urls(forResourcesWithExtension: "bsp", subdirectory: "Assets/q3/maps/") ?? []
+        mapURLs = Bundle.main.urls(forResourcesWithExtension: "bsp", subdirectory: "Assets/q3/maps/") ?? []
         
-        let names = urls
+        let names = mapURLs
             .map {
                 $0.deletingPathExtension().lastPathComponent
             }
             .sorted()
         
-        for name in names
+        for (index, name) in names.enumerated()
         {
             let button = NSButton(title: name, target: self, action: #selector(playMap))
             button.font = NSFont(name: "HalfLife", size: 20)
             button.contentTintColor = NSColor(deviceRed: 255, green: 220, blue: 0, alpha: 150/255)
             button.showsBorderOnlyWhileMouseInside = true
             button.isBordered = false
+            button.tag = index
             
             stackView.addArrangedSubview(button)
         }
@@ -59,7 +62,11 @@ final class MenuViewController: NSViewController
     
     @objc private func playMap(_ sender: NSButton)
     {
-        let vc = GameViewController(mapName: sender.title)
+        guard sender.tag < mapURLs.count else { return }
+        
+        let mapURL = mapURLs[sender.tag]
+        
+        let vc = GameViewController(mapURL: mapURL)
         view.window?.contentView = vc.view
         view.window?.makeKeyAndOrderFront(nil)
         view.window?.acceptsMouseMovedEvents = true
