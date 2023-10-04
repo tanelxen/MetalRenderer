@@ -19,11 +19,6 @@ class TextureManager
     
     private var _whiteTexture: MTLTexture?
     
-    private let lightmapDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba8Unorm,
-                                                                              width: 128,
-                                                                              height: 128,
-                                                                              mipmapped: true)
-    
     // Для генерации mip-уровней
     private let _commandQueue: MTLCommandQueue
     
@@ -133,20 +128,6 @@ class TextureManager
         return whiteTexture!
     }
     
-    func loadLightmap(_ lightmap: Q3Lightmap) -> MTLTexture
-    {
-        let texture = Engine.device.makeTexture(descriptor: lightmapDescriptor)
-        
-        texture?.replace(region: MTLRegionMake2D(0, 0, 128, 128),
-                         mipmapLevel: 0,
-                         withBytes: lightmap,
-                         bytesPerRow: 128 * 4)
-        
-        generateMipmaps(texture!)
-        
-        return texture!
-    }
-    
     func createTexture(_ name: String, bytes: [UInt8], width: Int, height: Int ) -> MTLTexture
     {
         let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba8Unorm_srgb,
@@ -166,7 +147,7 @@ class TextureManager
         return texture!
     }
     
-    private func generateMipmaps(_ texture: MTLTexture)
+    func generateMipmaps(_ texture: MTLTexture)
     {
         let commandBuffer = _commandQueue.makeCommandBuffer()
         let commandEncoder = commandBuffer?.makeBlitCommandEncoder()
