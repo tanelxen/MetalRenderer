@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -162,7 +162,7 @@
 		8A27DA452AAE2E750094C9D0 /* SkeletalMeshAsset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkeletalMeshAsset.swift; sourceTree = "<group>"; };
 		8A27DA472AAE35D40094C9D0 /* GameApplication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameApplication.swift; sourceTree = "<group>"; };
 		8A27DA962AAE39DE0094C9D0 /* Game.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Game.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		8A27DA972AAE39DF0094C9D0 /* Game-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Game-Info.plist"; path = "/Users/f.artemenkov/MetalRenderer/Game-Info.plist"; sourceTree = "<absolute>"; };
+		8A27DA972AAE39DF0094C9D0 /* Game-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Game-Info.plist"; sourceTree = "<group>"; };
 		8A27DA9A2AAE3C3C0094C9D0 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		8A27DB372AAE3E5A0094C9D0 /* Sandbox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Sandbox.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8A3C60172AAB916500BE835E /* ViewportPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewportPanel.swift; sourceTree = "<group>"; };

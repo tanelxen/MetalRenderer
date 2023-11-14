@@ -78,7 +78,7 @@ final class Viewport
         minBounds = min
         maxBounds = max
         
-        if width * 2 != framebufferWidth || height * 2 != framebufferHeight
+        if width * Int(dpi) != framebufferWidth || height * Int(dpi) != framebufferHeight
         {
             camera?.updateViewport(width: width, height: height)
             createRenderPass()
@@ -87,8 +87,8 @@ final class Viewport
     
     private func createRenderPass()
     {
-        let width = width * 2
-        let height = height * 2
+        let width = width * Int(dpi)
+        let height = height * Int(dpi)
         
         // ------ BASE COLOR 0 TEXTURE ------
         let colorTextureDecriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: Preferences.colorPixelFormat,

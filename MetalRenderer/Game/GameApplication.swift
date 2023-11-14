@@ -34,7 +34,7 @@ final class GameApplication: NSObject
         renderer = ForwardRenderer()
         
         viewport = Viewport()
-//        viewport.dpi = Float(view.window?.backingScaleFactor ?? 2.0)
+        viewport.dpi = Float(NSScreen.main!.backingScaleFactor)
         
         view.delegate = self
         

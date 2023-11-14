@@ -37,7 +37,7 @@ final class SandboxApplication: NSObject
         renderer = ForwardRenderer()
         
         viewport = Viewport()
-//        viewport.dpi = Float(view.window?.backingScaleFactor ?? 2.0)
+        viewport.dpi = Float(NSScreen.main!.backingScaleFactor)
         
         editor = EditorLayer(view: view, sceneViewport: viewport)
         
