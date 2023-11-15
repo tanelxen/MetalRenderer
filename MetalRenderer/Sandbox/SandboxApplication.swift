@@ -67,6 +67,24 @@ final class SandboxApplication: NSObject
         editor?.dropFile(url)
     }
     
+    func changeWorkingDir()
+    {
+        let dialog = NSOpenPanel()
+
+        dialog.title = "Choose a working directory"
+        dialog.showsResizeIndicator = true
+        dialog.showsHiddenFiles = false
+        dialog.allowsMultipleSelection = false
+        dialog.canChooseDirectories = true
+        dialog.canChooseFiles = false
+
+        if dialog.runModal() == .OK, let workingDirURL = dialog.url
+        {
+            UserDefaults.standard.set(workingDirURL, forKey: "workingDir")
+            editor?.updateWorkingDir()
+        }
+    }
+    
     private func setupEventsMonitor()
     {
         let mask: NSEvent.EventTypeMask = [

@@ -5,7 +5,6 @@
 //  Created by Fedor Artemenkov on 12.09.2023.
 //
 
-import Foundation
 import Cocoa
 import ImGui
 import Metal
@@ -15,9 +14,9 @@ final class AssetsPanel
 {
     let name = "Assets"
     
-    private let baseDir: URL
-    private let assetsDir: URL
-    private var currentDir: URL
+    private var baseDir: URL?
+    private var assetsDir: URL?
+    private var currentDir: URL?
     
     private var dirIcon: MTLTexture?
     private var fileIcon: MTLTexture?
@@ -25,11 +24,13 @@ final class AssetsPanel
     
     private var items: [AssetsPanelItem] {
         
-        let urls = try! FileManager.default.contentsOfDirectory(
+        guard let currentDir = self.currentDir else { return [] }
+        
+        guard let urls = try? FileManager.default.contentsOfDirectory(
             at: currentDir,
             includingPropertiesForKeys: [.isPackageKey, .isDirectoryKey],
             options: .skipsHiddenFiles
-        )
+        ) else { return [] }
         
         return urls.map {
             let isDir = (try! $0.resourceValues(forKeys: [.isDirectoryKey])).isDirectory!
@@ -47,19 +48,76 @@ final class AssetsPanel
     
     init()
     {
-        baseDir = UserDefaults.standard.url(forKey: "workingDir")!
-        assetsDir = baseDir.appendingPathComponent("Assets")
-        currentDir = assetsDir
-        
         dirIcon = TextureManager.shared.getTexture(for: "Assets/dir_ic.png")
         fileIcon = TextureManager.shared.getTexture(for: "Assets/file_ic.png")
         assetIcon = TextureManager.shared.getTexture(for: "Assets/asset_ic.png")
+        
+        updateWorkingDir()
+    }
+    
+    func updateWorkingDir()
+    {
+        baseDir = UserDefaults.standard.url(forKey: "workingDir")
+        
+        if let dir = baseDir?.appendingPathComponent("Assets"), FileManager.default.fileExists(atPath: dir.path)
+        {
+            assetsDir = dir
+            currentDir = dir
+        }
+        else
+        {
+            assetsDir = nil
+            currentDir = nil
+        }
     }
     
     func draw()
     {
         ImGuiBegin(name, nil, 0)
         
+        guard baseDir != nil else {
+            
+            ImGuiTextV("\u{f6e2} Working dir wasn't located! \u{f6e2}")
+            
+            if ImGuiButton("Locate")
+            {
+                locateWorkingDir()
+            }
+            
+            ImGuiEnd()
+            return
+        }
+        
+        guard assetsDir != nil else {
+            
+            ImGuiTextWrappedV("Your working dir:\n" + baseDir!.path)
+            ImGuiTextV("\u{f6e2} 'Assets' dir is missing! \u{f6e2}")
+            
+            if ImGuiButton("Create")
+            {
+                createAssetsDir()
+            }
+            
+            ImGuiEnd()
+            return
+        }
+        
+        drawContent()
+        
+        ImGuiEnd()
+    }
+    
+    func dropFile(_ url: URL)
+    {
+        if url.pathExtension == "mdl"
+        {
+            makeImportValveModel(url)
+            return
+        }
+    }
+    
+    private func drawContent()
+    {
         drawToolbar()
         
         let padding: Float = 8
@@ -77,11 +135,9 @@ final class AssetsPanel
         drawItems(thumbnailSize: thumbnailSize)
         
         ImGuiColumns(1, nil, false)
-        
-        ImGuiEnd()
     }
     
-    func dropFile(_ url: URL)
+    private func makeImportValveModel(_ url: URL)
     {
         guard url.pathExtension == "mdl"
         else
@@ -89,6 +145,7 @@ final class AssetsPanel
             print("Unknown format for \(url.path)")
             return
         }
+        guard let currentDir = self.currentDir else { return }
         
         guard let data = try? Data(contentsOf: url)
         else
@@ -138,6 +195,32 @@ final class AssetsPanel
         }
     }
     
+    private func locateWorkingDir()
+    {
+        let dialog = NSOpenPanel()
+        
+        dialog.title = "Choose a working directory"
+        dialog.showsResizeIndicator = true
+        dialog.showsHiddenFiles = false
+        dialog.allowsMultipleSelection = false
+        dialog.canChooseDirectories = true
+        dialog.canChooseFiles = false
+        
+        if dialog.runModal() == .OK, let workingDirURL = dialog.url
+        {
+            UserDefaults.standard.set(workingDirURL, forKey: "workingDir")
+            updateWorkingDir()
+        }
+    }
+    
+    private func createAssetsDir()
+    {
+        guard let workingDir = baseDir else { return }
+        
+        assetsDir = ResourceManager.getOrCreateFolder(named: "Assets", directory: workingDir)
+        currentDir = assetsDir
+    }
+    
     private func drawToolbar()
     {
         if ImGuiButton("Import")
@@ -147,13 +230,20 @@ final class AssetsPanel
 
         if ImGuiArrowButton("Back", Im(ImGuiDir_Left)), currentDir != assetsDir
         {
-            currentDir = currentDir.deletingLastPathComponent()
+            currentDir = currentDir?.deletingLastPathComponent()
         }
         
         ImGuiSameLine(0, 8)
         
-        let path = currentDir.path.replacingOccurrences(of: baseDir.path, with: "") + "/"
-        ImGuiTextV(path)
+        if let baseDir = self.baseDir, let currentDir = self.currentDir
+        {
+            let path = currentDir.path.replacingOccurrences(of: baseDir.path, with: "") + "/"
+            ImGuiTextV(path)
+        }
+        else
+        {
+            ImGuiTextV("No such 'Assets' dir")
+        }
         
         ImGuiSeparator()
     }

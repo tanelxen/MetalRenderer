@@ -35,6 +35,8 @@ class AppDelegate: NSObject, NSApplicationDelegate
         window?.makeKeyAndOrderFront(nil)
         window?.acceptsMouseMovedEvents = true
         
+        createMenu()
+        
         let types: [NSPasteboard.PasteboardType] = [.fileURL]
         view.registerForDraggedTypes(types)
         
@@ -46,6 +48,32 @@ class AppDelegate: NSObject, NSApplicationDelegate
     
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
         return true
+    }
+    
+    private func createMenu()
+    {
+        let appMenu = NSMenuItem()
+        appMenu.submenu = NSMenu()
+        let appName = ProcessInfo.processInfo.processName
+        appMenu.submenu?.addItem(NSMenuItem(title: "About \(appName)", action: #selector(NSApplication.orderFrontStandardAboutPanel(_:)), keyEquivalent: ""))
+        appMenu.submenu?.addItem(NSMenuItem(title: "Quit \(appName)", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
+
+        let settingsMenu = NSMenuItem()
+        settingsMenu.submenu = NSMenu(title: "Settings")
+        settingsMenu.submenu?.items = [
+            NSMenuItem(title: "Change working directory", action: #selector(changeDir), keyEquivalent: "")
+        ]
+        
+        let mainMenu = NSMenu(title: "Main Menu")
+        mainMenu.addItem(appMenu)
+        mainMenu.addItem(settingsMenu)
+        
+        NSApp.mainMenu = mainMenu
+    }
+    
+    @objc private func changeDir()
+    {
+        application?.changeWorkingDir()
     }
 }
 
