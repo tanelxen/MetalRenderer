@@ -5,8 +5,8 @@ Heavy inspired Id-Tech and Valve engines.
 
 Features:
 - ✅ Forward rendering
-- ✅ Own assets format for scenes
-- ✅ Own assets format for skinned meshes
+- ✅ Internal assets format for scenes
+- ✅ Internal assets format for skinned meshes
 - ✅ Importer from Quake 3 .bsp
 - ✅ Importer from GoldSrc .mdl
 - ✅ Skeletal animation
@@ -20,18 +20,16 @@ Features:
 - ✅ Hit detection with entities
 
 ## PREVIEW
-![sandbox](https://github.com/tanelxen/MetalRenderer/assets/14359330/e988d0aa-d8fa-47f6-b1cd-72c890131a51)
-
-![sandbox run mode](https://github.com/tanelxen/MetalRenderer/assets/14359330/74d244a3-8a66-460e-92e2-34d01e23b4f3)
+![sandbox run mode](https://github.com/tanelxen/MetalRenderer/assets/14359330/dec91dfb-033d-4dfd-b9f7-3e746d3f30c1)
 
 ## NOTE
 At this moment the code doesn't look good because I'm experimenting with some techniques and trying to find out better way.
 Don't take it as production ready game engine. It's just my playground. However, I seek to stay code quite straightforward and understandable.
 Later I'm going to refactor all of that. And then perhaps it will be useful for someone.
 
-Better to run Sandbox first time. While first running Sandbox asks you to locate 'Working Dir'. In this case you'll have to choose directory 'WorkingDir' at directory with project. After that Game should work fine. You alwase can change 'Working Dir' via Settings menu in the toolbar.
+Better to run Sandbox first time. While first running Sandbox asks you to locate 'Working Dir'. In this case you'll have to choose directory 'WorkingDir' at directory with project. After that Game should work fine. You always can change 'Working Dir' via Settings menu in the toolbar.
 
-Paths to skeletal mesh assets are hardcoded in the code. Sandbox just able you to import GoldSrc .mdl into internal format. After that you have to use imported mesh manually in the code. However .bsp files you can just drag-n-drop in the folder in the Assets panel and run it after converting.
+Keep in mind that paths to skeletal mesh assets are hardcoded in the code. Sandbox just able you to import GoldSrc .mdl into internal format. After that you have to use imported mesh manually in the code. However .bsp files you can just drag-n-drop in the folder in the Assets panel and run it after converting.
 
 ## IN PRORESS
 - 🚧 Integration with Bullet physics
