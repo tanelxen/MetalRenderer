@@ -126,6 +126,12 @@
 		8A27DB312AAE3E5A0094C9D0 /* pl_step2.wav in Resources */ = {isa = PBXBuildFile; fileRef = 8A6E036829CE3BA300609C3A /* pl_step2.wav */; };
 		8A27DB322AAE3E5A0094C9D0 /* pl_gun3.wav in Resources */ = {isa = PBXBuildFile; fileRef = 8AE8101829CEC08D003A681E /* pl_gun3.wav */; };
 		8A27DB332AAE3E5A0094C9D0 /* pl_step1.wav in Resources */ = {isa = PBXBuildFile; fileRef = 8A6E036629CE3BA300609C3A /* pl_step1.wav */; };
+		8A3E5C812B10DA160043EA29 /* BrushCollision.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A3E5C802B10DA150043EA29 /* BrushCollision.swift */; };
+		8A3E5C822B10DA160043EA29 /* BrushCollision.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A3E5C802B10DA150043EA29 /* BrushCollision.swift */; };
+		8A3E5C842B10DA430043EA29 /* BulletSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8A3E5C832B10DA430043EA29 /* BulletSwift.framework */; };
+		8A3E5C852B10DA430043EA29 /* BulletSwift.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 8A3E5C832B10DA430043EA29 /* BulletSwift.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		8A3E5C872B10DA4F0043EA29 /* BulletSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8A3E5C832B10DA430043EA29 /* BulletSwift.framework */; };
+		8A3E5C882B10DA4F0043EA29 /* BulletSwift.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 8A3E5C832B10DA430043EA29 /* BulletSwift.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		8A53DEFB2AB336DE00EC2C65 /* Particles.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8A53DEFA2AB336DE00EC2C65 /* Particles.metal */; };
 		8A53DEFC2AB336DE00EC2C65 /* Particles.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8A53DEFA2AB336DE00EC2C65 /* Particles.metal */; };
 		8A53DEFE2AB37E5C00EC2C65 /* Decals.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A53DEFD2AB37E5C00EC2C65 /* Decals.swift */; };
@@ -167,6 +173,31 @@
 		8AE718242AD08293000CE0E1 /* BrushRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AE718222AD08293000CE0E1 /* BrushRenderer.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		8A3E5C862B10DA430043EA29 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				8A3E5C852B10DA430043EA29 /* BulletSwift.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8A3E5C892B10DA4F0043EA29 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				8A3E5C882B10DA4F0043EA29 /* BulletSwift.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		8A01E0FA2957529800ED82C9 /* Waypoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Waypoint.swift; sourceTree = "<group>"; };
 		8A05DD0F2ACF25080012252D /* WorldEntitiesAsset+Q3BSP.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WorldEntitiesAsset+Q3BSP.swift"; sourceTree = "<group>"; };
@@ -194,6 +225,8 @@
 		8A27DB372AAE3E5A0094C9D0 /* Sandbox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Sandbox.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8A3C60172AAB916500BE835E /* ViewportPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewportPanel.swift; sourceTree = "<group>"; };
 		8A3C60192AAB94E000BE835E /* HierarchyPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HierarchyPanel.swift; sourceTree = "<group>"; };
+		8A3E5C802B10DA150043EA29 /* BrushCollision.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BrushCollision.swift; sourceTree = "<group>"; };
+		8A3E5C832B10DA430043EA29 /* BulletSwift.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = BulletSwift.framework; sourceTree = "<group>"; };
 		8A42053A2797B03400473A9D /* Skybox.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Skybox.metal; sourceTree = "<group>"; };
 		8A4F44F62A8A9D4E0044977A /* BasicShapes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BasicShapes.swift; sourceTree = "<group>"; };
 		8A53DEFA2AB336DE00EC2C65 /* Particles.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Particles.metal; sourceTree = "<group>"; };
@@ -269,6 +302,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8A92FDE32B0FC9F100BF5A75 /* SwiftZip in Frameworks */,
+				8A3E5C872B10DA4F0043EA29 /* BulletSwift.framework in Frameworks */,
 				8A27DA872AAE39DE0094C9D0 /* Quake3BSP in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -281,6 +315,7 @@
 				8A7C70B82AAFA7D7003FAFDD /* ImGuizmo in Frameworks */,
 				8A27DB282AAE3E5A0094C9D0 /* Quake3BSP in Frameworks */,
 				8A27DB292AAE3E5A0094C9D0 /* GoldSrcMDL in Frameworks */,
+				8A3E5C842B10DA430043EA29 /* BulletSwift.framework in Frameworks */,
 				8A9243CD2B0D460600B4766C /* SwiftZip in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -468,6 +503,7 @@
 				8A9186A02A8051E600719E55 /* Q3MapLightGrid.swift */,
 				8AD4567027B5D207009C43F4 /* Q3MapCollision.swift */,
 				8AE718222AD08293000CE0E1 /* BrushRenderer.swift */,
+				8A3E5C802B10DA150043EA29 /* BrushCollision.swift */,
 				8AF27E3427ACA5BC0025E4F4 /* Skybox.swift */,
 				8AB9EEF827C00C7D008C33B2 /* Barney.swift */,
 				8AEB11C427C146AF008FC445 /* Player.swift */,
@@ -543,6 +579,7 @@
 		8AE5331E27BEEA8B00A80C1E /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				8A3E5C832B10DA430043EA29 /* BulletSwift.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -557,6 +594,7 @@
 				8A27DA4F2AAE39DE0094C9D0 /* Sources */,
 				8A27DA842AAE39DE0094C9D0 /* Frameworks */,
 				8A27DA892AAE39DE0094C9D0 /* Resources */,
+				8A3E5C892B10DA4F0043EA29 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -578,6 +616,7 @@
 				8A27DAF12AAE3E5A0094C9D0 /* Sources */,
 				8A27DB252AAE3E5A0094C9D0 /* Frameworks */,
 				8A27DB2A2AAE3E5A0094C9D0 /* Resources */,
+				8A3E5C862B10DA430043EA29 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -720,6 +759,7 @@
 				8A27DA792AAE39DE0094C9D0 /* Sizeable.swift in Sources */,
 				8A27DA7A2AAE39DE0094C9D0 /* Skybox.swift in Sources */,
 				8A5969072ABB2F1D00772AC9 /* Intersection.swift in Sources */,
+				8A3E5C822B10DA160043EA29 /* BrushCollision.swift in Sources */,
 				8A27DA7B2AAE39DE0094C9D0 /* PipelineStates.swift in Sources */,
 				8A27DA7C2AAE39DE0094C9D0 /* TextureManager.swift in Sources */,
 				8A27DA7D2AAE39DE0094C9D0 /* BasicShapes.swift in Sources */,
@@ -766,6 +806,7 @@
 				8AE718232AD08293000CE0E1 /* BrushRenderer.swift in Sources */,
 				8A27DB062AAE3E5A0094C9D0 /* Skybox.metal in Sources */,
 				8A05DD102ACF25080012252D /* WorldEntitiesAsset+Q3BSP.swift in Sources */,
+				8A3E5C812B10DA160043EA29 /* BrushCollision.swift in Sources */,
 				8A27DB072AAE3E5A0094C9D0 /* Waypoint.swift in Sources */,
 				8A5969062ABB2F1D00772AC9 /* Intersection.swift in Sources */,
 				8A0C48B62AC9A9DA0099BEF6 /* WorldStaticMeshAsset+Q3BSP.swift in Sources */,
@@ -826,6 +867,10 @@
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = Q9T2S8AD86;
 				ENABLE_HARDENED_RUNTIME = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				INFOPLIST_FILE = "Game-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -857,6 +902,10 @@
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = Q9T2S8AD86;
 				ENABLE_HARDENED_RUNTIME = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				INFOPLIST_FILE = "Game-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -889,6 +938,10 @@
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = Q9T2S8AD86;
 				ENABLE_HARDENED_RUNTIME = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				INFOPLIST_FILE = "Sandbox-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -920,6 +973,10 @@
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = Q9T2S8AD86;
 				ENABLE_HARDENED_RUNTIME = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				INFOPLIST_FILE = "Sandbox-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
