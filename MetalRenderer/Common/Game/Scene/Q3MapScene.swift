@@ -7,19 +7,17 @@
 
 import Foundation
 import MetalKit
-import Quake3BSP
+import SwiftZip
 
 class Q3MapScene
 {
-    private (set) var map: Q3Map?
-    
     private let skybox = Skybox()
     
-    private var bspMesh: BSPMesh?
+    private var worldMesh: WorldStaticMesh?
     
     private var collision: Q3MapCollision!
     
-    private var lightGrid: Q3MapLightGrid!
+    private var lightGrid: Q3MapLightGrid?
     
     private (set) var spawnPoints: [Transform] = []
     private var entities: [Barney] = []
@@ -34,23 +32,88 @@ class Q3MapScene
     
     private (set) static var current: Q3MapScene!
     
+    private (set) var brushes: BrushRenderer?
+    
     var onReady: (()->Void)?
     
     init(url: URL)
     {
         do
         {
-            let data = try Data(contentsOf: url)
+            let archive = try ZipArchive(url: url)
             
-            DispatchQueue.global().async {
-                self.loadMap(with: data)
+            for entry in archive.entries()
+            {
+                // Get basic entry information
+                let name = try entry.getName()
+                let data = try entry.data()
+                
+                if name == "worldmesh.bin"
+                {
+                    if let asset = WorldStaticMeshAsset.load(from: data)
+                    {
+                        worldMesh = WorldStaticMesh()
+                        worldMesh?.loadFromAsset(asset)
+                    }
+                }
+                
+                if name == "lightmap.png"
+                {
+                    let lightmap = TextureManager.shared.getTexture(data: data, SRGB: false)
+                    worldMesh?.setLightmap(lightmap)
+                }
+                
+                if name == "collision.json"
+                {
+                    let decoder = JSONDecoder()
+                    
+                    if let asset = try? decoder.decode(WorldCollisionAsset.self, from: data)
+                    {
+                        collision = Q3MapCollision(asset: asset)
+                        
+//                        brushes = BrushRenderer()
+//                        brushes?.loadFromAsset(asset)
+                    }
+                }
+                
+                if name == "entities.json"
+                {
+                    let decoder = JSONDecoder()
+                    
+                    if let asset = try? decoder.decode(WorldEntitiesAsset.self, from: data)
+                    {
+                        spawnPoints = asset.entities
+                            .filter({ $0.classname == "info_player_deathmatch" || $0.classname == "info_player_start" })
+                            .map {
+                                let transform = Transform()
+                                transform.position = $0.position
+                                transform.rotation = Rotator(pitch: 0, yaw: $0.rotation.z, roll: 0)
+                                
+                                return transform
+                            }
+                        
+//                        for entity in asset.entities
+//                        {
+//                            if entity.classname == "light"
+//                            {
+//                                Billboards.shared.addBillboard(origin: entity.position, image: "Assets/point_light_img.png")
+//                            }
+//
+//                            if entity.classname == "misc_model"
+//                            {
+//                                Billboards.shared.addBillboard(origin: entity.position, image: "Assets/3d_model_img.png")
+//                            }
+//                        }
+                    }
+                }
             }
         }
         catch
         {
-            print(error.localizedDescription)
+            print("\(error)")
         }
         
+        isReady = true
         Q3MapScene.current = self
     }
     
@@ -97,26 +160,6 @@ class Q3MapScene
         Particles.shared.update()
     }
     
-    private func fetchSpawnPoints(for q3map: Q3Map)
-    {
-        let info_players = q3map.entities.filter { entity in
-            entity["classname"] == "info_player_deathmatch"
-        }
-        
-        for i in 0 ..< info_players.count
-        {
-            let info = info_players[i]
-            let origin = info["origin"]!.split(separator: " ").map { Float($0)! }
-            let angle = Float(info["angle"]!)!
-            
-            let transform = Transform()
-            transform.position = float3(origin[0], origin[1], origin[2])
-            transform.rotation = Rotator(pitch: 0, yaw: angle, roll: 0)
-            
-            spawnPoints.append(transform)
-        }
-    }
-    
     private func spawnPlayer()
     {
         guard let point = spawnPoints.first else { return }
@@ -140,35 +183,6 @@ class Q3MapScene
 //            break
         }
     }
-    
-    private func loadMap(with data: Data)
-    {
-        let q3map = Q3Map(data: data)
-        print("bsp file was loaded")
-        
-        fetchSpawnPoints(for: q3map)
-        print("spawn points were created")
-        
-        bspMesh = BSPMesh(map: q3map)
-        print("bsp mesh was created")
-
-        collision = Q3MapCollision(q3map: q3map)
-        print("collision was created")
-        
-        lightGrid = Q3MapLightGrid(
-            minBounds: q3map.models.first!.mins,
-            maxBounds: q3map.models.first!.maxs,
-            colors: q3map.lightgrid.map({ $0.ambient })
-        )
-        print("light grid was created")
-        
-        map = q3map
-        
-        DispatchQueue.main.async {
-            self.isReady = true
-            self.onReady?()
-        }
-    }
 }
 
 extension Q3MapScene
@@ -184,20 +198,20 @@ extension Q3MapScene
     {
         guard isReady else { return }
         
-        var modelConstants = ModelConstants()
-        encoder?.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
+//        var modelConstants = ModelConstants()
+//        encoder?.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
         
-        bspMesh?.renderLightmapped(with: encoder!)
+        worldMesh?.renderLightmapped(with: encoder!)
     }
     
     func renderWorldVertexlit(with encoder: MTLRenderCommandEncoder?)
     {
-        guard isReady else { return }
-        
-        var modelConstants = ModelConstants()
-        encoder?.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
-        
-        bspMesh?.renderVertexlit(with: encoder!)
+//        guard isReady else { return }
+//
+//        var modelConstants = ModelConstants()
+//        encoder?.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
+//
+//        bspMesh?.renderVertexlit(with: encoder!)
     }
     
     func renderStaticMeshes(with encoder: MTLRenderCommandEncoder?)
@@ -225,7 +239,7 @@ extension Q3MapScene
             var modelMatrix = entity.transform.matrix
             modelMatrix.translate(direction: float3(0, 0, -25))
             
-            let ambient = lightGrid.ambient(at: entity.transform.position)
+            let ambient = lightGrid?.ambient(at: entity.transform.position) ?? float3(1, 1, 1)
             let color = float4(ambient, 1.0)
             
             var modelConstants = ModelConstants(modelMatrix: modelMatrix, color: color)
@@ -259,7 +273,7 @@ extension Q3MapScene
         
         modelMatrix.translate(direction: float3(-2, 4, 0))
         
-        let ambient = lightGrid.ambient(at: transform.position)
+        let ambient = lightGrid?.ambient(at: transform.position) ?? float3(1, 1, 1)
         let color = float4(ambient, 1.0)
         
         var modelConstants = ModelConstants(modelMatrix: modelMatrix, color: color)

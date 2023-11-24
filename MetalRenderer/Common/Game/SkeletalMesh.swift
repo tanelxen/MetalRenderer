@@ -9,8 +9,7 @@ import MetalKit
 
 final class SkeletalMesh
 {
-    private var name = ""
-    private static var cache: [String: SkeletalMeshAsset] = [:]
+    private static var cache: [URL: SkeletalMeshAsset] = [:]
     
     private var vertexBuffer: MTLBuffer?
     private var indexBuffer: MTLBuffer?
@@ -41,30 +40,35 @@ final class SkeletalMesh
     
     private var framesCount = 0
     
-    init?(name: String)
+    init?(url: URL)
     {
-        self.name = name
-        let asset: SkeletalMeshAsset
-        
-        let baseDir = UserDefaults.standard.url(forKey: "workingDir")!
-        let assetsDir = baseDir.appendingPathComponent("Assets")
-        let packageURL = assetsDir.appendingPathComponent(name)
-        
-        if let cached = Self.cache[name]
+        do
         {
-            asset = cached
+            let data = try Data(contentsOf: url)
+            let packageURL = url.deletingLastPathComponent()
+            
+            let asset: SkeletalMeshAsset
+            
+            if let cached = Self.cache[url]
+            {
+                asset = cached
+            }
+            else if let serialized = SkeletalMeshAsset.load(from: data)
+            {
+                asset = serialized
+                Self.cache[url] = asset
+            }
+            else
+            {
+                return nil
+            }
+            
+            loadFromAsset(asset, folder: packageURL)
         }
-        else if let serialized = SkeletalMeshAsset.load(with: packageURL)
+        catch
         {
-            asset = serialized
-            Self.cache[name] = asset
+            print(error)
         }
-        else
-        {
-            return nil
-        }
-        
-        loadFromAsset(asset, folder: packageURL)
     }
     
     private func loadFromAsset(_ asset: SkeletalMeshAsset, folder: URL)
@@ -129,7 +133,7 @@ final class SkeletalMesh
         guard let buffer = self.animBuffer else { return }
         guard let seq = sequences[named] else { return }
         
-        let currIndex = Int(floor(frameIndex))
+        let currIndex = Int(frameIndex)
         let nextIndex = currIndex < seq.frames.count - 1 ? currIndex + 1 : 0
         
         let factor = frameIndex - floor(frameIndex)

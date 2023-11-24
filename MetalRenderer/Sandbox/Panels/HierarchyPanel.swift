@@ -21,13 +21,13 @@ final class HierarchyPanel
     {
         ImGuiBegin(name, nil, 0)
         
-        if let entities = Q3MapScene.current?.map?.entities
-        {
-            for (index, entity) in entities.enumerated()
-            {
-                drawEntity(dict: entity, index: index)
-            }
-        }
+//        if let entities = Q3MapScene.current?.map?.entities
+//        {
+//            for (index, entity) in entities.enumerated()
+//            {
+//                drawEntity(dict: entity, index: index)
+//            }
+//        }
         
         // Left-click on blank space: Delete game object
         if ImGuiIsMouseClicked(Im(ImGuiMouseButton_Left), false) && ImGuiIsWindowHovered(0) {
@@ -66,7 +66,7 @@ final class HierarchyPanel
         ImGuiPushStyleVar(Im(ImGuiStyleVar_ItemSpacing), ImVec2(8, 6))
         ImGuiPushStyleVar(Im(ImGuiStyleVar_FramePadding), ImVec2(1, 3))
 
-        var flags: ImGuiTreeNodeFlags = Im(ImGuiTreeNodeFlags_SpanAvailWidth) | Im(ImGuiTreeNodeFlags_OpenOnArrow) | Im(ImGuiTreeNodeFlags_OpenOnDoubleClick)
+        let flags: ImGuiTreeNodeFlags = Im(ImGuiTreeNodeFlags_SpanAvailWidth) | Im(ImGuiTreeNodeFlags_OpenOnArrow) | Im(ImGuiTreeNodeFlags_OpenOnDoubleClick)
 
 //        flags |= (entity === selectedEntity) ? Im(ImGuiTreeNodeFlags_Selected) : 0
         

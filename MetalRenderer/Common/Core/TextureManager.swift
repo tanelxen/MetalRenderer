@@ -6,7 +6,6 @@
 //
 
 import MetalKit
-import Quake3BSP
 
 class TextureManager
 {
@@ -19,7 +18,7 @@ class TextureManager
     
     private var _whiteTexture: MTLTexture?
     
-    // Для генерации mip-уровней
+    // for mip-maps generation
     private let _commandQueue: MTLCommandQueue
     
     init(with device: MTLDevice)
@@ -32,7 +31,9 @@ class TextureManager
     
     func getTexture(for path: String, origin: MTKTextureLoader.Origin = .topLeft) -> MTLTexture?
     {
-        if URL(string: path)!.pathExtension.isEmpty
+        guard let url0 = URL(string: path) else { return nil }
+        
+        if url0.pathExtension.isEmpty
         {
             if let url = ResourceManager.getURL(for: path + ".jpg")
             {
@@ -48,6 +49,7 @@ class TextureManager
             }
             else
             {
+//                print("Missing texture: \(path)")
                 return nil
             }
         }
@@ -59,7 +61,7 @@ class TextureManager
         return getTexture(url: url, origin: origin)
     }
     
-    func getTexture(url: URL, origin: MTKTextureLoader.Origin = .topLeft) -> MTLTexture?
+    func getTexture(url: URL, origin: MTKTextureLoader.Origin = .topLeft, SRGB: Bool = true) -> MTLTexture?
     {
         let fileName = url.lastPathComponent
         
@@ -70,7 +72,10 @@ class TextureManager
         
         var texture: MTLTexture?
         
-        let options: [MTKTextureLoader.Option : MTKTextureLoader.Origin] = [MTKTextureLoader.Option.origin : origin]
+        let options: [MTKTextureLoader.Option: Any] = [
+            .origin: origin,
+            .SRGB: SRGB
+        ]
         
         do
         {
@@ -83,6 +88,27 @@ class TextureManager
         }
         
         _cache[fileName] = texture
+        
+        return texture
+    }
+    
+    func getTexture(data: Data, origin: MTKTextureLoader.Origin = .topLeft, SRGB: Bool = true) -> MTLTexture?
+    {
+        var texture: MTLTexture?
+        
+        let options: [MTKTextureLoader.Option: Any] = [
+            .origin: origin,
+            .SRGB: SRGB
+        ]
+        
+        do
+        {
+            texture = try _textureLoader.newTexture(data: data, options: options)
+        }
+        catch
+        {
+            print("Can't create texture")
+        }
         
         return texture
     }

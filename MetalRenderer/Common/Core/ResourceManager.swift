@@ -17,14 +17,24 @@ enum ResourceManager
         let name = pathURL.deletingPathExtension().lastPathComponent
         let ext = pathURL.pathExtension
 
-        guard let fileURL = Bundle.main.url(forResource: name, withExtension: ext, subdirectory: dir)
-        else
+        if let fileURL = Bundle.main.url(forResource: name, withExtension: ext, subdirectory: dir)
         {
-            print("Invalid filepath: \(path)")
+            return fileURL
+        }
+        
+        guard let workingDir = UserDefaults.standard.url(forKey: "workingDir")
+        else {
             return nil
         }
-
-        return fileURL
+        
+        let relativeAtWorkingDir = workingDir.appendingPathComponent(path)
+        
+        guard FileManager.default.fileExists(atPath: relativeAtWorkingDir.path)
+        else {
+            return nil
+        }
+        
+        return relativeAtWorkingDir
     }
     
     static func getData(for path: String) -> Data?

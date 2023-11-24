@@ -5,8 +5,9 @@ Heavy inspired Id-Tech and Valve engines.
 
 Features:
 - ✅ Forward rendering
-- ✅ Loading Quake 3 .bsp
+- ✅ Own assets format for scenes
 - ✅ Own assets format for skinned meshes
+- ✅ Importer from Quake 3 .bsp
 - ✅ Importer from GoldSrc .mdl
 - ✅ Skeletal animation
 - ✅ Brush based collision detection
@@ -28,11 +29,16 @@ At this moment the code doesn't look good because I'm experimenting with some te
 Don't take it as production ready game engine. It's just my playground. However, I seek to stay code quite straightforward and understandable.
 Later I'm going to refactor all of that. And then perhaps it will be useful for someone.
 
+Better to run Sandbox first time. While first running Sandbox asks you to locate 'Working Dir'. In this case you'll have to choose directory 'WorkingDir' at directory with project. After that Game should work fine. You alwase can change 'Working Dir' via Settings menu in the toolbar.
+
+Paths to skeletal mesh assets are hardcoded in the code. Sandbox just able you to import GoldSrc .mdl into internal format. After that you have to use imported mesh manually in the code. However .bsp files you can just drag-n-drop in the folder in the Assets panel and run it after converting.
+
 ## IN PRORESS
+- 🚧 Integration with Bullet physics
 - 🚧 Improving navigation system with navmesh
-- 🚧 Moving to own assets format
 
 ## TODO
+- [ ] Brush creation inside Sandbox
 - [ ] Animation system
 - [ ] Player and AI controllers
 - [ ] Integrate Recast for navmesh generating
@@ -41,4 +47,5 @@ Later I'm going to refactor all of that. And then perhaps it will be useful for 
 - [ ] Material system
 - [ ] Rendering UI (besides crosshair)
 - [ ] Improve audio engine
+- [ ] Rewrite Sandbox in Qt
 - [ ] ⚠️ Refactoring all this stuff ⚠️

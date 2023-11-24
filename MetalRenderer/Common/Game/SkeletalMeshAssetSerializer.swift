@@ -9,10 +9,9 @@ import Foundation
 
 extension SkeletalMeshAsset
 {
-    static func load(with packageURL: URL) -> SkeletalMeshAsset?
+    static func load(from data: Data) -> SkeletalMeshAsset?
     {
-        let dataFileURL = packageURL.appendingPathComponent("data.bin")
-        guard let bytes = NSData(contentsOf: dataFileURL)?.bytes else { return nil }
+        let bytes = NSData(data: data).bytes
         
         let pData = UnsafeRawPointer(bytes)
         let header = pData.load(as: FileHeader.self)
@@ -82,7 +81,7 @@ extension SkeletalMeshAsset
 
 extension SkeletalMeshAsset
 {
-    func saveToFolder(_ folder: URL)
+    func toData() -> Data
     {
         let texturesData = texturesData()
         let indicesData = indicesData()
@@ -142,6 +141,13 @@ extension SkeletalMeshAsset
         data.append(rotationsData)
         data.append(positionsData)
         data.append(bonesData)
+        
+        return data
+    }
+    
+    func saveToFolder(_ folder: URL)
+    {
+        let data = toData()
         
         do
         {

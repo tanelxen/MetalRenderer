@@ -35,6 +35,14 @@ final class ForwardRenderer
         return Engine.device.makeDepthStencilState(descriptor: descriptor)!
     }()
     
+    private var billboardsStencilState: MTLDepthStencilState = {
+        let descriptor = MTLDepthStencilDescriptor()
+        descriptor.isDepthWriteEnabled = true
+        descriptor.depthCompareFunction = .less
+        descriptor.label = "Decal"
+        return Engine.device.makeDepthStencilState(descriptor: descriptor)!
+    }()
+    
     private func drawScene(_ scene: Q3MapScene, with renderEncoder: MTLRenderCommandEncoder)
     {
         guard scene.isReady else { return }
@@ -81,6 +89,9 @@ final class ForwardRenderer
         encoder.setFragmentTexture(nil, index: 0)
         
         encoder.setRenderPipelineState(pipelineStates.basic)
+        
+//        Q3MapScene.current?.brushes?.render(with: encoder)
+        
         Debug.shared.render(with: encoder)
         
         encoder.setRenderPipelineState(pipelineStates.basicInst)
@@ -111,6 +122,19 @@ final class ForwardRenderer
         encoder.setDepthStencilState(decalsStencilState)
         encoder.setRenderPipelineState(pipelineStates.basicInst)
         Decals.shared.render(with: encoder)
+        
+        encoder.popDebugGroup()
+    }
+    
+    private func drawBillboards(with encoder: MTLRenderCommandEncoder)
+    {
+        encoder.pushDebugGroup("Billboards Render")
+        
+        encoder.setFragmentTexture(nil, index: 0)
+        
+        encoder.setDepthStencilState(billboardsStencilState)
+        encoder.setRenderPipelineState(pipelineStates.billboards)
+        Billboards.shared.render(with: encoder)
         
         encoder.popDebugGroup()
     }
@@ -153,6 +177,7 @@ final class ForwardRenderer
             drawScene(scene, with: encoder)
         }
         
+        drawBillboards(with: encoder)
         drawParticles(with: encoder)
         drawDecals(with: encoder)
         drawDebug(with: encoder)

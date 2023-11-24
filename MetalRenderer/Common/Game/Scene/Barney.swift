@@ -5,6 +5,7 @@
 //  Created by Fedor Artemenkov on 18.02.2022.
 //
 
+import Foundation
 import simd
 
 class Barney
@@ -40,7 +41,11 @@ class Barney
     init(scene: Q3MapScene)
     {
         self.scene = scene
-        self.mesh = SkeletalMesh(name: "models/barney.asset")
+        
+        if let url = ResourceManager.getURL(for: "Assets/models/barney/mesh.skl")
+        {
+            self.mesh = SkeletalMesh(url: url)
+        }
         
         playerMovement.scene = scene
         playerMovement.cl_forwardspeed = 110
@@ -65,9 +70,9 @@ class Barney
             moveToPlayer(minDist: 128)
         }
         
-//        playerMovement.transform = transform
-//        playerMovement.update()
-//        transform.position = playerMovement.transform.position
+        playerMovement.transform = transform
+        playerMovement.update()
+        transform.position = playerMovement.transform.position
         
         let direction = transform.rotation.forward * forwardmove * cl_forwardspeed
         transform.position += direction * GameTime.deltaTime

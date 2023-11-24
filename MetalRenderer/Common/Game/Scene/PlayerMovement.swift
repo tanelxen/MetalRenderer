@@ -66,7 +66,15 @@ final class PlayerMovement
     
     var playStepsSound: (() -> Void)?
     private var lastStepDate = Date()
-    private let stepDistance = 64.0
+    private let stepDistance: Float = 64.0
+    
+    var speed: Float {
+        length(velocity)
+    }
+    
+    var isWalking: Bool {
+        return speed > 10 && (forwardmove != 0 || rightmove != 0) && ground_normal != nil
+    }
     
     // Произвести все вычисления столкновений и обновить position и velocity
     func update()
@@ -95,11 +103,9 @@ final class PlayerMovement
             transform.position += velocity * GameTime.deltaTime
         }
         
-        let speed = Double(length(velocity))
-        
-        if speed > 10 && (forwardmove != 0 || rightmove != 0) && ground_normal != nil
+        if isWalking
         {
-            let dt = stepDistance / speed
+            let dt = Double(stepDistance / speed)
             
             if -lastStepDate.timeIntervalSinceNow > dt
             {

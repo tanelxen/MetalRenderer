@@ -63,7 +63,7 @@ public class Q3Map
         
         // Version should always equal 0x2e for Q3 maps
         let version = buffer.getInt32()
-        assert(version == 0x2e, "Version must be equal to 0x2e")
+        assert(version == 0x2e || version == 0x2f, "Version must be equal to 0x2e")
         
         // Directory entries define the position and length of a section
         for _ in 0 ..< 17

@@ -6,7 +6,6 @@
 //
 
 import simd
-import Quake3BSP
 
 struct HitResult
 {
@@ -22,13 +21,44 @@ struct HitResult
     
     var fraction: Float = 0.0
     
-    var plane: Q3Plane?
+    var plane: WorldCollisionAsset.Plane?
     
     var startsolid = false
     var allsolid = false
 }
 
-fileprivate let CONTENTS_SOLID: Int32 = 1
+fileprivate let CONTENTS_SOLID: Int = 1
+fileprivate let CONTENTS_PLAYERCLIP: Int = 0x10000
+
+// plane types are used to speed some tests
+// 0-2 are axial planes
+private enum PlaneType: Int
+{
+    case PLANE_X = 0
+    case PLANE_Y = 1
+    case PLANE_Z = 2
+    case PLANE_NON_AXIAL = 3
+    
+    init(normal: float3)
+    {
+        if normal.x == 1.0
+        {
+            self = .PLANE_X
+        }
+        else if normal.y == 1.0
+        {
+            self = .PLANE_Y
+        }
+        else if normal.z == 1.0
+        {
+            self = .PLANE_Z
+        }
+        else
+        {
+            self = .PLANE_NON_AXIAL
+        }
+    }
+}
 
 fileprivate struct PlaneInfo
 {
@@ -56,19 +86,19 @@ fileprivate let SURF_CLIP_EPSILON: Float = 0.125
 
 class Q3MapCollision
 {
-    private let q3map: Q3Map
+    private let asset: WorldCollisionAsset
     private var planesInfo: [PlaneInfo] = []
     
-    init(q3map: Q3Map)
+    init(asset: WorldCollisionAsset)
     {
-        self.q3map = q3map
+        self.asset = asset
         
         initPlanesInfo()
     }
     
     private func initPlanesInfo()
     {
-        planesInfo = q3map.planes.map { PlaneInfo(normal: $0.normal) }
+        planesInfo = asset.planes.map { PlaneInfo(normal: $0.normal) }
     }
     
     func traceRay(result: inout HitResult, start inputStart: float3, end inputEnd: float3)
@@ -80,7 +110,7 @@ class Q3MapCollision
     {
         work.fraction = 1
         
-        // Делаем симетричный AABB для упрощения проверок
+        // Make symmetrical
         for i in 0...2
         {
             let offset = (mins[i] + maxs[i]) * 0.5
@@ -147,8 +177,8 @@ class Q3MapCollision
             return
         }
         
-        let node = q3map.nodes[index]
-        let plane = q3map.planes[node.plane]
+        let node = asset.nodes[index]
+        let plane = asset.planes[node.plane]
         let plane_type = planesInfo[node.plane].type
         
         let offset: Float
@@ -235,16 +265,13 @@ class Q3MapCollision
     
     private func trace_leaf(at index: Int, with work: inout HitResult)
     {
-        let leaf = q3map.leafs[index]
+        let leaf = asset.leafs[index]
         
-        for i in 0 ..< leaf.n_leafbrushes
+        for i in leaf.brushes
         {
-            let brush_index = Int(q3map.leafbrushes[leaf.leafbrush + i])
-            let brush = q3map.brushes[brush_index]
+            let brush = asset.brushes[i]
             
-            let contentFlags = q3map.textures[brush.texture].contentFlags
-            
-            if brush.brushside > 0 && (contentFlags & CONTENTS_SOLID != 0)
+            if brush.contentFlags & (CONTENTS_SOLID | CONTENTS_PLAYERCLIP) != 0
             {
                 trace_brush(brush, work: &work)
                 
@@ -255,11 +282,11 @@ class Q3MapCollision
         }
     }
     
-    private func trace_brush(_ brush: Q3Brush, work: inout HitResult)
+    private func trace_brush(_ brush: WorldCollisionAsset.Brush, work: inout HitResult)
     {
         var start_frac: Float = -1.0
         var end_frac: Float = 1.0
-        var closest_plane: Q3Plane?
+        var closest_plane: WorldCollisionAsset.Plane?
         
         var getout = false
         var startout = false
@@ -267,8 +294,8 @@ class Q3MapCollision
         for i in 0 ..< brush.numBrushsides
         {
             let side_index = brush.brushside + i
-            let plane_index = q3map.brushSides[side_index].plane
-            let plane = q3map.planes[plane_index]
+            let plane_index = asset.brushSides[side_index].plane
+            let plane = asset.planes[plane_index]
             let signbits = planesInfo[plane_index].signbits
             
             let dist = plane.distance - dot(work.offsets[signbits], plane.normal)

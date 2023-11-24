@@ -15,7 +15,7 @@ class Bezier
     var vertices: [Q3Vertex] = []
     var indices: [UInt32] = []
     
-    init(controls: [Q3Vertex], level: Int = 10)
+    init(controls: [Q3Vertex], level: Int = 6)
     {
         self.level = level
         self.controls = controls

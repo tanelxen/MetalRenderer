@@ -8,7 +8,11 @@
 import Cocoa
 import ImGui
 import Metal
+
 import GoldSrcMDL
+import Quake3BSP
+
+import SwiftZip
 
 final class AssetsPanel
 {
@@ -28,17 +32,16 @@ final class AssetsPanel
         
         guard let urls = try? FileManager.default.contentsOfDirectory(
             at: currentDir,
-            includingPropertiesForKeys: [.isPackageKey, .isDirectoryKey],
+            includingPropertiesForKeys: [.isDirectoryKey],
             options: .skipsHiddenFiles
         ) else { return [] }
         
         return urls.map {
             let isDir = (try! $0.resourceValues(forKeys: [.isDirectoryKey])).isDirectory!
-            let isPackage = (try! $0.resourceValues(forKeys: [.isPackageKey])).isPackage!
             let name = $0.deletingPathExtension().lastPathComponent
 //            let ext = $0.pathExtension
             
-            let type: ItemType = isPackage ? .asset : (isDir ? .folder : .file)
+            let type: ItemType = isDir ? .folder : .file
             
             return AssetsPanelItem(url: $0, name: name, type: type)
         }
@@ -114,6 +117,12 @@ final class AssetsPanel
             makeImportValveModel(url)
             return
         }
+        
+        if url.pathExtension == "bsp"
+        {
+            makeImportQuakeBSP(url)
+            return
+        }
     }
     
     private func drawContent()
@@ -135,16 +144,25 @@ final class AssetsPanel
         drawItems(thumbnailSize: thumbnailSize)
         
         ImGuiColumns(1, nil, false)
+        
+//        if ImGuiBeginPopupContextWindow("Asset empty popup", Im(ImGuiPopupFlags_MouseButtonRight) | Im(ImGuiPopupFlags_NoOpenOverItems))
+//        {
+//            if ImGuiSelectable("New folder", false, Im(ImGuiSelectableFlags_None), ImVec2(0))
+//            {
+//                print("Create new folder")
+//            }
+//
+//            if ImGuiSelectable("Import", false, Im(ImGuiSelectableFlags_None), ImVec2(0))
+//            {
+//                print("Import asset")
+//            }
+//
+//            ImGuiEndPopup()
+//        }
     }
     
     private func makeImportValveModel(_ url: URL)
     {
-        guard url.pathExtension == "mdl"
-        else
-        {
-            print("Unknown format for \(url.path)")
-            return
-        }
         guard let currentDir = self.currentDir else { return }
         
         guard let data = try? Data(contentsOf: url)
@@ -158,7 +176,7 @@ final class AssetsPanel
         let asset = SkeletalMeshAsset.make(from: model)
         
         let name = url.deletingPathExtension().lastPathComponent
-        if let folder = ResourceManager.getOrCreateFolder(named: "\(name).asset", directory: currentDir)
+        if let folder = ResourceManager.getOrCreateFolder(named: "\(name).skl", directory: currentDir)
         {
             asset.saveToFolder(folder)
             
@@ -175,6 +193,122 @@ final class AssetsPanel
         }
     }
     
+    private func makeImportQuakeBSP(_ url: URL)
+    {
+        guard let currentDir = self.currentDir else { return }
+        
+        guard let data = try? Data(contentsOf: url)
+        else
+        {
+            print("Invalid data for filepath: \(url.path)")
+            return
+        }
+        
+        let bsp = Q3Map(data: data)
+        let (worldmesh, lightmap) = WorldStaticMeshAsset.make(from: bsp)
+        
+        let entities = WorldEntitiesAsset.make(from: bsp)
+        let collision = WorldCollisionAsset.make(from: bsp)
+        
+        do
+        {
+            let name = url.deletingPathExtension().lastPathComponent
+            let archiveUrl = currentDir.appendingPathComponent(name).appendingPathExtension("zip")
+            
+            // Open an archive for writing, overwriting any existing file
+            let archive = try ZipMutableArchive(url: archiveUrl, flags: [.create, .truncate])
+
+            // Create a data source and add it to the archive
+            let worldmeshData = worldmesh.toData()
+            
+            if let source = try? ZipSource(data: worldmeshData)
+            {
+                try archive.addFile(name: "worldmesh.bin", source: source)
+            }
+            
+            if let data = lightmap.getPngData(), let source = try? ZipSource(data: data)
+            {
+                try archive.addFile(name: "lightmap.png", source: source)
+            }
+            
+            let encoder = JSONEncoder()
+            
+            if let data = try? encoder.encode(entities), let source = try? ZipSource(data: data)
+            {
+                try archive.addFile(name: "entities.json", source: source)
+            }
+            
+            if let data = try? encoder.encode(collision), let source = try? ZipSource(data: data)
+            {
+                try archive.addFile(name: "collision.json", source: source)
+            }
+
+            // Commit changes and close the archive
+            // Alternatively call `discard` to rollback any changes
+            try archive.close()
+        }
+        catch
+        {
+            // Handle possible errors
+            print("\(error)")
+        }
+        
+//        let name = url.deletingPathExtension().lastPathComponent
+//
+//        if let assetDir = ResourceManager.getOrCreateFolder(named: "\(name).wld", directory: currentDir)
+//        {
+//            let asset = WorldStaticMeshAsset.make(from: bsp, folder: assetDir)
+//            asset.saveToFolder(assetDir)
+//
+//            let entities = WorldEntitiesAsset.make(from: bsp, folder: assetDir)
+//            let collision = WorldCollisionAsset.make(from: bsp, folder: assetDir)
+//        }
+    }
+    
+    private func copyTextures(for bsp: Q3Map, from sourceDir: String)
+    {
+        for name in bsp.textures.map({ $0.texureName })
+        {
+            let fileURL = baseDir!.appendingPathComponent(sourceDir).appendingPathComponent(name)
+
+            let jpg = fileURL.appendingPathExtension("jpg")
+            let tga = fileURL.appendingPathExtension("tga")
+
+            var sourceURL: URL?
+
+            if FileManager.default.fileExists(atPath: jpg.path)
+            {
+                sourceURL = jpg
+            }
+            else if FileManager.default.fileExists(atPath: tga.path)
+            {
+                sourceURL = tga
+            }
+
+            if let source = sourceURL
+            {
+                let folderName = "Assets/" + URL(string: name)!.deletingLastPathComponent().path
+
+                if let destDir = ResourceManager.getOrCreateFolder(named: folderName, directory: baseDir!)
+                {
+                    let ext = source.pathExtension
+                    let filename = source.deletingPathExtension().lastPathComponent
+
+                    let dest = destDir.appendingPathComponent(filename).appendingPathExtension(ext)
+                    
+                    if !FileManager.default.fileExists(atPath: dest.path)
+                    {
+                        try? FileManager.default.copyItem(at: source, to: dest)
+                    }
+                }
+            }
+            else
+            {
+                print("Failed: " + name)
+            }
+        }
+    }
+    
     private func openImportFileDialog()
     {
         let openPanel = NSOpenPanel()
@@ -185,7 +319,7 @@ final class AssetsPanel
         openPanel.allowsMultipleSelection = false
         openPanel.canChooseDirectories = false
         openPanel.canChooseFiles = true
-        openPanel.allowedFileTypes = ["mdl"]
+        openPanel.allowedFileTypes = ["mdl", "bsp"]
         
         openPanel.begin { result in
             if result == .OK, let url = openPanel.url
@@ -273,6 +407,21 @@ final class AssetsPanel
                 processDoubleClick(item)
             }
             
+//            if ImGuiBeginPopupContextWindow("Asset popup", Im(ImGuiPopupFlags_MouseButtonRight))
+//            {
+//                if ImGuiSelectable("Remove", false, Im(ImGuiSelectableFlags_None), ImVec2(0))
+//                {
+//                    print("Remove asset \(item.name)")
+//                }
+//
+//                if ImGuiSelectable("Reimport", false, Im(ImGuiSelectableFlags_None), ImVec2(0))
+//                {
+//                    print("Reimport asset \(item.name)")
+//                }
+//
+//                ImGuiEndPopup()
+//            }
+            
             ImGuiPopStyleColor(3)
             
             ImGuiTextWrappedV(item.name)
@@ -289,8 +438,8 @@ final class AssetsPanel
             case .folder:
                 currentDir = item.url
                 
-            case .asset, .file:
-                if item.url.pathExtension == "bsp"
+            case .file:
+                if item.url.pathExtension == "wld"
                 {
                     onLoadNewMap?(item.url)
                 }
@@ -310,11 +459,6 @@ final class AssetsPanel
                 return withUnsafePointer(to: &fileIcon) { ptr in
                     return UnsafeMutableRawPointer(mutating: ptr)
                 }
-
-            case .asset:
-                return withUnsafePointer(to: &assetIcon) { ptr in
-                    return UnsafeMutableRawPointer(mutating: ptr)
-                }
         }
     }
 }
@@ -322,7 +466,6 @@ final class AssetsPanel
 private enum ItemType
 {
     case folder
-    case asset
     case file
 }
 
@@ -332,3 +475,4 @@ private struct AssetsPanelItem
     let name: String
     let type: ItemType
 }
+

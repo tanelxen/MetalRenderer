@@ -45,10 +45,8 @@ final class GameApplication: NSObject
     {
         scene = Q3MapScene(url: mapURL)
 
-        scene.onReady = { [unowned self] in
-            completionHandler?()
-            scene.startPlaying(in: viewport)
-        }
+        completionHandler?()
+        scene.startPlaying(in: viewport)
     }
     
     private func update()

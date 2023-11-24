@@ -45,14 +45,16 @@ final class SandboxApplication: NSObject
             
             self?.scene = Q3MapScene(url: url)
             
-            self?.scene.onReady = { [weak self] in
-                
-                if let point = self?.scene?.spawnPoints.first
-                {
-                    self?.viewport.camera?.transform.position = point.position
-                    self?.viewport.camera?.transform.rotation = point.rotation
-                }
+            if let point = self?.scene?.spawnPoints.first
+            {
+                self?.viewport.camera?.transform.position = point.position
+                self?.viewport.camera?.transform.rotation = point.rotation
             }
+            
+//            self?.scene.onReady = { [weak self] in
+//
+//
+//            }
         }
         
         view.delegate = self

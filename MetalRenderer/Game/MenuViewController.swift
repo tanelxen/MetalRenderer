@@ -17,6 +17,17 @@ final class MenuViewController: NSViewController
         return imageView
     }()
     
+    private let workingDirLabel: NSTextField = {
+        let label = NSTextField()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.textColor = NSColor(deviceRed: 255, green: 220, blue: 0, alpha: 100/255)
+        label.font = .systemFont(ofSize: 12)
+        label.drawsBackground = false
+        label.isEditable = false
+        label.isBezeled = false
+        return label
+    }()
+    
     private let stackView: NSStackView = {
         let stackView = NSStackView()
         stackView.translatesAutoresizingMaskIntoConstraints = false
@@ -27,7 +38,37 @@ final class MenuViewController: NSViewController
     
     private var gameViewController: NSViewController?
     
-    private var mapURLs: [URL] = []
+    private var mapsDir: URL? {
+        
+        guard let workingDir = UserDefaults.standard.url(forKey: "workingDir")
+        else {
+            return nil
+        }
+        
+        let maps = workingDir.appendingPathComponent("Assets/maps")
+        
+        guard FileManager.default.fileExists(atPath: maps.path)
+        else {
+            return nil
+        }
+        
+        return maps
+    }
+    
+    private var items: [URL] {
+        
+        guard let dir = self.mapsDir else { return [] }
+        
+        guard let urls = try? FileManager.default.contentsOfDirectory(
+            at: dir,
+            includingPropertiesForKeys: [.isPackageKey, .isDirectoryKey],
+            options: .skipsHiddenFiles
+        ) else { return [] }
+        
+        return urls.filter {
+            $0.pathExtension == "wld"
+        }
+    }
     
     override func loadView()
     {
@@ -39,9 +80,25 @@ final class MenuViewController: NSViewController
     {
         super.viewDidLoad()
         
-        mapURLs = Bundle.main.urls(forResourcesWithExtension: "bsp", subdirectory: "Assets/q3/maps/") ?? []
+        let workingDir = UserDefaults.standard.url(forKey: "workingDir")
+        workingDirLabel.stringValue = "Working dir: " + (workingDir?.path ?? "")
         
-        let names = mapURLs
+        let listTitleLabel: NSTextField = {
+            let label = NSTextField()
+            label.translatesAutoresizingMaskIntoConstraints = false
+            label.textColor = NSColor(deviceRed: 255, green: 220, blue: 0, alpha: 100/255)
+            label.font = .systemFont(ofSize: 20)
+            label.isEditable = false
+            label.isBezeled = false
+            label.drawsBackground = false
+            label.stringValue = "Available scenes:"
+            label.sizeToFit()
+            return label
+        }()
+        
+        stackView.addArrangedSubview(listTitleLabel)
+
+        let names = items
             .map {
                 $0.deletingPathExtension().lastPathComponent
             }
@@ -50,7 +107,7 @@ final class MenuViewController: NSViewController
         for (index, name) in names.enumerated()
         {
             let button = NSButton(title: name, target: self, action: #selector(playMap))
-            button.font = NSFont(name: "HalfLife", size: 20)
+            button.font = .systemFont(ofSize: 20, weight: .regular)
             button.contentTintColor = NSColor(deviceRed: 255, green: 220, blue: 0, alpha: 150/255)
             button.showsBorderOnlyWhileMouseInside = true
             button.isBordered = false
@@ -62,9 +119,9 @@ final class MenuViewController: NSViewController
     
     @objc private func playMap(_ sender: NSButton)
     {
-        guard sender.tag < mapURLs.count else { return }
+        guard sender.tag < items.count else { return }
         
-        let mapURL = mapURLs[sender.tag]
+        let mapURL = items[sender.tag]
         
         let vc = GameViewController(mapURL: mapURL)
         view.window?.contentView = vc.view
@@ -88,6 +145,12 @@ final class MenuViewController: NSViewController
         NSLayoutConstraint.activate([
             stackView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             stackView.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 40)
+        ])
+        
+        view.addSubview(workingDirLabel)
+        NSLayoutConstraint.activate([
+            workingDirLabel.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0),
+            workingDirLabel.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 0)
         ])
     }
 }

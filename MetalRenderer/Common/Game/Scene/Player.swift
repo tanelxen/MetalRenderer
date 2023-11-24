@@ -30,10 +30,16 @@ class Player
     
     private let shootTimer: TimerManager
     
+    private var bobing: Float = 0.0
+    
     init(scene: Q3MapScene)
     {
         self.scene = scene
-        self.mesh = SkeletalMesh(name: "models/v_9mmhandgun.asset")
+        
+        if let url = ResourceManager.getURL(for: "Assets/models/v_9mmhandgun/mesh.skl")
+        {
+            self.mesh = SkeletalMesh(url: url)
+        }
         
         playerMovement.scene = scene
         
@@ -71,7 +77,10 @@ class Player
         updateInput()
         updateMovement()
         
-        camera.transform.position = transform.position + float3(0, 0, 40)
+        bobing = playerMovement.isWalking ? bobing + GameTime.deltaTime : 0
+        let bob = sin(bobing * 16) * 1.2
+        
+        camera.transform.position = transform.position + float3(0, 0, 40 + bob)
         camera.transform.rotation = transform.rotation
     }
     
