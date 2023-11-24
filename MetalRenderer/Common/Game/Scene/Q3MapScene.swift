@@ -8,6 +8,7 @@
 import Foundation
 import MetalKit
 import SwiftZip
+import BulletSwift
 
 class Q3MapScene
 {
@@ -16,6 +17,7 @@ class Q3MapScene
     private var worldMesh: WorldStaticMesh?
     
     private var collision: Q3MapCollision!
+    private var brushesCollision: BrushCollision!
     
     private var lightGrid: Q3MapLightGrid?
     
@@ -35,6 +37,11 @@ class Q3MapScene
     private (set) var brushes: BrushRenderer?
     
     var onReady: (()->Void)?
+    
+    private let world = BulletWorld()
+    
+    private var colliderTransform = Transform()
+    private var colliderMotion: MotionState?
     
     init(url: URL)
     {
@@ -71,6 +78,9 @@ class Q3MapScene
                     if let asset = try? decoder.decode(WorldCollisionAsset.self, from: data)
                     {
                         collision = Q3MapCollision(asset: asset)
+                        
+                        brushesCollision = BrushCollision()
+                        brushesCollision.loadFromAsset(asset)
                         
 //                        brushes = BrushRenderer()
 //                        brushes?.loadFromAsset(asset)
@@ -116,6 +126,20 @@ class Q3MapScene
         
         isReady = true
         Q3MapScene.current = self
+        
+        world.gravity = vector3(0, 0, -10)
+        
+        createFloor()
+        createCollider()
+        
+        colliderTransform.scale = float3(30, 30, 30)
+        
+        if let position = colliderMotion?.transform.origin
+        {
+            colliderTransform.position = position
+        }
+        
+        Debug.shared.addCube(transform: colliderTransform, color: float4(1, 0, 0, 1))
     }
     
     func startPlaying(in viewport: Viewport)
@@ -159,6 +183,13 @@ class Q3MapScene
         }
         
         Particles.shared.update()
+        
+        world.stepSimulation(timeStep: 1.0/60.0, maxSubSteps: 10, fixedTimeStep: 1.0/60.0)
+        
+        if let position = colliderMotion?.transform.origin
+        {
+            colliderTransform.position = position
+        }
     }
     
     private func spawnPlayer()
@@ -182,6 +213,20 @@ class Q3MapScene
 
             entities.append(barney)
 //            break
+            
+            let shape = BulletBoxShape(halfExtents: vector3(15, 15, 32))
+                
+            let transform = BulletTransform()
+            transform.setIdentity()
+            transform.origin = point.position
+            
+            let motionState = MotionState(transform: transform)
+            
+            let body = BulletRigidBody(mass: 0,
+                                       motionState: motionState,
+                                       collisionShape: shape)
+            
+            world.add(rigidBody: body)
         }
     }
 }
@@ -315,27 +360,163 @@ extension Q3MapScene
 {
     func makeShoot(start: float3, end: float3)
     {
-        var hitResult = HitResult()
-        collision.traceRay(result: &hitResult, start: start, end: end)
+//        var hitResult = HitResult()
+//        collision.traceRay(result: &hitResult, start: start, end: end)
+//
+//        let line = Intersection.Line(start: start, end: hitResult.endpos)
+//
+//        let aabbs = entities.map {
+//            Intersection.AABB(
+//                mins: $0.minBounds + $0.transform.position,
+//                maxs: $0.maxBounds + $0.transform.position
+//            )
+//        }
+//
+//        if let result = Intersection.findIntersection(line: line, aabbs: aabbs)
+//        {
+//            Particles.shared.addParticles(origin: result.point, dir: result.normal, count: 5)
+//            entities[result.index].takeDamage()
+//        }
+//        else if hitResult.fraction > 0, let normal = hitResult.plane?.normal
+//        {
+//            Decals.shared.addDecale(origin: hitResult.endpos, normal: normal)
+//            Particles.shared.addParticles(origin: hitResult.endpos, dir: normal, count: 5)
+//        }
         
-        let line = Intersection.Line(start: start, end: hitResult.endpos)
+        let dynHit = world.rayTestClosest(from: start, to: end, collisionFilterGroup: 1, collisionFilterMask: 1)
         
-        let aabbs = entities.map {
-            Intersection.AABB(
-                mins: $0.minBounds + $0.transform.position,
-                maxs: $0.maxBounds + $0.transform.position
-            )
+        if dynHit.hasHits
+        {
+            let force = normalize(end - start) * 1000
+            dynHit.node.applyForce(force, onPoint: dynHit.hitPos)
         }
         
-        if let result = Intersection.findIntersection(line: line, aabbs: aabbs)
+        let statHit = world.rayTestClosest(from: start, to: end, collisionFilterGroup: 0, collisionFilterMask: 0)
+        
+        if statHit.hasHits
         {
-            Particles.shared.addParticles(origin: result.point, dir: result.normal, count: 5)
-            entities[result.index].takeDamage()
-        }
-        else if hitResult.fraction > 0, let normal = hitResult.plane?.normal
-        {
-            Decals.shared.addDecale(origin: hitResult.endpos, normal: normal)
-            Particles.shared.addParticles(origin: hitResult.endpos, dir: normal, count: 5)
+            Decals.shared.addDecale(origin: statHit.hitPos, normal: statHit.hitNormal)
+            Particles.shared.addParticles(origin: statHit.hitPos, dir: statHit.hitNormal, count: 5)
         }
     }
+    
+    func createFloor()
+    {
+        for brush in brushesCollision.brushes
+        {
+            let shape = BulletConvexHullShape()
+            
+            for point in brush.vertices
+            {
+                shape.addPoint(point)
+            }
+            
+            let transform = BulletTransform()
+            transform.setIdentity()
+            transform.origin = vector3(0, 0, 0)
+            
+            let motionState = MotionState(transform: transform)
+            let body = BulletRigidBody(mass: 0,
+                                       motionState: motionState,
+                                       collisionShape: shape)
+            world.add(rigidBody: body)
+        }
+    }
+    
+    func createCollider()
+    {
+//        let colShape = BulletBoxShape(halfExtents: vector3(15, 15, 15))
+        let colShape = BulletSphereShape(radius: 15)
+        
+        let startTransform = BulletTransform()
+        startTransform.setIdentity()
+        
+        let mass: Float = 1.0
+        let localInertia = colShape.calculateLocalInertia(mass: mass)
+        
+//        startTransform.origin = vector3(256, 1180, 200)
+        startTransform.origin = float3(140, 1443, 100)
+        
+        let colMotionState = MotionState(transform: startTransform)
+        
+        let colBody = BulletRigidBody(mass: mass,
+                                      motionState: colMotionState,
+                                      collisionShape: colShape,
+                                      localInertia: localInertia)
+        
+        world.add(rigidBody: colBody)
+        
+        self.colliderMotion = colMotionState
+    }
+}
+
+protocol BulletMotionState {
+  func getWorldTransform() -> BulletTransform
+  func setWorldTransform(centerOfMassWorldTransform: BulletTransform)
+}
+
+class MotionState: BulletMotionState
+{
+    var transform = BulletTransform()
+
+    init(transform: BulletTransform) {
+        self.transform = transform
+    }
+
+    func getWorldTransform() -> BulletTransform {
+        return transform
+    }
+
+    func setWorldTransform(centerOfMassWorldTransform: BulletTransform) {
+        self.transform = centerOfMassWorldTransform
+    }
+}
+
+extension BulletRigidBody {
+  convenience init(mass: Float, motionState: BulletMotionState, collisionShape: BulletCollisionShape, localInertia: vector_float3 = vector_float3(0, 0, 0)) {
+    self.init(mass: mass,
+              motionStateGetWorldTransform: { () -> BulletTransform in
+                return motionState.getWorldTransform()
+              },
+              motionStateSetWorldTransform: { (transform) in
+                motionState.setWorldTransform(centerOfMassWorldTransform: transform)
+              },
+              collisionShape: collisionShape,
+              localInertia: localInertia)
+  }
+}
+
+extension BulletWorld {
+  
+  @discardableResult
+  func stepSimulation(timeStep: Float, maxSubSteps: Int = 1, fixedTimeStep: Float = Float(1.0/60.0)) -> Int {
+    return Int(__stepSimulation(withTimeStep: timeStep, maxSubSteps: Int32(maxSubSteps), fixedTimeStep: fixedTimeStep))
+  }
+  
+  func add(rigidBody: BulletRigidBody, collisionFilterGroup: Int32, collisionFilterMask: Int32) {
+    __add(rigidBody, withCollisionFilterGroup: collisionFilterGroup, collisionFilterMask: collisionFilterMask)
+  }
+  
+  func add(rigidBody: BulletRigidBody) {
+    __add(rigidBody)
+  }
+  
+  func remove(rigidBody: BulletRigidBody) {
+    __remove(rigidBody)
+  }
+  
+  func add(ghost: BulletGhostObject) {
+    __addGhost(ghost)
+  }
+  
+  func remove(ghost: BulletGhostObject) {
+    __removeGhost(ghost)
+  }
+  
+}
+
+extension BulletCollisionShape {
+  func calculateLocalInertia(mass: Float) -> vector_float3 {
+    return __calculateLocalInertia(withMass: mass)
+  }
 }
