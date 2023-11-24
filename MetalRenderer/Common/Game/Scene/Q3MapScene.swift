@@ -43,6 +43,11 @@ class Q3MapScene
     private var colliderTransform = Transform()
     private var colliderMotion: MotionState?
     
+    private var playerTransform = Transform()
+    
+    private let q2b: Float = 2.54 / 100
+    private let b2q: Float = 100 / 2.54
+    
     init(url: URL)
     {
         do
@@ -134,11 +139,6 @@ class Q3MapScene
         
         colliderTransform.scale = float3(30, 30, 30)
         
-        if let position = colliderMotion?.transform.origin
-        {
-            colliderTransform.position = position
-        }
-        
         Debug.shared.addCube(transform: colliderTransform, color: float4(1, 0, 0, 1))
     }
     
@@ -184,21 +184,29 @@ class Q3MapScene
         
         Particles.shared.update()
         
-        world.stepSimulation(timeStep: 1.0/60.0, maxSubSteps: 10, fixedTimeStep: 1.0/60.0)
-        
         if let position = colliderMotion?.transform.origin
         {
-            colliderTransform.position = position
+            colliderTransform.position = position * b2q
         }
+        
+        world.stepSimulation(timeStep: 1.0/60.0, maxSubSteps: 10, fixedTimeStep: 1.0/60.0)
     }
     
     private func spawnPlayer()
     {
         guard let point = spawnPoints.first else { return }
         
+        let transform = Transform()
+        transform.position = point.position
+        transform.rotation = point.rotation
+        
         player = Player(scene: self)
-        player?.transform.position = point.position
-        player?.transform.rotation = point.rotation
+        player?.spawn(with: transform)
+        
+        if let body = player?.rigidBody
+        {
+            world.add(rigidBody: body)
+        }
     }
     
     private func spawnBarneys()
@@ -212,21 +220,6 @@ class Q3MapScene
             barney.transform.rotation = point.rotation
 
             entities.append(barney)
-//            break
-            
-            let shape = BulletBoxShape(halfExtents: vector3(15, 15, 32))
-                
-            let transform = BulletTransform()
-            transform.setIdentity()
-            transform.origin = point.position
-            
-            let motionState = MotionState(transform: transform)
-            
-            let body = BulletRigidBody(mass: 0,
-                                       motionState: motionState,
-                                       collisionShape: shape)
-            
-            world.add(rigidBody: body)
         }
     }
 }
@@ -243,21 +236,12 @@ extension Q3MapScene
     func renderWorldLightmapped(with encoder: MTLRenderCommandEncoder?)
     {
         guard isReady else { return }
-        
-//        var modelConstants = ModelConstants()
-//        encoder?.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
-        
+
         worldMesh?.renderLightmapped(with: encoder!)
     }
     
     func renderWorldVertexlit(with encoder: MTLRenderCommandEncoder?)
     {
-//        guard isReady else { return }
-//
-//        var modelConstants = ModelConstants()
-//        encoder?.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
-//
-//        bspMesh?.renderVertexlit(with: encoder!)
     }
     
     func renderStaticMeshes(with encoder: MTLRenderCommandEncoder?)
@@ -360,73 +344,79 @@ extension Q3MapScene
 {
     func makeShoot(start: float3, end: float3)
     {
-//        var hitResult = HitResult()
-//        collision.traceRay(result: &hitResult, start: start, end: end)
-//
-//        let line = Intersection.Line(start: start, end: hitResult.endpos)
-//
-//        let aabbs = entities.map {
-//            Intersection.AABB(
-//                mins: $0.minBounds + $0.transform.position,
-//                maxs: $0.maxBounds + $0.transform.position
-//            )
-//        }
-//
-//        if let result = Intersection.findIntersection(line: line, aabbs: aabbs)
-//        {
-//            Particles.shared.addParticles(origin: result.point, dir: result.normal, count: 5)
-//            entities[result.index].takeDamage()
-//        }
-//        else if hitResult.fraction > 0, let normal = hitResult.plane?.normal
-//        {
-//            Decals.shared.addDecale(origin: hitResult.endpos, normal: normal)
-//            Particles.shared.addParticles(origin: hitResult.endpos, dir: normal, count: 5)
-//        }
+        let start = start * q2b
+        let end = end * q2b
         
-        let dynHit = world.rayTestClosest(from: start, to: end, collisionFilterGroup: 1, collisionFilterMask: 1)
+        let dynHit = world.rayTestClosest(from: start, to: end, collisionFilterGroup: 0b1111111, collisionFilterMask: 0b1111111)
         
         if dynHit.hasHits
         {
-            let force = normalize(end - start) * 1000
-            dynHit.node.applyForce(force, onPoint: dynHit.hitPos)
-        }
-        
-        let statHit = world.rayTestClosest(from: start, to: end, collisionFilterGroup: 0, collisionFilterMask: 0)
-        
-        if statHit.hasHits
-        {
-            Decals.shared.addDecale(origin: statHit.hitPos, normal: statHit.hitNormal)
-            Particles.shared.addParticles(origin: statHit.hitPos, dir: statHit.hitNormal, count: 5)
+            if dynHit.node.isStaticObject
+            {
+                print("HIT STATIC", dynHit.hitPos)
+            }
+            else
+            {
+                print("HIT DYNAMIC", dynHit.hitPos)
+                
+                let force = normalize(end - start) * 5
+                
+                
+                dynHit.node.applyCentralImpulse(force)
+                dynHit.node.setActiveState(true)
+            }
         }
     }
     
     func createFloor()
     {
-        for brush in brushesCollision.brushes
+        let usePlane = false
+        
+        if usePlane
         {
-            let shape = BulletConvexHullShape()
-            
-            for point in brush.vertices
-            {
-                shape.addPoint(point)
-            }
-            
+            let shape = BulletStaticPlaneShape(normal: .z_axis, constant: -31.6 * q2b)
+    //        let shape = BulletBoxShape(halfExtents: float3(1000, 1000, 10) * q2b)
+
             let transform = BulletTransform()
             transform.setIdentity()
-            transform.origin = vector3(0, 0, 0)
-            
+    //        transform.origin = vector3(100, 1400, -31.95 - 10) * q2b
+
             let motionState = MotionState(transform: transform)
             let body = BulletRigidBody(mass: 0,
                                        motionState: motionState,
                                        collisionShape: shape)
+            
+    //        body.friction = 1
             world.add(rigidBody: body)
+        }
+        else
+        {
+            for brush in brushesCollision.brushes
+            {
+                let shape = BulletConvexHullShape()
+                
+                for point in brush.vertices
+                {
+                    shape.addPoint(point * q2b)
+                }
+                
+                let transform = BulletTransform()
+                transform.setIdentity()
+                
+                let motionState = MotionState(transform: transform)
+                let body = BulletRigidBody(mass: 0,
+                                           motionState: motionState,
+                                           collisionShape: shape)
+                body.friction = 1
+                world.add(rigidBody: body)
+            }
         }
     }
     
     func createCollider()
     {
-//        let colShape = BulletBoxShape(halfExtents: vector3(15, 15, 15))
-        let colShape = BulletSphereShape(radius: 15)
+        let colShape = BulletBoxShape(halfExtents: vector3(15, 15, 15) * q2b)
+//        let colShape = BulletSphereShape(radius: 15.0 * q2b)
         
         let startTransform = BulletTransform()
         startTransform.setIdentity()
@@ -435,7 +425,7 @@ extension Q3MapScene
         let localInertia = colShape.calculateLocalInertia(mass: mass)
         
 //        startTransform.origin = vector3(256, 1180, 200)
-        startTransform.origin = float3(140, 1443, 100)
+        startTransform.origin = float3(140, 1443, 100) * q2b
         
         let colMotionState = MotionState(transform: startTransform)
         
@@ -444,6 +434,7 @@ extension Q3MapScene
                                       collisionShape: colShape,
                                       localInertia: localInertia)
         
+//        colBody.friction = 1
         world.add(rigidBody: colBody)
         
         self.colliderMotion = colMotionState

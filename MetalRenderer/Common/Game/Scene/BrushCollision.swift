@@ -21,7 +21,7 @@ final class BrushCollision
     {
         for brush in asset.brushes
         {
-            if !brush.contentFlags.contains(.SOLID) {
+            if !(brush.contentFlags.contains(.SOLID) || brush.contentFlags.contains(.PLAYERCLIP)) {
                 continue
             }
             
