@@ -167,4 +167,53 @@ enum Intersection
         
         return closestIntersection
     }
+    
+    static func hit(line: Line, mins: float3, maxs: float3) -> Result?
+    {
+        let dir = line.start - line.end
+        
+        let t1 = (mins - line.start) / dir
+        let t2 = (maxs - line.start) / dir
+        
+        let tmin = max(max(min(t1.x, t2.x), min(t1.y, t2.y)), min(t1.z, t2.z))
+        let tmax = min(min(max(t1.x, t2.x), max(t1.y, t2.y)), max(t1.z, t2.z))
+        
+        if tmin <= tmax
+        {
+            // Intersection found
+            let point = line.start + dir * tmin
+            
+            // Determine the normal based on which face of the AABB was hit
+            var normal = float3(0, 0, 0)
+            
+            for i in 0...2
+            {
+                if tmin == t1[i] {
+                    normal[i] = -1
+                    break
+                }
+                
+                if tmin == t2[i] {
+                    normal[i] = 1
+                    break
+                }
+            }
+            
+            // Adjust the normal to reflect the correct axis of intersection
+            if normal.x != 0 {
+                normal.y = 0
+                normal.z = 0
+            } else if normal.y != 0 {
+                normal.x = 0
+                normal.z = 0
+            } else {
+                normal.x = 0
+                normal.y = 0
+            }
+            
+            return Result(point: point, normal: normal, index: -1)
+        }
+        
+        return nil
+    }
 }

@@ -20,6 +20,13 @@ final class Debug
     {
         let transform: Transform
         let color: float4
+        
+        /*
+         value in seconds
+         -1 - draw eternaly
+          0 - draw one frame
+         */
+        var lifespan: Float
     }
     
     private var lines: [Line] = []
@@ -48,15 +55,15 @@ final class Debug
         lines.append(line)
     }
     
-    func addCube(transform: Transform, color: float4)
+    func addCube(transform: Transform, color: float4, lifespan: Float = -1)
     {
-        let cube = Shape(transform: transform, color: color)
+        let cube = Shape(transform: transform, color: color, lifespan: lifespan)
         cubes.append(cube)
     }
     
-    func addQuad(transform: Transform, color: float4)
+    func addQuad(transform: Transform, color: float4, lifespan: Float = -1)
     {
-        let quad = Shape(transform: transform, color: color)
+        let quad = Shape(transform: transform, color: color, lifespan: lifespan)
         quads.append(quad)
     }
     
@@ -92,6 +99,8 @@ final class Debug
         
         var pointer = cubesConstantsBuffer.contents().bindMemory(to: ModelConstants.self, capacity: maxInstances)
         
+        var instancesCount: Int = 0
+        
         for (index, cube) in cubes.enumerated()
         {
             guard index < maxInstances else { break }
@@ -104,11 +113,17 @@ final class Debug
 
             pointer.pointee = modelConstants
             pointer = pointer.advanced(by: 1)
+            
+            instancesCount += 1
         }
+        
+        cubes.removeAll(where: { $0.lifespan == 0 })
+        
+        guard instancesCount > 0 else { return }
         
         encoder?.setVertexBuffer(cubesConstantsBuffer, offset: 0, index: 2)
         
-        cubeShape.render(with: encoder, instanceCount: cubes.count)
+        cubeShape.render(with: encoder, instanceCount: instancesCount)
     }
     
     private func drawQuads(with encoder: MTLRenderCommandEncoder?)

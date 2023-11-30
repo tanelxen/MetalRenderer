@@ -11,6 +11,8 @@ import SwiftZip
 
 class Q3MapScene
 {
+    let name: String
+    
     private let skybox = Skybox()
     
     private var worldMesh: WorldStaticMesh?
@@ -32,12 +34,15 @@ class Q3MapScene
     
     private (set) static var current: Q3MapScene!
     
-    private (set) var brushes: BrushRenderer?
+//    private (set) var brushes: BrushRenderer?
+    let aabbTree = AABBTree()
     
     var onReady: (()->Void)?
     
     init(url: URL)
     {
+        name = url.deletingPathExtension().lastPathComponent
+        
         do
         {
             let archive = try ZipArchive(url: url)
@@ -70,6 +75,8 @@ class Q3MapScene
                     if let asset = try? decoder.decode(WorldCollisionAsset.self, from: data)
                     {
                         collision = Q3MapCollision(asset: asset)
+                        
+                        aabbTree.loadFromAsset(asset)
                         
 //                        brushes = BrushRenderer()
 //                        brushes?.loadFromAsset(asset)
@@ -293,19 +300,37 @@ extension Q3MapScene
         return hitResult.fraction >= 1
     }
     
-    func trace2(start: float3, end: float3) -> HitResult
-    {
-        var hitResult = HitResult()
-        collision.traceRay(result: &hitResult, start: start, end: end)
-        
-        return hitResult
-    }
-    
     func trace(start: float3, end: float3, mins: float3, maxs: float3) -> HitResult
     {
         var hitResult = HitResult()
         collision.traceBox(result: &hitResult, start: start, end: end, mins: mins, maxs: maxs)
         
+//        hitResult.fraction = 1.0
+//        hitResult.start = start
+//        hitResult.end = end
+//        hitResult.endpos = end
+//
+//        if let hit = brushes.traceBox(
+//            start: start,
+//            end: end,
+//            mins: .zero,
+//            maxs: testTransform.scale
+//        )
+//        {
+//            if hit.sweepTestFraction < 1
+//            {
+//                hitResult.endpos = start + Float(hit.sweepTestFraction) * (end - start)
+//            }
+//            else
+//            {
+//                hitResult.endpos = start
+//            }
+//
+//            hitResult.fraction = Float(hit.sweepTestFraction)
+////            hitResult.endpos = start + Float(hit.sweepTestFraction) * (end - start)
+//            hitResult.plane = WorldCollisionAsset.Plane(normal: float3(hit.contactNormal), distance: 0)
+//        }
+
         return hitResult
     }
 }
@@ -316,25 +341,35 @@ extension Q3MapScene
     {
         var hitResult = HitResult()
         collision.traceRay(result: &hitResult, start: start, end: end)
+
+//        let line = Intersection.Line(start: start, end: hitResult.endpos)
+//
+//        let aabbs = entities.map {
+//            Intersection.AABB(
+//                mins: $0.minBounds + $0.transform.position,
+//                maxs: $0.maxBounds + $0.transform.position
+//            )
+//        }
         
-        let line = Intersection.Line(start: start, end: hitResult.endpos)
+        Debug.shared.addLine(start: start, end: end, color: float4(0, 1, 0, 1))
         
-        let aabbs = entities.map {
-            Intersection.AABB(
-                mins: $0.minBounds + $0.transform.position,
-                maxs: $0.maxBounds + $0.transform.position
-            )
-        }
-        
-        if let result = Intersection.findIntersection(line: line, aabbs: aabbs)
+        if let result = aabbTree.intersection(start: start, end: end)
         {
             Particles.shared.addParticles(origin: result.point, dir: result.normal, count: 5)
-            entities[result.index].takeDamage()
+            Decals.shared.addDecale(origin: result.point, normal: result.normal)
+            
+            print(result.point, hitResult.endpos)
         }
-        else if hitResult.fraction > 0, let normal = hitResult.plane?.normal
-        {
-            Decals.shared.addDecale(origin: hitResult.endpos, normal: normal)
-            Particles.shared.addParticles(origin: hitResult.endpos, dir: normal, count: 5)
-        }
+        
+//        if let result = Intersection.findIntersection(line: line, aabbs: aabbs)
+//        {
+//            Particles.shared.addParticles(origin: result.point, dir: result.normal, count: 5)
+//            entities[result.index].takeDamage()
+//        }
+//        else if hitResult.fraction > 0, let normal = hitResult.plane?.normal
+//        {
+//            Decals.shared.addDecale(origin: hitResult.endpos, normal: normal)
+//            Particles.shared.addParticles(origin: hitResult.endpos, dir: normal, count: 5)
+//        }
     }
 }
