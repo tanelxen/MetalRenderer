@@ -27,8 +27,10 @@ struct HitResult
     var allsolid = false
     
     var depth = 0
+    var checkedNodesCount = 0
     var checkedBrushesCount = 0
-    var sweepBox: BoundingBox!
+
+    var tracedBox: BoundingBox!
 }
 
 fileprivate let CONTENTS_SOLID: Int = 1

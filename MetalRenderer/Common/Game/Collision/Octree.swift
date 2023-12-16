@@ -48,12 +48,17 @@ final class Octree
         
         split(node: root, items: items, depth: 0)
         
-//        let playerBox = BoundingBox(min: float3(-15, -15, -24), max: float3(15, 15, 32))
-//
-//        for i in 0 ..< nodes.count
-//        {
-//            nodes[i].boundingBox = nodes[i].boundingBox.minkowski(with: playerBox)
-//        }
+        var maxDepth = 0
+        
+        for node in nodes
+        {
+            if node.depth > maxDepth
+            {
+                maxDepth = node.depth
+            }
+        }
+        
+        print("octree.maxDepth", maxDepth)
         
         for node in nodes
         {
@@ -471,26 +476,14 @@ extension Octree
         work.offsets[7][1] = work.maxs[1]
         work.offsets[7][2] = work.maxs[2]
         
-        work.sweepBox = overallBoundingBox(for: [
-            BoundingBox(min: start + mins, max: start + maxs),
-            BoundingBox(min: end + mins, max: end + maxs)
-        ])
-        
-//        for brush in brushes
-//        {
-//            trace_brush(brush, work: &work)
-//
-//            if work.allsolid {
-//                return
-//            }
-//        }
+        work.tracedBox = BoundingBox(min: work.mins, max: work.maxs)
         
         if let root = self.root
         {
             trace_node(work: &work, node: root, start: start, end: end)
         }
         
-//        print("work.checkedBrushesCount", work.checkedBrushesCount)
+//        print("checkedNodesCount", work.checkedNodesCount, "checkedBrushesCount", work.checkedBrushesCount)
 
         if work.fraction == 1.0
         {
@@ -506,9 +499,9 @@ extension Octree
     
     private func trace_node(work: inout HitResult, node: OctreeNode, start: float3, end: float3)
     {
-        let tracedBox = BoundingBox(min: work.mins, max: work.maxs)
-        let minkowski = node.boundingBox.minkowski(with: tracedBox)
+        work.checkedNodesCount += 1
         
+        let minkowski = node.boundingBox.minkowski(with: work.tracedBox)
         let check = lineIntersectionAABB(start: start, end: end, mins: minkowski.min, maxs: minkowski.max)
         
         guard check else { return }
@@ -526,7 +519,7 @@ extension Octree
         }
         
         let sorted = node.children.sorted(by: {
-            length($0.boundingBox.center - start) < length($1.boundingBox.center - start)
+            length_squared($0.boundingBox.center - start) < length_squared($1.boundingBox.center - start)
         })
         
         for child in sorted
@@ -576,7 +569,7 @@ private extension BoundingBox
     }
     
     var hasValidSize: Bool {
-        size.x > 64 && size.y > 64 && size.z > 64
+        size.x > 32 && size.y > 32 && size.z > 32
     }
     
     var frontLeftTop: BoundingBox {

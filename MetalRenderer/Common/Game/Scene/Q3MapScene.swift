@@ -140,9 +140,9 @@ class Q3MapScene
         
         AudioEngine.play(file: "Half-Life13.mp3")
         
-//        DispatchQueue.global().async {
-//            self.spawnBarneys()
-//        }
+        DispatchQueue.global().async {
+            self.spawnBarneys()
+        }
         
         spawnPlayer()
         
@@ -312,9 +312,9 @@ extension Q3MapScene
     {
         var hitResult = HitResult()
         
-        Utils.timeProfile("octree.traceBox") {
+//        Utils.timeProfile("octree.traceBox") {
             octree.traceBox(result: &hitResult, start: start, end: end, mins: mins, maxs: maxs)
-        }
+//        }
         
 //        Utils.timeProfile("collision.traceBox") {
 //            collision.traceBox(result: &hitResult, start: start, end: end, mins: mins, maxs: maxs)

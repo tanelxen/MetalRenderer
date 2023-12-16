@@ -92,10 +92,14 @@ final class ForwardRenderer
         
 //        Q3MapScene.current?.brushes?.render(with: encoder)
         
+        encoder.setCullMode(.none)
+        
         Debug.shared.render(with: encoder)
         
         encoder.setRenderPipelineState(pipelineStates.basicInst)
         Debug.shared.renderInstanced(with: encoder)
+        
+        encoder.setCullMode(.back)
         
         encoder.popDebugGroup()
     }
