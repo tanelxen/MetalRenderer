@@ -25,6 +25,10 @@ struct HitResult
     
     var startsolid = false
     var allsolid = false
+    
+    var depth = 0
+    var checkedBrushesCount = 0
+    var sweepBox: BoundingBox!
 }
 
 fileprivate let CONTENTS_SOLID: Int = 1
@@ -273,6 +277,7 @@ class Q3MapCollision
             
             if brush.contentFlags & (CONTENTS_SOLID | CONTENTS_PLAYERCLIP) != 0
             {
+                work.checkedBrushesCount += 1
                 trace_brush(brush, work: &work)
                 
                 if work.allsolid {

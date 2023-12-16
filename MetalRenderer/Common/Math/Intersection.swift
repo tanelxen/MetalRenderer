@@ -168,6 +168,11 @@ enum Intersection
         return closestIntersection
     }
     
+    static func hit(line: Line, bbox: BoundingBox) -> Result?
+    {
+        return hit(line: line, mins: bbox.min, maxs: bbox.max)
+    }
+    
     static func hit(line: Line, mins: float3, maxs: float3) -> Result?
     {
         let dir = line.start - line.end

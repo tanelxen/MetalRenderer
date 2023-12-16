@@ -35,7 +35,10 @@ class Q3MapScene
     private (set) static var current: Q3MapScene!
     
 //    private (set) var brushes: BrushRenderer?
-    let aabbTree = AABBTree()
+    
+    let kdTree = KdTree()
+    let octree = Octree()
+    let bspTree = BSPTree()
     
     var onReady: (()->Void)?
     
@@ -46,6 +49,8 @@ class Q3MapScene
         do
         {
             let archive = try ZipArchive(url: url)
+            
+            var lightmap: MTLTexture?
             
             for entry in archive.entries()
             {
@@ -64,8 +69,7 @@ class Q3MapScene
                 
                 if name == "lightmap.png"
                 {
-                    let lightmap = TextureManager.shared.getTexture(data: data, SRGB: false)
-                    worldMesh?.setLightmap(lightmap)
+                    lightmap = TextureManager.shared.getTexture(data: data, SRGB: false)
                 }
                 
                 if name == "collision.json"
@@ -76,7 +80,9 @@ class Q3MapScene
                     {
                         collision = Q3MapCollision(asset: asset)
                         
-                        aabbTree.loadFromAsset(asset)
+//                        kdTree.loadFromAsset(asset)
+                        octree.loadFromAsset(asset)
+//                        bspTree.loadFromAsset(asset)
                         
 //                        brushes = BrushRenderer()
 //                        brushes?.loadFromAsset(asset)
@@ -114,6 +120,8 @@ class Q3MapScene
                     }
                 }
             }
+            
+            worldMesh?.setLightmap(lightmap)
         }
         catch
         {
@@ -132,9 +140,9 @@ class Q3MapScene
         
         AudioEngine.play(file: "Half-Life13.mp3")
         
-        DispatchQueue.global().async {
-            self.spawnBarneys()
-        }
+//        DispatchQueue.global().async {
+//            self.spawnBarneys()
+//        }
         
         spawnPlayer()
         
@@ -303,32 +311,13 @@ extension Q3MapScene
     func trace(start: float3, end: float3, mins: float3, maxs: float3) -> HitResult
     {
         var hitResult = HitResult()
-        collision.traceBox(result: &hitResult, start: start, end: end, mins: mins, maxs: maxs)
         
-//        hitResult.fraction = 1.0
-//        hitResult.start = start
-//        hitResult.end = end
-//        hitResult.endpos = end
-//
-//        if let hit = brushes.traceBox(
-//            start: start,
-//            end: end,
-//            mins: .zero,
-//            maxs: testTransform.scale
-//        )
-//        {
-//            if hit.sweepTestFraction < 1
-//            {
-//                hitResult.endpos = start + Float(hit.sweepTestFraction) * (end - start)
-//            }
-//            else
-//            {
-//                hitResult.endpos = start
-//            }
-//
-//            hitResult.fraction = Float(hit.sweepTestFraction)
-////            hitResult.endpos = start + Float(hit.sweepTestFraction) * (end - start)
-//            hitResult.plane = WorldCollisionAsset.Plane(normal: float3(hit.contactNormal), distance: 0)
+        Utils.timeProfile("octree.traceBox") {
+            octree.traceBox(result: &hitResult, start: start, end: end, mins: mins, maxs: maxs)
+        }
+        
+//        Utils.timeProfile("collision.traceBox") {
+//            collision.traceBox(result: &hitResult, start: start, end: end, mins: mins, maxs: maxs)
 //        }
 
         return hitResult
@@ -353,11 +342,11 @@ extension Q3MapScene
         
         Debug.shared.addLine(start: start, end: end, color: float4(0, 1, 0, 1))
         
-        if let result = aabbTree.intersection(start: start, end: end)
+        if let result = octree.intersection(start: start, end: end)
         {
             Particles.shared.addParticles(origin: result.point, dir: result.normal, count: 5)
             Decals.shared.addDecale(origin: result.point, normal: result.normal)
-            
+
             print(result.point, hitResult.endpos)
         }
         

@@ -233,8 +233,8 @@ extension AABBTree
 
 struct BoundingBox
 {
-    let min: SIMD3<Float>
-    let max: SIMD3<Float>
+    var min: SIMD3<Float>
+    var max: SIMD3<Float>
     
     var center: float3 {
         return (min + max) * 0.5
@@ -242,6 +242,15 @@ struct BoundingBox
     
     var size: float3 {
         max - min
+    }
+    
+    // Minkowski sum
+    func minkowski(with other: BoundingBox) -> BoundingBox
+    {
+        return BoundingBox(
+            min: min - other.size * 0.5,
+            max: max + other.size * 0.5
+        )
     }
 }
 

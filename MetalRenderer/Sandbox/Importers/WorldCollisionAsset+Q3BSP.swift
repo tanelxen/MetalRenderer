@@ -27,6 +27,7 @@ extension WorldCollisionAsset
         
         asset.brushes = bsp.brushes.map {
             Brush(
+                name: nil,
                 brushside: $0.brushside,
                 numBrushsides: $0.numBrushsides,
                 contentFlags: Int(bsp.textures[$0.texture].contentFlags)
@@ -64,6 +65,7 @@ extension WorldCollisionAsset
         
         asset.brushes = bsp.brushes.map {
             Brush(
+                name: nil,
                 brushside: $0.brushside,
                 numBrushsides: $0.numBrushsides,
                 contentFlags: Int(bsp.textures[$0.texture].contentFlags)

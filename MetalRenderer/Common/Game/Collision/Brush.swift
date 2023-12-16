@@ -12,12 +12,22 @@ class Brush
 {
     typealias Plane = WorldCollisionAsset.Plane
     
+    var name: String = "brush"
+    
     let planes: [Plane]
     let vertices: [float3]
     let triangles: [float3]
     
+    var bounds: BoundingBox {
+        BoundingBox(min: minBounds, max: maxBounds)
+    }
+    
     let minBounds: float3
     let maxBounds: float3
+    
+    var center: float3 {
+        (minBounds + maxBounds) * 0.5
+    }
     
     init(planes: [Plane])
     {

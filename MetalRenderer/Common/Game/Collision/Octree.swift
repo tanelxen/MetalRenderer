@@ -7,441 +7,631 @@
 
 import Foundation
 import simd
-//import MetalKit
 
-struct Octant: CustomStringConvertible
+final class Octree
 {
-    var boxMin: vector_float3
-    var boxMax: vector_float3
+    var root: OctreeNode?
+    var nodes: [OctreeNode] = []
     
-    init(boxMin: vector_float3, boxMax: vector_float3)
+    var brushes: [Brush] = []
+    
+    func loadFromAsset(_ asset: WorldCollisionAsset)
     {
-        self.boxMin = boxMin
-        self.boxMax = boxMax
-    }
-    
-    var boxSize: vector_float3 {
-        return boxMax - boxMin
-    }
-    
-    var halfBoxSize: vector_float3 {
-        return boxSize * 0.5
-    }
-    
-    var frontLeftTop: Octant {
-        let boxMin = self.boxMin + vector_float3(0, halfBoxSize.y, halfBoxSize.z)
-        let boxMax = self.boxMax - vector_float3(halfBoxSize.x, 0, 0)
-        return Octant(boxMin: boxMin, boxMax: boxMax)
-    }
-    
-    var frontLeftBottom: Octant {
-        let boxMin = self.boxMin + vector_float3(0, 0, halfBoxSize.z)
-        let boxMax = self.boxMax - vector_float3(halfBoxSize.x, halfBoxSize.y, 0)
-        return Octant(boxMin: boxMin, boxMax: boxMax)
-    }
-    
-    var frontRightTop: Octant {
-        let boxMin = self.boxMin + vector_float3(halfBoxSize.x, halfBoxSize.y, halfBoxSize.z)
-        let boxMax = self.boxMax - vector_float3(0, 0, 0)
-        return Octant(boxMin: boxMin, boxMax: boxMax)
-    }
-    
-    var frontRightBottom: Octant {
-        let boxMin = self.boxMin + vector_float3(halfBoxSize.x, 0, halfBoxSize.z)
-        let boxMax = self.boxMax - vector_float3(0, halfBoxSize.y, 0)
-        return Octant(boxMin: boxMin, boxMax: boxMax)
-    }
-    
-    var backLeftTop: Octant {
-        let boxMin = self.boxMin + vector_float3(0, halfBoxSize.y, 0)
-        let boxMax = self.boxMax - vector_float3(halfBoxSize.x, 0, halfBoxSize.z)
-        return Octant(boxMin: boxMin, boxMax: boxMax)
-    }
-    
-    var backLeftBottom: Octant {
-        let boxMin = self.boxMin + vector_float3(0, 0, 0)
-        let boxMax = self.boxMax - vector_float3(halfBoxSize.x, halfBoxSize.y, halfBoxSize.z)
-        return Octant(boxMin: boxMin, boxMax: boxMax)
-    }
-    
-    var backRightTop: Octant {
-        let boxMin = self.boxMin + vector_float3(halfBoxSize.x, halfBoxSize.y, 0)
-        let boxMax = self.boxMax - vector_float3(0, 0, halfBoxSize.z)
-        return Octant(boxMin: boxMin, boxMax: boxMax)
-    }
-    
-    var backRightBottom: Octant {
-        let boxMin = self.boxMin + vector_float3(halfBoxSize.x, 0, 0)
-        let boxMax = self.boxMax - vector_float3(0, halfBoxSize.y, halfBoxSize.z)
-        return Octant(boxMin: boxMin, boxMax: boxMax)
-    }
-    
-    func contains(_ point: vector_float3) -> Bool {
-        return (boxMin.x <= point.x && point.x <= boxMax.x) && (boxMin.y <= point.y && point.y <= boxMax.y) && (boxMin.z <= point.z && point.z <= boxMax.z)
-    }
-    
-    func contains(_ box: Octant) -> Bool {
-        return
-            self.boxMin.x <= box.boxMin.x &&
-                self.boxMin.y <= box.boxMin.y &&
-                self.boxMin.z <= box.boxMin.z &&
-                self.boxMax.x >= box.boxMax.x &&
-                self.boxMax.y >= box.boxMax.y &&
-                self.boxMax.z >= box.boxMax.z
-    }
-    
-    func isContained(in box: Octant) -> Bool {
-        return
-            self.boxMin.x >= box.boxMin.x &&
-                self.boxMin.y >= box.boxMin.y &&
-                self.boxMin.z >= box.boxMin.z &&
-                self.boxMax.x <= box.boxMax.x &&
-                self.boxMax.y <= box.boxMax.y &&
-                self.boxMax.z <= box.boxMax.z
-    }
-    
-    /* This intersect function does not handle all possibilities such as two beams
-     of different diameter crossing each other half way. But it does cover all cases
-     needed for an octree as the bounding box has to contain the given intersect box */
-    func intersects(_ box: Octant) -> Bool {
-        let corners = [
-            vector_float3(boxMin.x, boxMax.y, boxMax.z), //frontLeftTop
-            vector_float3(boxMin.x, boxMin.y, boxMax.z), //frontLeftBottom
-            vector_float3(boxMax.x, boxMax.y, boxMax.z), //frontRightTop
-            vector_float3(boxMax.x, boxMin.y, boxMax.z), //frontRightBottom
-            vector_float3(boxMin.x, boxMax.y, boxMin.z), //backLeftTop
-            vector_float3(boxMin.x, boxMin.y, boxMin.z), //backLeftBottom
-            vector_float3(boxMax.x, boxMax.y, boxMin.z), //backRightTop
-            vector_float3(boxMax.x, boxMin.y, boxMin.z)  //backRightBottom
-        ]
-        for corner in corners {
-            if box.contains(corner) {
-                return true
+        for (index, brush) in asset.brushes.enumerated()
+        {
+            if !(brush.contentFlags.contains(.SOLID) || brush.contentFlags.contains(.PLAYERCLIP)) {
+                continue
             }
+            
+            let name = brush.name ?? "brush_\(index)"
+            
+            let sides = asset.brushSides[brush.brushside ..< brush.brushside + brush.numBrushsides]
+            let planes = sides.map { asset.planes[$0.plane] }
+            
+            let brush = Brush(planes: planes)
+            brush.name = name
+            
+            brushes.append(brush)
         }
-        return false
+        
+        root = buildTree(for: brushes)
     }
     
-    var description: String {
-        return "Box from:\(boxMin) to:\(boxMax)"
+    private func buildTree(for items: [Brush]) -> OctreeNode?
+    {
+        guard !items.isEmpty else { return nil }
+
+        let bounds = overallBoundingBox(for: items)
+        let root = OctreeNode(boundingBox: bounds)
+        
+        nodes.append(root)
+        
+        split(node: root, items: items, depth: 0)
+        
+//        let playerBox = BoundingBox(min: float3(-15, -15, -24), max: float3(15, 15, 32))
+//
+//        for i in 0 ..< nodes.count
+//        {
+//            nodes[i].boundingBox = nodes[i].boundingBox.minkowski(with: playerBox)
+//        }
+        
+        for node in nodes
+        {
+            node.children = [
+                node.frontLeftTop,
+                node.frontLeftBottom,
+                node.frontRightTop,
+                node.frontRightBottom,
+                node.backLeftTop,
+                node.backLeftBottom,
+                node.backRightTop,
+                node.backRightBottom
+            ].compactMap({ $0 })
+        }
+
+        return root
+    }
+    
+    private func split(node: OctreeNode, items: [Brush], depth: Int)
+    {
+        node.depth = depth
+        
+        guard items.count > 1 && node.boundingBox.hasValidSize else {
+            node.isLeaf = true
+            node.items = items
+            return
+        }
+        
+        let frontLeftTopBounds = node.boundingBox.frontLeftTop
+        let frontLeftBottomBounds = node.boundingBox.frontLeftBottom
+        let frontRightTopBounds = node.boundingBox.frontRightTop
+        let frontRightBottomBounds = node.boundingBox.frontRightBottom
+        
+        let backLeftTopBounds = node.boundingBox.backLeftTop
+        let backLeftBottomBounds = node.boundingBox.backLeftBottom
+        let backRightTopBounds = node.boundingBox.backRightTop
+        let backRightBottomBounds = node.boundingBox.backRightBottom
+        
+        let frontLeftTopItems = items.filter({ isIntersect($0.bounds, frontLeftTopBounds) })
+        let frontLeftBottomItems = items.filter({ isIntersect($0.bounds, frontLeftBottomBounds) })
+        let frontRightTopItems = items.filter({ isIntersect($0.bounds, frontRightTopBounds) })
+        let frontRightBottomItems = items.filter({ isIntersect($0.bounds, frontRightBottomBounds) })
+        
+        let backLeftTopItems = items.filter({ isIntersect($0.bounds, backLeftTopBounds) })
+        let backLeftBottomItems = items.filter({ isIntersect($0.bounds, backLeftBottomBounds) })
+        let backRightTopItems = items.filter({ isIntersect($0.bounds, backRightTopBounds) })
+        let backRightBottomItems = items.filter({ isIntersect($0.bounds, backRightBottomBounds) })
+    
+        
+        if !frontLeftTopItems.isEmpty
+        {
+            let child = OctreeNode(boundingBox: frontLeftTopBounds)
+            node.frontLeftTop = child
+            
+            nodes.append(child)
+            
+            split(node: child, items: frontLeftTopItems, depth: depth + 1)
+        }
+        
+        if !frontLeftBottomItems.isEmpty
+        {
+            let child = OctreeNode(boundingBox: frontLeftBottomBounds)
+            node.frontLeftBottom = child
+            
+            nodes.append(child)
+            
+            split(node: child, items: frontLeftBottomItems, depth: depth + 1)
+        }
+        
+        if !frontRightTopItems.isEmpty
+        {
+            let child = OctreeNode(boundingBox: frontRightTopBounds)
+            node.frontRightTop = child
+            
+            nodes.append(child)
+            
+            split(node: child, items: frontRightTopItems, depth: depth + 1)
+        }
+        
+        if !frontRightBottomItems.isEmpty
+        {
+            let child = OctreeNode(boundingBox: frontRightBottomBounds)
+            node.frontRightBottom = child
+            
+            nodes.append(child)
+            
+            split(node: child, items: frontRightBottomItems, depth: depth + 1)
+        }
+        
+        if !backLeftTopItems.isEmpty
+        {
+            let child = OctreeNode(boundingBox: backLeftTopBounds)
+            node.backLeftTop = child
+            
+            nodes.append(child)
+            
+            split(node: child, items: backLeftTopItems, depth: depth + 1)
+        }
+        
+        if !backLeftBottomItems.isEmpty
+        {
+            let child = OctreeNode(boundingBox: backLeftBottomBounds)
+            node.backLeftBottom = child
+            
+            nodes.append(child)
+            
+            split(node: child, items: backLeftBottomItems, depth: depth + 1)
+        }
+        
+        if !backRightTopItems.isEmpty
+        {
+            let child = OctreeNode(boundingBox: backRightTopBounds)
+            node.backRightTop = child
+            
+            nodes.append(child)
+            
+            split(node: child, items: backRightTopItems, depth: depth + 1)
+        }
+        
+        if !backRightBottomItems.isEmpty
+        {
+            let child = OctreeNode(boundingBox: backRightBottomBounds)
+            node.backRightBottom = child
+            
+            nodes.append(child)
+            
+            split(node: child, items: backRightBottomItems, depth: depth + 1)
+        }
+    }
+    
+    private func isIntersect(_ first: BoundingBox, _ second: BoundingBox) -> Bool
+    {
+        return first.min.x <= second.max.x &&
+        first.max.x >= second.min.x &&
+        first.min.y <= second.max.y &&
+        first.max.y >= second.min.y &&
+        first.min.z <= second.max.z &&
+        first.max.z >= second.min.z
+    }
+    
+    private func isFirstFullInsideSecond(_ first: BoundingBox, _ second: BoundingBox) -> Bool
+    {
+        return first.min.x > second.min.x &&
+        first.max.x < second.max.x &&
+        first.min.y > second.min.y &&
+        first.max.y < second.max.y &&
+        first.min.z > second.min.z &&
+        first.max.z < second.max.z
+    }
+    
+    private func overallBoundingBox(for objects: [Brush]) -> BoundingBox
+    {
+        var minValues = SIMD3<Float>(repeating: Float.greatestFiniteMagnitude)
+        var maxValues = SIMD3<Float>(repeating: -Float.greatestFiniteMagnitude)
+        
+        for object in objects
+        {
+            minValues.x = min(minValues.x, object.minBounds.x)
+            minValues.y = min(minValues.y, object.minBounds.y)
+            minValues.z = min(minValues.z, object.minBounds.z)
+            
+            maxValues.x = max(maxValues.x, object.maxBounds.x)
+            maxValues.y = max(maxValues.y, object.maxBounds.y)
+            maxValues.z = max(maxValues.z, object.maxBounds.z)
+        }
+        
+        return BoundingBox(min: minValues, max: maxValues)
     }
 }
 
-class OctreeNode<T: Equatable>: CustomStringConvertible
+extension Octree
 {
-    let box: Octant
-    var point: vector_float3!
-    var elements: [T]!
-    var type: NodeType = .leaf
-    
-//    var aabb: AABB?
-    
-    enum NodeType {
-        case leaf
-        case `internal`(children: Children)
-    }
-    
-    public var description: String {
-        switch type {
-        case .leaf:
-            return "leaf node with \(box) elements: \(elements)"
-        case .internal:
-            return "internal node with \(box)"
-        }
-    }
-    
-    var recursiveDescription: String {
-        return recursiveDescription(withTabCount: 0)
-    }
-    
-    private func recursiveDescription(withTabCount count: Int) -> String {
-        let indent = String(repeating: "\t", count: count)
-        var result = "\(indent)" + description + "\n"
-        switch type {
-        case .internal(let children):
-            for child in children {
-                result += child.recursiveDescription(withTabCount: count + 1)
-            }
-        default:
-            break
-        }
-        return result
-    }
-    
-//    func render(with encoder: MTLRenderCommandEncoder?)
-//    {
-//        aabb?.render(with: encoder)
-//
-//        switch type
-//        {
-//            case .internal(let children):
-//                for child in children
-//                {
-//                    child.render(with: encoder)
-//                }
-//
-//            default:
-//                break
-//        }
-//    }
-    
-    struct Children: Sequence
+    func intersection(start: float3, end: float3) -> Intersection.Result?
     {
-        let frontLeftTop: OctreeNode
-        let frontLeftBottom: OctreeNode
-        let frontRightTop: OctreeNode
-        let frontRightBottom: OctreeNode
-        let backLeftTop: OctreeNode
-        let backLeftBottom: OctreeNode
-        let backRightTop: OctreeNode
-        let backRightBottom: OctreeNode
+        guard let root = self.root else { return nil }
         
-        init(parentNode: OctreeNode)
+        let line = Intersection.Line(start: start, end: end)
+        return intersect(line: line, node: root)
+    }
+    
+    private func intersect(line: Intersection.Line, node: OctreeNode) -> Intersection.Result?
+    {
+        if intersectSegmentWithAABB(start: line.start, end: line.end, box: node.boundingBox)
         {
-            frontLeftTop = OctreeNode(box: parentNode.box.frontLeftTop)
-            frontLeftBottom = OctreeNode(box: parentNode.box.frontLeftBottom)
-            frontRightTop = OctreeNode(box: parentNode.box.frontRightTop)
-            frontRightBottom = OctreeNode(box: parentNode.box.frontRightBottom)
-            backLeftTop = OctreeNode(box: parentNode.box.backLeftTop)
-            backLeftBottom = OctreeNode(box: parentNode.box.backLeftBottom)
-            backRightTop = OctreeNode(box: parentNode.box.backRightTop)
-            backRightBottom = OctreeNode(box: parentNode.box.backRightBottom)
-        }
-        
-        struct ChildrenIterator: IteratorProtocol
-        {
-            var index = 0
-            let children: Children
+            let transform = Transform()
+            transform.position = node.boundingBox.center
+            transform.scale = node.boundingBox.size
+
+            Debug.shared.addCube(transform: transform, color: float4(1, 0, 0, 0.5))
             
-            init(children: Children) {
-                self.children = children
-            }
-            
-            mutating func next() -> OctreeNode?
+            if node.isLeaf
             {
-                defer { index += 1 }
+                var hitResult = HitResult()
+                hitResult.fraction = 1.0
+                hitResult.start = line.start
+                hitResult.end = line.end
                 
-                switch index
+                // Узел листовой
+                for item in node.items
                 {
-                    case 0: return children.frontLeftTop
-                    case 1: return children.frontLeftBottom
-                    case 2: return children.frontRightTop
-                    case 3: return children.frontRightBottom
-                    case 4: return children.backLeftTop
-                    case 5: return children.backLeftBottom
-                    case 6: return children.backRightTop
-                    case 7: return children.backRightBottom
-                        
-                    default: return nil
+                    trace_brush(item, work: &hitResult)
+                }
+                
+                if hitResult.fraction < 1
+                {
+                    let point = line.start + hitResult.fraction * (line.end - line.start)
+                    return Intersection.Result(point: point, normal: hitResult.plane!.normal, index: 0)
+                }
+                
+                return nil
+            }
+            
+            let childs = [
+                node.frontLeftTop,
+                node.frontLeftBottom,
+                node.frontRightTop,
+                node.frontRightBottom,
+                node.backLeftTop,
+                node.backLeftBottom,
+                node.backRightTop,
+                node.backRightBottom
+            ]
+            
+            let sorted = childs
+                .compactMap({ $0 })
+                .sorted(by: { length($0.boundingBox.center - line.start) < length($1.boundingBox.center - line.start)
+            })
+            
+            for child in sorted
+            {
+                if let result = intersect(line: line, node: child)
+                {
+                    return result
                 }
             }
         }
         
-        func makeIterator() -> ChildrenIterator {
-            return ChildrenIterator(children: self)
-        }
-    }
-    
-    init(box: Octant)
-    {
-        self.box = box
-//        self.aabb = AABB(min: box.boxMin, max: box.boxMax)
-    }
-    
-    @discardableResult
-    func add(_ element: T, at point: vector_float3) -> OctreeNode? {
-        return tryAdd(element, at: point)
-    }
-    
-    private func tryAdd(_ element: T, at point: vector_float3) -> OctreeNode?
-    {
-        if !box.contains(point) { return nil }
-        
-        switch type
-        {
-            case .internal(let children):
-                // pass the point to one of the children
-                for child in children
-                {
-                    if let child = child.tryAdd(element, at: point) {
-                        return child
-                    }
-                }
-                
-                fatalError("box.contains evaluted to true, but none of the children added the point")
-            case .leaf:
-                if self.point != nil
-                {
-                    // leaf already has an asigned point
-                    if self.point == point {
-                        self.elements.append(element)
-                        return self
-                    } else {
-                        return subdivide(adding: element, at: point)
-                    }
-                }
-                else
-                {
-                    self.elements = [element]
-                    self.point = point
-                    return self
-                }
-        }
-    }
-    
-    func add(_ elements: [T], at point: vector_float3)
-    {
-        for element in elements {
-            self.add(element, at: point)
-        }
-    }
-    
-    @discardableResult
-    func remove(_ element: T) -> Bool
-    {
-        switch type
-        {
-            case .leaf:
-                if let elements = self.elements {
-                    // leaf contains one ore more elements
-                    if let index = elements.index(of: element) {
-                        // leaf contains the element we want to remove
-                        self.elements.remove(at: index)
-                        // if elements is now empty remove it
-                        if self.elements.isEmpty {
-                            self.elements = nil
-                        }
-                        return true
-                    }
-                }
-                return false
-                
-            case .internal(let children):
-                for child in children  {
-                    if child.remove(element) {
-                        return true
-                    }
-                }
-                return false
-        }
-    }
-    
-    func elements(at point: vector_float3) -> [T]?
-    {
-        switch type
-        {
-            case .leaf:
-                if self.point == point
-                {
-                    return self.elements
-                }
-                
-            case .internal(let children):
-                for child in children {
-                    if child.box.contains(point) {
-                        return child.elements(at: point)
-                    }
-                }
-        }
-        
-        // tree does not contain given point
         return nil
     }
     
-    func elements(in box: Octant) -> [T]?
+    private func trace_brush(_ brush: Brush, work: inout HitResult)
     {
-        var values: [T] = []
+        var start_frac: Float = -1.0
+        var end_frac: Float = 1.0
+        var closest_plane: WorldCollisionAsset.Plane?
         
-        switch type
+        var getout = false
+        var startout = false
+        
+        for plane in brush.planes
         {
-            case .leaf:
-                // check if leaf has an assigned point
-                if let point = self.point {
-                    // check if point is inside given box
-                    if box.contains(point) {
-                        values += elements ?? []
-                    }
-                }
+            let signbits = plane.signbits
+            let dist = plane.distance - dot(work.offsets[signbits], plane.normal)
+
+            let start_distance = dot(work.start, plane.normal) - dist
+            let end_distance = dot(work.end, plane.normal) - dist
+
+            if start_distance > 0
+            {
+                startout = true
+            }
+            
+            if end_distance > 0
+            {
+                getout = true // endpoint is not in solid
+            }
+
+            // make sure the trace isn't completely on one side of the brush
+            // both are in front of the plane, its outside of this brush
+            if (start_distance > 0 && (end_distance >= SURF_CLIP_EPSILON || end_distance >= start_distance)) { return }
+            
+            // both are behind this plane, it will get clipped by another one
+            if (start_distance <= 0 && end_distance <= 0) { continue }
+            
+
+            if start_distance > end_distance
+            {
+                let frac = (start_distance - SURF_CLIP_EPSILON) / (start_distance - end_distance)
                 
-            case .internal(let children):
-                for child in children {
-                    if child.box.isContained(in: box) {
-                        // child is contained in box
-                        // add all children of child
-                        values += child.elements(in: child.box) ?? []
-                    } else if child.box.contains(box) || child.box.intersects(box) {
-                        // child contains at least part of box
-                        values += child.elements(in: box) ?? []
-                    }
-                    // child does not contain any part of given box
+                if frac > start_frac
+                {
+                    start_frac = frac
+                    closest_plane = plane
                 }
+            }
+            else // line is leaving the brush
+            {
+                let frac = (start_distance + SURF_CLIP_EPSILON) / (start_distance - end_distance)
+                
+                end_frac = min(end_frac, frac)
+            }
         }
         
-        if values.isEmpty { return nil }
+        if !startout
+        {
+            // original point was inside brush
+            work.startsolid = true
+            
+            if !getout
+            {
+                work.allsolid = true
+                work.fraction = 0
+            }
+            
+            return
+        }
         
-        return values
+        if start_frac < end_frac && start_frac > -1 && start_frac < work.fraction
+        {
+            work.fraction = max(start_frac, 0)
+            work.plane = closest_plane
+        }
     }
     
-    private func subdivide(adding element: T, at point: vector_float3) -> OctreeNode?
+    private func intersectSegmentWithAABB(start: float3, end: float3, box: BoundingBox) -> Bool
     {
-        precondition(self.elements != nil, "Subdividing while leaf does not contain a element")
-        precondition(self.point != nil, "Subdividing while leaf does not contain a point")
+        let minCorner = min(box.min, box.max)
+        let maxCorner = max(box.min, box.max)
         
-        switch type
+        let startInside = (minCorner.x <= start.x && start.x <= maxCorner.x) &&
+        (minCorner.y <= start.y && start.y <= maxCorner.y) &&
+        (minCorner.z <= start.z && start.z <= maxCorner.z)
+        
+        let endInside = (minCorner.x <= end.x && end.x <= maxCorner.x) &&
+        (minCorner.y <= end.y && end.y <= maxCorner.y) &&
+        (minCorner.z <= end.z && end.z <= maxCorner.z)
+        
+        if startInside || endInside {
+            // Один из концов отрезка находится внутри AABB
+            return true
+        }
+        
+        // Проверяем пересечение линии AABB с помощью проверки пересечения луча с AABB
+        let ray = Ray(origin: start, direction: normalize(end - start))
+        return intersect(ray: ray, box: box)
+    }
+    
+    private func intersect(ray: Ray, box: BoundingBox) -> Bool
+    {
+        let t1 = (box.min - ray.origin) / ray.direction
+        let t2 = (box.max - ray.origin) / ray.direction
+        
+        let tmin = max(max(min(t1.x, t2.x), min(t1.y, t2.y)), min(t1.z, t2.z))
+        let tmax = min(min(max(t1.x, t2.x), max(t1.y, t2.y)), max(t1.z, t2.z))
+        
+        return tmax >= tmin && tmax >= 0
+    }
+    
+    private func overallBoundingBox(for boxes: [BoundingBox]) -> BoundingBox
+    {
+        var minValues = SIMD3<Float>(repeating: Float.greatestFiniteMagnitude)
+        var maxValues = SIMD3<Float>(repeating: -Float.greatestFiniteMagnitude)
+        
+        for box in boxes
         {
-            case .leaf:
-                type = .internal(children: Children(parentNode: self))
-                // add element previously contained in leaf to children
-                self.add(self.elements, at: self.point)
-                self.elements = nil
-                self.point = nil
-                // add new element to children
-                return self.add(element, at: point)
-                
-            case .internal:
-                preconditionFailure("Calling subdivide on an internal node")
+            minValues.x = min(minValues.x, box.min.x)
+            minValues.y = min(minValues.y, box.min.y)
+            minValues.z = min(minValues.z, box.min.z)
+            
+            maxValues.x = max(maxValues.x, box.max.x)
+            maxValues.y = max(maxValues.y, box.max.y)
+            maxValues.z = max(maxValues.z, box.max.z)
+        }
+        
+        return BoundingBox(min: minValues, max: maxValues)
+    }
+}
+
+extension Octree
+{
+    func traceBox(result work: inout HitResult, start: float3, end: float3, mins: float3, maxs: float3)
+    {
+        work.fraction = 1
+        
+        // Make symmetrical
+        for i in 0...2
+        {
+            let offset = (mins[i] + maxs[i]) * 0.5
+            
+            work.mins[i] = mins[i] - offset
+            work.maxs[i] = maxs[i] - offset
+            work.start[i] = start[i] + offset
+            work.end[i] = end[i] + offset
+        }
+        
+        work.offsets[0][0] = work.mins[0]
+        work.offsets[0][1] = work.mins[1]
+        work.offsets[0][2] = work.mins[2]
+        
+        work.offsets[1][0] = work.maxs[0]
+        work.offsets[1][1] = work.mins[1]
+        work.offsets[1][2] = work.mins[2]
+        
+        work.offsets[2][0] = work.mins[0]
+        work.offsets[2][1] = work.maxs[1]
+        work.offsets[2][2] = work.mins[2]
+        
+        work.offsets[3][0] = work.maxs[0]
+        work.offsets[3][1] = work.maxs[1]
+        work.offsets[3][2] = work.mins[2]
+        
+        work.offsets[4][0] = work.mins[0]
+        work.offsets[4][1] = work.mins[1]
+        work.offsets[4][2] = work.maxs[2]
+        
+        work.offsets[5][0] = work.maxs[0]
+        work.offsets[5][1] = work.mins[1]
+        work.offsets[5][2] = work.maxs[2]
+        
+        work.offsets[6][0] = work.mins[0]
+        work.offsets[6][1] = work.maxs[1]
+        work.offsets[6][2] = work.maxs[2]
+        
+        work.offsets[7][0] = work.maxs[0]
+        work.offsets[7][1] = work.maxs[1]
+        work.offsets[7][2] = work.maxs[2]
+        
+        work.sweepBox = overallBoundingBox(for: [
+            BoundingBox(min: start + mins, max: start + maxs),
+            BoundingBox(min: end + mins, max: end + maxs)
+        ])
+        
+//        for brush in brushes
+//        {
+//            trace_brush(brush, work: &work)
+//
+//            if work.allsolid {
+//                return
+//            }
+//        }
+        
+        if let root = self.root
+        {
+            trace_node(work: &work, node: root, start: start, end: end)
+        }
+        
+//        print("work.checkedBrushesCount", work.checkedBrushesCount)
+
+        if work.fraction == 1.0
+        {
+            // nothing blocked the trace
+            work.endpos = end
+        }
+        else
+        {
+            // collided with something
+            work.endpos = start + work.fraction * (end - start)
+        }
+    }
+    
+    private func trace_node(work: inout HitResult, node: OctreeNode, start: float3, end: float3)
+    {
+        let tracedBox = BoundingBox(min: work.mins, max: work.maxs)
+        let minkowski = node.boundingBox.minkowski(with: tracedBox)
+        
+        let check = lineIntersectionAABB(start: start, end: end, mins: minkowski.min, maxs: minkowski.max)
+        
+        guard check else { return }
+        
+        if node.isLeaf
+        {
+            // Узел листовой
+            for item in node.items
+            {
+                work.checkedBrushesCount += 1
+                trace_brush(item, work: &work)
+            }
+            
+            return
+        }
+        
+        let sorted = node.children.sorted(by: {
+            length($0.boundingBox.center - start) < length($1.boundingBox.center - start)
+        })
+        
+        for child in sorted
+        {
+            trace_node(work: &work, node: child, start: start, end: end)
+            
+            if work.fraction < 1 {
+                break
+            }
         }
     }
 }
 
-class Octree<T: Equatable>: CustomStringConvertible
+fileprivate let SURF_CLIP_EPSILON: Float = 0.125
+
+final class OctreeNode
 {
-    var root: OctreeNode<T>
+    var boundingBox: BoundingBox
     
-    var description: String {
-        return "Octree\n" + root.recursiveDescription
+    var frontLeftTop: OctreeNode?
+    var frontLeftBottom: OctreeNode?
+    var frontRightTop: OctreeNode?
+    var frontRightBottom: OctreeNode?
+    
+    var backLeftTop: OctreeNode?
+    var backLeftBottom: OctreeNode?
+    var backRightTop: OctreeNode?
+    var backRightBottom: OctreeNode?
+    
+    var children: [OctreeNode] = []
+
+    var isLeaf = false
+    var items: [Brush] = []
+    
+    var depth = 0
+
+    init(boundingBox: BoundingBox)
+    {
+        self.boundingBox = boundingBox
+    }
+}
+
+private extension BoundingBox
+{
+    private var halfSize: float3 {
+        size * 0.5
     }
     
-    init(boundingBox: Octant, minimumCellSize: Double) {
-        root = OctreeNode<T>(box: boundingBox)
+    var hasValidSize: Bool {
+        size.x > 64 && size.y > 64 && size.z > 64
     }
     
-    @discardableResult
-    func add(_ element: T, at point: vector_float3) -> OctreeNode<T>? {
-        return root.add(element, at: point)
+    var frontLeftTop: BoundingBox {
+        BoundingBox(min: center + SIMD3<Float>(0, 0, 0),
+                    max: center + SIMD3<Float>(halfSize.x, halfSize.y, halfSize.z))
     }
     
-    @discardableResult
-    func remove(_ element: T, using node: OctreeNode<T>) -> Bool {
-        return node.remove(element)
+    var frontLeftBottom: BoundingBox {
+        BoundingBox(min: center + SIMD3<Float>(0, 0, -halfSize.z),
+                    max: center + SIMD3<Float>(halfSize.x, halfSize.y, 0))
     }
     
-    @discardableResult
-    func remove(_ element: T) -> Bool {
-        return root.remove(element)
+    var frontRightTop: BoundingBox {
+        BoundingBox(min: center + SIMD3<Float>(0, -halfSize.y, 0),
+                    max: center + SIMD3<Float>(halfSize.x, 0, halfSize.z))
     }
     
-    func elements(at point: vector_float3) -> [T]? {
-        return root.elements(at: point)
+    var frontRightBottom: BoundingBox {
+        BoundingBox(min: center + SIMD3<Float>(0, -halfSize.y, -halfSize.z),
+                    max: center + SIMD3<Float>(halfSize.x, 0, 0))
     }
     
-    func elements(in box: Octant) -> [T]? {
-        precondition(root.box.contains(box), "box is outside of octree bounds")
-        return root.elements(in: box)
+    var backLeftTop: BoundingBox {
+        BoundingBox(min: center + SIMD3<Float>(-halfSize.x, 0, 0),
+                    max: center + SIMD3<Float>(0, halfSize.y, halfSize.z))
     }
     
-//    func render(with encoder: MTLRenderCommandEncoder?)
-//    {
-//        root.render(with: encoder)
-//    }
+    var backLeftBottom: BoundingBox {
+        BoundingBox(min: center + SIMD3<Float>(-halfSize.x, 0, -halfSize.z),
+                    max: center + SIMD3<Float>(0, halfSize.y, 0))
+    }
+    
+    var backRightTop: BoundingBox {
+        BoundingBox(min: center + SIMD3<Float>(-halfSize.x, -halfSize.y, 0),
+                    max: center + SIMD3<Float>(0, 0, halfSize.z))
+    }
+    
+    var backRightBottom: BoundingBox {
+        BoundingBox(min: center + SIMD3<Float>(-halfSize.x, -halfSize.y, -halfSize.z),
+                    max: center + SIMD3<Float>(0, 0, 0))
+    }
+}
+
+private extension WorldCollisionAsset.Plane
+{
+    var signbits: Int {
+        var bits = 0
+        
+        for i in 0...2
+        {
+            if normal[i] < 0 {
+                bits |= 1 << i
+            }
+        }
+        
+        return bits
+    }
 }

@@ -27,6 +27,7 @@ struct WorldCollisionAsset: Codable
     
     struct Brush: Codable
     {
+        let name: String?
         let brushside: Int
         let numBrushsides: Int
         let contentFlags: Int

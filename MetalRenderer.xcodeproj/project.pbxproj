@@ -160,6 +160,10 @@
 		8A96E2FE2B17F24B00C6E80F /* SceneKitWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A96E2FC2B17F24B00C6E80F /* SceneKitWrapper.swift */; };
 		8A96E3012B17F38E00C6E80F /* Brush.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A96E3002B17F38E00C6E80F /* Brush.swift */; };
 		8A96E3022B17F38E00C6E80F /* Brush.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A96E3002B17F38E00C6E80F /* Brush.swift */; };
+		8A96E3042B182FD600C6E80F /* KdTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A96E3032B182FD600C6E80F /* KdTree.swift */; };
+		8A96E3052B182FD600C6E80F /* KdTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A96E3032B182FD600C6E80F /* KdTree.swift */; };
+		8A97CBFA2B23589900395E07 /* BSPTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A97CBF92B23589900395E07 /* BSPTree.swift */; };
+		8A97CBFB2B23589900395E07 /* BSPTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A97CBF92B23589900395E07 /* BSPTree.swift */; };
 		8A98722D2AD4587200AAEE2C /* Billboards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A98722C2AD4587200AAEE2C /* Billboards.swift */; };
 		8A98722E2AD4587200AAEE2C /* Billboards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A98722C2AD4587200AAEE2C /* Billboards.swift */; };
 		8A9872302AD4648900AAEE2C /* Billboards.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8A98722F2AD4648900AAEE2C /* Billboards.metal */; };
@@ -245,6 +249,8 @@
 		8A9186A02A8051E600719E55 /* Q3MapLightGrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Q3MapLightGrid.swift; sourceTree = "<group>"; };
 		8A96E2FC2B17F24B00C6E80F /* SceneKitWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneKitWrapper.swift; sourceTree = "<group>"; };
 		8A96E3002B17F38E00C6E80F /* Brush.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Brush.swift; sourceTree = "<group>"; };
+		8A96E3032B182FD600C6E80F /* KdTree.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KdTree.swift; sourceTree = "<group>"; };
+		8A97CBF92B23589900395E07 /* BSPTree.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BSPTree.swift; sourceTree = "<group>"; };
 		8A98722C2AD4587200AAEE2C /* Billboards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Billboards.swift; sourceTree = "<group>"; };
 		8A98722F2AD4648900AAEE2C /* Billboards.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Billboards.metal; sourceTree = "<group>"; };
 		8A9977CF29492CC400B48C70 /* Rotator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rotator.swift; sourceTree = "<group>"; };
@@ -536,8 +542,10 @@
 			children = (
 				8A96E3002B17F38E00C6E80F /* Brush.swift */,
 				8A2B483C2B14D2D700990807 /* AABBTree.swift */,
+				8A96E3032B182FD600C6E80F /* KdTree.swift */,
 				8A96E2FC2B17F24B00C6E80F /* SceneKitWrapper.swift */,
 				8A2B48392B14AC3D00990807 /* Octree.swift */,
+				8A97CBF92B23589900395E07 /* BSPTree.swift */,
 			);
 			path = Collision;
 			sourceTree = "<group>";
@@ -700,9 +708,11 @@
 				8AC34E432AAE54E600A6D429 /* GameViewController.swift in Sources */,
 				8A808F3A2AD034290087A084 /* WorldStaticMeshAsset.swift in Sources */,
 				8A27DA532AAE39DE0094C9D0 /* Engine.swift in Sources */,
+				8A96E3052B182FD600C6E80F /* KdTree.swift in Sources */,
 				8A27DA542AAE39DE0094C9D0 /* Q3MapLightGrid.swift in Sources */,
 				8A27DA562AAE39DE0094C9D0 /* NavigationGraph.swift in Sources */,
 				8A98722E2AD4587200AAEE2C /* Billboards.swift in Sources */,
+				8A97CBFB2B23589900395E07 /* BSPTree.swift in Sources */,
 				8A27DA572AAE39DE0094C9D0 /* Common.metal in Sources */,
 				8A27DA582AAE39DE0094C9D0 /* Barney.swift in Sources */,
 				8A27DA592AAE39DE0094C9D0 /* AudioEngine.swift in Sources */,
@@ -766,6 +776,7 @@
 			files = (
 				8A27DAF22AAE3E5A0094C9D0 /* ImGuiFontLibrary.swift in Sources */,
 				8A0C48B32AC88C200099BEF6 /* WorldStaticMesh.swift in Sources */,
+				8A96E3042B182FD600C6E80F /* KdTree.swift in Sources */,
 				8A27DAF32AAE3E5A0094C9D0 /* SandboxApplication.swift in Sources */,
 				8A27DAF42AAE3E5A0094C9D0 /* KeyCodes.swift in Sources */,
 				8A05DD122ACF26140012252D /* WorldCollisionAsset+Q3BSP.swift in Sources */,
@@ -820,6 +831,7 @@
 				8A27DB162AAE3E5A0094C9D0 /* Q3MapScene.swift in Sources */,
 				8A27DB172AAE3E5A0094C9D0 /* GameTime.swift in Sources */,
 				8A27DB182AAE3E5A0094C9D0 /* Viewport.swift in Sources */,
+				8A97CBFA2B23589900395E07 /* BSPTree.swift in Sources */,
 				8A27DB192AAE3E5A0094C9D0 /* ForwardRenderer.swift in Sources */,
 				8A27DB1A2AAE3E5A0094C9D0 /* Sizeable.swift in Sources */,
 				8A53DEFE2AB37E5C00EC2C65 /* Decals.swift in Sources */,
