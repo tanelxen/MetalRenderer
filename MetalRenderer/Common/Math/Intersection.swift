@@ -36,6 +36,12 @@ func lineIntersectTriangle(v0: float3, v1: float3, v2: float3, start: float3, en
 
 func lineIntersectionAABB(start: float3, end: float3, mins: float3, maxs: float3) -> Bool
 {
+    guard start != end else {
+        return (start.x >= mins.x && start.x <= maxs.x &&
+                start.y >= mins.y && start.y <= maxs.y &&
+                start.z >= mins.z && start.z <= maxs.z)
+    }
+    
     var dirfrac = float3()
     
     let line = end - start

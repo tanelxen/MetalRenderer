@@ -12,6 +12,7 @@ class Brush
 {
     typealias Plane = WorldCollisionAsset.Plane
     
+    var id: Int = -1
     var name: String = "brush"
     
     let planes: [Plane]

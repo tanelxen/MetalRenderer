@@ -17,7 +17,7 @@ class Q3MapScene
     
     private var worldMesh: WorldStaticMesh?
     
-    private var collision: Q3MapCollision!
+//    private var collision: Q3MapCollision!
     
     private var lightGrid: Q3MapLightGrid?
     
@@ -78,7 +78,7 @@ class Q3MapScene
                     
                     if let asset = try? decoder.decode(WorldCollisionAsset.self, from: data)
                     {
-                        collision = Q3MapCollision(asset: asset)
+//                        collision = Q3MapCollision(asset: asset)
                         
 //                        kdTree.loadFromAsset(asset)
                         octree.loadFromAsset(asset)
@@ -303,7 +303,7 @@ extension Q3MapScene
     func trace(start: float3, end: float3) -> Bool
     {
         var hitResult = HitResult()
-        collision.traceRay(result: &hitResult, start: start, end: end)
+        octree.traceBox(result: &hitResult, start: start, end: end, mins: .zero, maxs: .zero)
         
         return hitResult.fraction >= 1
     }
@@ -311,14 +311,7 @@ extension Q3MapScene
     func trace(start: float3, end: float3, mins: float3, maxs: float3) -> HitResult
     {
         var hitResult = HitResult()
-        
-//        Utils.timeProfile("octree.traceBox") {
-            octree.traceBox(result: &hitResult, start: start, end: end, mins: mins, maxs: maxs)
-//        }
-        
-//        Utils.timeProfile("collision.traceBox") {
-//            collision.traceBox(result: &hitResult, start: start, end: end, mins: mins, maxs: maxs)
-//        }
+        octree.traceBox(result: &hitResult, start: start, end: end, mins: mins, maxs: maxs)
 
         return hitResult
     }
@@ -329,36 +322,12 @@ extension Q3MapScene
     func makeShoot(start: float3, end: float3)
     {
         var hitResult = HitResult()
-        collision.traceRay(result: &hitResult, start: start, end: end)
-
-//        let line = Intersection.Line(start: start, end: hitResult.endpos)
-//
-//        let aabbs = entities.map {
-//            Intersection.AABB(
-//                mins: $0.minBounds + $0.transform.position,
-//                maxs: $0.maxBounds + $0.transform.position
-//            )
-//        }
+        octree.traceBox(result: &hitResult, start: start, end: end, mins: .zero, maxs: .zero)
         
-        Debug.shared.addLine(start: start, end: end, color: float4(0, 1, 0, 1))
-        
-        if let result = octree.intersection(start: start, end: end)
+        if hitResult.fraction > 0, let normal = hitResult.plane?.normal
         {
-            Particles.shared.addParticles(origin: result.point, dir: result.normal, count: 5)
-            Decals.shared.addDecale(origin: result.point, normal: result.normal)
-
-            print(result.point, hitResult.endpos)
+            Decals.shared.addDecale(origin: hitResult.endpos, normal: normal)
+            Particles.shared.addParticles(origin: hitResult.endpos, dir: normal, count: 5)
         }
-        
-//        if let result = Intersection.findIntersection(line: line, aabbs: aabbs)
-//        {
-//            Particles.shared.addParticles(origin: result.point, dir: result.normal, count: 5)
-//            entities[result.index].takeDamage()
-//        }
-//        else if hitResult.fraction > 0, let normal = hitResult.plane?.normal
-//        {
-//            Decals.shared.addDecale(origin: hitResult.endpos, normal: normal)
-//            Particles.shared.addParticles(origin: hitResult.endpos, dir: normal, count: 5)
-//        }
     }
 }

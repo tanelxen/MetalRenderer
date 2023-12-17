@@ -30,6 +30,7 @@ final class Octree
             
             let brush = Brush(planes: planes)
             brush.name = name
+            brush.id = index
             
             brushes.append(brush)
         }
@@ -44,6 +45,8 @@ final class Octree
         let bounds = overallBoundingBox(for: items)
         let root = OctreeNode(boundingBox: bounds)
         
+        root.name = "root"
+        
         nodes.append(root)
         
         split(node: root, items: items, depth: 0)
@@ -57,8 +60,6 @@ final class Octree
                 maxDepth = node.depth
             }
         }
-        
-        print("octree.maxDepth", maxDepth)
         
         for node in nodes
         {
@@ -111,6 +112,8 @@ final class Octree
         if !frontLeftTopItems.isEmpty
         {
             let child = OctreeNode(boundingBox: frontLeftTopBounds)
+            child.name = "frontLeftTop"
+            
             node.frontLeftTop = child
             
             nodes.append(child)
@@ -121,6 +124,8 @@ final class Octree
         if !frontLeftBottomItems.isEmpty
         {
             let child = OctreeNode(boundingBox: frontLeftBottomBounds)
+            child.name = "frontLeftBottom"
+            
             node.frontLeftBottom = child
             
             nodes.append(child)
@@ -131,6 +136,8 @@ final class Octree
         if !frontRightTopItems.isEmpty
         {
             let child = OctreeNode(boundingBox: frontRightTopBounds)
+            child.name = "frontRightTop"
+            
             node.frontRightTop = child
             
             nodes.append(child)
@@ -141,6 +148,8 @@ final class Octree
         if !frontRightBottomItems.isEmpty
         {
             let child = OctreeNode(boundingBox: frontRightBottomBounds)
+            child.name = "frontRightBottom"
+            
             node.frontRightBottom = child
             
             nodes.append(child)
@@ -151,6 +160,8 @@ final class Octree
         if !backLeftTopItems.isEmpty
         {
             let child = OctreeNode(boundingBox: backLeftTopBounds)
+            child.name = "backLeftTop"
+            
             node.backLeftTop = child
             
             nodes.append(child)
@@ -161,6 +172,8 @@ final class Octree
         if !backLeftBottomItems.isEmpty
         {
             let child = OctreeNode(boundingBox: backLeftBottomBounds)
+            child.name = "backLeftBottom"
+            
             node.backLeftBottom = child
             
             nodes.append(child)
@@ -171,6 +184,8 @@ final class Octree
         if !backRightTopItems.isEmpty
         {
             let child = OctreeNode(boundingBox: backRightTopBounds)
+            child.name = "backRightTop"
+            
             node.backRightTop = child
             
             nodes.append(child)
@@ -181,6 +196,8 @@ final class Octree
         if !backRightBottomItems.isEmpty
         {
             let child = OctreeNode(boundingBox: backRightBottomBounds)
+            child.name = "backRightBottom"
+            
             node.backRightBottom = child
             
             nodes.append(child)
@@ -191,22 +208,9 @@ final class Octree
     
     private func isIntersect(_ first: BoundingBox, _ second: BoundingBox) -> Bool
     {
-        return first.min.x <= second.max.x &&
-        first.max.x >= second.min.x &&
-        first.min.y <= second.max.y &&
-        first.max.y >= second.min.y &&
-        first.min.z <= second.max.z &&
-        first.max.z >= second.min.z
-    }
-    
-    private func isFirstFullInsideSecond(_ first: BoundingBox, _ second: BoundingBox) -> Bool
-    {
-        return first.min.x > second.min.x &&
-        first.max.x < second.max.x &&
-        first.min.y > second.min.y &&
-        first.max.y < second.max.y &&
-        first.min.z > second.min.z &&
-        first.max.z < second.max.z
+        return (first.min.x <= second.max.x && first.max.x >= second.min.x &&
+                first.min.y <= second.max.y && first.max.y >= second.min.y &&
+                first.min.z <= second.max.z && first.max.z >= second.min.z)
     }
     
     private func overallBoundingBox(for objects: [Brush]) -> BoundingBox
@@ -226,185 +230,6 @@ final class Octree
         }
         
         return BoundingBox(min: minValues, max: maxValues)
-    }
-}
-
-extension Octree
-{
-    func intersection(start: float3, end: float3) -> Intersection.Result?
-    {
-        guard let root = self.root else { return nil }
-        
-        let line = Intersection.Line(start: start, end: end)
-        return intersect(line: line, node: root)
-    }
-    
-    private func intersect(line: Intersection.Line, node: OctreeNode) -> Intersection.Result?
-    {
-        if intersectSegmentWithAABB(start: line.start, end: line.end, box: node.boundingBox)
-        {
-            let transform = Transform()
-            transform.position = node.boundingBox.center
-            transform.scale = node.boundingBox.size
-
-            Debug.shared.addCube(transform: transform, color: float4(1, 0, 0, 0.5))
-            
-            if node.isLeaf
-            {
-                var hitResult = HitResult()
-                hitResult.fraction = 1.0
-                hitResult.start = line.start
-                hitResult.end = line.end
-                
-                // Узел листовой
-                for item in node.items
-                {
-                    trace_brush(item, work: &hitResult)
-                }
-                
-                if hitResult.fraction < 1
-                {
-                    let point = line.start + hitResult.fraction * (line.end - line.start)
-                    return Intersection.Result(point: point, normal: hitResult.plane!.normal, index: 0)
-                }
-                
-                return nil
-            }
-            
-            let childs = [
-                node.frontLeftTop,
-                node.frontLeftBottom,
-                node.frontRightTop,
-                node.frontRightBottom,
-                node.backLeftTop,
-                node.backLeftBottom,
-                node.backRightTop,
-                node.backRightBottom
-            ]
-            
-            let sorted = childs
-                .compactMap({ $0 })
-                .sorted(by: { length($0.boundingBox.center - line.start) < length($1.boundingBox.center - line.start)
-            })
-            
-            for child in sorted
-            {
-                if let result = intersect(line: line, node: child)
-                {
-                    return result
-                }
-            }
-        }
-        
-        return nil
-    }
-    
-    private func trace_brush(_ brush: Brush, work: inout HitResult)
-    {
-        var start_frac: Float = -1.0
-        var end_frac: Float = 1.0
-        var closest_plane: WorldCollisionAsset.Plane?
-        
-        var getout = false
-        var startout = false
-        
-        for plane in brush.planes
-        {
-            let signbits = plane.signbits
-            let dist = plane.distance - dot(work.offsets[signbits], plane.normal)
-
-            let start_distance = dot(work.start, plane.normal) - dist
-            let end_distance = dot(work.end, plane.normal) - dist
-
-            if start_distance > 0
-            {
-                startout = true
-            }
-            
-            if end_distance > 0
-            {
-                getout = true // endpoint is not in solid
-            }
-
-            // make sure the trace isn't completely on one side of the brush
-            // both are in front of the plane, its outside of this brush
-            if (start_distance > 0 && (end_distance >= SURF_CLIP_EPSILON || end_distance >= start_distance)) { return }
-            
-            // both are behind this plane, it will get clipped by another one
-            if (start_distance <= 0 && end_distance <= 0) { continue }
-            
-
-            if start_distance > end_distance
-            {
-                let frac = (start_distance - SURF_CLIP_EPSILON) / (start_distance - end_distance)
-                
-                if frac > start_frac
-                {
-                    start_frac = frac
-                    closest_plane = plane
-                }
-            }
-            else // line is leaving the brush
-            {
-                let frac = (start_distance + SURF_CLIP_EPSILON) / (start_distance - end_distance)
-                
-                end_frac = min(end_frac, frac)
-            }
-        }
-        
-        if !startout
-        {
-            // original point was inside brush
-            work.startsolid = true
-            
-            if !getout
-            {
-                work.allsolid = true
-                work.fraction = 0
-            }
-            
-            return
-        }
-        
-        if start_frac < end_frac && start_frac > -1 && start_frac < work.fraction
-        {
-            work.fraction = max(start_frac, 0)
-            work.plane = closest_plane
-        }
-    }
-    
-    private func intersectSegmentWithAABB(start: float3, end: float3, box: BoundingBox) -> Bool
-    {
-        let minCorner = min(box.min, box.max)
-        let maxCorner = max(box.min, box.max)
-        
-        let startInside = (minCorner.x <= start.x && start.x <= maxCorner.x) &&
-        (minCorner.y <= start.y && start.y <= maxCorner.y) &&
-        (minCorner.z <= start.z && start.z <= maxCorner.z)
-        
-        let endInside = (minCorner.x <= end.x && end.x <= maxCorner.x) &&
-        (minCorner.y <= end.y && end.y <= maxCorner.y) &&
-        (minCorner.z <= end.z && end.z <= maxCorner.z)
-        
-        if startInside || endInside {
-            // Один из концов отрезка находится внутри AABB
-            return true
-        }
-        
-        // Проверяем пересечение линии AABB с помощью проверки пересечения луча с AABB
-        let ray = Ray(origin: start, direction: normalize(end - start))
-        return intersect(ray: ray, box: box)
-    }
-    
-    private func intersect(ray: Ray, box: BoundingBox) -> Bool
-    {
-        let t1 = (box.min - ray.origin) / ray.direction
-        let t2 = (box.max - ray.origin) / ray.direction
-        
-        let tmin = max(max(min(t1.x, t2.x), min(t1.y, t2.y)), min(t1.z, t2.z))
-        let tmax = min(min(max(t1.x, t2.x), max(t1.y, t2.y)), max(t1.z, t2.z))
-        
-        return tmax >= tmin && tmax >= 0
     }
     
     private func overallBoundingBox(for boxes: [BoundingBox]) -> BoundingBox
@@ -476,14 +301,18 @@ extension Octree
         work.offsets[7][1] = work.maxs[1]
         work.offsets[7][2] = work.maxs[2]
         
-        work.tracedBox = BoundingBox(min: work.mins, max: work.maxs)
+        
+        let eps = float3(SURF_CLIP_EPSILON, SURF_CLIP_EPSILON, SURF_CLIP_EPSILON)
+        
+        work.sweepBox = overallBoundingBox(for: [
+            BoundingBox(min: start + mins - eps, max: start + maxs + eps),
+            BoundingBox(min: end + mins - eps, max: end + maxs + eps)
+        ])
         
         if let root = self.root
         {
             trace_node(work: &work, node: root, start: start, end: end)
         }
-        
-//        print("checkedNodesCount", work.checkedNodesCount, "checkedBrushesCount", work.checkedBrushesCount)
 
         if work.fraction == 1.0
         {
@@ -499,36 +328,114 @@ extension Octree
     
     private func trace_node(work: inout HitResult, node: OctreeNode, start: float3, end: float3)
     {
-        work.checkedNodesCount += 1
-        
-        let minkowski = node.boundingBox.minkowski(with: work.tracedBox)
-        let check = lineIntersectionAABB(start: start, end: end, mins: minkowski.min, maxs: minkowski.max)
+        let check = isIntersect(work.sweepBox, node.boundingBox)
         
         guard check else { return }
         
         if node.isLeaf
         {
             // Узел листовой
-            for item in node.items
+            trace_leaf(node, work: &work)
+            return
+        }
+        
+        for child in node.children
+        {
+            trace_node(work: &work, node: child, start: start, end: end)
+        }
+    }
+    
+    private func trace_leaf(_ leaf: OctreeNode, work: inout HitResult)
+    {
+        for item in leaf.items
+        {
+            if work.checkedBrushIndeces.contains(item.id) {
+                continue
+            }
+            
+            work.checkedBrushIndeces.append(item.id)
+            
+            trace_brush(item, work: &work)
+            
+            if work.allsolid {
+                return
+            }
+        }
+    }
+    
+    private func trace_brush(_ brush: Brush, work: inout HitResult)
+    {
+        guard isIntersect(work.sweepBox, brush.bounds) else { return }
+        
+        var start_frac: Float = -1.0
+        var end_frac: Float = 1.0
+        var closest_plane: WorldCollisionAsset.Plane?
+        
+        var getout = false
+        var startout = false
+        
+        for plane in brush.planes
+        {
+            let signbits = plane.signbits
+            let dist = plane.distance - dot(work.offsets[signbits], plane.normal)
+
+            let start_distance = dot(work.start, plane.normal) - dist
+            let end_distance = dot(work.end, plane.normal) - dist
+
+            if start_distance > 0
             {
-                work.checkedBrushesCount += 1
-                trace_brush(item, work: &work)
+                startout = true
+            }
+            
+            if end_distance > 0
+            {
+                getout = true // endpoint is not in solid
+            }
+
+            // make sure the trace isn't completely on one side of the brush
+            // both are in front of the plane, its outside of this brush
+            if (start_distance > 0 && (end_distance >= SURF_CLIP_EPSILON || end_distance >= start_distance)) { return }
+            
+            // both are behind this plane, it will get clipped by another one
+            if (start_distance <= 0 && end_distance <= 0) { continue }
+            
+
+            if start_distance > end_distance
+            {
+                let frac = (start_distance - SURF_CLIP_EPSILON) / (start_distance - end_distance)
+                
+                if frac > start_frac
+                {
+                    start_frac = frac
+                    closest_plane = plane
+                }
+            }
+            else // line is leaving the brush
+            {
+                let frac = (start_distance + SURF_CLIP_EPSILON) / (start_distance - end_distance)
+                
+                end_frac = min(end_frac, frac)
+            }
+        }
+        
+        if !startout
+        {
+            // original point was inside brush
+            work.startsolid = true
+            
+            if !getout
+            {
+                work.allsolid = true
+                work.fraction = 0
             }
             
             return
         }
         
-        let sorted = node.children.sorted(by: {
-            length_squared($0.boundingBox.center - start) < length_squared($1.boundingBox.center - start)
-        })
-        
-        for child in sorted
+        if start_frac < end_frac && start_frac > -1 && start_frac < work.fraction
         {
-            trace_node(work: &work, node: child, start: start, end: end)
-            
-            if work.fraction < 1 {
-                break
-            }
+            work.fraction = max(start_frac, 0)
+            work.plane = closest_plane
         }
     }
 }
@@ -537,6 +444,7 @@ fileprivate let SURF_CLIP_EPSILON: Float = 0.125
 
 final class OctreeNode
 {
+    var name = ""
     var boundingBox: BoundingBox
     
     var frontLeftTop: OctreeNode?

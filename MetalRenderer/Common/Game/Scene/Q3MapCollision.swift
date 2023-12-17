@@ -5,6 +5,7 @@
 //  Created by Fedor Artemenkov on 11.02.2022.
 //
 
+import Foundation
 import simd
 
 struct HitResult
@@ -25,12 +26,10 @@ struct HitResult
     
     var startsolid = false
     var allsolid = false
-    
-    var depth = 0
-    var checkedNodesCount = 0
-    var checkedBrushesCount = 0
 
-    var tracedBox: BoundingBox!
+    var sweepBox: BoundingBox!
+    
+    var checkedBrushIndeces: [Int] = []
 }
 
 fileprivate let CONTENTS_SOLID: Int = 1
@@ -160,7 +159,20 @@ class Q3MapCollision
         work.offsets[7][2] = work.maxs[2]
 
         // walk through the BSP tree
-        trace_node(work: &work, index: 0, start_frac: 0, end_frac: 1, start: work.start, end: work.end)
+//        trace_node(work: &work, index: 0, start_frac: 0, end_frac: 1, start: work.start, end: work.end)
+        
+        for brush in asset.brushes
+        {
+            trace_brush(brush, work: &work)
+            
+//            if work.allsolid {
+//                break
+//            }
+            
+            if work.fraction < 1 {
+                break
+            }
+        }
 
         if work.fraction == 1.0
         {
@@ -279,7 +291,6 @@ class Q3MapCollision
             
             if brush.contentFlags & (CONTENTS_SOLID | CONTENTS_PLAYERCLIP) != 0
             {
-                work.checkedBrushesCount += 1
                 trace_brush(brush, work: &work)
                 
                 if work.allsolid {
