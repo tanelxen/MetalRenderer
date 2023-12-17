@@ -42,6 +42,8 @@ class Player
     private var forwardmove: Float = 0.0
     private var rightmove: Float = 0.0
     
+    private var isGrounded = false
+    
     init(scene: Q3MapScene)
     {
         self.scene = scene
@@ -88,7 +90,7 @@ class Player
         
         body.forceActivationState(.disableDeactivation)
         
-        body.friction = 1.0
+        body.friction = 0.1
         body.linearDamping = 0.0
         body.restitution = 0.0
         
@@ -122,6 +124,8 @@ class Player
         updateInput()
 //        updateMovement()
         
+        traceGround()
+        
         var forward = transform.rotation.forward
         var right = transform.rotation.right
         
@@ -130,10 +134,20 @@ class Player
         
         var direction: float3 = .zero
         direction += forward * forwardmove * 400 * q2b
-        direction += right * rightmove * 350 * q2b
+        direction += right * rightmove * 200 * q2b
+        
+//        direction += float3(0, 0, -9.0)
+        
+        let currentVel = rigidBody!.linearVelocity
         
         rigidBody?.angularFactor = .zero
-        rigidBody?.linearVelocity = direction
+        rigidBody?.linearVelocity = float3(direction.x, direction.y, currentVel.z)
+        
+//        if playerMovement.isWishJump && isGrounded
+//        {
+////            direction += float3(0, 0, 60)
+//            rigidBody?.applyCentralImpulse(float3(0, 0, 2))
+//        }
         
         if let origin = motionState?.transform.origin
         {
@@ -145,6 +159,21 @@ class Player
         
         camera.transform.position = transform.position + float3(0, 0, 40)
         camera.transform.rotation = transform.rotation
+    }
+    
+    private func traceGround()
+    {
+        let start = transform.position
+        let end = start + float3(0, 0, -29)
+        
+        let dynHit = scene.world.rayTestClosest(
+            from: start * q2b,
+            to: end * q2b,
+            collisionFilterGroup: 0b1111111,
+            collisionFilterMask: 0b1111110
+        )
+        
+        isGrounded = dynHit.hasHits
     }
     
     private func makeShoot()

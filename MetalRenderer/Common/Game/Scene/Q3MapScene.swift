@@ -38,7 +38,7 @@ class Q3MapScene
     
     var onReady: (()->Void)?
     
-    private let world = BulletWorld()
+    let world = BulletWorld()
     
     private var colliderTransform = Transform()
     private var colliderMotion: MotionState?
@@ -347,13 +347,19 @@ extension Q3MapScene
         let start = start * q2b
         let end = end * q2b
         
-        let dynHit = world.rayTestClosest(from: start, to: end, collisionFilterGroup: 0b1111111, collisionFilterMask: 0b1111111)
+        let dynHit = world.rayTestClosest(from: start, to: end, collisionFilterGroup: 0b1111111, collisionFilterMask: 0b1111110)
         
         if dynHit.hasHits
         {
             if dynHit.node.isStaticObject
             {
                 print("HIT STATIC", dynHit.hitPos)
+                
+                let point = dynHit.hitPos * b2q
+                let normal = dynHit.hitNormal
+                
+                Decals.shared.addDecale(origin: point, normal: normal)
+                Particles.shared.addParticles(origin: point, dir: normal, count: 5)
             }
             else
             {
