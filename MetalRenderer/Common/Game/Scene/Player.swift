@@ -119,40 +119,12 @@ class Player
     
     func update()
     {
-//        playerMovement.transform = transform
+        playerMovement.transform = transform
         
         updateInput()
-//        updateMovement()
+        updateMovement()
         
-        traceGround()
-        
-        var forward = transform.rotation.forward
-        var right = transform.rotation.right
-        
-        forward.z = 0
-        right.z = 0
-        
-        var direction: float3 = .zero
-        direction += forward * forwardmove * 400 * q2b
-        direction += right * rightmove * 200 * q2b
-        
-//        direction += float3(0, 0, -9.0)
-        
-        let currentVel = rigidBody!.linearVelocity
-        
-        rigidBody?.angularFactor = .zero
-        rigidBody?.linearVelocity = float3(direction.x, direction.y, currentVel.z)
-        
-//        if playerMovement.isWishJump && isGrounded
-//        {
-////            direction += float3(0, 0, 60)
-//            rigidBody?.applyCentralImpulse(float3(0, 0, 2))
-//        }
-        
-        if let origin = motionState?.transform.origin
-        {
-            transform.position = origin * b2q
-        }
+
         
 //        bobing = playerMovement.isWalking ? bobing + GameTime.deltaTime : 0
 //        let bob = sin(bobing * 16) * 1.2
@@ -166,12 +138,24 @@ class Player
         let start = transform.position
         let end = start + float3(0, 0, -29)
         
-        let dynHit = scene.world.rayTestClosest(
+//        let dynHit = scene.world.rayTestClosest(
+//            from: start * q2b,
+//            to: end * q2b,
+//            collisionFilterGroup: 0b1111111,
+//            collisionFilterMask: 0b1111110
+//        )
+        
+        let shape = BulletBoxShape(halfExtents: float3(15, 15, 28) * q2b)
+        
+        let dynHit = scene.world.convexTestClosest(
             from: start * q2b,
             to: end * q2b,
+            shape: shape,
             collisionFilterGroup: 0b1111111,
             collisionFilterMask: 0b1111110
         )
+        
+//        print("dynHit.hasHits", dynHit.hasHits)
         
         isGrounded = dynHit.hasHits
     }
