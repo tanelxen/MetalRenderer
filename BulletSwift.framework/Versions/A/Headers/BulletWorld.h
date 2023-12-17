@@ -78,10 +78,17 @@ NS_ASSUME_NONNULL_BEGIN
                                         to:(vector_float3)toPos
                       collisionFilterGroup:(int)collisionFilterGroup
                        collisionFilterMask:(int)collisionFilterMask;
+
 - (BulletClosestHitRayResult *)rayTestClosestFrom:(vector_float3)fromPos
                                                to:(vector_float3)toPos
                              collisionFilterGroup:(int)collisionFilterGroup
                               collisionFilterMask:(int)collisionFilterMask;
+
+- (BulletClosestHitRayResult *)convexTestClosestFrom:(vector_float3)fromPos
+                                                  to:(vector_float3)toPos
+                                               shape:(BulletCollisionShape *)shape
+                                collisionFilterGroup:(int)collisionFilterGroup
+                                 collisionFilterMask:(int)collisionFilterMask;
 
 @end
 

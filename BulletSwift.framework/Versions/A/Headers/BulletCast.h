@@ -33,6 +33,7 @@ typedef struct {} btConcaveShapeC;
 typedef struct {} btContactResultCallbackC;
 typedef struct {} btAllHitsRayResultCallbackC;
 typedef struct {} btClosestRayResultCallbackC;
+typedef struct {} btClosestConvexResultCallbackC;
 
 #ifdef __cplusplus
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
@@ -113,6 +114,11 @@ inline btCollisionWorld::ClosestRayResultCallback * bullet_cast(btClosestRayResu
 inline btClosestRayResultCallbackC * bullet_cast(btCollisionWorld::ClosestRayResultCallback *p) { return reinterpret_cast<btClosestRayResultCallbackC *>(p); }
 inline const btCollisionWorld::ClosestRayResultCallback * bullet_cast(const btClosestRayResultCallbackC *p) { return reinterpret_cast<const btCollisionWorld::ClosestRayResultCallback *>(p); }
 inline const btClosestRayResultCallbackC * bullet_cast(const btCollisionWorld::ClosestRayResultCallback *p) { return reinterpret_cast<const btClosestRayResultCallbackC *>(p); }
+
+inline btCollisionWorld::ClosestConvexResultCallback * bullet_cast(btClosestConvexResultCallbackC *p) { return reinterpret_cast<btCollisionWorld::ClosestConvexResultCallback *>(p); }
+inline btClosestConvexResultCallbackC * bullet_cast(btCollisionWorld::ClosestConvexResultCallback *p) { return reinterpret_cast<btClosestConvexResultCallbackC *>(p); }
+inline const btCollisionWorld::ClosestConvexResultCallback * bullet_cast(const btClosestConvexResultCallbackC *p) { return reinterpret_cast<const btCollisionWorld::ClosestConvexResultCallback *>(p); }
+inline const btClosestConvexResultCallbackC * bullet_cast(const btCollisionWorld::ClosestConvexResultCallback *p) { return reinterpret_cast<const btClosestConvexResultCallbackC *>(p); }
 
 #endif
 

@@ -334,7 +334,31 @@ extension Q3MapScene
     func trace(start: float3, end: float3, mins: float3, maxs: float3) -> HitResult
     {
         var hitResult = HitResult()
-        collision.traceBox(result: &hitResult, start: start, end: end, mins: mins, maxs: maxs)
+        
+//        collision.traceBox(result: &hitResult, start: start, end: end, mins: mins, maxs: maxs)
+        
+        if start == end
+        {
+            collision.traceBox(result: &hitResult, start: start, end: end, mins: mins, maxs: maxs)
+        }
+        else
+        {
+            let shape = BulletBoxShape(halfExtents: float3(15, 15, 28) * q2b)
+            
+            let dynHit = world.convexTestClosest(
+                from: start * q2b,
+                to: end * q2b,
+                shape: shape,
+                collisionFilterGroup: 0b1111111,
+                collisionFilterMask: 0b1111110
+            )
+            
+            hitResult.endpos = dynHit.hitPos * b2q
+            hitResult.fraction = dynHit.hitFraction
+            hitResult.plane = WorldCollisionAsset.Plane(normal: dynHit.hitNormal, distance: 0)
+        }
+        
+        
         
         return hitResult
     }
