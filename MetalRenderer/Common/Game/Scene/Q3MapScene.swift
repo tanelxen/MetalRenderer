@@ -134,8 +134,8 @@ class Q3MapScene
         
         world.gravity = vector3(0, 0, -10)
         
-        createFloor()
-        createCollider()
+        createWorld()
+        createCube()
         
         colliderTransform.scale = float3(30, 30, 30)
         
@@ -196,17 +196,9 @@ class Q3MapScene
     {
         guard let point = spawnPoints.first else { return }
         
-        let transform = Transform()
-        transform.position = point.position
-        transform.rotation = point.rotation
-        
         player = Player(scene: self)
-        player?.spawn(with: transform)
-        
-        if let body = player?.rigidBody
-        {
-            world.add(rigidBody: body)
-        }
+        player?.transform.position = point.position
+        player?.transform.rotation = point.rotation
     }
     
     private func spawnBarneys()
@@ -344,7 +336,7 @@ extension Q3MapScene
         else
         {
             let shape = BulletBoxShape(halfExtents: float3(15, 15, 28) * q2b)
-            
+
             let dynHit = world.convexTestClosest(
                 from: start * q2b,
                 to: end * q2b,
@@ -353,12 +345,10 @@ extension Q3MapScene
                 collisionFilterMask: 0b1111110
             )
             
-            hitResult.endpos = dynHit.hitPos * b2q
             hitResult.fraction = dynHit.hitFraction
+            hitResult.endpos = start + hitResult.fraction * (end - start)
             hitResult.plane = WorldCollisionAsset.Plane(normal: dynHit.hitNormal, distance: 0)
         }
-        
-        
         
         return hitResult
     }
@@ -398,52 +388,30 @@ extension Q3MapScene
         }
     }
     
-    func createFloor()
+    func createWorld()
     {
-        let usePlane = false
-        
-        if usePlane
+        for brush in brushesCollision.brushes
         {
-            let shape = BulletStaticPlaneShape(normal: .z_axis, constant: -31.6 * q2b)
-    //        let shape = BulletBoxShape(halfExtents: float3(1000, 1000, 10) * q2b)
-
+            let shape = BulletConvexHullShape()
+            
+            for point in brush.vertices
+            {
+                shape.addPoint(point * q2b)
+            }
+            
             let transform = BulletTransform()
             transform.setIdentity()
-    //        transform.origin = vector3(100, 1400, -31.95 - 10) * q2b
-
+            
             let motionState = MotionState(transform: transform)
             let body = BulletRigidBody(mass: 0,
                                        motionState: motionState,
                                        collisionShape: shape)
-            
-    //        body.friction = 1
+            body.friction = 1
             world.add(rigidBody: body)
-        }
-        else
-        {
-            for brush in brushesCollision.brushes
-            {
-                let shape = BulletConvexHullShape()
-                
-                for point in brush.vertices
-                {
-                    shape.addPoint(point * q2b)
-                }
-                
-                let transform = BulletTransform()
-                transform.setIdentity()
-                
-                let motionState = MotionState(transform: transform)
-                let body = BulletRigidBody(mass: 0,
-                                           motionState: motionState,
-                                           collisionShape: shape)
-                body.friction = 1
-                world.add(rigidBody: body)
-            }
         }
     }
     
-    func createCollider()
+    func createCube()
     {
         let colShape = BulletBoxShape(halfExtents: vector3(15, 15, 15) * q2b)
 //        let colShape = BulletSphereShape(radius: 15.0 * q2b)

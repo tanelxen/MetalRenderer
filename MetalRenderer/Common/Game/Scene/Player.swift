@@ -7,7 +7,6 @@
 
 import simd
 import Foundation
-import BulletSwift
 
 class Player
 {
@@ -33,17 +32,6 @@ class Player
     
     private var bobing: Float = 0.0
     
-    private (set) var motionState: MotionState?
-    private (set) var rigidBody: BulletRigidBody?
-    
-    private let q2b: Float = 2.54 / 100
-    private let b2q: Float = 100 / 2.54
-    
-    private var forwardmove: Float = 0.0
-    private var rightmove: Float = 0.0
-    
-    private var isGrounded = false
-    
     init(scene: Q3MapScene)
     {
         self.scene = scene
@@ -61,41 +49,6 @@ class Player
         mesh?.sequenceName = "idle3"
         
         setupEvents()
-    }
-    
-    func spawn(with transform: Transform)
-    {
-        self.transform = transform
-        setupRigidBody()
-    }
-    
-    private func setupRigidBody()
-    {
-//        let shape = BulletCapsuleShape(radius: 15 * q2b, height: 56 * q2b, up: .z)
-        let shape = BulletBoxShape(halfExtents: float3(15, 15, 28) * q2b)
-        
-        let startTransform = BulletTransform()
-        startTransform.setIdentity()
-        startTransform.origin = transform.position * q2b
-        
-        let mass: Float = 1.0
-        let localInertia = shape.calculateLocalInertia(mass: mass)
-        
-        let motionState = MotionState(transform: startTransform)
-        
-        let body = BulletRigidBody(mass: mass,
-                                   motionState: motionState,
-                                   collisionShape: shape,
-                                   localInertia: localInertia)
-        
-        body.forceActivationState(.disableDeactivation)
-        
-        body.friction = 0.1
-        body.linearDamping = 0.0
-        body.restitution = 0.0
-        
-        self.motionState = motionState
-        self.rigidBody = body
     }
     
     private func setupEvents()
@@ -124,40 +77,11 @@ class Player
         updateInput()
         updateMovement()
         
-
+        bobing = playerMovement.isWalking ? bobing + GameTime.deltaTime : 0
+        let bob = sin(bobing * 16) * 1.2
         
-//        bobing = playerMovement.isWalking ? bobing + GameTime.deltaTime : 0
-//        let bob = sin(bobing * 16) * 1.2
-        
-        camera.transform.position = transform.position + float3(0, 0, 40)
+        camera.transform.position = transform.position + float3(0, 0, 40 + bob)
         camera.transform.rotation = transform.rotation
-    }
-    
-    private func traceGround()
-    {
-        let start = transform.position
-        let end = start + float3(0, 0, -29)
-        
-//        let dynHit = scene.world.rayTestClosest(
-//            from: start * q2b,
-//            to: end * q2b,
-//            collisionFilterGroup: 0b1111111,
-//            collisionFilterMask: 0b1111110
-//        )
-        
-        let shape = BulletBoxShape(halfExtents: float3(15, 15, 28) * q2b)
-        
-        let dynHit = scene.world.convexTestClosest(
-            from: start * q2b,
-            to: end * q2b,
-            shape: shape,
-            collisionFilterGroup: 0b1111111,
-            collisionFilterMask: 0b1111110
-        )
-        
-//        print("dynHit.hasHits", dynHit.hasHits)
-        
-        isGrounded = dynHit.hasHits
     }
     
     private func makeShoot()
@@ -187,27 +111,27 @@ class Player
     {
         let deltaTime = GameTime.deltaTime
 
-        forwardmove = 0
-        rightmove = 0
+        playerMovement.forwardmove = 0
+        playerMovement.rightmove = 0
         
         if Keyboard.isKeyPressed(.w)
         {
-            forwardmove = 1
+            playerMovement.forwardmove = 1
         }
 
         if Keyboard.isKeyPressed(.s)
         {
-            forwardmove = -1
+            playerMovement.forwardmove = -1
         }
         
         if Keyboard.isKeyPressed(.a)
         {
-            rightmove = -1
+            playerMovement.rightmove = -1
         }
 
         if Keyboard.isKeyPressed(.d)
         {
-            rightmove = 1
+            playerMovement.rightmove = 1
         }
         
         if Keyboard.isKeyPressed(.leftArrow)
