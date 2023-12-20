@@ -39,6 +39,7 @@ class Q3MapScene
     let kdTree = KdTree()
     let octree = Octree()
     let bspTree = BSPTree()
+    let hashGrid = HashGrid()
     
     var onReady: (()->Void)?
     
@@ -81,7 +82,8 @@ class Q3MapScene
 //                        collision = Q3MapCollision(asset: asset)
                         
 //                        kdTree.loadFromAsset(asset)
-                        octree.loadFromAsset(asset)
+//                        octree.loadFromAsset(asset)
+                        hashGrid.loadFromAsset(asset)
 //                        bspTree.loadFromAsset(asset)
                         
 //                        brushes = BrushRenderer()
@@ -311,7 +313,7 @@ extension Q3MapScene
     func trace(start: float3, end: float3, mins: float3, maxs: float3) -> HitResult
     {
         var hitResult = HitResult()
-        octree.traceBox(result: &hitResult, start: start, end: end, mins: mins, maxs: maxs)
+        hashGrid.traceBox(result: &hitResult, start: start, end: end, mins: mins, maxs: maxs)
 
         return hitResult
     }
