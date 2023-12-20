@@ -8,85 +8,8 @@
 import Foundation
 import simd
 
-struct HitResult
-{
-    var start: float3 = .zero
-    var end: float3 = .zero
-    
-    var mins: float3 = .zero
-    var maxs: float3 = .zero
-    
-    var offsets: [float3] = .init(repeating: .zero, count: 8)
-    
-    var endpos: float3 = .zero
-    
-    var fraction: Float = 0.0
-    
-    var plane: WorldCollisionAsset.Plane?
-    
-    var startsolid = false
-    var allsolid = false
-
-    var sweepBox: BoundingBox!
-    
-    var checkedBrushIndeces: [Int] = []
-}
-
 fileprivate let CONTENTS_SOLID: Int = 1
 fileprivate let CONTENTS_PLAYERCLIP: Int = 0x10000
-
-// plane types are used to speed some tests
-// 0-2 are axial planes
-private enum PlaneType: Int
-{
-    case PLANE_X = 0
-    case PLANE_Y = 1
-    case PLANE_Z = 2
-    case PLANE_NON_AXIAL = 3
-    
-    init(normal: float3)
-    {
-        if normal.x == 1.0
-        {
-            self = .PLANE_X
-        }
-        else if normal.y == 1.0
-        {
-            self = .PLANE_Y
-        }
-        else if normal.z == 1.0
-        {
-            self = .PLANE_Z
-        }
-        else
-        {
-            self = .PLANE_NON_AXIAL
-        }
-    }
-}
-
-fileprivate struct PlaneInfo
-{
-    let type: PlaneType
-    let signbits: Int
-    
-    init(normal: float3)
-    {
-        type = PlaneType(normal: normal)
-        
-        var bits = 0
-        
-        for i in 0...2
-        {
-            if normal[i] < 0 {
-                bits |= 1 << i
-            }
-        }
-        
-        signbits = bits
-    }
-}
-
 fileprivate let SURF_CLIP_EPSILON: Float = 0.125
 
 class Q3MapCollision
@@ -111,9 +34,9 @@ class Q3MapCollision
         traceBox(result: &result, start: inputStart, end: inputEnd, mins: .zero, maxs: .zero)
     }
     
-    func traceBox(result work: inout HitResult, start: float3, end: float3, mins: float3, maxs: float3)
+    func traceBox(result: inout HitResult, start: float3, end: float3, mins: float3, maxs: float3)
     {
-        work.fraction = 1
+        var work = TraceWork()
         
         // Make symmetrical
         for i in 0...2
@@ -159,34 +82,18 @@ class Q3MapCollision
         work.offsets[7][2] = work.maxs[2]
 
         // walk through the BSP tree
-//        trace_node(work: &work, index: 0, start_frac: 0, end_frac: 1, start: work.start, end: work.end)
+        trace_node(work: &work, index: 0, start_frac: 0, end_frac: 1, start: work.start, end: work.end)
         
-        for brush in asset.brushes
-        {
-            trace_brush(brush, work: &work)
-            
-//            if work.allsolid {
-//                break
-//            }
-            
-            if work.fraction < 1 {
-                break
-            }
-        }
-
-        if work.fraction == 1.0
-        {
-            // nothing blocked the trace
-            work.endpos = end
-        }
-        else
-        {
-            // collided with something
-            work.endpos = start + work.fraction * (end - start)
-        }
+        result.fraction = work.fraction
+        result.normal = work.plane?.normal
+        
+        result.startsolid = work.startsolid
+        result.allsolid = work.allsolid
+        
+        result.endpos = start + work.fraction * (end - start)
     }
     
-    private func trace_node(work: inout HitResult, index: Int, start_frac: Float, end_frac: Float, start: float3, end: float3)
+    private func trace_node(work: inout TraceWork, index: Int, start_frac: Float, end_frac: Float, start: float3, end: float3)
     {
         // this is a leaf
         if index < 0
@@ -281,7 +188,7 @@ class Q3MapCollision
         trace_node(work: &work, index: node.child[side^1], start_frac: mid_frac, end_frac: end_frac, start: mid, end: end)
     }
     
-    private func trace_leaf(at index: Int, with work: inout HitResult)
+    private func trace_leaf(at index: Int, with work: inout TraceWork)
     {
         let leaf = asset.leafs[index]
         
@@ -300,7 +207,7 @@ class Q3MapCollision
         }
     }
     
-    private func trace_brush(_ brush: WorldCollisionAsset.Brush, work: inout HitResult)
+    private func trace_brush(_ brush: WorldCollisionAsset.Brush, work: inout TraceWork)
     {
         var start_frac: Float = -1.0
         var end_frac: Float = 1.0
@@ -379,7 +286,54 @@ class Q3MapCollision
     }
 }
 
-fileprivate func clamp<T>(_ value: T, minValue: T, maxValue: T) -> T where T : Comparable
+// plane types are used to speed some tests
+// 0-2 are axial planes
+private enum PlaneType: Int
 {
-    return min(max(value, minValue), maxValue)
+    case PLANE_X = 0
+    case PLANE_Y = 1
+    case PLANE_Z = 2
+    case PLANE_NON_AXIAL = 3
+    
+    init(normal: float3)
+    {
+        if normal.x == 1.0
+        {
+            self = .PLANE_X
+        }
+        else if normal.y == 1.0
+        {
+            self = .PLANE_Y
+        }
+        else if normal.z == 1.0
+        {
+            self = .PLANE_Z
+        }
+        else
+        {
+            self = .PLANE_NON_AXIAL
+        }
+    }
+}
+
+private struct PlaneInfo
+{
+    let type: PlaneType
+    let signbits: Int
+    
+    init(normal: float3)
+    {
+        type = PlaneType(normal: normal)
+        
+        var bits = 0
+        
+        for i in 0...2
+        {
+            if normal[i] < 0 {
+                bits |= 1 << i
+            }
+        }
+        
+        signbits = bits
+    }
 }

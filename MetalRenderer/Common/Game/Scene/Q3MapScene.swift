@@ -17,8 +17,6 @@ class Q3MapScene
     
     private var worldMesh: WorldStaticMesh?
     
-//    private var collision: Q3MapCollision!
-    
     private var lightGrid: Q3MapLightGrid?
     
     private (set) var spawnPoints: [Transform] = []
@@ -34,12 +32,7 @@ class Q3MapScene
     
     private (set) static var current: Q3MapScene!
     
-//    private (set) var brushes: BrushRenderer?
-    
-    let kdTree = KdTree()
-    let octree = Octree()
-    let bspTree = BSPTree()
-    let hashGrid = HashGrid()
+    private let hashGrid = HashGrid()
     
     var onReady: (()->Void)?
     
@@ -79,15 +72,7 @@ class Q3MapScene
                     
                     if let asset = try? decoder.decode(WorldCollisionAsset.self, from: data)
                     {
-//                        collision = Q3MapCollision(asset: asset)
-                        
-//                        kdTree.loadFromAsset(asset)
-//                        octree.loadFromAsset(asset)
                         hashGrid.loadFromAsset(asset)
-//                        bspTree.loadFromAsset(asset)
-                        
-//                        brushes = BrushRenderer()
-//                        brushes?.loadFromAsset(asset)
                     }
                 }
                 
@@ -140,11 +125,11 @@ class Q3MapScene
         
         isPlaying = true
         
-        AudioEngine.play(file: "Half-Life13.mp3")
+//        AudioEngine.play(file: "Half-Life13.mp3")
         
-        DispatchQueue.global().async {
-            self.spawnBarneys()
-        }
+//        DispatchQueue.global().async {
+//            self.spawnBarneys()
+//        }
         
         spawnPlayer()
         
@@ -305,7 +290,7 @@ extension Q3MapScene
     func trace(start: float3, end: float3) -> Bool
     {
         var hitResult = HitResult()
-        octree.traceBox(result: &hitResult, start: start, end: end, mins: .zero, maxs: .zero)
+        hashGrid.traceBox(result: &hitResult, start: start, end: end, mins: .zero, maxs: .zero)
         
         return hitResult.fraction >= 1
     }
@@ -324,9 +309,9 @@ extension Q3MapScene
     func makeShoot(start: float3, end: float3)
     {
         var hitResult = HitResult()
-        octree.traceBox(result: &hitResult, start: start, end: end, mins: .zero, maxs: .zero)
+        hashGrid.traceBox(result: &hitResult, start: start, end: end, mins: .zero, maxs: .zero)
         
-        if hitResult.fraction > 0, let normal = hitResult.plane?.normal
+        if hitResult.fraction > 0, let normal = hitResult.normal
         {
             Decals.shared.addDecale(origin: hitResult.endpos, normal: normal)
             Particles.shared.addParticles(origin: hitResult.endpos, dir: normal, count: 5)

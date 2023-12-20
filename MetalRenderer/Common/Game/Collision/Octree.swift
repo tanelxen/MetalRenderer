@@ -254,9 +254,9 @@ final class Octree
 
 extension Octree
 {
-    func traceBox(result work: inout HitResult, start: float3, end: float3, mins: float3, maxs: float3)
+    func traceBox(result: inout HitResult, start: float3, end: float3, mins: float3, maxs: float3)
     {
-        work.fraction = 1
+        var work = TraceWork()
         
         // Make symmetrical
         for i in 0...2
@@ -313,20 +313,17 @@ extension Octree
         {
             trace_node(work: &work, node: root, start: start, end: end)
         }
-
-        if work.fraction == 1.0
-        {
-            // nothing blocked the trace
-            work.endpos = end
-        }
-        else
-        {
-            // collided with something
-            work.endpos = start + work.fraction * (end - start)
-        }
+        
+        result.fraction = work.fraction
+        result.normal = work.plane?.normal
+        
+        result.startsolid = work.startsolid
+        result.allsolid = work.allsolid
+        
+        result.endpos = start + work.fraction * (end - start)
     }
     
-    private func trace_node(work: inout HitResult, node: OctreeNode, start: float3, end: float3)
+    private func trace_node(work: inout TraceWork, node: OctreeNode, start: float3, end: float3)
     {
         let check = isIntersect(work.sweepBox, node.boundingBox)
         
@@ -345,7 +342,7 @@ extension Octree
         }
     }
     
-    private func trace_leaf(_ leaf: OctreeNode, work: inout HitResult)
+    private func trace_leaf(_ leaf: OctreeNode, work: inout TraceWork)
     {
         for item in leaf.items
         {
@@ -363,7 +360,7 @@ extension Octree
         }
     }
     
-    private func trace_brush(_ brush: Brush, work: inout HitResult)
+    private func trace_brush(_ brush: Brush, work: inout TraceWork)
     {
         guard isIntersect(work.sweepBox, brush.bounds) else { return }
         

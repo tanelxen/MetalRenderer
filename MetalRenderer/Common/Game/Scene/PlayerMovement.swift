@@ -199,7 +199,7 @@ final class PlayerMovement
         else
         {
             movement &= ~MOVEMENT_JUMPING
-            ground_normal = hitResult.plane?.normal
+            ground_normal = hitResult.normal
         }
     }
     
@@ -296,7 +296,7 @@ final class PlayerMovement
         var up = float3(0, 0, 1)
         
         // never step up when you still have up velocity
-        if velocity.z > 0 && (trace.fraction == 1.0 || dot(trace.plane!.normal, up) < 0.7)
+        if velocity.z > 0 && (trace.fraction == 1.0 || dot(trace.normal!, up) < 0.7)
         {
             return
         }
@@ -332,7 +332,7 @@ final class PlayerMovement
         
         if trace.fraction < 1.0
         {
-            velocity = clip_velocity(velocity, normal: trace.plane!.normal, overbounce: OVERCLIP)
+            velocity = clip_velocity(velocity, normal: trace.normal!, overbounce: OVERCLIP)
         }
     }
     
@@ -411,7 +411,7 @@ final class PlayerMovement
              * to prevent epsilon issues and dont re-test it
              */
             
-            let normal = work.plane!.normal
+            let normal = work.normal!
             
             if planes.contains(where: { dot(normal, $0) > 0.99 })
             {

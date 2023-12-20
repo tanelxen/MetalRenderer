@@ -17,12 +17,6 @@ final class HierarchyPanel
         selectedEntity?.transform
     }
     
-    private var selectedBSPNode: BSPNode?
-    private var selectedBSPPlane: BSPNode.Plane?
-    
-    private var selectedKdNode: KdNode?
-    private var selectedKdPlane: KdNode.Plane?
-    
     private var selectedNode: OctreeNode?
     private var selectedBrush: Brush?
     
@@ -47,6 +41,8 @@ final class HierarchyPanel
         // Left-click on blank space: Delete game object
         if ImGuiIsMouseClicked(Im(ImGuiMouseButton_Left), false) && ImGuiIsWindowHovered(0) {
             selectedEntity = nil
+            selectedNode = nil
+            selectedBrush = nil
         }
         
         ImGuiEnd()
@@ -100,8 +96,6 @@ final class HierarchyPanel
             ImGuiTreePop()
         }
 
-
-
         ImGuiPopStyleVar(2)  // ItemSpacing & FramePadding
     }
     
@@ -116,9 +110,7 @@ final class HierarchyPanel
         
         if ImGuiTreeNodeEx(scene.name, flags)
         {
-//            drawKdTree(scene.kdTree)
-//            drawBspTree(scene.bspTree)
-            drawOctree(scene.octree)
+//            drawOctree(scene.octree)
             ImGuiTreePop()
         }
 
@@ -147,151 +139,7 @@ final class HierarchyPanel
         ImGuiPopStyleVar(2)  // ItemSpacing & FramePadding
     }
     
-    private func drawKdTree(_ tree: KdTree)
-    {
-        ImGuiPushStyleVar(Im(ImGuiStyleVar_ItemSpacing), ImVec2(8, 6))
-        ImGuiPushStyleVar(Im(ImGuiStyleVar_FramePadding), ImVec2(1, 3))
-
-        let flags: ImGuiTreeNodeFlags = Im(ImGuiTreeNodeFlags_SpanAvailWidth) | Im(ImGuiTreeNodeFlags_OpenOnArrow) | Im(ImGuiTreeNodeFlags_OpenOnDoubleClick)
-
-//        flags |= (entity === selectedEntity) ? Im(ImGuiTreeNodeFlags_Selected) : 0
-        
-        if ImGuiTreeNodeEx("KD-Tree", flags)
-        {
-            if let root = tree.root
-            {
-                drawNode(root, named: "\(FAIcon.shapes) root")
-            }
-            
-            ImGuiTreePop()
-        }
-
-        ImGuiPopStyleVar(2)  // ItemSpacing & FramePadding
-    }
-    
-    private func drawNode(_ node: KdNode, named: String)
-    {
-        ImGuiPushStyleVar(Im(ImGuiStyleVar_ItemSpacing), ImVec2(8, 6))
-        ImGuiPushStyleVar(Im(ImGuiStyleVar_FramePadding), ImVec2(1, 3))
-
-        var flags: ImGuiTreeNodeFlags = Im(ImGuiTreeNodeFlags_SpanAvailWidth) | Im(ImGuiTreeNodeFlags_OpenOnArrow)
-        flags |= (node === selectedKdNode) ? Im(ImGuiTreeNodeFlags_Selected) : 0
-        
-        let opened = ImGuiTreeNodeEx(named, flags)
-        
-        if ImGuiIsItemClicked(Im(ImGuiMouseButton_Left))
-        {
-            if selectedKdNode === node
-            {
-                selectedKdNode = nil
-            }
-            else
-            {
-                selectedKdNode = node
-            }
-        }
-        
-        if opened
-        {
-            if let plane = node.plane
-            {
-                drawPlane(plane)
-            }
-            
-            if let left = node.left
-            {
-                drawNode(left, named: "\(FAIcon.shareAlt) left")
-            }
-            
-            if let right = node.right
-            {
-                drawNode(right, named: "\(FAIcon.shareAlt) right")
-            }
-            
-            for brush in node.items
-            {
-                drawBrush(brush)
-            }
-            
-            ImGuiTreePop()
-        }
-
-        ImGuiPopStyleVar(2)  // ItemSpacing & FramePadding
-    }
-    
-    private func drawBspTree(_ collision: BSPTree)
-    {
-        ImGuiPushStyleVar(Im(ImGuiStyleVar_ItemSpacing), ImVec2(8, 6))
-        ImGuiPushStyleVar(Im(ImGuiStyleVar_FramePadding), ImVec2(1, 3))
-
-        let flags: ImGuiTreeNodeFlags = Im(ImGuiTreeNodeFlags_SpanAvailWidth) | Im(ImGuiTreeNodeFlags_OpenOnArrow) | Im(ImGuiTreeNodeFlags_OpenOnDoubleClick)
-
-//        flags |= (entity === selectedEntity) ? Im(ImGuiTreeNodeFlags_Selected) : 0
-        
-        if ImGuiTreeNodeEx("BSP", flags)
-        {
-            if let root = collision.root
-            {
-                drawNode(root, named: "\(FAIcon.shapes) root")
-            }
-            
-            ImGuiTreePop()
-        }
-
-        ImGuiPopStyleVar(2)  // ItemSpacing & FramePadding
-    }
-    
-    private func drawNode(_ node: BSPNode, named: String)
-    {
-        ImGuiPushStyleVar(Im(ImGuiStyleVar_ItemSpacing), ImVec2(8, 6))
-        ImGuiPushStyleVar(Im(ImGuiStyleVar_FramePadding), ImVec2(1, 3))
-
-        var flags: ImGuiTreeNodeFlags = Im(ImGuiTreeNodeFlags_SpanAvailWidth) | Im(ImGuiTreeNodeFlags_OpenOnArrow)
-        flags |= (node === selectedBSPNode) ? Im(ImGuiTreeNodeFlags_Selected) : 0
-        
-        let opened = ImGuiTreeNodeEx(named, flags)
-        
-        if ImGuiIsItemClicked(Im(ImGuiMouseButton_Left))
-        {
-            if selectedBSPNode === node
-            {
-                selectedBSPNode = nil
-            }
-            else
-            {
-                selectedBSPNode = node
-            }
-        }
-        
-        if opened
-        {
-            if let plane = node.plane
-            {
-                drawPlane(plane)
-            }
-            
-            if let front = node.front
-            {
-                drawNode(front, named: "\(FAIcon.shareAlt) front")
-            }
-            
-            if let back = node.back
-            {
-                drawNode(back, named: "\(FAIcon.shareAlt) back")
-            }
-            
-            for brush in node.items
-            {
-                drawBrush(brush)
-            }
-            
-            ImGuiTreePop()
-        }
-
-        ImGuiPopStyleVar(2)  // ItemSpacing & FramePadding
-    }
-    
-    private func drawOctree(_ collision: Octree)
+    private func drawOctree(_ octree: Octree)
     {
         ImGuiPushStyleVar(Im(ImGuiStyleVar_ItemSpacing), ImVec2(8, 6))
         ImGuiPushStyleVar(Im(ImGuiStyleVar_FramePadding), ImVec2(1, 3))
@@ -302,7 +150,7 @@ final class HierarchyPanel
         
         if ImGuiTreeNodeEx("Octree", flags)
         {
-            if let root = collision.root
+            if let root = octree.root
             {
                 drawNode(root, named: "root")
             }
@@ -388,75 +236,6 @@ final class HierarchyPanel
         ImGuiPopStyleVar(2)  // ItemSpacing & FramePadding
     }
     
-    private func drawPlane(_ plane: KdNode.Plane)
-    {
-        ImGuiPushStyleVar(Im(ImGuiStyleVar_ItemSpacing), ImVec2(8, 6))
-        ImGuiPushStyleVar(Im(ImGuiStyleVar_FramePadding), ImVec2(1, 3))
-
-        var flags: ImGuiTreeNodeFlags = Im(ImGuiTreeNodeFlags_SpanAvailWidth) | Im(ImGuiTreeNodeFlags_Leaf)
-        flags |= (plane === selectedBSPPlane) ? Im(ImGuiTreeNodeFlags_Selected) : 0
-        
-        let axis: String = {
-            switch plane.axis {
-                case 0: return "X"
-                case 1: return "Y"
-                case 2: return "Z"
-                default: return "?"
-            }
-        }()
-        
-        let opened = ImGuiTreeNodeEx("\(FAIcon.square) plane \(axis)-axis", flags)
-        
-        if ImGuiIsItemClicked(Im(ImGuiMouseButton_Left))
-        {
-            if selectedBSPPlane === plane
-            {
-                selectedBSPPlane = nil
-            }
-            else
-            {
-                selectedKdPlane = plane
-            }
-        }
-        
-        if opened
-        {
-            ImGuiTreePop()
-        }
-
-        ImGuiPopStyleVar(2)  // ItemSpacing & FramePadding
-    }
-    
-    private func drawPlane(_ plane: BSPNode.Plane)
-    {
-        ImGuiPushStyleVar(Im(ImGuiStyleVar_ItemSpacing), ImVec2(8, 6))
-        ImGuiPushStyleVar(Im(ImGuiStyleVar_FramePadding), ImVec2(1, 3))
-
-        var flags: ImGuiTreeNodeFlags = Im(ImGuiTreeNodeFlags_SpanAvailWidth) | Im(ImGuiTreeNodeFlags_Leaf)
-        flags |= (plane === selectedBSPPlane) ? Im(ImGuiTreeNodeFlags_Selected) : 0
-        
-        let opened = ImGuiTreeNodeEx("\(FAIcon.square) plane", flags)
-        
-        if ImGuiIsItemClicked(Im(ImGuiMouseButton_Left))
-        {
-            if selectedBSPPlane === plane
-            {
-                selectedBSPPlane = nil
-            }
-            else
-            {
-                selectedBSPPlane = plane
-            }
-        }
-        
-        if opened
-        {
-            ImGuiTreePop()
-        }
-
-        ImGuiPopStyleVar(2)  // ItemSpacing & FramePadding
-    }
-    
     private func drawBrush(_ brush: Brush)
     {
         ImGuiPushStyleVar(Im(ImGuiStyleVar_ItemSpacing), ImVec2(8, 6))
@@ -505,37 +284,6 @@ final class HierarchyPanel
             transform.scale = brush.maxBounds - brush.minBounds
             
             Debug.shared.addCube(transform: transform, color: float4(1, 0, 1, 0.8), lifespan: 0)
-        }
-        
-        if let plane = selectedBSPPlane
-        {
-            let transform = Transform()
-            transform.position = plane.normal * plane.distance
-            
-            let axis = float3.one - plane.normal
-            transform.scale = axis * 4096
-            
-            Debug.shared.addCube(transform: transform, color: float4(0, 1, 0, 0.8), lifespan: 0)
-        }
-        
-        if let plane = selectedKdPlane
-        {
-            let normal: float3 = {
-                switch plane.axis {
-                    case 0: return .x_axis
-                    case 1: return .y_axis
-                    case 2: return .z_axis
-                    default: return .zero
-                }
-            }()
-            
-            let transform = Transform()
-            transform.position = normal * plane.distance
-            
-            let axis = float3.one - normal
-            transform.scale = axis * 4096
-            
-            Debug.shared.addCube(transform: transform, color: float4(0, 1, 0, 0.8), lifespan: 0)
         }
     }
 }

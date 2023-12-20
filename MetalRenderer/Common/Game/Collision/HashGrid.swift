@@ -11,15 +11,10 @@ import simd
 final class HashGrid
 {
     private var grid: [GridKey: [Brush]] = [:]
-    
-    private var brushes: [Brush] = []
-    
-    private var bounds = BoundingBox(min: .zero, max: .zero)
     private let cellSize: Float = 64
     
-    private var sizeX: Float = 0
-    private var sizeY: Float = 0
-    private var sizeZ: Float = 0
+    private var brushes: [Brush] = []
+    private var bounds = BoundingBox(min: .zero, max: .zero)
     
     func loadFromAsset(_ asset: WorldCollisionAsset)
     {
@@ -41,26 +36,17 @@ final class HashGrid
             brushes.append(brush)
         }
         
-        bounds = overallBoundingBox(for: brushes)
-        
-        sizeX = floor(bounds.max.x / cellSize) - ceil(bounds.min.x / cellSize) + 1.0
-        sizeY = floor(bounds.max.y / cellSize) - ceil(bounds.min.y / cellSize) + 1.0
-        sizeZ = floor(bounds.max.z / cellSize) - ceil(bounds.min.z / cellSize) + 1.0
-        
         for brush in brushes
         {
             insert(brush)
         }
-        
     }
     
     private func cellForPoint(_ point: float3) -> (Int, Int, Int)
     {
-        let shifted = point - bounds.min
-        
-        let x = floor(shifted.x / cellSize)
-        let y = floor(shifted.y / cellSize)
-        let z = floor(shifted.z / cellSize)
+        let x = floor(point.x / cellSize)
+        let y = floor(point.y / cellSize)
+        let z = floor(point.z / cellSize)
         
         return (Int(x), Int(y), Int(z))
     }
@@ -165,9 +151,9 @@ final class HashGrid
 
 extension HashGrid
 {
-    func traceBox(result work: inout HitResult, start: float3, end: float3, mins: float3, maxs: float3)
+    func traceBox(result: inout HitResult, start: float3, end: float3, mins: float3, maxs: float3)
     {
-        work.fraction = 1
+        var work = TraceWork()
         
         // Make symmetrical
         for i in 0...2
@@ -219,14 +205,9 @@ extension HashGrid
             BoundingBox(min: end + mins - eps, max: end + maxs + eps)
         ])
         
-//        if let root = self.root
-//        {
-//            trace_node(work: &work, node: root, start: start, end: end)
-//        }
+        let overlapped = queryBrushes(in: work.sweepBox)
         
-        let result = queryBrushes(in: work.sweepBox)
-        
-        for item in result
+        for item in overlapped
         {
             if work.checkedBrushIndeces.contains(item.id) {
                 continue
@@ -240,38 +221,17 @@ extension HashGrid
                 break
             }
         }
-
-        if work.fraction == 1.0
-        {
-            // nothing blocked the trace
-            work.endpos = end
-        }
-        else
-        {
-            // collided with something
-            work.endpos = start + work.fraction * (end - start)
-        }
+        
+        result.fraction = work.fraction
+        result.normal = work.plane?.normal
+        
+        result.startsolid = work.startsolid
+        result.allsolid = work.allsolid
+        
+        result.endpos = start + work.fraction * (end - start)
     }
     
-//    private func trace_leaf(_ leaf: OctreeNode, work: inout HitResult)
-//    {
-//        for item in leaf.items
-//        {
-//            if work.checkedBrushIndeces.contains(item.id) {
-//                continue
-//            }
-//
-//            work.checkedBrushIndeces.append(item.id)
-//
-//            trace_brush(item, work: &work)
-//
-//            if work.allsolid {
-//                return
-//            }
-//        }
-//    }
-    
-    private func trace_brush(_ brush: Brush, work: inout HitResult)
+    private func trace_brush(_ brush: Brush, work: inout TraceWork)
     {
         guard isIntersect(work.sweepBox, brush.bounds) else { return }
         

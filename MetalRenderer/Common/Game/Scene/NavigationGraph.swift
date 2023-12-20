@@ -274,7 +274,7 @@ final class NavigationGraph
             else
             {
                 ent.flags &= ~FL_PARTIALGROUND
-                ent.ground_normal = trace.plane?.normal
+                ent.ground_normal = trace.normal
 //                if( relink ) SV_LinkEdict( ent, true )
 
                 return true
