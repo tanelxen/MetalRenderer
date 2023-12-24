@@ -132,7 +132,7 @@ class Q3MapScene
         isReady = true
         Q3MapScene.current = self
         
-        world.gravity = vector3(0, 0, -10)
+        world.gravity = vector3(0, 0, -800 * q2b)
         
         createWorld()
         createCube()
@@ -196,9 +196,17 @@ class Q3MapScene
     {
         guard let point = spawnPoints.first else { return }
         
+        let transform = Transform()
+        transform.position = point.position
+        transform.rotation = point.rotation
+        
         player = Player(scene: self)
-        player?.transform.position = point.position
-        player?.transform.rotation = point.rotation
+        player?.spawn(with: transform)
+        
+        if let body = player?.rigidBody
+        {
+            world.add(rigidBody: body)
+        }
     }
     
     private func spawnBarneys()

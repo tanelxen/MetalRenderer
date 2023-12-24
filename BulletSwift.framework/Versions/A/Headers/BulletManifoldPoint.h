@@ -36,6 +36,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) int partId1;
 @property (nonatomic, readonly) vector_float3 positionWorldOnA;
 @property (nonatomic, readonly) vector_float3 positionWorldOnB;
+@property (nonatomic, readonly) vector_float3 normalWorldOnB;
 
 - (instancetype)initWithManifoldPoint:(btManifoldPointC *)pt;
 @end
