@@ -54,7 +54,7 @@ final class PlayerMovement
     var isNoclip = false
     
     // Текущий вектор направления движения
-    private var velocity: float3 = .zero
+    private (set) var velocity: float3 = .zero
     
     // Нормаль плоскости, на которой стоит игрок
     private var ground_normal: float3?
