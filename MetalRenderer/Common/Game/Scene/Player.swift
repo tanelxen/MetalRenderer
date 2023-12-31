@@ -33,8 +33,7 @@ class Player
     
     private var bobing: Float = 0.0
     
-    private (set) var motionState: MotionState?
-    private (set) var rigidBody: BulletRigidBody?
+    private (set) var characterController: BulletCharacterController?
     
     private let q2b: Float = 2.54 / 100
     private let b2q: Float = 100 / 2.54
@@ -67,31 +66,14 @@ class Player
     func spawn(with transform: Transform)
     {
         self.transform = transform
-        setupRigidBody()
-    }
-    
-    private func setupRigidBody()
-    {
-        let shape = BulletCapsuleShape(radius: 15 * q2b, height: 28 * q2b, up: .z)
         
-        let startTransform = BulletTransform()
-        startTransform.setIdentity()
-        startTransform.origin = transform.position * q2b
-        
-        let mass: Float = 1.0
-        let localInertia = shape.calculateLocalInertia(mass: mass)
-        
-        let motionState = MotionState(transform: startTransform)
-        
-        let body = BulletRigidBody(mass: mass,
-                                   motionState: motionState,
-                                   collisionShape: shape,
-                                   localInertia: localInertia)
-        
-        body.forceActivationState(.disableDeactivation)
-        
-        self.motionState = motionState
-        self.rigidBody = body
+        characterController = BulletCharacterController(
+            world: scene.world,
+            pos: transform.position * q2b,
+            radius: 15 * q2b,
+            height: 28 * q2b,
+            stepHeight: 18 * q2b
+        )
     }
     
     private func setupEvents()
@@ -117,7 +99,8 @@ class Player
     {
         updateInput()
 //        updateQuakeMovement()
-        updateBtMovement()
+//        updateBtMovement()
+        updateControllerMovement()
         
         camera.transform.position = transform.position + float3(0, 0, 40)
         camera.transform.rotation = transform.rotation
@@ -131,11 +114,9 @@ class Player
         transform.position = playerMovement.transform.position
     }
     
-    // Movement based on Bullet's rigid body
-    private func updateBtMovement()
+    // Movement based on Bullet's character controller
+    private func updateControllerMovement()
     {
-        traceGround()
-        
         var forward = transform.rotation.forward
         var right = transform.rotation.right
         
@@ -146,63 +127,17 @@ class Player
         direction += forward * forwardmove * 200 * q2b
         direction += right * rightmove * 150 * q2b
         
-        let currentVel = rigidBody!.linearVelocity
+        characterController?.setWalkDirection(direction * GameTime.deltaTime)
         
-        rigidBody?.angularFactor = .zero
-        rigidBody?.linearVelocity = float3(direction.x, direction.y, currentVel.z)
-        
-        if playerMovement.isWishJump && isGrounded
+        if playerMovement.isWishJump, characterController!.isOnGround()
         {
-            let jumpValue = currentVel.z + 150 * q2b
-            
-            rigidBody?.linearVelocity = float3(direction.x, direction.y, jumpValue)
+            characterController!.linearVelocity += float3(0, 0, 270 * q2b)
         }
         
-        if let origin = motionState?.transform.origin
+        if let origin = characterController?.getPos()
         {
             transform.position = origin * b2q
         }
-    }
-    
-    private func traceGround()
-    {
-        isGrounded = false
-        
-        let slopeMaxNormalY: Float = 0.4
-        
-        for i in 0 ..< scene.world.numberOfManifolds()
-        {
-            let contact = scene.world.manifold(by: i)
-            
-            guard contact.numberOfContacts() > 0 else { continue }
-            
-            let body0 = contact.body0
-            let body1 = contact.body1
-            
-            var sign: Float = 0
-            
-            if body0 == rigidBody
-            {
-                sign = 1
-            }
-            else if body1 == rigidBody
-            {
-                sign = -1
-            }
-            else
-            {
-                continue
-            }
-            
-            let normal = contact.contactPoint(at: 0).normalWorldOnB * sign
-            
-            if dot(normal, .z_axis) > slopeMaxNormalY
-            {
-                isGrounded = true
-                break
-            }
-        }
-        
     }
     
     private func makeShoot()

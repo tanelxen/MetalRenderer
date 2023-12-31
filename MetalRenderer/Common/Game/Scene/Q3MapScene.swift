@@ -189,7 +189,7 @@ class Q3MapScene
             colliderTransform.position = position * b2q
         }
         
-        world.stepSimulation(timeStep: 1.0/60.0, maxSubSteps: 10, fixedTimeStep: 1.0/60.0)
+        world.stepSimulation(timeStep: GameTime.deltaTime)
     }
     
     private func spawnPlayer()
@@ -202,11 +202,6 @@ class Q3MapScene
         
         player = Player(scene: self)
         player?.spawn(with: transform)
-        
-        if let body = player?.rigidBody
-        {
-            world.add(rigidBody: body)
-        }
     }
     
     private func spawnBarneys()
@@ -427,7 +422,7 @@ extension Q3MapScene
         let startTransform = BulletTransform()
         startTransform.setIdentity()
         
-        let mass: Float = 1.0
+        let mass: Float = 0.1
         let localInertia = colShape.calculateLocalInertia(mass: mass)
         
 //        startTransform.origin = vector3(256, 1180, 200)
@@ -440,7 +435,9 @@ extension Q3MapScene
                                       collisionShape: colShape,
                                       localInertia: localInertia)
         
-//        colBody.friction = 1
+        colBody.collisionFlag(2 | 1)
+        
+        colBody.friction = 0.5
         world.add(rigidBody: colBody)
         
         self.colliderMotion = colMotionState

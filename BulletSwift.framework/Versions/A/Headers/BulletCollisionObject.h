@@ -78,6 +78,8 @@ typedef NS_ENUM(NSUInteger, BulletActivationState) {
 
 - (btCollisionObjectC *)ptr;
 
+- (void)setWorldTransform:(BulletTransform *)transform;
+
 @end
 
 NS_ASSUME_NONNULL_END
