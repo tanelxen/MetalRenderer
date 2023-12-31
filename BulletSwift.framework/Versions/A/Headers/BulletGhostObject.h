@@ -33,6 +33,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSUInteger)numberOfOverlappingNodes;
 - (BulletCollisionObject *)overlappingNodeAt:(NSUInteger)index;
 - (btCollisionObjectC *)ptr;
+
+- (vector_float3) worldPosition;
 @end
 
 NS_ASSUME_NONNULL_END
