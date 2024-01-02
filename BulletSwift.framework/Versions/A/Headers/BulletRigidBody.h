@@ -57,15 +57,7 @@ motionStateGetWorldTransform:(MotionStateGetWorldTransform)motionStateGetWorldTr
 motionStateSetWorldTransform:(MotionStateSetWorldTransform)motionStateSetWorldTransform
               collisionShape:(BulletCollisionShape *)collisionShape
                 localInertia:(vector_float3)localInertia;
-- (instancetype)initWithShape:(BulletCollisionShape *)shape
-                     position:(vector_float3)position
-                     rotation:(vector_float3)rotation
-                         mass:(float)mass
-                  restitution:(float)restitution;
-- (instancetype)initWithShape:(BulletCollisionShape *)shape
-            transformationRef:(const matrix_float4x4 *)transformation
-                         mass:(float)mass
-                  restitution:(float)restitution;
+
 - (void)applyCentralForce:(vector_float3)force;
 - (void)applyCentralImpulse:(vector_float3)impulse;
 - (void)applyForce:(vector_float3)force onPoint:(vector_float3)position;
@@ -73,7 +65,9 @@ motionStateSetWorldTransform:(MotionStateSetWorldTransform)motionStateSetWorldTr
 - (void)applyTorque:(vector_float3)torque;
 - (void)applyTorqueImpulse:(vector_float3)torque;
 - (void)clearForces;
+
 - (btCollisionObjectC *)ptr;
+
 @end
 
 
