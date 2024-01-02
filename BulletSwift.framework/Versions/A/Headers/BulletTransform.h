@@ -27,6 +27,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface BulletTransform : NSObject
 @property (nonatomic) matrix_float3x3 basis;
 @property (nonatomic) vector_float3 origin;
+@property (nonatomic) vector_float4 rotation;
 
 - (instancetype)init;
 - (instancetype)initWithQuaternion:(vector_float4)q translation:(vector_float3)c;

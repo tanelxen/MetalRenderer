@@ -27,16 +27,23 @@ NS_ASSUME_NONNULL_BEGIN
 @class BulletRigidBody;
 
 @interface BulletPoint2PointConstraint : BulletConstraint
+
+@property (nonatomic) float impulseClamp;
+@property (nonatomic) float tau;
+
 - (instancetype)initWithNodeA:(BulletRigidBody *)nodeA
                         nodeB:(BulletRigidBody *)nodeB
                        pivotA:(vector_float3)pivotA
                        pivotB:(vector_float3)pivotB;
+
 - (instancetype)initWithNodeA:(BulletRigidBody *)nodeA
                        pivotA:(vector_float3)pivotA;
+
 - (vector_float3)pivotInA;
 - (vector_float3)pivotInB;
 - (void)setPivotA:(vector_float3)pivotA;
 - (void)setPivotB:(vector_float3)pivotB;
+
 @end
 
 NS_ASSUME_NONNULL_END

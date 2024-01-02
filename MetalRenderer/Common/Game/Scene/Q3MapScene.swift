@@ -10,6 +10,8 @@ import MetalKit
 import SwiftZip
 import BulletSwift
 
+import SceneKit
+
 class Q3MapScene
 {
     private let skybox = Skybox()
@@ -41,7 +43,10 @@ class Q3MapScene
     let world = BulletWorld()
     
     private var colliderTransform = Transform()
-    private var colliderMotion: MotionState?
+    private (set) var colliderMotion: MotionState?
+    
+    private var rampTransform: Transform?
+    private var rampMotion: MotionState?
     
     private var playerTransform = Transform()
     
@@ -184,12 +189,37 @@ class Q3MapScene
         
         Particles.shared.update()
         
-        if let position = colliderMotion?.transform.origin
+        if let transform = colliderMotion?.transform
         {
-            colliderTransform.position = position * b2q
+            colliderTransform.position = transform.origin * b2q
+            
+            let quat = simd_quatf(vector: transform.rotation)
+            
+            let n = SCNNode()
+            n.simdOrientation = quat
+            let rotation = n.simdEulerAngles
+            
+            colliderTransform.rotation.pitch = rotation.x.degrees
+            colliderTransform.rotation.yaw = rotation.z.degrees
+            colliderTransform.rotation.roll = rotation.y.degrees
         }
         
-        world.stepSimulation(timeStep: GameTime.deltaTime)
+        if let transform = rampMotion?.transform
+        {
+            rampTransform?.position = transform.origin * b2q
+            
+            let quat = simd_quatf(vector: transform.rotation)
+            
+            let n = SCNNode()
+            n.simdOrientation = quat
+            let rotation = n.simdEulerAngles
+            
+            rampTransform?.rotation.pitch = rotation.x.degrees
+            rampTransform?.rotation.yaw = rotation.z.degrees
+            rampTransform?.rotation.roll = rotation.y.degrees
+        }
+        
+        world.stepSimulation(timeStep: GameTime.deltaTime, maxSubSteps: 10)
     }
     
     private func spawnPlayer()
@@ -364,13 +394,13 @@ extension Q3MapScene
         let start = start * q2b
         let end = end * q2b
         
-        let dynHit = world.rayTestClosest(from: start, to: end, collisionFilterGroup: 0b1111111, collisionFilterMask: 0b1111110)
+        let dynHit = world.rayTestClosest(from: start, to: end, collisionFilterGroup: 0b1111111, collisionFilterMask: 0b1111111)
         
         if dynHit.hasHits
         {
             if dynHit.node.isStaticObject
             {
-                print("HIT STATIC", dynHit.hitPos)
+                print("HIT STATIC", dynHit.hitPos * b2q)
                 
                 let point = dynHit.hitPos * b2q
                 let normal = dynHit.hitNormal
@@ -380,12 +410,11 @@ extension Q3MapScene
             }
             else
             {
-                print("HIT DYNAMIC", dynHit.hitPos)
+                print("HIT DYNAMIC", dynHit.hitPos * b2q)
                 
-                let force = normalize(end - start) * 5
+                let impulse = normalize(end - start) * 0.1
                 
-                
-                dynHit.node.applyCentralImpulse(force)
+                dynHit.node.applyImpulse(impulse, onPoint: dynHit.hitPos)
                 dynHit.node.setActiveState(true)
             }
         }
@@ -409,44 +438,77 @@ extension Q3MapScene
             let body = BulletRigidBody(mass: 0,
                                        motionState: motionState,
                                        collisionShape: shape)
-            body.friction = 1
+            body.friction = 0.5
             world.add(rigidBody: body)
+        }
+        
+        if true
+        {
+            let position = float3(0, 1374, 4)
+            let scale = float3(340, 96, 8)
+            
+            let shape = BulletBoxShape(halfExtents: scale * 0.5 * q2b)
+            
+            let startTransform = BulletTransform()
+            startTransform.setIdentity()
+            
+            startTransform.origin = position * q2b
+            
+            let motionState = MotionState(transform: startTransform)
+            
+            let mass: Float = 5
+            let localInertia = shape.calculateLocalInertia(mass: mass)
+            
+            let body = BulletRigidBody(mass: mass,
+                                       motionState: motionState,
+                                       collisionShape: shape,
+                                       localInertia: localInertia)
+            
+            world.add(rigidBody: body)
+            
+            let transform = Transform()
+            transform.position = position
+            transform.scale = scale
+            
+            Debug.shared.addCube(transform: transform, color: float4(1, 0, 1, 1))
+            
+            rampTransform = transform
+            rampMotion = motionState
+            
+            let hinge = BulletHingeConstraint(nodeA: body, pivotA: .zero, axisA: .y_axis)
+            world.add(hinge, disableCollisionsBetweenLinkedBodies: true)
         }
     }
     
     func createCube()
     {
         let colShape = BulletBoxShape(halfExtents: vector3(15, 15, 15) * q2b)
-//        let colShape = BulletSphereShape(radius: 15.0 * q2b)
-        
+
         let startTransform = BulletTransform()
         startTransform.setIdentity()
-        
-        let mass: Float = 0.1
+
+        let mass: Float = 1
         let localInertia = colShape.calculateLocalInertia(mass: mass)
-        
-//        startTransform.origin = vector3(256, 1180, 200)
+
         startTransform.origin = float3(140, 1443, 100) * q2b
-        
+
         let colMotionState = MotionState(transform: startTransform)
-        
+
         let colBody = BulletRigidBody(mass: mass,
                                       motionState: colMotionState,
                                       collisionShape: colShape,
                                       localInertia: localInertia)
-        
-        colBody.collisionFlag(2 | 1)
-        
-        colBody.friction = 0.5
+
         world.add(rigidBody: colBody)
-        
+
         self.colliderMotion = colMotionState
     }
 }
 
-protocol BulletMotionState {
-  func getWorldTransform() -> BulletTransform
-  func setWorldTransform(centerOfMassWorldTransform: BulletTransform)
+protocol BulletMotionState
+{
+    func getWorldTransform() -> BulletTransform
+    func setWorldTransform(_ transform: BulletTransform)
 }
 
 class MotionState: BulletMotionState
@@ -461,23 +523,24 @@ class MotionState: BulletMotionState
         return transform
     }
 
-    func setWorldTransform(centerOfMassWorldTransform: BulletTransform) {
-        self.transform = centerOfMassWorldTransform
+    func setWorldTransform(_ transform: BulletTransform) {
+        self.transform = transform
     }
 }
 
-extension BulletRigidBody {
-  convenience init(mass: Float, motionState: BulletMotionState, collisionShape: BulletCollisionShape, localInertia: vector_float3 = vector_float3(0, 0, 0)) {
-    self.init(mass: mass,
-              motionStateGetWorldTransform: { () -> BulletTransform in
-                return motionState.getWorldTransform()
-              },
-              motionStateSetWorldTransform: { (transform) in
-                motionState.setWorldTransform(centerOfMassWorldTransform: transform)
-              },
-              collisionShape: collisionShape,
-              localInertia: localInertia)
-  }
+extension BulletRigidBody
+{
+    convenience init(mass: Float,
+                     motionState: BulletMotionState,
+                     collisionShape: BulletCollisionShape,
+                     localInertia: float3 = .zero)
+    {
+        self.init(mass: mass,
+                  motionStateGetWorldTransform: { return motionState.getWorldTransform() },
+                  motionStateSetWorldTransform: { transform in motionState.setWorldTransform(transform) },
+                  collisionShape: collisionShape,
+                  localInertia: localInertia)
+    }
 }
 
 extension BulletWorld {
