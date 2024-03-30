@@ -8,7 +8,7 @@
 import Foundation
 import MetalKit
 import SwiftZip
-import BulletSwift
+import SwiftBullet
 
 import SceneKit
 
@@ -92,8 +92,8 @@ class Q3MapScene
                         brushesCollision = BrushCollision()
                         brushesCollision.loadFromAsset(asset)
                         
-//                        brushes = BrushRenderer()
-//                        brushes?.loadFromAsset(asset)
+                        brushes = BrushRenderer()
+                        brushes?.loadFromAsset(asset)
                     }
                 }
                 
@@ -360,28 +360,28 @@ extension Q3MapScene
     {
         var hitResult = HitResult()
         
-//        collision.traceBox(result: &hitResult, start: start, end: end, mins: mins, maxs: maxs)
+        collision.traceBox(result: &hitResult, start: start, end: end, mins: mins, maxs: maxs)
         
-        if start == end
-        {
-            collision.traceBox(result: &hitResult, start: start, end: end, mins: mins, maxs: maxs)
-        }
-        else
-        {
-            let shape = BulletBoxShape(halfExtents: float3(15, 15, 28) * q2b)
-
-            let dynHit = world.convexTestClosest(
-                from: start * q2b,
-                to: end * q2b,
-                shape: shape,
-                collisionFilterGroup: 0b1111111,
-                collisionFilterMask: 0b1111110
-            )
-            
-            hitResult.fraction = dynHit.hitFraction
-            hitResult.endpos = start + hitResult.fraction * (end - start)
-            hitResult.plane = WorldCollisionAsset.Plane(normal: dynHit.hitNormal, distance: 0)
-        }
+//        if start == end
+//        {
+//            collision.traceBox(result: &hitResult, start: start, end: end, mins: mins, maxs: maxs)
+//        }
+//        else
+//        {
+//            let shape = BulletBoxShape(halfExtents: float3(15, 15, 28) * q2b)
+//
+//            let dynHit = world.convexTestClosest(
+//                from: start * q2b,
+//                to: end * q2b,
+//                shape: shape,
+//                collisionFilterGroup: 0b1111111,
+//                collisionFilterMask: 0b1111110
+//            )
+//
+//            hitResult.fraction = dynHit.hitFraction
+//            hitResult.endpos = start + hitResult.fraction * (end - start)
+//            hitResult.plane = WorldCollisionAsset.Plane(normal: dynHit.hitNormal, distance: 0)
+//        }
         
         return hitResult
     }
@@ -391,32 +391,27 @@ extension Q3MapScene
 {
     func makeShoot(start: float3, end: float3)
     {
-        let start = start * q2b
-        let end = end * q2b
+        var hitResult = HitResult()
+        collision.traceRay(result: &hitResult, start: start, end: end)
         
-        let dynHit = world.rayTestClosest(from: start, to: end, collisionFilterGroup: 0b1111111, collisionFilterMask: 0b1111111)
+        let line = Intersection.Line(start: start, end: hitResult.endpos)
         
-        if dynHit.hasHits
+        let aabbs = entities.map {
+            Intersection.AABB(
+                mins: $0.minBounds + $0.transform.position,
+                maxs: $0.maxBounds + $0.transform.position
+            )
+        }
+        
+        if let result = Intersection.findIntersection(line: line, aabbs: aabbs)
         {
-            if dynHit.node.isStaticObject
-            {
-                print("HIT STATIC", dynHit.hitPos * b2q)
-                
-                let point = dynHit.hitPos * b2q
-                let normal = dynHit.hitNormal
-                
-                Decals.shared.addDecale(origin: point, normal: normal)
-                Particles.shared.addParticles(origin: point, dir: normal, count: 5)
-            }
-            else
-            {
-                print("HIT DYNAMIC", dynHit.hitPos * b2q)
-                
-                let impulse = normalize(end - start) * 0.1
-                
-                dynHit.node.applyImpulse(impulse, onPoint: dynHit.hitPos)
-                dynHit.node.setActiveState(true)
-            }
+            Particles.shared.addParticles(origin: result.point, dir: result.normal, count: 5)
+            entities[result.index].takeDamage()
+        }
+        else if hitResult.fraction > 0, let normal = hitResult.plane?.normal
+        {
+            Decals.shared.addDecale(origin: hitResult.endpos, normal: normal)
+            Particles.shared.addParticles(origin: hitResult.endpos, dir: normal, count: 5)
         }
     }
     
@@ -541,39 +536,4 @@ extension BulletRigidBody
                   collisionShape: collisionShape,
                   localInertia: localInertia)
     }
-}
-
-extension BulletWorld {
-  
-  @discardableResult
-  func stepSimulation(timeStep: Float, maxSubSteps: Int = 1, fixedTimeStep: Float = Float(1.0/60.0)) -> Int {
-    return Int(__stepSimulation(withTimeStep: timeStep, maxSubSteps: Int32(maxSubSteps), fixedTimeStep: fixedTimeStep))
-  }
-  
-  func add(rigidBody: BulletRigidBody, collisionFilterGroup: Int32, collisionFilterMask: Int32) {
-    __add(rigidBody, withCollisionFilterGroup: collisionFilterGroup, collisionFilterMask: collisionFilterMask)
-  }
-  
-  func add(rigidBody: BulletRigidBody) {
-    __add(rigidBody)
-  }
-  
-  func remove(rigidBody: BulletRigidBody) {
-    __remove(rigidBody)
-  }
-  
-  func add(ghost: BulletGhostObject) {
-    __addGhost(ghost)
-  }
-  
-  func remove(ghost: BulletGhostObject) {
-    __removeGhost(ghost)
-  }
-  
-}
-
-extension BulletCollisionShape {
-  func calculateLocalInertia(mass: Float) -> vector_float3 {
-    return __calculateLocalInertia(withMass: mass)
-  }
 }

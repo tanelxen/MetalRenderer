@@ -30,6 +30,12 @@ final class BrushCollision
 
             let brushVertices = createVertices(planes: planes)
             
+            if brushVertices.isEmpty
+            {
+                print("brush.numBrushsides", brush.numBrushsides)
+                continue
+            }
+            
             let set = BrushSet(vertices: brushVertices)
             brushes.append(set)
         }

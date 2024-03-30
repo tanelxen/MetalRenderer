@@ -7,7 +7,7 @@
 
 import simd
 import Foundation
-import BulletSwift
+import SwiftBullet
 
 class Player
 {

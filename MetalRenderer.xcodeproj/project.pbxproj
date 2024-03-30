@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8A02B3002BB8CB4300F3E4FB /* SwiftBullet in Frameworks */ = {isa = PBXBuildFile; productRef = 8A02B2FF2BB8CB4300F3E4FB /* SwiftBullet */; };
+		8A02B3022BB8CB4B00F3E4FB /* SwiftBullet in Frameworks */ = {isa = PBXBuildFile; productRef = 8A02B3012BB8CB4B00F3E4FB /* SwiftBullet */; };
 		8A05DD102ACF25080012252D /* WorldEntitiesAsset+Q3BSP.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A05DD0F2ACF25080012252D /* WorldEntitiesAsset+Q3BSP.swift */; };
 		8A05DD122ACF26140012252D /* WorldCollisionAsset+Q3BSP.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A05DD112ACF26140012252D /* WorldCollisionAsset+Q3BSP.swift */; };
 		8A0C48AC2AC852A50099BEF6 /* WorldAsset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A0C48AB2AC852A50099BEF6 /* WorldAsset.swift */; };
@@ -126,9 +128,6 @@
 		8A27DB312AAE3E5A0094C9D0 /* pl_step2.wav in Resources */ = {isa = PBXBuildFile; fileRef = 8A6E036829CE3BA300609C3A /* pl_step2.wav */; };
 		8A27DB322AAE3E5A0094C9D0 /* pl_gun3.wav in Resources */ = {isa = PBXBuildFile; fileRef = 8AE8101829CEC08D003A681E /* pl_gun3.wav */; };
 		8A27DB332AAE3E5A0094C9D0 /* pl_step1.wav in Resources */ = {isa = PBXBuildFile; fileRef = 8A6E036629CE3BA300609C3A /* pl_step1.wav */; };
-		8A32CD882B3E760B0078A32A /* BulletSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8A32CD862B3E760B0078A32A /* BulletSwift.framework */; };
-		8A32CD892B3E76F30078A32A /* BulletSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8A32CD862B3E760B0078A32A /* BulletSwift.framework */; };
-		8A32CD8A2B3E76F30078A32A /* BulletSwift.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 8A32CD862B3E760B0078A32A /* BulletSwift.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		8A3E5C812B10DA160043EA29 /* BrushCollision.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A3E5C802B10DA150043EA29 /* BrushCollision.swift */; };
 		8A3E5C822B10DA160043EA29 /* BrushCollision.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A3E5C802B10DA150043EA29 /* BrushCollision.swift */; };
 		8A53DEFB2AB336DE00EC2C65 /* Particles.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8A53DEFA2AB336DE00EC2C65 /* Particles.metal */; };
@@ -173,17 +172,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		8A3E5C862B10DA430043EA29 /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				8A32CD8A2B3E76F30078A32A /* BulletSwift.framework in Embed Frameworks */,
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		8A3E5C892B10DA4F0043EA29 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -221,7 +209,6 @@
 		8A27DA972AAE39DF0094C9D0 /* Game-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Game-Info.plist"; sourceTree = "<group>"; };
 		8A27DA9A2AAE3C3C0094C9D0 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		8A27DB372AAE3E5A0094C9D0 /* Sandbox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Sandbox.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		8A32CD862B3E760B0078A32A /* BulletSwift.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = BulletSwift.framework; sourceTree = "<group>"; };
 		8A3C60172AAB916500BE835E /* ViewportPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewportPanel.swift; sourceTree = "<group>"; };
 		8A3C60192AAB94E000BE835E /* HierarchyPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HierarchyPanel.swift; sourceTree = "<group>"; };
 		8A3E5C802B10DA150043EA29 /* BrushCollision.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BrushCollision.swift; sourceTree = "<group>"; };
@@ -300,7 +287,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8A92FDE32B0FC9F100BF5A75 /* SwiftZip in Frameworks */,
-				8A32CD882B3E760B0078A32A /* BulletSwift.framework in Frameworks */,
+				8A02B3002BB8CB4300F3E4FB /* SwiftBullet in Frameworks */,
 				8A27DA872AAE39DE0094C9D0 /* Quake3BSP in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -313,7 +300,7 @@
 				8A7C70B82AAFA7D7003FAFDD /* ImGuizmo in Frameworks */,
 				8A27DB282AAE3E5A0094C9D0 /* Quake3BSP in Frameworks */,
 				8A27DB292AAE3E5A0094C9D0 /* GoldSrcMDL in Frameworks */,
-				8A32CD892B3E76F30078A32A /* BulletSwift.framework in Frameworks */,
+				8A02B3022BB8CB4B00F3E4FB /* SwiftBullet in Frameworks */,
 				8A9243CD2B0D460600B4766C /* SwiftZip in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -577,7 +564,6 @@
 		8AE5331E27BEEA8B00A80C1E /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				8A32CD862B3E760B0078A32A /* BulletSwift.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -602,6 +588,7 @@
 			packageProductDependencies = (
 				8A27DA4A2AAE39DE0094C9D0 /* Quake3BSP */,
 				8A92FDE22B0FC9F100BF5A75 /* SwiftZip */,
+				8A02B2FF2BB8CB4300F3E4FB /* SwiftBullet */,
 			);
 			productName = MetalRenderer;
 			productReference = 8A27DA962AAE39DE0094C9D0 /* Game.app */;
@@ -614,7 +601,6 @@
 				8A27DAF12AAE3E5A0094C9D0 /* Sources */,
 				8A27DB252AAE3E5A0094C9D0 /* Frameworks */,
 				8A27DB2A2AAE3E5A0094C9D0 /* Resources */,
-				8A3E5C862B10DA430043EA29 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -627,6 +613,7 @@
 				8A7C70B52AAFA7D3003FAFDD /* ImGui */,
 				8A7C70B72AAFA7D7003FAFDD /* ImGuizmo */,
 				8A9243CC2B0D460600B4766C /* SwiftZip */,
+				8A02B3012BB8CB4B00F3E4FB /* SwiftBullet */,
 			);
 			productName = MetalRenderer;
 			productReference = 8A27DB372AAE3E5A0094C9D0 /* Sandbox.app */;
@@ -1154,6 +1141,14 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		8A02B2FF2BB8CB4300F3E4FB /* SwiftBullet */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = SwiftBullet;
+		};
+		8A02B3012BB8CB4B00F3E4FB /* SwiftBullet */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = SwiftBullet;
+		};
 		8A27DA4A2AAE39DE0094C9D0 /* Quake3BSP */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Quake3BSP;
