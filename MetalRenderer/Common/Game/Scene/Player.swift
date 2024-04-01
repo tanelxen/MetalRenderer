@@ -72,13 +72,13 @@ class Player
     {
         self.transform = transform
         
-//        characterController = BulletCharacterController(
-//            world: scene.world,
-//            pos: transform.position * q2b,
-//            radius: 15 * q2b,
-//            height: 28 * q2b,
-//            stepHeight: 18 * q2b
-//        )
+        characterController = BulletCharacterController(
+            world: scene.world,
+            pos: transform.position * q2b,
+            radius: 15 * q2b,
+            height: 28 * q2b,
+            stepHeight: 18 * q2b
+        )
         
         setupRigidBody()
     }
@@ -139,8 +139,8 @@ class Player
     {
         updateInput()
 //        updateQuakeMovement()
-        updateBtMovement()
-//        updateControllerMovement()
+//        updateBtMovement()
+        updateControllerMovement()
         
         camera.transform.position = transform.position + float3(0, 0, 40)
         camera.transform.rotation = transform.rotation

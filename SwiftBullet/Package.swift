@@ -17,7 +17,7 @@ let package = Package(
         ),
         .target(
             name: "ObjCBullet",
-            dependencies: ["bullet"],
+            dependencies: ["bullet", "DynamicCharacter"],
             path: "Sources/ObjCBullet",
             publicHeadersPath: ".",
             cSettings: [
@@ -32,6 +32,16 @@ let package = Package(
             cxxSettings: [
                 .headerSearchPath(".")
             ]
+        ),
+        .target(
+            name: "DynamicCharacter",
+            dependencies: ["bullet"],
+            path: "Sources/DynamicCharacter",
+            publicHeadersPath: ".",
+            cxxSettings: [
+                .headerSearchPath(".")
+            ]
         )
-    ]
+    ],
+    cxxLanguageStandard: .cxx11
 )
