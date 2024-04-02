@@ -213,7 +213,7 @@ final class AssetsPanel
         do
         {
             let name = url.deletingPathExtension().lastPathComponent
-            let archiveUrl = currentDir.appendingPathComponent(name).appendingPathExtension("zip")
+            let archiveUrl = currentDir.appendingPathComponent(name).appendingPathExtension("wld")
             
             // Open an archive for writing, overwriting any existing file
             let archive = try ZipMutableArchive(url: archiveUrl, flags: [.create, .truncate])
@@ -243,8 +243,6 @@ final class AssetsPanel
                 try archive.addFile(name: "collision.json", source: source)
             }
 
-            // Commit changes and close the archive
-            // Alternatively call `discard` to rollback any changes
             try archive.close()
         }
         catch
@@ -252,17 +250,6 @@ final class AssetsPanel
             // Handle possible errors
             print("\(error)")
         }
-        
-//        let name = url.deletingPathExtension().lastPathComponent
-//
-//        if let assetDir = ResourceManager.getOrCreateFolder(named: "\(name).wld", directory: currentDir)
-//        {
-//            let asset = WorldStaticMeshAsset.make(from: bsp, folder: assetDir)
-//            asset.saveToFolder(assetDir)
-//
-//            let entities = WorldEntitiesAsset.make(from: bsp, folder: assetDir)
-//            let collision = WorldCollisionAsset.make(from: bsp, folder: assetDir)
-//        }
     }
     
     private func copyTextures(for bsp: Q3Map, from sourceDir: String)

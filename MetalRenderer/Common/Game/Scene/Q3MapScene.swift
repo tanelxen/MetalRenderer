@@ -40,6 +40,8 @@ class Q3MapScene
     {
         do
         {
+            worldMesh = WorldStaticMesh()
+            
             let archive = try ZipArchive(url: url)
             
             for entry in archive.entries()
@@ -52,7 +54,6 @@ class Q3MapScene
                 {
                     if let asset = WorldStaticMeshAsset.load(from: data)
                     {
-                        worldMesh = WorldStaticMesh()
                         worldMesh?.loadFromAsset(asset)
                     }
                 }
