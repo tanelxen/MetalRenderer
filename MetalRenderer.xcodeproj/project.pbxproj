@@ -167,6 +167,7 @@
 		8AC34E452AAE6E7800A6D429 /* HalfLife.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8AC34E442AAE6E7800A6D429 /* HalfLife.ttf */; };
 		8AE718232AD08293000CE0E1 /* BrushRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AE718222AD08293000CE0E1 /* BrushRenderer.swift */; };
 		8AE718242AD08293000CE0E1 /* BrushRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AE718222AD08293000CE0E1 /* BrushRenderer.swift */; };
+		8AF51C422BBCE6AC0021177B /* SwiftRecast in Frameworks */ = {isa = PBXBuildFile; productRef = 8AF51C412BBCE6AC0021177B /* SwiftRecast */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -284,6 +285,7 @@
 				8A7C70B82AAFA7D7003FAFDD /* ImGuizmo in Frameworks */,
 				8A27DB282AAE3E5A0094C9D0 /* Quake3BSP in Frameworks */,
 				8A27DB292AAE3E5A0094C9D0 /* GoldSrcMDL in Frameworks */,
+				8AF51C422BBCE6AC0021177B /* SwiftRecast in Frameworks */,
 				8A9243CD2B0D460600B4766C /* SwiftZip in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -594,6 +596,7 @@
 				8A7C70B52AAFA7D3003FAFDD /* ImGui */,
 				8A7C70B72AAFA7D7003FAFDD /* ImGuizmo */,
 				8A9243CC2B0D460600B4766C /* SwiftZip */,
+				8AF51C412BBCE6AC0021177B /* SwiftRecast */,
 			);
 			productName = MetalRenderer;
 			productReference = 8A27DB372AAE3E5A0094C9D0 /* Sandbox.app */;
@@ -709,7 +712,6 @@
 				8A27DA692AAE39DE0094C9D0 /* SkeletalMeshAsset.swift in Sources */,
 				8A0C48AD2AC852A50099BEF6 /* WorldAsset.swift in Sources */,
 				8A53DEFF2AB37E5C00EC2C65 /* Decals.swift in Sources */,
-				8A9C2E492AB8D5B9007E96AA /* Intersection.swift in Sources */,
 				8A27DA6A2AAE39DE0094C9D0 /* SkeletalMesh.metal in Sources */,
 				8A27DA6C2AAE39DE0094C9D0 /* ResourceManager.swift in Sources */,
 				8A27DA6D2AAE39DE0094C9D0 /* StaticMesh.swift in Sources */,
@@ -752,7 +754,6 @@
 				8A27DAF62AAE3E5A0094C9D0 /* Q3MapLightGrid.swift in Sources */,
 				8A7C70C12AB26278003FAFDD /* Particles.swift in Sources */,
 				8A98722D2AD4587200AAEE2C /* Billboards.swift in Sources */,
-				8A9C2E482AB8D5B9007E96AA /* Intersection.swift in Sources */,
 				8A27DAF72AAE3E5A0094C9D0 /* EditorLayer.swift in Sources */,
 				8A27DAF82AAE3E5A0094C9D0 /* NavigationGraph.swift in Sources */,
 				8A85E13E2AC5F47800923DB5 /* SkeletalMeshAsset+Valve.swift in Sources */,
@@ -1136,6 +1137,10 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 8A9243CB2B0D460600B4766C /* XCRemoteSwiftPackageReference "SwiftZip" */;
 			productName = SwiftZip;
+		};
+		8AF51C412BBCE6AC0021177B /* SwiftRecast */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = SwiftRecast;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

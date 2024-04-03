@@ -13,4 +13,7 @@
    <FileRef
       location = "group:ImGui+ImGuizmo">
    </FileRef>
+   <FileRef
+      location = "group:SwiftRecast">
+   </FileRef>
 </Workspace>
