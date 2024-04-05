@@ -235,7 +235,7 @@ final class AssetsPanel
             }
         }
         
-        let navmesh = Navmesh()
+        let navmesh = NavmeshBulder()
         navmesh.calculateVerts(&verts, nverts: nverts, tris: &tris, ntris: ntris)
         
         do
@@ -273,6 +273,16 @@ final class AssetsPanel
             if let data = navmesh.getMeshJson(), let source = try? ZipSource(data: data)
             {
                 try archive.addFile(name: "navmesh.json", source: source)
+            }
+            
+//            if let data = navmesh.getMeshObj(), let source = try? ZipSource(data: data)
+//            {
+//                try archive.addFile(name: "navmesh.obj", source: source)
+//            }
+            
+            if let data = navmesh.getDetourData(), let source = try? ZipSource(data: data)
+            {
+                try archive.addFile(name: "detour.bin", source: source)
             }
 
             try archive.close()

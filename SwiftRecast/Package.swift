@@ -11,15 +11,10 @@ let package = Package(
     dependencies: [],
     targets: [
         .target(
-            name: "SwiftRecast",
-            dependencies: ["RecastObjC"],
-            path: "Sources/RecastSwift"
-        ),
-        .target(
             name: "RecastObjC",
-            dependencies: ["Recast", "Detour", "MeshLoader"],
+            dependencies: ["Recast", "Detour"],
             path: "Sources/RecastObjC",
-            publicHeadersPath: ".",
+            publicHeadersPath: "Include",
             cSettings: [
                 .headerSearchPath(".")
             ]
@@ -40,15 +35,6 @@ let package = Package(
             publicHeadersPath: "Include",
             cxxSettings: [
                 .headerSearchPath("Include")
-            ]
-        ),
-        .target(
-            name: "MeshLoader",
-            dependencies: [],
-            path: "Sources/MeshLoader",
-            publicHeadersPath: ".",
-            cSettings: [
-                .headerSearchPath(".")
             ]
         )
     ],

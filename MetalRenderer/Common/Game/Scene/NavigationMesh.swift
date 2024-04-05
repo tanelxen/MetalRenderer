@@ -7,6 +7,7 @@
 
 import Foundation
 import MetalKit
+import RecastObjC
 
 final class NavigationMesh
 {
@@ -36,6 +37,8 @@ final class NavigationMesh
     }
     
     private var waypoints: [Node] = []
+    
+    var pathfinder: DetourPathfinder?
     
     init?(data: Data)
     {
@@ -393,55 +396,42 @@ extension NavigationMesh
     
     func makeRoute(from startPos: float3, to endPos: float3) -> [float3]
     {
-        var waypoints_copy = waypoints
+        guard let pathfinder = self.pathfinder else {
+            print("Have no Detour Pathfinder!!!")
+            return []
+        }
         
-        guard let startNode = addExtraNode(at: startPos, to: &waypoints_copy) else { return [] }
-        guard let endNode = addExtraNode(at: endPos, to: &waypoints_copy) else { return [] }
+        guard let (_, startPoint) = pointOnMesh(rayStart: startPos, rayEnd: startPos + float3(0, 0, -128))
+        else {
+            print("Have no startPoint")
+            return []
+        }
         
-        typealias Edge = (Float, Int)
-                
-        var queue = Queue<Edge>()
-        queue.push((0, startNode))
+        guard let (_, endPoint) = pointOnMesh(rayStart: endPos, rayEnd: endPos + float3(0, 0, -128))
+        else {
+            print("Have no endPoint")
+            return []
+        }
         
-        var cost_visited: [Int: Float] = [startNode: 0]
-        var visited: [Int: Int?] = [startNode: nil]
+        let spos = float3(startPoint.x, startPoint.z, -startPoint.y)
+        let epos = float3(endPoint.x, endPoint.z, -endPoint.y)
         
-        while let (_, curNode) = queue.pop()
+        if let values = pathfinder.getPathStartPos(spos, endPos: epos) as? [NSValue]
         {
-            if curNode == endNode { break }
+            var path: [float3] = []
             
-            let neighbors = waypoints_copy[curNode].neighbors
-            
-            for (neigh_cost, neighNode) in neighbors
+            for value in values
             {
-                let new_cost = (cost_visited[curNode] ?? 0) + neigh_cost
+                var vector = float3()
+                value.getValue(&vector)
                 
-                if cost_visited[neighNode] == nil || new_cost < cost_visited[neighNode]!
-                {
-                    let neigh_pos = waypoints_copy[neighNode].position
-                    let priority = new_cost + length(endPos - neigh_pos)
-                    
-                    queue.push((priority, neighNode))
-                    
-                    cost_visited[neighNode] = new_cost
-                    visited[neighNode] = curNode
-                }
+                path.append(vector)
             }
+            
+            return path.map { float3($0.x, -$0.z, $0.y) };
         }
         
-        var indiciesPath = [endNode]
-        
-        var cur_node = endNode
-
-        while cur_node != startNode
-        {
-            cur_node = visited[cur_node]!!
-            indiciesPath.append(cur_node)
-        }
-        
-        let path = indiciesPath.reversed().map({ waypoints_copy[$0].position })
-        
-        return path
+        return []
     }
 }
 

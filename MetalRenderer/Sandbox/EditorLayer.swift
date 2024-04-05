@@ -12,8 +12,6 @@ final class EditorLayer
 {
     private let view: MTKView
     
-    private var debugInfo = ""
-    
     private var iniPath = ""// ResourceManager.pathInPreferences(for: "editor.ini")
     
     private var viewportPanel: ViewportPanel!
@@ -101,8 +99,6 @@ final class EditorLayer
             let deltaChange = float2(Float(event.deltaX), Float(event.deltaY))
             let posX = Float(event.locationInWindow.x)
             let posY = Float(view.bounds.height - event.locationInWindow.y)
-            
-            debugInfo = "Mouse: \(posX), \(posY)"
             
             Mouse.setMousePositionChange(overallPosition: float2(posX, posY),
                                          deltaPosition: deltaChange)
@@ -233,7 +229,6 @@ final class EditorLayer
         hierarchyPanel.draw()
         viewportPanel.draw()
         
-        drawDebugPanel()
         assetsPanel.draw()
     }
     
@@ -297,18 +292,6 @@ final class EditorLayer
         {
             exit(0)
         }
-    }
-}
-
-private extension EditorLayer
-{
-    private func drawDebugPanel()
-    {
-        ImGuiBegin("Info", nil, 0)
-        
-        ImGuiTextV(debugInfo)
-
-        ImGuiEnd()
     }
 }
 

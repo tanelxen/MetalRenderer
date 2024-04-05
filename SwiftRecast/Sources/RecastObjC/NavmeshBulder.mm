@@ -1,18 +1,18 @@
 //
-//  Navmesh.cpp
+//  NavmeshBulder.mm
 //  
 //
 //  Created by Fedor Artemenkov on 03.04.2024.
 //
 
-#import "Navmesh.h"
+#import "Include/NavmeshBulder.h"
+#import "Utils.h"
+
 #import "Recast.h"
 #import "DetourNavMesh.h"
 #import "DetourNavMeshBuilder.h"
-#import "MeshLoaderObj.h"
-#import "Utils.h"
 
-@implementation Navmesh
+@implementation NavmeshBulder
 {
     float m_cellSize;
     float m_cellHeight;
@@ -151,20 +151,20 @@
     if (!m_chf)
     {
         m_ctx->log(RC_LOG_ERROR, "buildNavigation: Out of memory 'chf'.");
-        return false;
+        return;
     }
     
     if (!rcBuildCompactHeightfield(m_ctx, m_cfg.walkableHeight, m_cfg.walkableClimb, *m_solid, *m_chf))
     {
         m_ctx->log(RC_LOG_ERROR, "buildNavigation: Could not build compact data.");
-        return false;
+        return;
     }
     
     // Erode the walkable area by agent radius.
     if (!rcErodeWalkableArea(m_ctx, m_cfg.walkableRadius, *m_chf))
     {
         m_ctx->log(RC_LOG_ERROR, "buildNavigation: Could not erode.");
-        return false;
+        return;
     }
     
     // Watershed partitioning
@@ -173,14 +173,14 @@
     if (!rcBuildDistanceField(m_ctx, *m_chf))
     {
         m_ctx->log(RC_LOG_ERROR, "buildNavigation: Could not build distance field.");
-        return false;
+        return;
     }
     
     // Partition the walkable surface into simple regions without holes.
     if (!rcBuildRegions(m_ctx, *m_chf, 0, m_cfg.minRegionArea, m_cfg.mergeRegionArea))
     {
         m_ctx->log(RC_LOG_ERROR, "buildNavigation: Could not build watershed regions.");
-        return false;
+        return;
     }
     
     //
@@ -192,12 +192,12 @@
     if (!m_cset)
     {
         m_ctx->log(RC_LOG_ERROR, "buildNavigation: Out of memory 'cset'.");
-        return false;
+        return;
     }
     if (!rcBuildContours(m_ctx, *m_chf, m_cfg.maxSimplificationError, m_cfg.maxEdgeLen, *m_cset))
     {
         m_ctx->log(RC_LOG_ERROR, "buildNavigation: Could not create contours.");
-        return false;
+        return;
     }
     
     //
@@ -209,12 +209,12 @@
     if (!m_pmesh)
     {
         m_ctx->log(RC_LOG_ERROR, "buildNavigation: Out of memory 'pmesh'.");
-        return false;
+        return;
     }
     if (!rcBuildPolyMesh(m_ctx, *m_cset, m_cfg.maxVertsPerPoly, *m_pmesh))
     {
         m_ctx->log(RC_LOG_ERROR, "buildNavigation: Could not triangulate contours.");
-        return false;
+        return;
     }
     
     //
@@ -225,13 +225,13 @@
     if (!m_dmesh)
     {
         m_ctx->log(RC_LOG_ERROR, "buildNavigation: Out of memory 'pmdtl'.");
-        return false;
+        return;
     }
 
     if (!rcBuildPolyMeshDetail(m_ctx, *m_pmesh, *m_chf, m_cfg.detailSampleDist, m_cfg.detailSampleMaxError, *m_dmesh))
     {
         m_ctx->log(RC_LOG_ERROR, "buildNavigation: Could not build detail mesh.");
-        return false;
+        return;
     }
     
     // At this point the navigation mesh data is ready, you can access it from m_pmesh.
@@ -264,6 +264,7 @@
     
     dtNavMeshCreateParams params;
     memset(&params, 0, sizeof(params));
+    
     params.verts = m_pmesh->verts;
     params.vertCount = m_pmesh->nverts;
     params.polys = m_pmesh->polys;
@@ -277,14 +278,6 @@
     params.detailTris = m_dmesh->tris;
     params.detailTriCount = m_dmesh->ntris;
     
-//    params.offMeshConVerts = m_geom->getOffMeshConnectionVerts();
-//    params.offMeshConRad = m_geom->getOffMeshConnectionRads();
-//    params.offMeshConDir = m_geom->getOffMeshConnectionDirs();
-//    params.offMeshConAreas = m_geom->getOffMeshConnectionAreas();
-//    params.offMeshConFlags = m_geom->getOffMeshConnectionFlags();
-//    params.offMeshConUserID = m_geom->getOffMeshConnectionId();
-//    params.offMeshConCount = m_geom->getOffMeshConnectionCount();
-    
     params.walkableHeight = m_agentHeight;
     params.walkableRadius = m_agentRadius;
     params.walkableClimb = m_agentMaxClimb;
@@ -292,7 +285,7 @@
     rcVcopy(params.bmax, m_pmesh->bmax);
     params.cs = m_cfg.cs;
     params.ch = m_cfg.ch;
-    params.buildBvTree = false;
+    params.buildBvTree = true;
     
     unsigned char* navData = 0;
     int navDataSize = 0;
@@ -300,7 +293,7 @@
     if (!dtCreateNavMeshData(&params, &navData, &navDataSize))
     {
         m_ctx->log(RC_LOG_ERROR, "Could not build Detour navmesh.");
-        return false;
+        return;
     }
     
     m_navMesh = dtAllocNavMesh();
@@ -308,7 +301,7 @@
     {
         dtFree(navData);
         m_ctx->log(RC_LOG_ERROR, "Could not create Detour navmesh");
-        return false;
+        return;
     }
     
     dtStatus status;
@@ -318,8 +311,26 @@
     {
         dtFree(navData);
         m_ctx->log(RC_LOG_ERROR, "Could not init Detour navmesh");
-        return false;
+        return;
     }
+    
+    //TODO: clean up all allocated memory
+}
+
+- (nullable NSData*)getDetourData
+{
+    NSData* data = NULL;
+    
+    char *buffer;
+    size_t size = saveAllToMemory(&buffer, m_navMesh);
+    
+    if (buffer)
+    {
+        data = [NSData dataWithBytes:(const void *)buffer length:sizeof(char)*size];
+        free(buffer);
+    }
+    
+    return data;
 }
 
 - (nullable NSData*)getMeshJson
@@ -338,7 +349,23 @@
     return data;
 }
 
--(void)purge
+- (nullable NSData*)getMeshObj
+{
+    NSData* data = NULL;
+    
+    char *buffer;
+    size_t size = saveAsObjToMemory(&buffer, m_dmesh);
+    
+    if (buffer)
+    {
+        data = [NSData dataWithBytes:(const void *)buffer length:sizeof(char)*size];
+        free(buffer);
+    }
+    
+    return data;
+}
+
+-(void)cleanUp
 {
     if (m_triareas != nullptr) {
         delete[] m_triareas;
@@ -366,7 +393,7 @@
         delete m_dmesh;
     }
     
-    [self purge];
+    [self cleanUp];
     
     dtFreeNavMesh(m_navMesh);
 }

@@ -8,6 +8,7 @@
 import Foundation
 import MetalKit
 import SwiftZip
+import RecastObjC
 
 class Q3MapScene
 {
@@ -43,6 +44,8 @@ class Q3MapScene
             worldMesh = WorldStaticMesh()
             
             let archive = try ZipArchive(url: url)
+            
+            var pathfinder: DetourPathfinder?
             
             for entry in archive.entries()
             {
@@ -112,7 +115,15 @@ class Q3MapScene
                 {
                     navigation = NavigationMesh(data: data)
                 }
+                
+                if name == "detour.bin"
+                {
+                    pathfinder = DetourPathfinder()
+                    pathfinder?.load(from: data)
+                }
             }
+            
+            navigation?.pathfinder = pathfinder
         }
         catch
         {
