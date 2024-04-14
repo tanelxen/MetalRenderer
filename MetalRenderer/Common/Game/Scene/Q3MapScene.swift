@@ -8,7 +8,7 @@
 import Foundation
 import MetalKit
 import SwiftZip
-import RecastObjC
+import DetourPathfinder
 
 class Q3MapScene
 {

@@ -7,7 +7,7 @@
 
 import Foundation
 import MetalKit
-import RecastObjC
+import DetourPathfinder
 
 final class NavigationMesh
 {
@@ -259,141 +259,6 @@ final class NavigationMesh
 
 extension NavigationMesh
 {
-    private func findNearest(from start: float3) -> Int?
-    {
-        var shortest: Float = 999999
-        var nearest = -1
-        
-        for (index, waypoint) in waypoints.enumerated()
-        {
-            let end = waypoint.position
-            
-            let dist = length(end - start)
-            
-            if dist < shortest
-            {
-                shortest = dist
-                nearest = index
-            }
-        }
-        
-        if nearest != -1
-        {
-            return nearest
-        }
-        
-        return nil
-    }
-    
-    private func getNearestNodes(from origin: float3, in nodes: [Node]) -> [(index: Int, distance: Float)]
-    {
-        let maxNum: Int = 3
-        
-        var distances = nodes.enumerated().map { ( $0, length($1.position - origin) ) }
-        distances = distances.sorted(by: { $0.1 < $1.1 })
-        
-        distances.removeLast(distances.count - maxNum)
-        
-        return distances
-    }
-    
-    // Получить точку на меше
-    private func pointOnMesh(rayStart: float3, rayEnd: float3) -> (poly: [Int], point: float3)?
-    {
-        var polyIndex: Int?
-        var point: float3?
-        
-        for (index, poly) in asset.polys.enumerated()
-        {
-            let v0 = asset.verts[poly[0]]
-            let v1 = asset.verts[poly[1]]
-            let v2 = asset.verts[poly[2]]
-            
-            point = lineIntersectTriangle(v0: v0, v1: v1, v2: v2,
-                                          start: rayStart, end: rayEnd)
-            
-            if point != nil
-            {
-                polyIndex = index
-                break
-            }
-        }
-        
-        if let index = polyIndex, let point = point
-        {
-            return (asset.polys[index], point)
-        }
-        
-        return nil
-    }
-    
-    // Добавить новый узел в граф и вернуть индекс узла
-    private func addExtraNode(at startPos: float3, to nodes: inout [Node]) -> Int?
-    {
-        // Найдена точка на меше
-        if let (poly, point) = pointOnMesh(rayStart: startPos, rayEnd: startPos + float3(0, 0, -128))
-        {
-            // Создаем новый узел
-            var node = Node()
-            node.position = point
-            
-            // Индекс нового узла
-            let nodeIndex = nodes.count
-            
-            // Индексы соседних узлов
-            let i0 = poly[0]
-            let i1 = poly[1]
-            let i2 = poly[2]
-            
-            // Сосоедние узлы
-            let n0 = nodes[i0]
-            let n1 = nodes[i1]
-            let n2 = nodes[i2]
-            
-            // Расстояния до соседних узлов
-            let d0 = length(n0.position - point)
-            let d1 = length(n1.position - point)
-            let d2 = length(n2.position - point)
-            
-            node.neighbors = [
-                (d0, i0),
-                (d1, i1),
-                (d2, i2)
-            ]
-            
-            nodes[i0].neighbors.append( (d0, nodeIndex) )
-            nodes[i1].neighbors.append( (d1, nodeIndex) )
-            nodes[i2].neighbors.append( (d2, nodeIndex) )
-            
-            nodes.append(node)
-            return nodeIndex
-        }
-        
-        // Точка где-то вне меша, попробуем создать
-        let nearestNodes = getNearestNodes(from: startPos, in: nodes)
-        
-        if !nearestNodes.isEmpty
-        {
-            // Создаем новый узел
-            var node = Node()
-            node.position = startPos
-            
-            // Индекс нового узла
-            let nodeIndex = nodes.count
-            
-            for nearestNode in nearestNodes
-            {
-                node.neighbors.append( (nearestNode.distance, nearestNode.index) )
-                nodes[nearestNode.index].neighbors.append( (nearestNode.distance, nodeIndex) )
-            }
-            
-            nodes.append(node)
-            return nodeIndex
-        }
-        
-        return nil
-    }
-    
     func makeRoute(from startPos: float3, to endPos: float3) -> [float3]
     {
         guard let pathfinder = self.pathfinder else {
@@ -401,37 +266,13 @@ extension NavigationMesh
             return []
         }
         
-        guard let (_, startPoint) = pointOnMesh(rayStart: startPos, rayEnd: startPos + float3(0, 0, -128))
-        else {
-            print("Have no startPoint")
-            return []
-        }
+        let spos = float3(startPos.x, startPos.z, -startPos.y)
+        let epos = float3(endPos.x, endPos.z, -endPos.y)
+        let ext = float3(0, 56, 0)
         
-        guard let (_, endPoint) = pointOnMesh(rayStart: endPos, rayEnd: endPos + float3(0, 0, -128))
-        else {
-            print("Have no endPoint")
-            return []
-        }
+        let path = pathfinder.findPath(start: spos, end: epos, halfExtents: ext)
         
-        let spos = float3(startPoint.x, startPoint.z, -startPoint.y)
-        let epos = float3(endPoint.x, endPoint.z, -endPoint.y)
-        
-        if let values = pathfinder.getPathStartPos(spos, endPos: epos) as? [NSValue]
-        {
-            var path: [float3] = []
-            
-            for value in values
-            {
-                var vector = float3()
-                value.getValue(&vector)
-                
-                path.append(vector)
-            }
-            
-            return path.map { float3($0.x, -$0.z, $0.y) };
-        }
-        
-        return []
+        return path.map { float3($0.x, -$0.z, $0.y) }
     }
 }
 
