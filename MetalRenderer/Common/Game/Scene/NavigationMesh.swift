@@ -40,6 +40,8 @@ final class NavigationMesh
     
     var pathfinder: DetourPathfinder?
     
+    var isDebugDrawable = true
+    
     init?(data: Data)
     {
         do
@@ -118,6 +120,7 @@ final class NavigationMesh
     
     func renderWithEncoder(_ encoder: MTLRenderCommandEncoder)
     {
+        guard isDebugDrawable else { return }
         guard hasUnselected || hasSelected else { return }
         
         encoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
@@ -129,14 +132,14 @@ final class NavigationMesh
             modelConstants.color = float4(0, 1, 0, 0.6)
             encoder.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
             
-            encoder.setTriangleFillMode(.lines)
+//            encoder.setTriangleFillMode(.lines)
             encoder.drawIndexedPrimitives(type: .triangle,
                                           indexCount: unselectedIndicesCount,
                                           indexType: .uint16,
                                           indexBuffer: unselectedIndexBuffer,
                                           indexBufferOffset: 0)
             
-            encoder.setTriangleFillMode(.fill)
+//            encoder.setTriangleFillMode(.fill)
         }
         
         if hasSelected
@@ -271,6 +274,21 @@ extension NavigationMesh
         let ext = float3(0, 56, 0)
         
         let path = pathfinder.findPath(start: spos, end: epos, halfExtents: ext)
+        
+        return path.map { float3($0.x, -$0.z, $0.y) }
+    }
+    
+    func makeRandomRoute(from startPos: float3) -> [float3]
+    {
+        guard let pathfinder = self.pathfinder else {
+            print("Have no Detour Pathfinder!!!")
+            return []
+        }
+        
+        let spos = float3(startPos.x, startPos.z, -startPos.y)
+        let ext = float3(0, 56, 0)
+        
+        let path = pathfinder.randomPath(from: spos, halfExtents: ext)
         
         return path.map { float3($0.x, -$0.z, $0.y) }
     }

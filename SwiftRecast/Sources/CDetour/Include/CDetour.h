@@ -27,6 +27,7 @@ dtNavMesh* create_navmesh(const void* data, size_t size);
 dtNavMeshQuery* create_query(dtNavMesh* mesh);
 
 Path find_path(dtNavMeshQuery* query, simd_float3 start, simd_float3 end, simd_float3 half_extents);
+Path random_path(dtNavMeshQuery* query, simd_float3 start, simd_float3 half_extents);
 
 void destroy_navmesh(dtNavMesh* mesh);
 void destroy_query(dtNavMeshQuery* query);

@@ -206,6 +206,15 @@ class Q3MapScene
         
         entities.first?.moveBy(route: route)
     }
+    
+    func routeToPlayer(from position: float3) -> [float3]
+    {
+        guard let end = player?.transform.position else { return [] }
+        guard let navigation = navigation else { return [] }
+        
+        return navigation.makeRoute(from: position, to: end)
+    }
+    
     private func spawnPlayer()
     {
         guard let point = spawnPoints.first else { return }

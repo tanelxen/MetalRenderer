@@ -49,6 +49,26 @@ public class DetourPathfinder
         return path
     }
     
+    public func randomPath(from start: simd_float3, halfExtents: simd_float3) -> [simd_float3]
+    {
+        guard m_navQuery != nil else { return [] }
+        
+        let result = random_path(m_navQuery, start, halfExtents)
+
+        let outputFloats = UnsafeBufferPointer<Float>(
+            start: result.points,
+            count: Int(result.count) * 3
+        )
+        
+        let array = [Float](outputFloats)
+        
+        let path = stride(from: 0, to: array.count, by: 3).map {
+            simd_float3(array[$0], array[$0+1], array[$0+2])
+        }
+        
+        return path
+    }
+    
     deinit
     {
         destroy_query(m_navQuery)
