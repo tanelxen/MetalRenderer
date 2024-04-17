@@ -12,8 +12,6 @@ NS_ASSUME_NONNULL_BEGIN
 @interface NavmeshBulder: NSObject
 - (instancetype)init;
 - (void)calculateVerts:(const float*)verts nverts:(int)nverts tris:(const int*)tris ntris:(int)ntris;
-- (nullable NSData*)getMeshJson;
-- (nullable NSData*)getMeshObj;
 - (nullable NSData*)getDetourData;
 @end
 

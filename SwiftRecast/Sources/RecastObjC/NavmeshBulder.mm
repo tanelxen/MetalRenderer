@@ -28,16 +28,7 @@
     float m_detailSampleDist;
     float m_detailSampleMaxError;
     
-    rcConfig m_cfg;
     rcContext* m_ctx;
-    
-    rcHeightfield* m_solid;
-    unsigned char* m_triareas;
-    rcCompactHeightfield* m_chf;
-    rcContourSet* m_cset;
-    rcPolyMesh* m_pmesh;
-    rcPolyMeshDetail* m_dmesh;
-    
     dtNavMesh* m_navMesh;
 }
 
@@ -75,7 +66,9 @@
     // Step 1. Initialize build config.
     //
     
+    rcConfig m_cfg;
     memset(&m_cfg, 0, sizeof(m_cfg));
+    
     m_cfg.cs = m_cellSize;
     m_cfg.ch = m_cellHeight;
     m_cfg.walkableSlopeAngle = m_agentMaxSlope;
@@ -103,7 +96,7 @@
     //
     
     // Allocate voxel heightfield where we rasterize our input data to.
-    m_solid = rcAllocHeightfield();
+    rcHeightfield* m_solid = rcAllocHeightfield();
     
     if (!m_solid)
     {
@@ -113,13 +106,14 @@
     if (!rcCreateHeightfield(m_ctx, *m_solid, m_cfg.width, m_cfg.height, m_cfg.bmin, m_cfg.bmax, m_cfg.cs, m_cfg.ch))
     {
         m_ctx->log(RC_LOG_ERROR, "buildNavigation: Could not create solid heightfield.");
+        rcFreeHeightField(m_solid);
         return;
     }
     
     // Allocate array that can hold triangle area types.
     // If you have multiple meshes you need to process, allocate
     // and array which can hold the max number of triangles you need to process.
-    m_triareas = new unsigned char[ntris];
+    unsigned char* m_triareas = new unsigned char[ntris];
     memset(m_triareas, 0, ntris * sizeof(unsigned char));
     
     // Find triangles which are walkable based on their slope and rasterize them.
@@ -127,6 +121,8 @@
     // the are type for each of the meshes and rasterize them.
     rcMarkWalkableTriangles(m_ctx, m_cfg.walkableSlopeAngle, verts, nverts, tris, ntris, m_triareas);
     rcRasterizeTriangles(m_ctx, verts, nverts, tris, m_triareas, ntris, *m_solid, m_cfg.walkableClimb);
+    
+    delete [] m_triareas;
     
     //
     // Step 3. Filter walkable surfaces.
@@ -146,17 +142,20 @@
     // Compact the heightfield so that it is faster to handle from now on.
     // This will result more cache coherent data as well as the neighbours
     // between walkable cells will be calculated.
-    m_chf = rcAllocCompactHeightfield();
+    rcCompactHeightfield* m_chf = rcAllocCompactHeightfield();
     
     if (!m_chf)
     {
         m_ctx->log(RC_LOG_ERROR, "buildNavigation: Out of memory 'chf'.");
+        rcFreeHeightField(m_solid);
         return;
     }
     
     if (!rcBuildCompactHeightfield(m_ctx, m_cfg.walkableHeight, m_cfg.walkableClimb, *m_solid, *m_chf))
     {
         m_ctx->log(RC_LOG_ERROR, "buildNavigation: Could not build compact data.");
+        rcFreeCompactHeightfield(m_chf);
+        rcFreeHeightField(m_solid);
         return;
     }
     
@@ -164,6 +163,8 @@
     if (!rcErodeWalkableArea(m_ctx, m_cfg.walkableRadius, *m_chf))
     {
         m_ctx->log(RC_LOG_ERROR, "buildNavigation: Could not erode.");
+        rcFreeCompactHeightfield(m_chf);
+        rcFreeHeightField(m_solid);
         return;
     }
     
@@ -173,6 +174,8 @@
     if (!rcBuildDistanceField(m_ctx, *m_chf))
     {
         m_ctx->log(RC_LOG_ERROR, "buildNavigation: Could not build distance field.");
+        rcFreeCompactHeightfield(m_chf);
+        rcFreeHeightField(m_solid);
         return;
     }
     
@@ -180,6 +183,8 @@
     if (!rcBuildRegions(m_ctx, *m_chf, 0, m_cfg.minRegionArea, m_cfg.mergeRegionArea))
     {
         m_ctx->log(RC_LOG_ERROR, "buildNavigation: Could not build watershed regions.");
+        rcFreeCompactHeightfield(m_chf);
+        rcFreeHeightField(m_solid);
         return;
     }
     
@@ -188,15 +193,20 @@
     //
     
     // Create contours.
-    m_cset = rcAllocContourSet();
+    rcContourSet* m_cset = rcAllocContourSet();
     if (!m_cset)
     {
         m_ctx->log(RC_LOG_ERROR, "buildNavigation: Out of memory 'cset'.");
+        rcFreeCompactHeightfield(m_chf);
+        rcFreeHeightField(m_solid);
         return;
     }
     if (!rcBuildContours(m_ctx, *m_chf, m_cfg.maxSimplificationError, m_cfg.maxEdgeLen, *m_cset))
     {
         m_ctx->log(RC_LOG_ERROR, "buildNavigation: Could not create contours.");
+        rcFreeCompactHeightfield(m_chf);
+        rcFreeHeightField(m_solid);
+        rcFreeContourSet(m_cset);
         return;
     }
     
@@ -205,15 +215,22 @@
     //
     
     // Build polygon navmesh from the contours.
-    m_pmesh = rcAllocPolyMesh();
+    rcPolyMesh* m_pmesh = rcAllocPolyMesh();
     if (!m_pmesh)
     {
         m_ctx->log(RC_LOG_ERROR, "buildNavigation: Out of memory 'pmesh'.");
+        rcFreeCompactHeightfield(m_chf);
+        rcFreeHeightField(m_solid);
+        rcFreeContourSet(m_cset);
         return;
     }
     if (!rcBuildPolyMesh(m_ctx, *m_cset, m_cfg.maxVertsPerPoly, *m_pmesh))
     {
         m_ctx->log(RC_LOG_ERROR, "buildNavigation: Could not triangulate contours.");
+        rcFreeCompactHeightfield(m_chf);
+        rcFreeHeightField(m_solid);
+        rcFreeContourSet(m_cset);
+        rcFreePolyMesh(m_pmesh);
         return;
     }
     
@@ -221,20 +238,33 @@
     // Step 7. Create detail mesh which allows to access approximate height on each polygon.
     //
     
-    m_dmesh = rcAllocPolyMeshDetail();
+    rcPolyMeshDetail* m_dmesh = rcAllocPolyMeshDetail();
     if (!m_dmesh)
     {
         m_ctx->log(RC_LOG_ERROR, "buildNavigation: Out of memory 'pmdtl'.");
+        rcFreeCompactHeightfield(m_chf);
+        rcFreeHeightField(m_solid);
+        rcFreeContourSet(m_cset);
+        rcFreePolyMesh(m_pmesh);
         return;
     }
 
     if (!rcBuildPolyMeshDetail(m_ctx, *m_pmesh, *m_chf, m_cfg.detailSampleDist, m_cfg.detailSampleMaxError, *m_dmesh))
     {
         m_ctx->log(RC_LOG_ERROR, "buildNavigation: Could not build detail mesh.");
+        rcFreeCompactHeightfield(m_chf);
+        rcFreeHeightField(m_solid);
+        rcFreeContourSet(m_cset);
+        rcFreePolyMesh(m_pmesh);
+        rcFreePolyMeshDetail(m_dmesh);
         return;
     }
     
     // At this point the navigation mesh data is ready, you can access it from m_pmesh.
+    
+    rcFreeCompactHeightfield(m_chf);
+    rcFreeHeightField(m_solid);
+    rcFreeContourSet(m_cset);
     
     //
     // Step 8. Create Detour data from Recast poly mesh.
@@ -293,14 +323,17 @@
     if (!dtCreateNavMeshData(&params, &navData, &navDataSize))
     {
         m_ctx->log(RC_LOG_ERROR, "Could not build Detour navmesh.");
+        rcFreePolyMeshDetail(m_dmesh);
+        rcFreePolyMesh(m_pmesh);
         return;
     }
     
     m_navMesh = dtAllocNavMesh();
     if (!m_navMesh)
     {
-        dtFree(navData);
         m_ctx->log(RC_LOG_ERROR, "Could not create Detour navmesh");
+        rcFreePolyMeshDetail(m_dmesh);
+        rcFreePolyMesh(m_pmesh);
         return;
     }
     
@@ -309,12 +342,15 @@
     status = m_navMesh->init(navData, navDataSize, DT_TILE_FREE_DATA);
     if (dtStatusFailed(status))
     {
-        dtFree(navData);
         m_ctx->log(RC_LOG_ERROR, "Could not init Detour navmesh");
+        rcFreePolyMeshDetail(m_dmesh);
+        rcFreePolyMesh(m_pmesh);
+        dtFreeNavMesh(m_navMesh);
         return;
     }
     
-    //TODO: clean up all allocated memory
+    rcFreePolyMeshDetail(m_dmesh);
+    rcFreePolyMesh(m_pmesh);
 }
 
 - (nullable NSData*)getDetourData
@@ -333,67 +369,12 @@
     return data;
 }
 
-- (nullable NSData*)getMeshJson
-{
-    NSData* data = NULL;
-    
-    char *buffer;
-    size_t size = saveAsJsonToMemory(&buffer, m_navMesh);
-    
-    if (buffer)
-    {
-        data = [NSData dataWithBytes:(const void *)buffer length:sizeof(char)*size];
-        free(buffer);
-    }
-    
-    return data;
-}
-
-- (nullable NSData*)getMeshObj
-{
-    NSData* data = NULL;
-    
-    char *buffer;
-    size_t size = saveAsObjToMemory(&buffer, m_dmesh);
-    
-    if (buffer)
-    {
-        data = [NSData dataWithBytes:(const void *)buffer length:sizeof(char)*size];
-        free(buffer);
-    }
-    
-    return data;
-}
-
--(void)cleanUp
-{
-    if (m_triareas != nullptr) {
-        delete[] m_triareas;
-    }
-    
-    rcFreeHeightField(m_solid);
-    rcFreeCompactHeightfield(m_chf);
-    rcFreeContourSet(m_cset);
-}
-
 - (void)dealloc
 {
     if (m_ctx != nullptr)
     {
         delete m_ctx;
     }
-    
-    if (m_pmesh != nullptr)
-    {
-        delete m_pmesh;
-    }
-    
-    if (m_dmesh != nullptr)
-    {
-        delete m_dmesh;
-    }
-    
-    [self cleanUp];
     
     dtFreeNavMesh(m_navMesh);
 }
