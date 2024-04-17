@@ -110,20 +110,12 @@ class Q3MapScene
 //                        }
                     }
                 }
-
-                if name == "navmesh.json"
-                {
-                    navigation = NavigationMesh(data: data)
-                }
                 
                 if name == "detour.bin"
                 {
-                    pathfinder = DetourPathfinder()
-                    pathfinder?.load(from: data)
+                    navigation = NavigationMesh(detour: data)
                 }
             }
-            
-            navigation?.pathfinder = pathfinder
         }
         catch
         {

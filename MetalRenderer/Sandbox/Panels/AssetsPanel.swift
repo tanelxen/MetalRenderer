@@ -258,6 +258,11 @@ final class AssetsPanel
                 try archive.addFile(name: "lightmap.png", source: source)
             }
             
+            if let data = navmesh.getDetourData(), let source = try? ZipSource(data: data)
+            {
+                try archive.addFile(name: "detour.bin", source: source)
+            }
+            
             let encoder = JSONEncoder()
             
             if let data = try? encoder.encode(entities), let source = try? ZipSource(data: data)
@@ -268,21 +273,6 @@ final class AssetsPanel
             if let data = try? encoder.encode(collision), let source = try? ZipSource(data: data)
             {
                 try archive.addFile(name: "collision.json", source: source)
-            }
-            
-            if let data = navmesh.getMeshJson(), let source = try? ZipSource(data: data)
-            {
-                try archive.addFile(name: "navmesh.json", source: source)
-            }
-            
-//            if let data = navmesh.getMeshObj(), let source = try? ZipSource(data: data)
-//            {
-//                try archive.addFile(name: "navmesh.obj", source: source)
-//            }
-            
-            if let data = navmesh.getDetourData(), let source = try? ZipSource(data: data)
-            {
-                try archive.addFile(name: "detour.bin", source: source)
             }
 
             try archive.close()
