@@ -34,11 +34,15 @@ final class Debug
     private let maxInstances = 10000
     
     private var cubesConstantsBuffer: MTLBuffer!
+    private var cubesConstantsBuffer2: MTLBuffer!
+    
     private var quadsConstantsBuffer: MTLBuffer!
     
     init()
     {
         cubesConstantsBuffer = Engine.device.makeBuffer(length: ModelConstants.stride(maxInstances), options: [])
+        cubesConstantsBuffer2 = Engine.device.makeBuffer(length: ModelConstants.stride(maxInstances), options: [])
+        
         quadsConstantsBuffer = Engine.device.makeBuffer(length: ModelConstants.stride(maxInstances), options: [])
     }
     
@@ -90,6 +94,8 @@ final class Debug
     func renderInstanced(with encoder: MTLRenderCommandEncoder?)
     {
         drawCubes(with: encoder)
+        drawCubeLines(with: encoder)
+        
         drawQuads(with: encoder)
     }
     
@@ -116,6 +122,33 @@ final class Debug
         encoder?.setVertexBuffer(cubesConstantsBuffer, offset: 0, index: 2)
         
         cubeShape.render(with: encoder, instanceCount: cubes.count)
+    }
+    
+    private func drawCubeLines(with encoder: MTLRenderCommandEncoder?)
+    {
+        guard !cubes.isEmpty else { return }
+        
+        var pointer = cubesConstantsBuffer2.contents().bindMemory(to: ModelConstants.self, capacity: maxInstances)
+        
+        for (index, cube) in cubes.enumerated()
+        {
+            guard index < maxInstances else { break }
+            
+            var modelConstants = ModelConstants()
+            modelConstants.color = float4(0, 0, 0, 1)
+
+            cube.transform.updateModelMatrix()
+            modelConstants.modelMatrix = cube.transform.matrix
+
+            pointer.pointee = modelConstants
+            pointer = pointer.advanced(by: 1)
+        }
+        
+        encoder?.setVertexBuffer(cubesConstantsBuffer2, offset: 0, index: 2)
+        
+        encoder?.setTriangleFillMode(.lines)
+        cubeShape.render(with: encoder, instanceCount: cubes.count)
+        encoder?.setTriangleFillMode(.fill)
     }
     
     private func drawQuads(with encoder: MTLRenderCommandEncoder?)

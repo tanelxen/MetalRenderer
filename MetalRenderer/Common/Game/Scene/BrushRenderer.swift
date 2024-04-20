@@ -17,6 +17,8 @@ final class BrushRenderer
         var verticesCount = 0
         var vertexBuffer: MTLBuffer?
         var vertices: [BasicVertex] = []
+        
+        var texture: MTLTexture!
     }
     
     private var brushes: [BrushSet] = []
@@ -40,6 +42,8 @@ final class BrushRenderer
             map[brush.contentFlags]?.vertices.append(contentsOf: brushVertices)
         }
         
+        print(map.keys)
+        
         for key in map.keys
         {
             map[key]!.vertexBuffer = Engine.device.makeBuffer(
@@ -53,6 +57,8 @@ final class BrushRenderer
             
             map[key]!.color = CONTENTS.allCases.first(where: { key.contains($0) })?.color ?? .zero
             
+            map[key]!.texture = CONTENTS.allCases.first(where: { key.contains($0) })?.texture
+            
             brushes.append(map[key]!)
         }
         
@@ -61,8 +67,6 @@ final class BrushRenderer
     
     func render(with encoder: MTLRenderCommandEncoder)
     {
-        encoder.setFragmentTexture(texture, index: 0)
-        
         for brush in brushes
         {
             guard brush.vertexBuffer != nil else { continue }
@@ -75,6 +79,15 @@ final class BrushRenderer
             
 //            encoder.setCullMode(.none)
 //            encoder.setTriangleFillMode(.lines)
+            
+            if let texture = brush.texture
+            {
+                encoder.setFragmentTexture(texture, index: 0)
+            }
+            else
+            {
+                encoder.setFragmentTexture(texture, index: 0)
+            }
             
             encoder.drawPrimitives(type: .triangle,
                                    vertexStart: 0,
@@ -306,6 +319,22 @@ private enum CONTENTS: Int, CaseIterable
             case .WATER: return float3(0, 0, 1)
                 
             default: return float3(0, 0.5, 0)
+        }
+    }
+    
+    var texture: MTLTexture? {
+        
+        switch self
+        {
+            case .AREAPORTAL: return TextureManager.shared.getTexture(for: "Assets/textures/common/areaportal.tga")
+            case .CLUSTERPORTAL: return TextureManager.shared.getTexture(for: "Assets/textures/common/clusterportal.tga")
+            case .FOG: return TextureManager.shared.getTexture(for: "Assets/textures/common/fog.tga")
+            case .MONSTERCLIP: return TextureManager.shared.getTexture(for: "Assets/textures/common/clipmonster.tga")
+            case .SOLID: return TextureManager.shared.getTexture(for: "Assets/textures/common/nodraw.tga")
+            case .PLAYERCLIP: return TextureManager.shared.getTexture(for: "Assets/textures/common/clip.tga")
+            case .TRIGGER: return TextureManager.shared.getTexture(for: "Assets/textures/common/trigger.tga")
+                
+            default: return nil
         }
     }
 }

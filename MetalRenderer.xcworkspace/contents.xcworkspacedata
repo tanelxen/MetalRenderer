@@ -16,4 +16,7 @@
    <FileRef
       location = "group:SwiftRecast">
    </FileRef>
+   <FileRef
+      location = "group:SwiftBullet">
+   </FileRef>
 </Workspace>

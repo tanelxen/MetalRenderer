@@ -54,13 +54,13 @@ final class PlayerMovement
     var isNoclip = false
     
     // Текущий вектор направления движения
-    private var velocity: float3 = .zero
+    private (set) var velocity: float3 = .zero
     
     // Нормаль плоскости, на которой стоит игрок
     private var ground_normal: float3?
     
-    private let player_mins = float3( -15, -15, -24 )
-    private let player_maxs = float3( 15, 15, 32 )
+    private let player_mins = float3( -15, -15, -28 )
+    private let player_maxs = float3( 15, 15, 28 )
     
     private var movement: Int = 0
     
