@@ -38,6 +38,8 @@ class Barney
     
     private var curentSequence = "idle1"
     
+    private var isRunning = false
+    
     init(scene: Q3MapScene)
     {
         self.scene = scene
@@ -65,10 +67,10 @@ class Barney
         
         updateRoute()
         
-        if isSeePlayer
-        {
-            moveToPlayer(minDist: 128)
-        }
+//        if isSeePlayer
+//        {
+//            moveToPlayer(minDist: 128)
+//        }
         
         playerMovement.transform = transform
         playerMovement.update()
@@ -80,7 +82,8 @@ class Barney
         
         if forwardmove != 0
         {
-            setSequence(name: "walk")
+            let name = isRunning ? "run" : "walk"
+            setSequence(name: name)
         }
         else
         {
@@ -98,6 +101,14 @@ class Barney
     {
         if let sound = hurt.randomElement() {
             AudioEngine.play(file: sound)
+        }
+        
+        if let navigation = scene?.navigation
+        {
+            let path = navigation.makeRandomRoute(from: transform.position)
+            
+            isRunning = true
+            moveBy(route: path)
         }
     }
     

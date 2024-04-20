@@ -14,6 +14,9 @@ import Quake3BSP
 
 import SwiftZip
 
+import RecastObjC
+//import RecastNavmesh
+
 final class AssetsPanel
 {
     let name = "Assets"
@@ -204,15 +207,39 @@ final class AssetsPanel
             return
         }
         
+        let name = url.deletingPathExtension().lastPathComponent
+        
         let bsp = Q3Map(data: data)
         let (worldmesh, lightmap) = WorldStaticMeshAsset.make(from: bsp)
         
         let entities = WorldEntitiesAsset.make(from: bsp)
         let collision = WorldCollisionAsset.make(from: bsp)
         
+        var verts = bsp.vertices.flatMap({ [$0.position.x, $0.position.z, -$0.position.y] })
+        let nverts = Int32(bsp.vertices.count)
+        
+        var tris: [Int32] = []
+        var ntris: Int32 = 0
+        
+        for face in bsp.faces
+        {
+            if face.textureName == "noshader" { continue }
+            if face.textureName.contains("sky") { continue }
+            
+            for poly in face.vertexIndices.chunked(into: 3)
+            {
+                let indices: [Int32] = [ Int32(poly[0]), Int32(poly[2]), Int32(poly[1]) ]
+                tris.append(contentsOf: indices)
+                
+                ntris += 1
+            }
+        }
+        
+        let navmesh = NavmeshBulder()
+        navmesh.calculateVerts(&verts, nverts: nverts, tris: &tris, ntris: ntris)
+        
         do
         {
-            let name = url.deletingPathExtension().lastPathComponent
             let archiveUrl = currentDir.appendingPathComponent(name).appendingPathExtension("wld")
             
             // Open an archive for writing, overwriting any existing file
@@ -229,6 +256,11 @@ final class AssetsPanel
             if let data = lightmap.getPngData(), let source = try? ZipSource(data: data)
             {
                 try archive.addFile(name: "lightmap.png", source: source)
+            }
+            
+            if let data = navmesh.getDetourData(), let source = try? ZipSource(data: data)
+            {
+                try archive.addFile(name: "detour.bin", source: source)
             }
             
             let encoder = JSONEncoder()

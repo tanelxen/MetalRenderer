@@ -12,7 +12,7 @@ Features:
 - ✅ Skeletal animation
 - ✅ Brush based collision detection
 - ✅ Quake-style player movement
-- ✅ AI navigation with waypoints and A\*\
+- ✅ Navmesh building and pathfinding with Recast
 - ✅ Ambient lightning for skeletal meshes (light grid)
 - ✅ Sandbox editor based on ImGUI
 - ✅ Simple particles (CPU driven)
@@ -20,7 +20,7 @@ Features:
 - ✅ Hit detection with entities
 
 ## PREVIEW
-![sandbox run mode](https://github.com/tanelxen/MetalRenderer/assets/14359330/dec91dfb-033d-4dfd-b9f7-3e746d3f30c1)
+![sandbox run mode](https://github.com/tanelxen/MetalRenderer/assets/14359330/a250ff78-26f6-4284-a62f-20dbdd3feaa2)
 
 ## NOTE
 At this moment the code doesn't look good because I'm experimenting with some techniques and trying to find out better way.
@@ -31,15 +31,15 @@ Better to run Sandbox first time. While first running Sandbox asks you to locate
 
 Keep in mind that paths to skeletal mesh assets are hardcoded in the code. Sandbox just able you to import GoldSrc .mdl into internal format. After that you have to use imported mesh manually in the code. However .bsp files you can just drag-n-drop in the folder in the Assets panel and run it after converting.
 
+Repository uses Git LFS.
+
 ## IN PRORESS
 - 🚧 Integration with Bullet physics
-- 🚧 Improving navigation system with navmesh
 
 ## TODO
 - [ ] Brush creation inside Sandbox
 - [ ] Animation system
 - [ ] Player and AI controllers
-- [ ] Integrate Recast for navmesh generating
 - [ ] Support Half-Life 2 models and maps
 - [ ] GPU driven particle system
 - [ ] Material system

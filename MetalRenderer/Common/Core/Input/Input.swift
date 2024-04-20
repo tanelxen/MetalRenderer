@@ -94,10 +94,10 @@ enum Mouse
         return mouseButtonList[Int(button.rawValue)] == true
     }
     
-    static func setOverallMousePosition(position: float2)
-    {
-        self.overallMousePosition = position
-    }
+//    static func setOverallMousePosition(position: float2)
+//    {
+//        self.overallMousePosition = position
+//    }
     
     ///Sets the delta distance the mouse had moved
     static func setMousePositionChange(overallPosition: float2, deltaPosition: float2)

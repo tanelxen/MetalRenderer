@@ -61,6 +61,11 @@ final class ViewportPanel
         
         isHovered = ImGuiIsItemHovered(ImGuiFlag_None)
         
+        if ImGuiIsItemClicked(Im(ImGuiMouseButton_Left))
+        {
+            selectObject()
+        }
+        
         if isPlaying
         {
             if ImGuiIsKeyPressedMap(Im(ImGuiKey_Escape), false)
@@ -172,16 +177,12 @@ final class ViewportPanel
     private func selectObject()
     {
         guard isHovered else { return }
-        guard !ImGuizmoIsUsing() else { return }
+//        guard !ImGuizmoIsUsing() else { return }
         
-//        let ray = camera.mousePositionInWorld()
-//
-//        let end = ray.origin + ray.direction * 1024
-//        Debug.shared.addLine(start: ray.origin, end: end, color: float3(0, 1, 0))
-//
-//        let index = Q3MapScene.current.navigation.findIntersectedByRay(start: ray.origin, dir: ray.direction, dist: 1024)
-//
-//        selectedWaypointIndex = index != -1 ? index : nil
+//        let ray = viewport.mousePositionInWorld()
+//        let navmesh = Q3MapScene.current.navigation
+
+//        navmesh?.selectByRay(start: ray.origin, end: ray.origin + ray.direction * 512)
     }
     
     private func drawPlayPauseControl()
