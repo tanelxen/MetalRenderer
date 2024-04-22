@@ -89,6 +89,20 @@ final class ForwardRenderer
         renderEncoder.popDebugGroup()
     }
     
+    private func drawScene(_ scene: BrushScene, with renderEncoder: MTLRenderCommandEncoder)
+    {
+        renderEncoder.setFrontFacing(.clockwise)
+        renderEncoder.setCullMode(.back)
+        
+        renderEncoder.setDepthStencilState(regularStencilState)
+        
+        renderEncoder.pushDebugGroup("Brush Render")
+            renderEncoder.setFragmentTexture(nil, index: 0)
+            renderEncoder.setRenderPipelineState(pipelineStates.basic)
+            scene.render(with: renderEncoder)
+        renderEncoder.popDebugGroup()
+    }
+    
     private func drawDebug(with encoder: MTLRenderCommandEncoder)
     {
         encoder.pushDebugGroup("Debug Render")
@@ -193,6 +207,28 @@ final class ForwardRenderer
 //        {
             drawUserInterface(in: viewport, with: encoder)
 //        }
+        
+        encoder.endEncoding()
+    }
+    
+    func render(scene: BrushScene, to viewport: Viewport, with commandBuffer: MTLCommandBuffer)
+    {
+        guard let pass = viewport.renderPass else { return }
+        guard let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: pass) else { return }
+        
+        var viewUniforms = SceneConstants()
+        
+        if let camera = viewport.camera
+        {
+            viewUniforms.viewMatrix = camera.viewMatrix
+            viewUniforms.projectionMatrix = camera.projectionMatrix
+            viewUniforms.viewportSize = viewport.maxBounds - viewport.minBounds
+        }
+        
+        encoder.setVertexBytes(&viewUniforms, length: MemoryLayout<SceneConstants>.stride, index: 1)
+        
+        drawScene(scene, with: encoder)
+        drawDebug(with: encoder)
         
         encoder.endEncoding()
     }

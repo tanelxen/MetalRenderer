@@ -16,7 +16,7 @@ final class SandboxApplication: NSObject
     
     private var viewport: Viewport!
     private var renderer: ForwardRenderer!
-    private var scene: Q3MapScene!
+    private var scene = BrushScene()
     
     private var editor: EditorLayer?
     
@@ -41,21 +41,8 @@ final class SandboxApplication: NSObject
         
         editor = EditorLayer(view: view, sceneViewport: viewport)
         
-        editor?.onLoadNewMap = { [weak self] url in
-            
-            self?.scene = Q3MapScene(url: url)
-            
-            if let point = self?.scene?.spawnPoints.first
-            {
-                self?.viewport.camera?.transform.position = point.position
-                self?.viewport.camera?.transform.rotation = point.rotation
-            }
-            
-//            self?.scene.onReady = { [weak self] in
-//
-//
-//            }
-        }
+        viewport.camera?.transform.position = float3(-256, 0, 256)
+        viewport.camera?.transform.rotation = Rotator(pitch: 30, yaw: 0, roll: 0)
         
         view.delegate = self
         
@@ -113,7 +100,7 @@ final class SandboxApplication: NSObject
         
         guard let viewport = self.viewport else { return }
         
-        scene?.update()
+        scene.update()
         viewport.camera?.update()
         
         if let commandBuffer = Engine.commandQueue.makeCommandBuffer()

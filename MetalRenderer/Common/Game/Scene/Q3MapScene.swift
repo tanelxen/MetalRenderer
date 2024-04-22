@@ -53,8 +53,6 @@ class Q3MapScene
     private let q2b: Float = 2.54 / 100
     private let b2q: Float = 100 / 2.54
     
-    let brush = WorldBrush()
-    
     init(url: URL)
     {
         do
@@ -157,8 +155,6 @@ class Q3MapScene
         createWorldStaticCollision()
         createPinkCube()
 //        createRamp()
-        
-        brush.transform.position = float3(144, 1440, 128)
     }
     
     func startPlaying(in viewport: Viewport)
@@ -323,7 +319,6 @@ extension Q3MapScene
         guard isReady else { return }
         
         navigation?.renderWithEncoder(encoder!)
-        brush.render(with: encoder)
     }
     
     func renderSkeletalMeshes(with encoder: MTLRenderCommandEncoder?)

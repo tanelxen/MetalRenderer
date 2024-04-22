@@ -157,6 +157,8 @@
 		8A808F402AD034C30087A084 /* WorldEntitiesAsset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A808F3E2AD034C30087A084 /* WorldEntitiesAsset.swift */; };
 		8A84556C2BD4527D00AA70E1 /* WorldBrush.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A84556B2BD4527D00AA70E1 /* WorldBrush.swift */; };
 		8A84556D2BD4527D00AA70E1 /* WorldBrush.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A84556B2BD4527D00AA70E1 /* WorldBrush.swift */; };
+		8A84556F2BD5F4C400AA70E1 /* BrushScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A84556E2BD5F4C400AA70E1 /* BrushScene.swift */; };
+		8A8455702BD5F4C400AA70E1 /* BrushScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A84556E2BD5F4C400AA70E1 /* BrushScene.swift */; };
 		8A85E13E2AC5F47800923DB5 /* SkeletalMeshAsset+Valve.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A85E13D2AC5F47800923DB5 /* SkeletalMeshAsset+Valve.swift */; };
 		8A8B9A992BCC553800437D16 /* DetourPathfinder in Frameworks */ = {isa = PBXBuildFile; productRef = 8A8B9A982BCC553800437D16 /* DetourPathfinder */; };
 		8A9243CD2B0D460600B4766C /* SwiftZip in Frameworks */ = {isa = PBXBuildFile; productRef = 8A9243CC2B0D460600B4766C /* SwiftZip */; };
@@ -255,6 +257,7 @@
 		8A808F3E2AD034C30087A084 /* WorldEntitiesAsset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorldEntitiesAsset.swift; sourceTree = "<group>"; };
 		8A84536927ADA45100E25638 /* TextureManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureManager.swift; sourceTree = "<group>"; };
 		8A84556B2BD4527D00AA70E1 /* WorldBrush.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorldBrush.swift; sourceTree = "<group>"; };
+		8A84556E2BD5F4C400AA70E1 /* BrushScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrushScene.swift; sourceTree = "<group>"; };
 		8A85E13D2AC5F47800923DB5 /* SkeletalMeshAsset+Valve.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SkeletalMeshAsset+Valve.swift"; sourceTree = "<group>"; };
 		8A8D0E9329CB6CD500721A7D /* ResourceManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResourceManager.swift; sourceTree = "<group>"; };
 		8A8D130D29CB6D4800721A7D /* Assets */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Assets; sourceTree = "<group>"; };
@@ -497,6 +500,7 @@
 			isa = PBXGroup;
 			children = (
 				8A75016127B08F84001F63F6 /* Q3MapScene.swift */,
+				8A84556E2BD5F4C400AA70E1 /* BrushScene.swift */,
 				8A9186A02A8051E600719E55 /* Q3MapLightGrid.swift */,
 				8AD4567027B5D207009C43F4 /* Q3MapCollision.swift */,
 				8AE718222AD08293000CE0E1 /* BrushRenderer.swift */,
@@ -771,6 +775,7 @@
 				8A808F3D2AD034830087A084 /* WorldCollisionAsset.swift in Sources */,
 				8A27DA812AAE39DE0094C9D0 /* Math.swift in Sources */,
 				8A53DF052AB48F4700EC2C65 /* UserInterface.swift in Sources */,
+				8A8455702BD5F4C400AA70E1 /* BrushScene.swift in Sources */,
 				8A84556D2BD4527D00AA70E1 /* WorldBrush.swift in Sources */,
 				8A27DA822AAE39DE0094C9D0 /* Rotator.swift in Sources */,
 			);
@@ -815,6 +820,7 @@
 				8A27DB072AAE3E5A0094C9D0 /* Waypoint.swift in Sources */,
 				8A5969062ABB2F1D00772AC9 /* Intersection.swift in Sources */,
 				8A0C48B62AC9A9DA0099BEF6 /* WorldStaticMeshAsset+Q3BSP.swift in Sources */,
+				8A84556F2BD5F4C400AA70E1 /* BrushScene.swift in Sources */,
 				8A27DB082AAE3E5A0094C9D0 /* Frustum.swift in Sources */,
 				8A7C70BB2AB09169003FAFDD /* AssetsPanel.swift in Sources */,
 				8A27DB092AAE3E5A0094C9D0 /* imgui_impl_metal.swift in Sources */,

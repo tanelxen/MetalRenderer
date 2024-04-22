@@ -115,7 +115,7 @@ final class ViewportPanel
             return
         }
         
-        guard let normal = Q3MapScene.current.brush.selectedFaceNormal
+        guard let normal = BrushScene.current.brush.selectedFaceNormal
         else {
             return
         }
@@ -131,7 +131,7 @@ final class ViewportPanel
         
         transform.position = origin + value
         
-        Q3MapScene.current.brush.selectedFaceTransform = transform
+        BrushScene.current.brush.selectedFaceTransform = transform
     }
     
     private func startPlaying()
@@ -215,12 +215,11 @@ final class ViewportPanel
             }
         }
         
-        if ImGuizmoIsUsing()
-        {
-            transform.position = modelMatrix.columns.3.xyz
-            Q3MapScene.current.brush.selectedFaceTransform = transform
-            
-        }
+//        if ImGuizmoIsUsing()
+//        {
+//            transform.position = modelMatrix.columns.3.xyz
+//            BrushScene.current.brush.selectedFaceTransform = transform
+//        }
     }
     
     private func selectObject()
@@ -229,7 +228,7 @@ final class ViewportPanel
         guard !ImGuizmoIsUsing() else { return }
         
         let ray = viewport.mousePositionInWorld()
-        let brush = Q3MapScene.current.brush
+        let brush = BrushScene.current.brush
         
 //        let end = ray.origin + ray.direction * 1024
 //        Debug.shared.addLine(start: ray.origin, end: end, color: float4(0, 1, 0, 1))
