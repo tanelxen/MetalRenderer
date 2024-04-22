@@ -111,6 +111,8 @@ final class EditorLayer
         {
             Mouse.setMouseButton(0, isPressed: false)
         }
+        
+        Keyboard.setKey(KeyCodes.shift.rawValue, isPressed: NSEvent.modifierFlags.contains(.shift))
     }
     
     func draw()

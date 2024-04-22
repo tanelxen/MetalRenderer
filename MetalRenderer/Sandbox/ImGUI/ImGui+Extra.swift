@@ -112,10 +112,10 @@ extension ImVec4
     return Int32(flag.rawValue)
 }
 
-//@inline(__always) func Im(_ flag: ImGuiKeyModFlags_) -> Int32 {
-//    return Int32(flag.rawValue)
-//}
-//
+@inline(__always) func Im(_ flag: ImGuiKeyModFlags_) -> Int32 {
+    return Int32(flag.rawValue)
+}
+
 //@inline(__always) func Im(_ flag: ImGuiNavInput_) -> Int32 {
 //    return Int32(flag.rawValue)
 //}

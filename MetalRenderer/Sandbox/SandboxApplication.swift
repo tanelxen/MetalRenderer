@@ -93,7 +93,7 @@ final class SandboxApplication: NSObject
             .mouseMoved,
             .leftMouseDown, .leftMouseUp, .leftMouseDragged,
             .rightMouseDown, .rightMouseUp, .rightMouseDragged,
-            .keyDown, .keyUp
+            .keyDown, .keyUp, .flagsChanged
         ]
         
         NSEvent.addLocalMonitorForEvents(matching: mask) { [weak self] event -> NSEvent? in

@@ -8,6 +8,7 @@
 import AppKit
 import ImGui
 import ImGuizmo
+import simd
 
 final class ViewportPanel
 {
@@ -36,6 +37,9 @@ final class ViewportPanel
     
     var guizmoTransform: Transform?
     
+    private var dragOrigin: float3?
+    private var objectInitialPos: float3?
+    
     func draw()
     {
         let windowFlags = Im(ImGuiWindowFlags_NoDecoration)
@@ -61,7 +65,12 @@ final class ViewportPanel
         
         isHovered = ImGuiIsItemHovered(ImGuiFlag_None)
         
-        if ImGuiIsItemClicked(Im(ImGuiMouseButton_Left))
+//        if ImGuiIsItemClicked(Im(ImGuiMouseButton_Left)) && Keyboard.isKeyPressed(.command)
+//        {
+//
+//        }
+        
+        if ImGuiIsItemClicked(Im(ImGuiMouseButton_Left)) && Keyboard.isKeyPressed(.shift)
         {
             selectObject()
         }
@@ -77,7 +86,8 @@ final class ViewportPanel
         {
             if let transform = guizmoTransform
             {
-                renderGizmo(for: transform)
+//                renderGizmo(for: transform)
+                dragFace(at: transform)
             }
             
             drawPlayPauseControl()
@@ -85,6 +95,43 @@ final class ViewportPanel
         }
         
         ImGuiEnd()
+    }
+    
+    private func dragFace(at transform: Transform)
+    {
+        guard isHovered else { return }
+        
+        guard Mouse.IsMouseButtonPressed(.left)
+        else {
+            dragOrigin = nil
+            objectInitialPos = nil
+            return
+        }
+        
+        guard let start = dragOrigin, let origin = objectInitialPos
+        else {
+            dragOrigin = viewport.mousePositionInWorld().origin
+            objectInitialPos = transform.position
+            return
+        }
+        
+        guard let normal = Q3MapScene.current.brush.selectedFaceNormal
+        else {
+            return
+        }
+        
+        let axis = float3(abs(normal.x), abs(normal.y), abs(normal.z))
+        
+        let end = viewport.mousePositionInWorld().origin
+        
+        var value = dot(axis, end - start) * 1000
+        
+        let gridSize: Float = 16
+        value = round(value / gridSize) * gridSize
+        
+        transform.position = origin + value
+        
+        Q3MapScene.current.brush.selectedFaceTransform = transform
     }
     
     private func startPlaying()
@@ -147,8 +194,8 @@ final class ViewportPanel
         var modelMatrix = transform.matrix
         
         // Snapping
-        let snap: Bool = false //Input.isPressed(key: .shift)
-        var snapValues: float3 = float3(repeating: 0.5)
+        let snap: Bool = true //Input.isPressed(key: .shift)
+        var snapValues: float3 = float3(repeating: 8)
         
         let gizmoType: ImGuizmoType = .translate
         
@@ -171,18 +218,30 @@ final class ViewportPanel
         if ImGuizmoIsUsing()
         {
             transform.position = modelMatrix.columns.3.xyz
+            Q3MapScene.current.brush.selectedFaceTransform = transform
+            
         }
     }
     
     private func selectObject()
     {
         guard isHovered else { return }
-//        guard !ImGuizmoIsUsing() else { return }
+        guard !ImGuizmoIsUsing() else { return }
         
-//        let ray = viewport.mousePositionInWorld()
-//        let navmesh = Q3MapScene.current.navigation
-
-//        navmesh?.selectByRay(start: ray.origin, end: ray.origin + ray.direction * 512)
+        let ray = viewport.mousePositionInWorld()
+        let brush = Q3MapScene.current.brush
+        
+//        let end = ray.origin + ray.direction * 1024
+//        Debug.shared.addLine(start: ray.origin, end: end, color: float4(0, 1, 0, 1))
+        
+        brush.selectFace(by: ray)
+        
+//        if let pos = brush.selectedFaceTransform?.position
+//        {
+//            print(pos)
+//        }
+        
+        guizmoTransform = brush.selectedFaceTransform
     }
     
     private func drawPlayPauseControl()

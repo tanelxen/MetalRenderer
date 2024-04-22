@@ -149,20 +149,17 @@ final class Viewport
         
         let clipCoords = float4(ndcX, ndcY, 0, 1)
         
-        let projInv = camera!.projectionMatrix.inverse
-        let viewInv = camera!.viewMatrix.inverse
+        let viewProjInv = (camera!.projectionMatrix * camera!.viewMatrix).inverse
         
-        var eyeRayDir = projInv * clipCoords
-        eyeRayDir.z = -1
-        eyeRayDir.w = 0
+        var rayOrigin = viewProjInv * clipCoords
+        rayOrigin /= rayOrigin.w
         
-        var worldRayDir = (viewInv * eyeRayDir).xyz
-        worldRayDir = normalize(worldRayDir)
+        var rayEnd = viewProjInv * float4(ndcX, ndcY, 1, 1)
+        rayEnd /= rayEnd.w
         
-        let eyeRayOrigin = float4(x: 0, y: 0, z: 0, w: 1)
-        let worldRayOrigin = (viewInv * eyeRayOrigin).xyz
+        let rayDir = normalize(rayEnd - rayOrigin)
         
-        return Ray(origin: worldRayOrigin, direction: worldRayDir)
+        return Ray(origin: rayOrigin.xyz, direction: rayDir.xyz)
     }
     
 //    private func updateFramebufferSize(_ size: ImVec2)
