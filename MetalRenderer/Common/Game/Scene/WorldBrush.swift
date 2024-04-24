@@ -16,6 +16,8 @@ final class WorldBrush
     
     private var selectedFaceIndex: Int?
     
+    var isSelected = false
+    
     var selectedFaceTransform: Transform? {
         
         get {
@@ -120,50 +122,54 @@ final class WorldBrush
         }
     }
     
-    func render(with encoder: MTLRenderCommandEncoder?)
+    func render(with encoder: MTLRenderCommandEncoder, to renderer: ForwardRenderer)
     {
         transform.updateModelMatrix()
         
         if let index = selectedFaceIndex, faces.indices.contains(index)
         {
             let selected = faces[index]
-            drawFaces([selected], color: float4(1, 0, 0, 1), edges: false, with: encoder)
+            drawFaces([selected], color: float4(1, 0, 0, 1), edges: false, with: encoder, to: renderer)
             
             var unselected = faces
             unselected.remove(at: index)
-            drawFaces(unselected, color: float4(1, 1, 0, 1), edges: true, with: encoder)
+            drawFaces(unselected, color: float4(1, 1, 0, 1), edges: true, with: encoder, to: renderer)
         }
         else
         {
-            drawFaces(self.faces, color: float4(1, 1, 0, 1), edges: true, with: encoder)
+            drawFaces(self.faces, color: float4(1, 1, 0, 1), edges: true, with: encoder, to: renderer)
         }
     }
     
-    private func drawFaces(_ faces: [Face], color: float4, edges: Bool, with encoder: MTLRenderCommandEncoder?)
+    private func drawFaces(_ faces: [Face], color: float4, edges: Bool, with encoder: MTLRenderCommandEncoder, to renderer: ForwardRenderer)
     {
         var vertices = faces.flatMap({ $0.indices }).map({ BrushVertex(corners[$0]) })
 
-        encoder?.setVertexBytes(&vertices, length: MemoryLayout<BrushVertex>.stride * vertices.count, index: 0)
+        renderer.apply(tehnique: .brush, to: encoder)
+        
+        encoder.setVertexBytes(&vertices, length: MemoryLayout<BrushVertex>.stride * vertices.count, index: 0)
         
         var modelConstants = ModelConstants()
         modelConstants.color = color
         modelConstants.modelMatrix = transform.matrix
         
-        encoder?.setTriangleFillMode(.fill)
-        encoder?.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
-        encoder?.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices.count)
+        encoder.setTriangleFillMode(.fill)
+        encoder.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
+        encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices.count)
         
         if edges
         {
+            renderer.apply(tehnique: .basic, to: encoder)
+            
             var modelConstants2 = ModelConstants()
-            modelConstants2.color = float4(0, 0, 0, 1)
+            modelConstants2.color = isSelected ? float4(1, 0, 0, 1) : float4(0, 0, 0, 1)
             modelConstants2.modelMatrix = transform.matrix
             modelConstants2.modelMatrix.scale(axis: float3(repeating: 1.001))
             
-            encoder?.setTriangleFillMode(.lines)
-            encoder?.setVertexBytes(&modelConstants2, length: ModelConstants.stride, index: 2)
-            encoder?.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices.count)
-            encoder?.setTriangleFillMode(.fill)
+            encoder.setTriangleFillMode(.lines)
+            encoder.setVertexBytes(&modelConstants2, length: ModelConstants.stride, index: 2)
+            encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices.count)
+            encoder.setTriangleFillMode(.fill)
         }
     }
     

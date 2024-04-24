@@ -12,6 +12,8 @@ final class BrushScene
 {
     private (set) static var current: BrushScene!
     
+    lazy var gridQuad = QuadShape(mins: float3(-4096, -4096, 0), maxs: float3(4096, 4096, 0))
+    
     let brush = WorldBrush(minBounds: .zero, maxBounds: float3(64, 64, 64))
     
     var brushes: [WorldBrush] = []
@@ -24,8 +26,7 @@ final class BrushScene
     
     init()
     {
-//        brush.transform.position = float3(144, 1440, 128)
-        
+        brush.isSelected = true
         BrushScene.current = self
     }
     
@@ -47,14 +48,21 @@ final class BrushScene
         grid.update()
     }
     
-    func render(with encoder: MTLRenderCommandEncoder?)
+    func render(with encoder: MTLRenderCommandEncoder, to renderer: ForwardRenderer)
     {
+        renderer.apply(tehnique: .grid, to: encoder)
+        var modelConstants = ModelConstants()
+        encoder.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
+        gridQuad.render(with: encoder)
+        
+        renderer.apply(tehnique: .basic, to: encoder)
         grid.render(with: encoder)
-        brush.render(with: encoder)
+        
+        brush.render(with: encoder, to: renderer)
         
         for brush in brushes
         {
-            brush.render(with: encoder)
+            brush.render(with: encoder, to: renderer)
         }
     }
 }
