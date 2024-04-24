@@ -21,13 +21,10 @@ final class HierarchyPanel
     {
         ImGuiBegin(name, nil, 0)
         
-//        if let entities = Q3MapScene.current?.map?.entities
-//        {
-//            for (index, entity) in entities.enumerated()
-//            {
-//                drawEntity(dict: entity, index: index)
-//            }
-//        }
+        for i in BrushScene.current.brushes.indices
+        {
+            ImGuiTextV("Brush #\(i)")
+        }
         
         // Left-click on blank space: Delete game object
         if ImGuiIsMouseClicked(Im(ImGuiMouseButton_Left), false) && ImGuiIsWindowHovered(0) {

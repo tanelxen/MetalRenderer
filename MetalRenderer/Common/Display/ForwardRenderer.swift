@@ -113,7 +113,7 @@ final class ForwardRenderer
         renderEncoder.setCullMode(.back)
         renderEncoder.setDepthStencilState(regularStencilState)
         
-        renderEncoder.setRenderPipelineState(pipelineStates.basic)
+        renderEncoder.setRenderPipelineState(pipelineStates.brush)
         scene.render(with: renderEncoder)
     }
     

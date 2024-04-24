@@ -67,11 +67,6 @@ final class ViewportPanel
         
         isHovered = ImGuiIsItemHovered(ImGuiFlag_None)
         
-//        if ImGuiIsItemClicked(Im(ImGuiMouseButton_Left)) && Keyboard.isKeyPressed(.command)
-//        {
-//
-//        }
-        
         if ImGuiIsItemClicked(Im(ImGuiMouseButton_Left)) && Keyboard.isKeyPressed(.shift)
         {
             selectObject()

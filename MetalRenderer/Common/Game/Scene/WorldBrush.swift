@@ -64,11 +64,8 @@ final class WorldBrush
         return faces[index].axis
     }
     
-    init()
+    init(minBounds: float3, maxBounds: float3)
     {
-        let minBounds = float3(0, 0, 0)
-        let maxBounds = float3(8, 8, 8)
-        
         corners[0] = float3(minBounds.x, minBounds.y, minBounds.z)  // Back     Right   Bottom      0
         corners[1] = float3(maxBounds.x, minBounds.y, minBounds.z)  // Front    Right   Bottom      1
         corners[2] = float3(minBounds.x, maxBounds.y, minBounds.z)  // Back     Left    Bottom      2
@@ -144,9 +141,9 @@ final class WorldBrush
     
     private func drawFaces(_ faces: [Face], color: float4, edges: Bool, with encoder: MTLRenderCommandEncoder?)
     {
-        var vertices = faces.flatMap({ $0.indices }).map({ BasicVertex(corners[$0]) })
+        var vertices = faces.flatMap({ $0.indices }).map({ BrushVertex(corners[$0]) })
 
-        encoder?.setVertexBytes(&vertices, length: MemoryLayout<BasicVertex>.stride * vertices.count, index: 0)
+        encoder?.setVertexBytes(&vertices, length: MemoryLayout<BrushVertex>.stride * vertices.count, index: 0)
         
         var modelConstants = ModelConstants()
         modelConstants.color = color
@@ -177,20 +174,30 @@ final class WorldBrush
     }
 }
 
-private struct BasicVertex
+private struct BrushVertex
 {
-    let pos: float3
+    let position: float3
+//    let normal: float3
     let uv: float2
     
     init(_ x: Float, _ y: Float, _ z: Float, _ u: Float, _ v: Float)
     {
-        self.pos = float3(x, y, z)
+        self.position = float3(x, y, z)
+//        self.normal = float3(0, 0, 0)
         self.uv = float2(u, v)
     }
     
-    init(_ pos: float3)
+    init(_ position: float3)
     {
-        self.pos = pos
+        self.position = position
+//        self.normal = .zero
+        self.uv = .zero
+    }
+    
+    init(_ position: float3, _ normal: float3)
+    {
+        self.position = position
+//        self.normal = normal
         self.uv = .zero
     }
 }

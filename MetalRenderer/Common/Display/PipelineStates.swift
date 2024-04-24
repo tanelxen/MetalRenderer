@@ -22,6 +22,8 @@ class PipelineStates
     
     private (set) var simpleGrid: MTLRenderPipelineState!
     
+    private (set) var brush: MTLRenderPipelineState!
+    
     init()
     {
         createSkyboxPipelineState()
@@ -38,6 +40,8 @@ class PipelineStates
         createUserInterfacePipelineState()
         
         createSimpleGridPipelineState()
+        
+        createBrushPipelineState()
     }
     
     private func createSkyboxPipelineState()
@@ -250,6 +254,31 @@ class PipelineStates
         simpleGrid = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
     }
     
+    private func createBrushPipelineState()
+    {
+        let descriptor = MTLRenderPipelineDescriptor()
+        
+        descriptor.colorAttachments[0].pixelFormat = Preferences.colorPixelFormat
+        
+        descriptor.colorAttachments[0].isBlendingEnabled = true
+        descriptor.colorAttachments[0].rgbBlendOperation = .add
+        descriptor.colorAttachments[0].alphaBlendOperation = .add
+        descriptor.colorAttachments[0].sourceRGBBlendFactor = .sourceAlpha
+        descriptor.colorAttachments[0].sourceAlphaBlendFactor = .one
+        descriptor.colorAttachments[0].destinationRGBBlendFactor = .oneMinusSourceAlpha
+        descriptor.colorAttachments[0].destinationAlphaBlendFactor = .oneMinusSourceAlpha
+        
+        descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
+
+        descriptor.vertexFunction = Engine.defaultLibrary.makeFunction(name: "brush_vs")
+        descriptor.fragmentFunction = Engine.defaultLibrary.makeFunction(name: "brush_fs")
+        descriptor.vertexDescriptor = brushVertexDescriptor()
+
+        descriptor.label = "Simple Grid Pipeline State"
+
+        brush = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
+    }
+    
     private func basicVertexDescriptor() -> MTLVertexDescriptor
     {
         let descriptor = MTLVertexDescriptor()
@@ -295,6 +324,35 @@ class PipelineStates
         descriptor.attributes[1].format = .float
         descriptor.attributes[1].bufferIndex = 0
         offset += MemoryLayout<Float>.size
+        
+        descriptor.layouts[0].stepFunction = .perVertex
+        descriptor.layouts[0].stride = offset
+        
+        return descriptor
+    }
+    
+    private func brushVertexDescriptor() -> MTLVertexDescriptor
+    {
+        let descriptor = MTLVertexDescriptor()
+        var offset = 0
+        
+        // Position
+        descriptor.attributes[0].offset = offset
+        descriptor.attributes[0].format = .float3
+        descriptor.attributes[0].bufferIndex = 0
+        offset += MemoryLayout<float3>.size
+        
+//        // Normal
+//        descriptor.attributes[1].offset = offset
+//        descriptor.attributes[1].format = .float3
+//        descriptor.attributes[1].bufferIndex = 0
+//        offset += MemoryLayout<float3>.size
+        
+        // UV
+        descriptor.attributes[1].offset = offset
+        descriptor.attributes[1].format = .float2
+        descriptor.attributes[1].bufferIndex = 0
+        offset += MemoryLayout<float2>.size
         
         descriptor.layouts[0].stepFunction = .perVertex
         descriptor.layouts[0].stride = offset

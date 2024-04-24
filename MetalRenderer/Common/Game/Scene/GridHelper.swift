@@ -20,6 +20,8 @@ final class GridHelper
     
     var viewport: Viewport?
     
+    weak var scene: BrushScene?
+    
     func update()
     {
         guard let viewport = viewport else { return }
@@ -69,11 +71,7 @@ final class GridHelper
         {
             if isPlaneDrawn, cube.transform.scale.z > 0
             {
-                let transform = Transform()
-                transform.position = cube.transform.position + cube.transform.scale * 0.5
-                transform.scale = cube.transform.scale
-                
-                Debug.shared.addCube(transform: transform, color: float4(0, 1, 1, 1))
+                scene?.addBrush(position: cube.transform.position, size: cube.transform.scale)
             }
             
             startPoint = nil
