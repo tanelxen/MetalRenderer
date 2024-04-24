@@ -14,6 +14,8 @@ final class BrushScene
     
     let brush = WorldBrush()
     
+    lazy var grid = GridHelper()
+    
     init()
     {
 //        brush.transform.position = float3(144, 1440, 128)
@@ -23,11 +25,12 @@ final class BrushScene
     
     func update()
     {
-        
+        grid.update()
     }
     
     func render(with encoder: MTLRenderCommandEncoder?)
     {
+        grid.render(with: encoder)
         brush.render(with: encoder)
     }
 }

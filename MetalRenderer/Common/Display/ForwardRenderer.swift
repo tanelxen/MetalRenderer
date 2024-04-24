@@ -43,6 +43,8 @@ final class ForwardRenderer
         return Engine.device.makeDepthStencilState(descriptor: descriptor)!
     }()
     
+    private let quad = QuadShape(mins: float3(-4096, -4096, 0), maxs: float3(4096, 4096, 0))
+    
     private func drawScene(_ scene: Q3MapScene, with renderEncoder: MTLRenderCommandEncoder)
     {
         guard scene.isReady else { return }
@@ -92,15 +94,27 @@ final class ForwardRenderer
     private func drawScene(_ scene: BrushScene, with renderEncoder: MTLRenderCommandEncoder)
     {
         renderEncoder.setFrontFacing(.clockwise)
-        renderEncoder.setCullMode(.back)
+//        renderEncoder.setCullMode(.back)
         
+//        renderEncoder.setDepthStencilState(regularStencilState)
+        
+//        renderEncoder.setRenderPipelineState(pipelineStates.grid)
+//        renderEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 6)
+        
+        renderEncoder.setCullMode(.none)
+        renderEncoder.setDepthStencilState(skyStencilState)
+        renderEncoder.setRenderPipelineState(pipelineStates.simpleGrid)
+        
+        var modelConstants = ModelConstants()
+        renderEncoder.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
+        
+        quad.render(with: renderEncoder)
+        
+        renderEncoder.setCullMode(.back)
         renderEncoder.setDepthStencilState(regularStencilState)
         
-        renderEncoder.pushDebugGroup("Brush Render")
-            renderEncoder.setFragmentTexture(nil, index: 0)
-            renderEncoder.setRenderPipelineState(pipelineStates.basic)
-            scene.render(with: renderEncoder)
-        renderEncoder.popDebugGroup()
+        renderEncoder.setRenderPipelineState(pipelineStates.basic)
+        scene.render(with: renderEncoder)
     }
     
     private func drawDebug(with encoder: MTLRenderCommandEncoder)

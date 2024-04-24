@@ -28,6 +28,8 @@ final class ViewportPanel
         self.viewport = viewport
         viewport.camera = camera
         
+        BrushScene.current?.grid.viewport = viewport
+        
 //        Mouse.onLeftMouseDown = { [weak self] in
 //            if Keyboard.isKeyPressed(.y) {
 //                self?.selectObject()

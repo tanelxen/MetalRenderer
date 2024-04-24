@@ -67,7 +67,7 @@ final class WorldBrush
     init()
     {
         let minBounds = float3(0, 0, 0)
-        let maxBounds = float3(64, 64, 64)
+        let maxBounds = float3(8, 8, 8)
         
         corners[0] = float3(minBounds.x, minBounds.y, minBounds.z)  // Back     Right   Bottom      0
         corners[1] = float3(maxBounds.x, minBounds.y, minBounds.z)  // Front    Right   Bottom      1

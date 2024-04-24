@@ -20,6 +20,8 @@ class PipelineStates
     private (set) var particles: MTLRenderPipelineState!
     private (set) var userInterface: MTLRenderPipelineState!
     
+    private (set) var simpleGrid: MTLRenderPipelineState!
+    
     init()
     {
         createSkyboxPipelineState()
@@ -34,6 +36,8 @@ class PipelineStates
         createParticlesPipelineState()
         
         createUserInterfacePipelineState()
+        
+        createSimpleGridPipelineState()
     }
     
     private func createSkyboxPipelineState()
@@ -219,6 +223,31 @@ class PipelineStates
         descriptor.label = "UI Render Pipeline State"
 
         userInterface = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
+    }
+    
+    private func createSimpleGridPipelineState()
+    {
+        let descriptor = MTLRenderPipelineDescriptor()
+        
+        descriptor.colorAttachments[0].pixelFormat = Preferences.colorPixelFormat
+        
+        descriptor.colorAttachments[0].isBlendingEnabled = true
+        descriptor.colorAttachments[0].rgbBlendOperation = .add
+        descriptor.colorAttachments[0].alphaBlendOperation = .add
+        descriptor.colorAttachments[0].sourceRGBBlendFactor = .sourceAlpha
+        descriptor.colorAttachments[0].sourceAlphaBlendFactor = .one
+        descriptor.colorAttachments[0].destinationRGBBlendFactor = .oneMinusSourceAlpha
+        descriptor.colorAttachments[0].destinationAlphaBlendFactor = .oneMinusSourceAlpha
+        
+        descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
+
+        descriptor.vertexFunction = Engine.defaultLibrary.makeFunction(name: "simple_grid_vs")
+        descriptor.fragmentFunction = Engine.defaultLibrary.makeFunction(name: "simple_grid_fs")
+        descriptor.vertexDescriptor = basicVertexDescriptor()
+
+        descriptor.label = "Simple Grid Pipeline State"
+
+        simpleGrid = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
     }
     
     private func basicVertexDescriptor() -> MTLVertexDescriptor

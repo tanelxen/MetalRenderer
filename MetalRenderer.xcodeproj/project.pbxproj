@@ -144,6 +144,9 @@
 		8A5969072ABB2F1D00772AC9 /* Intersection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5969052ABB2F1D00772AC9 /* Intersection.swift */; };
 		8A5AE68B2AC0FE0400809790 /* SkeletalMeshAssetSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5AE68A2AC0FE0400809790 /* SkeletalMeshAssetSerializer.swift */; };
 		8A5AE68C2AC0FE0400809790 /* SkeletalMeshAssetSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5AE68A2AC0FE0400809790 /* SkeletalMeshAssetSerializer.swift */; };
+		8A5D1BE72BD6CC1E007CB0FA /* GridHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5D1BE62BD6CC1E007CB0FA /* GridHelper.swift */; };
+		8A5D1BE82BD6CC1E007CB0FA /* GridHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5D1BE62BD6CC1E007CB0FA /* GridHelper.swift */; };
+		8A5D1BEA2BD81705007CB0FA /* SimpleGrid.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8A5D1BE92BD81705007CB0FA /* SimpleGrid.metal */; };
 		8A7C70B62AAFA7D3003FAFDD /* ImGui in Frameworks */ = {isa = PBXBuildFile; productRef = 8A7C70B52AAFA7D3003FAFDD /* ImGui */; };
 		8A7C70B82AAFA7D7003FAFDD /* ImGuizmo in Frameworks */ = {isa = PBXBuildFile; productRef = 8A7C70B72AAFA7D7003FAFDD /* ImGuizmo */; };
 		8A7C70BB2AB09169003FAFDD /* AssetsPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A7C70BA2AB09169003FAFDD /* AssetsPanel.swift */; };
@@ -234,6 +237,8 @@
 		8A56D72B278E61CD00D3FE2B /* MetalTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalTypes.swift; sourceTree = "<group>"; };
 		8A5969052ABB2F1D00772AC9 /* Intersection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Intersection.swift; sourceTree = "<group>"; };
 		8A5AE68A2AC0FE0400809790 /* SkeletalMeshAssetSerializer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkeletalMeshAssetSerializer.swift; sourceTree = "<group>"; };
+		8A5D1BE62BD6CC1E007CB0FA /* GridHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GridHelper.swift; sourceTree = "<group>"; };
+		8A5D1BE92BD81705007CB0FA /* SimpleGrid.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = SimpleGrid.metal; sourceTree = "<group>"; };
 		8A5EDFDD27B998A2007166E4 /* ForwardRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForwardRenderer.swift; sourceTree = "<group>"; };
 		8A5EDFDF27B99EED007166E4 /* WorldMesh.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = WorldMesh.metal; sourceTree = "<group>"; };
 		8A5EDFE127B9B76D007166E4 /* StaticMesh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StaticMesh.swift; sourceTree = "<group>"; };
@@ -401,6 +406,7 @@
 				8A5EDFEF27BC205B007166E4 /* SkeletalMesh.metal */,
 				8A53DEFA2AB336DE00EC2C65 /* Particles.metal */,
 				8A98722F2AD4648900AAEE2C /* Billboards.metal */,
+				8A5D1BE92BD81705007CB0FA /* SimpleGrid.metal */,
 			);
 			path = Shaders;
 			sourceTree = "<group>";
@@ -517,6 +523,7 @@
 				8A53DEFD2AB37E5C00EC2C65 /* Decals.swift */,
 				8A98722C2AD4587200AAEE2C /* Billboards.swift */,
 				8A84556B2BD4527D00AA70E1 /* WorldBrush.swift */,
+				8A5D1BE62BD6CC1E007CB0FA /* GridHelper.swift */,
 			);
 			path = Scene;
 			sourceTree = "<group>";
@@ -732,6 +739,7 @@
 				8A27DA5B2AAE39DE0094C9D0 /* SkeletalMesh.swift in Sources */,
 				8A27DA5C2AAE39DE0094C9D0 /* Basic.metal in Sources */,
 				8A27DA5D2AAE39DE0094C9D0 /* PlayerMovement.swift in Sources */,
+				8A5D1BE82BD6CC1E007CB0FA /* GridHelper.swift in Sources */,
 				8A27DA5E2AAE39DE0094C9D0 /* Q3MapCollision.swift in Sources */,
 				8A53DF022AB488A700EC2C65 /* UserInterface.metal in Sources */,
 				8A808F402AD034C30087A084 /* WorldEntitiesAsset.swift in Sources */,
@@ -788,6 +796,7 @@
 				8A27DAF22AAE3E5A0094C9D0 /* ImGuiFontLibrary.swift in Sources */,
 				8A0C48B32AC88C200099BEF6 /* WorldStaticMesh.swift in Sources */,
 				8A27DAF32AAE3E5A0094C9D0 /* SandboxApplication.swift in Sources */,
+				8A5D1BEA2BD81705007CB0FA /* SimpleGrid.metal in Sources */,
 				8A27DAF42AAE3E5A0094C9D0 /* KeyCodes.swift in Sources */,
 				8A84556C2BD4527D00AA70E1 /* WorldBrush.swift in Sources */,
 				8A05DD122ACF26140012252D /* WorldCollisionAsset+Q3BSP.swift in Sources */,
@@ -814,6 +823,7 @@
 				8A27DB032AAE3E5A0094C9D0 /* StaticMesh.metal in Sources */,
 				8A27DB042AAE3E5A0094C9D0 /* Utils.swift in Sources */,
 				8AE718232AD08293000CE0E1 /* BrushRenderer.swift in Sources */,
+				8A5D1BE72BD6CC1E007CB0FA /* GridHelper.swift in Sources */,
 				8A27DB062AAE3E5A0094C9D0 /* Skybox.metal in Sources */,
 				8A05DD102ACF25080012252D /* WorldEntitiesAsset+Q3BSP.swift in Sources */,
 				8A3E5C812B10DA160043EA29 /* BrushCollision.swift in Sources */,
