@@ -112,7 +112,7 @@ final class ViewportPanel
             return
         }
         
-        guard let normal = BrushScene.current.brush.selectedFaceNormal
+        guard let normal = BrushScene.current.selected?.selectedFaceNormal
         else {
             return
         }
@@ -128,7 +128,7 @@ final class ViewportPanel
         
         transform.position = origin + value
         
-        BrushScene.current.brush.selectedFaceTransform = transform
+        BrushScene.current.selected?.selectedFaceTransform = transform
     }
     
     private func startPlaying()
@@ -224,8 +224,9 @@ final class ViewportPanel
         guard isHovered else { return }
         guard !ImGuizmoIsUsing() else { return }
         
+        guard let brush = BrushScene.current.selected else { return }
+        
         let ray = viewport.mousePositionInWorld()
-        let brush = BrushScene.current.brush
         
 //        let end = ray.origin + ray.direction * 1024
 //        Debug.shared.addLine(start: ray.origin, end: end, color: float4(0, 1, 0, 1))

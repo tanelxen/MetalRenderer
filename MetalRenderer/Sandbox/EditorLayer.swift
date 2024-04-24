@@ -16,6 +16,7 @@ final class EditorLayer
     
     private var viewportPanel: ViewportPanel!
     private var hierarchyPanel: HierarchyPanel!
+    private var inspectorPanel: InspectorPanel!
     private var assetsPanel: AssetsPanel!
     
     var onLoadNewMap: ((URL)->Void)?
@@ -35,6 +36,7 @@ final class EditorLayer
         
         viewportPanel = ViewportPanel(viewport: sceneViewport)
         hierarchyPanel = HierarchyPanel()
+        inspectorPanel = InspectorPanel()
         assetsPanel = AssetsPanel()
         
         assetsPanel.onLoadNewMap = { [weak self] url in
@@ -201,15 +203,15 @@ final class EditorLayer
             ImGuiDockBuilderSetNodeSize(window_id, ImGuiGetMainViewport().pointee.Size)
 
             var dock_main_id       = window_id
-            let dock_right_id      = ImGuiDockBuilderSplitNode(dock_main_id, Im(ImGuiDir_Right), 0.15, nil, &dock_main_id)
+            var dock_right_id      = ImGuiDockBuilderSplitNode(dock_main_id, Im(ImGuiDir_Right), 0.15, nil, &dock_main_id)
             let dock_left_id      = ImGuiDockBuilderSplitNode(dock_main_id, Im(ImGuiDir_Left), 0.18, nil, &dock_main_id)
-//            var dock_right_down_id = ImGuiDockBuilderSplitNode(dock_right_id, Im(ImGuiDir_Down), 0.6, nil, &dock_right_id)
+            let dock_right_down_id = ImGuiDockBuilderSplitNode(dock_right_id, Im(ImGuiDir_Down), 0.6, nil, &dock_right_id)
 //            var dock_down_id       = ImGuiDockBuilderSplitNode(dock_main_id, Im(ImGuiDir_Down), 0.25, nil, &dock_main_id)
 //            var dock_down_right_id = ImGuiDockBuilderSplitNode(dock_down_id, Im(ImGuiDir_Right), 0.6, nil, &dock_down_id)
 
             // Dock windows
             ImGuiDockBuilderDockWindow(hierarchyPanel.name, dock_right_id)
-//            ImGuiDockBuilderDockWindow("Properties", dock_right_down_id)
+            ImGuiDockBuilderDockWindow(inspectorPanel.name, dock_right_down_id)
 //            ImGuiDockBuilderDockWindow("Console",    dock_down_id)
             ImGuiDockBuilderDockWindow(assetsPanel.name, dock_left_id)
             ImGuiDockBuilderDockWindow(viewportPanel.name, dock_main_id)
@@ -229,6 +231,7 @@ final class EditorLayer
     private func drawPanels()
     {
         hierarchyPanel.draw()
+        inspectorPanel.draw()
         viewportPanel.draw()
         
         assetsPanel.draw()

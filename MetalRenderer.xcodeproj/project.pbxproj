@@ -151,6 +151,8 @@
 		8A5D1BF12BD8A6E9007CB0FA /* Brush.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8A5D1BEF2BD8A6E9007CB0FA /* Brush.metal */; };
 		8A5D1BF32BD92C53007CB0FA /* Material.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5D1BF22BD92C53007CB0FA /* Material.swift */; };
 		8A5D1BF42BD92C53007CB0FA /* Material.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5D1BF22BD92C53007CB0FA /* Material.swift */; };
+		8A5D1BF62BD997D3007CB0FA /* InspectorPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5D1BF52BD997D3007CB0FA /* InspectorPanel.swift */; };
+		8A5D1BF72BD997D3007CB0FA /* InspectorPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5D1BF52BD997D3007CB0FA /* InspectorPanel.swift */; };
 		8A7C70B62AAFA7D3003FAFDD /* ImGui in Frameworks */ = {isa = PBXBuildFile; productRef = 8A7C70B52AAFA7D3003FAFDD /* ImGui */; };
 		8A7C70B82AAFA7D7003FAFDD /* ImGuizmo in Frameworks */ = {isa = PBXBuildFile; productRef = 8A7C70B72AAFA7D7003FAFDD /* ImGuizmo */; };
 		8A7C70BB2AB09169003FAFDD /* AssetsPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A7C70BA2AB09169003FAFDD /* AssetsPanel.swift */; };
@@ -245,6 +247,7 @@
 		8A5D1BE92BD81705007CB0FA /* SimpleGrid.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = SimpleGrid.metal; sourceTree = "<group>"; };
 		8A5D1BEF2BD8A6E9007CB0FA /* Brush.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Brush.metal; sourceTree = "<group>"; };
 		8A5D1BF22BD92C53007CB0FA /* Material.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Material.swift; sourceTree = "<group>"; };
+		8A5D1BF52BD997D3007CB0FA /* InspectorPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectorPanel.swift; sourceTree = "<group>"; };
 		8A5EDFDD27B998A2007166E4 /* ForwardRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForwardRenderer.swift; sourceTree = "<group>"; };
 		8A5EDFDF27B99EED007166E4 /* WorldMesh.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = WorldMesh.metal; sourceTree = "<group>"; };
 		8A5EDFE127B9B76D007166E4 /* StaticMesh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StaticMesh.swift; sourceTree = "<group>"; };
@@ -556,6 +559,7 @@
 			children = (
 				8A3C60172AAB916500BE835E /* ViewportPanel.swift */,
 				8A3C60192AAB94E000BE835E /* HierarchyPanel.swift */,
+				8A5D1BF52BD997D3007CB0FA /* InspectorPanel.swift */,
 				8A7C70BA2AB09169003FAFDD /* AssetsPanel.swift */,
 			);
 			path = Panels;
@@ -783,6 +787,7 @@
 				8A27DA782AAE39DE0094C9D0 /* ForwardRenderer.swift in Sources */,
 				8A27DA792AAE39DE0094C9D0 /* Sizeable.swift in Sources */,
 				8A27DA7A2AAE39DE0094C9D0 /* Skybox.swift in Sources */,
+				8A5D1BF72BD997D3007CB0FA /* InspectorPanel.swift in Sources */,
 				8A5969072ABB2F1D00772AC9 /* Intersection.swift in Sources */,
 				8A3E5C822B10DA160043EA29 /* BrushCollision.swift in Sources */,
 				8A27DA7B2AAE39DE0094C9D0 /* PipelineStates.swift in Sources */,
@@ -858,6 +863,7 @@
 				8A5D1BF32BD92C53007CB0FA /* Material.swift in Sources */,
 				8A27DB102AAE3E5A0094C9D0 /* Camera.swift in Sources */,
 				8A27DB112AAE3E5A0094C9D0 /* MetalTypes.swift in Sources */,
+				8A5D1BF62BD997D3007CB0FA /* InspectorPanel.swift in Sources */,
 				8A27DB122AAE3E5A0094C9D0 /* Transform.swift in Sources */,
 				8A27DB132AAE3E5A0094C9D0 /* imgui_impl_osx.swift in Sources */,
 				8A808F3F2AD034C30087A084 /* WorldEntitiesAsset.swift in Sources */,

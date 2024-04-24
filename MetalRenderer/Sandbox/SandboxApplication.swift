@@ -29,6 +29,7 @@ final class SandboxApplication: NSObject
         view.colorPixelFormat = Preferences.colorPixelFormat
         view.depthStencilPixelFormat = Preferences.depthStencilPixelFormat
         view.framebufferOnly = false
+        view.preferredFramesPerSecond = 30
         
         view.device = MTLCreateSystemDefaultDevice()
         

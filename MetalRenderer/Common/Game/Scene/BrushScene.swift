@@ -14,9 +14,11 @@ final class BrushScene
     
     lazy var gridQuad = QuadShape(mins: float3(-4096, -4096, 0), maxs: float3(4096, 4096, 0))
     
-    let brush = WorldBrush(minBounds: .zero, maxBounds: float3(64, 64, 64))
-    
     var brushes: [WorldBrush] = []
+    
+    var selected: WorldBrush? {
+        brushes.first(where: { $0.isSelected })
+    }
     
     lazy var grid: GridHelper = {
         let helper = GridHelper()
@@ -26,7 +28,6 @@ final class BrushScene
     
     init()
     {
-        brush.isSelected = true
         BrushScene.current = self
     }
     
@@ -39,6 +40,9 @@ final class BrushScene
         let maxs = max(start, end)
         
         let brush = WorldBrush(minBounds: mins, maxBounds: maxs)
+        brush.isSelected = true
+        
+        brushes.forEach { $0.isSelected = false }
         
         brushes.append(brush)
     }
@@ -57,8 +61,6 @@ final class BrushScene
         
         renderer.apply(tehnique: .basic, to: encoder)
         grid.render(with: encoder)
-        
-        brush.render(with: encoder, to: renderer)
         
         for brush in brushes
         {

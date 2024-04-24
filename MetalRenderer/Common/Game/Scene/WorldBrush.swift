@@ -11,12 +11,33 @@ import simd
 final class WorldBrush
 {
     var transform = Transform()
+    
+    var mins: float3 {
+        let x = corners.map({ $0.x }).min() ?? 0
+        let y = corners.map({ $0.y }).min() ?? 0
+        let z = corners.map({ $0.z }).min() ?? 0
+        
+        return float3(x, y, z)
+    }
+    
+    var maxs: float3 {
+        let x = corners.map({ $0.x }).max() ?? 0
+        let y = corners.map({ $0.y }).max() ?? 0
+        let z = corners.map({ $0.z }).max() ?? 0
+        
+        return float3(x, y, z)
+    }
+    
     private var corners: [float3] = .init(repeating: .zero, count: 8)
     private let faces: [Face]
     
     private var selectedFaceIndex: Int?
     
-    var isSelected = false
+    var isSelected = false {
+        didSet {
+            selectedFaceIndex = nil
+        }
+    }
     
     var selectedFaceTransform: Transform? {
         
