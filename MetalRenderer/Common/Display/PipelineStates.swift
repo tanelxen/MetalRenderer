@@ -342,16 +342,16 @@ class PipelineStates
         descriptor.attributes[0].bufferIndex = 0
         offset += MemoryLayout<float3>.size
         
-//        // Normal
-//        descriptor.attributes[1].offset = offset
-//        descriptor.attributes[1].format = .float3
-//        descriptor.attributes[1].bufferIndex = 0
-//        offset += MemoryLayout<float3>.size
+        // Normal
+        descriptor.attributes[1].offset = offset
+        descriptor.attributes[1].format = .float3
+        descriptor.attributes[1].bufferIndex = 0
+        offset += MemoryLayout<float3>.size
         
         // UV
-        descriptor.attributes[1].offset = offset
-        descriptor.attributes[1].format = .float2
-        descriptor.attributes[1].bufferIndex = 0
+        descriptor.attributes[2].offset = offset
+        descriptor.attributes[2].format = .float2
+        descriptor.attributes[2].bufferIndex = 0
         offset += MemoryLayout<float2>.size
         
         descriptor.layouts[0].stepFunction = .perVertex

@@ -12,19 +12,45 @@ using namespace metal;
 struct VertexIn
 {
     float3 position [[attribute(0)]];
-//    float3 normal [[attribute(1)]];
+    float3 normal [[attribute(1)]];
     float2 uv [[attribute(2)]];
 };
 
 struct VertexOut
 {
     float4 position [[ position ]];
-    float4 viewPosition;
-    float3 normal;
-    float2 uv;
     float4 color;
-    float3 light;
+    float2 uv;
+    float shade [[ flat ]];
 };
+
+constant float lightaxis[3] = {0.6f, 0.8f, 1.0f};
+
+float shadeForNormal(float3 normal)
+{
+    int i;
+    float f;
+    
+    // axial plane
+    for ( i = 0; i < 3; i++ ) {
+        if (fabs(normal[i]) > 0.9) {
+            f = lightaxis[i];
+            return f;
+        }
+    }
+    
+    // between two axial planes
+    for (i = 0; i < 3; i++) {
+        if (fabs(normal[i]) < 0.1) {
+            f = ( lightaxis[( i + 1 ) % 3] + lightaxis[( i + 2 ) % 3] ) / 2;
+            return f;
+        }
+    }
+    
+    // other
+    f = ( lightaxis[0] + lightaxis[1] + lightaxis[2] ) / 3;
+    return f;
+}
 
 vertex VertexOut brush_vs(constant VertexIn       *vertices       [[ buffer(0) ]],
                           constant SceneConstants &viewConstants  [[ buffer(1) ]],
@@ -36,16 +62,9 @@ vertex VertexOut brush_vs(constant VertexIn       *vertices       [[ buffer(0) ]
     VertexOut data;
     
     data.position = mvp * float4(vertices[vertexID].position, 1);
-    
-    data.viewPosition = viewConstants.viewMatrix * float4(vertices[vertexID].position, 1);
-    
-//    data.normal = vertices[vertexID].normal;
     data.uv = vertices[vertexID].uv;
     data.color = modelConstants.color;
-    
-    float4x4 mv = viewConstants.viewMatrix * modelConstants.modelMatrix;
-    
-    data.light = -normalize(mv * float4(vertices[vertexID].position, 1)).xyz;
+    data.shade = shadeForNormal(vertices[vertexID].normal);
     
     return data;
 }
@@ -54,13 +73,6 @@ vertex VertexOut brush_vs(constant VertexIn       *vertices       [[ buffer(0) ]
 
 fragment float4 brush_fs(VertexOut in [[ stage_in ]])
 {
-//    float4 color = in.color;
-    
-    float3 xTangent = dfdx( in.viewPosition.xyz );
-    float3 yTangent = dfdy( in.viewPosition.xyz );
-    float3 faceNormal = normalize( cross( yTangent, xTangent ) );
-    
-    float nDotL = dot(faceNormal, in.light);
-    
-    return float4(nDotL, nDotL, nDotL, 1.0) * in.color;
+    float3 shade = float3(in.shade);
+    return float4(shade, 1.0) * in.color;
 }

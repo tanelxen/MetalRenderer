@@ -184,7 +184,16 @@ final class WorldBrush
     
     private func drawFaces(_ faces: [Face], color: float4, edges: Bool, with encoder: MTLRenderCommandEncoder, to renderer: ForwardRenderer)
     {
-        var vertices = faces.flatMap({ $0.indices }).map({ BrushVertex(corners[$0]) })
+        var vertices: [BrushVertex] = []
+        
+        for face in faces
+        {
+            let faceVerices = face.indices
+                .map { (corners[$0], face.axis) }
+                .map { BrushVertex($0.0, $0.1) }
+       
+            vertices.append(contentsOf: faceVerices)
+        }
 
         renderer.apply(tehnique: .brush, to: encoder)
         
@@ -198,20 +207,20 @@ final class WorldBrush
         encoder.setVertexBytes(&modelConstants, length: MemoryLayout<ModelConstants>.size, index: 2)
         encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices.count)
         
-        if edges
-        {
-            renderer.apply(tehnique: .basic, to: encoder)
-            
-            var modelConstants2 = ModelConstants()
-            modelConstants2.color = isSelected ? float4(1, 0, 0, 1) : float4(0, 0, 0, 1)
-            modelConstants2.modelMatrix = transform.matrix
-            modelConstants2.modelMatrix.scale(axis: float3(repeating: 1.001))
-            
-            encoder.setTriangleFillMode(.lines)
-            encoder.setVertexBytes(&modelConstants2, length: MemoryLayout<ModelConstants>.size, index: 2)
-            encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices.count)
-            encoder.setTriangleFillMode(.fill)
-        }
+//        if edges
+//        {
+//            renderer.apply(tehnique: .basic, to: encoder)
+//
+//            var modelConstants2 = ModelConstants()
+//            modelConstants2.color = isSelected ? float4(1, 0, 0, 1) : float4(0, 0, 0, 1)
+//            modelConstants2.modelMatrix = transform.matrix
+//            modelConstants2.modelMatrix.scale(axis: float3(repeating: 1.001))
+//
+//            encoder.setTriangleFillMode(.lines)
+//            encoder.setVertexBytes(&modelConstants2, length: MemoryLayout<ModelConstants>.size, index: 2)
+//            encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices.count)
+//            encoder.setTriangleFillMode(.fill)
+//        }
     }
     
     struct Face
@@ -224,27 +233,27 @@ final class WorldBrush
 private struct BrushVertex
 {
     let position: float3
-//    let normal: float3
+    let normal: float3
     let uv: float2
     
     init(_ x: Float, _ y: Float, _ z: Float, _ u: Float, _ v: Float)
     {
         self.position = float3(x, y, z)
-//        self.normal = float3(0, 0, 0)
+        self.normal = .zero
         self.uv = float2(u, v)
     }
     
     init(_ position: float3)
     {
         self.position = position
-//        self.normal = .zero
+        self.normal = .zero
         self.uv = .zero
     }
     
     init(_ position: float3, _ normal: float3)
     {
         self.position = position
-//        self.normal = normal
+        self.normal = normal
         self.uv = .zero
     }
 }
