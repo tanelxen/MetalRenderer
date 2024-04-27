@@ -8,6 +8,21 @@
 import Foundation
 import simd
 
+func intersection(ray: Ray, plane: Plane) -> float3?
+{
+    let dotProduct = dot(ray.direction, plane.normal)
+    
+    if abs(dotProduct) < 0.000001 { return nil }
+    
+    let t = (plane.distance - dot(ray.origin, plane.normal)) / dotProduct
+    
+    if t < 0 { return nil }
+    
+    return (ray.origin + ray.direction * t)
+    
+//        return round(result * 1000) / 1000
+}
+
 func lineIntersectTriangle(v0: float3, v1: float3, v2: float3, start: float3, end: float3) -> float3?
 {
     let n = normalize(cross(v1 - v0, v2 - v1))

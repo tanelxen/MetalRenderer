@@ -33,13 +33,13 @@ final class BrushScene
     
     func addBrush(position: float3, size: float3)
     {
-        let start = position
-        let end = position + size
+//        let start = position
+//        let end = position + size
+//
+//        let mins = min(start, end)
+//        let maxs = max(start, end)
         
-        let mins = min(start, end)
-        let maxs = max(start, end)
-        
-        let brush = WorldBrush(minBounds: mins, maxBounds: maxs)
+        let brush = WorldBrush(origin: position, size: size)
         brush.isSelected = true
         
         brushes.forEach { $0.isSelected = false }

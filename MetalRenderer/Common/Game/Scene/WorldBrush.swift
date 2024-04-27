@@ -12,19 +12,14 @@ final class WorldBrush
 {
     var transform = Transform()
     
-    var mins: float3 {
-        let x = corners.map({ $0.x }).min() ?? 0
-        let y = corners.map({ $0.y }).min() ?? 0
-        let z = corners.map({ $0.z }).min() ?? 0
-        
-        return float3(x, y, z)
+    var origin: float3 {
+        transform.position
     }
     
-    var maxs: float3 {
-        let x = corners.map({ $0.x }).max() ?? 0
-        let y = corners.map({ $0.y }).max() ?? 0
-        let z = corners.map({ $0.z }).max() ?? 0
-        
+    var size: float3 {
+        let x = corners[1].x - corners[0].x
+        let y = corners[2].y - corners[0].y
+        let z = corners[4].z - corners[0].z
         return float3(x, y, z)
     }
     
@@ -35,6 +30,9 @@ final class WorldBrush
     
     var isSelected = false {
         didSet {
+            if selectedFaceIndex != nil {
+                commitFaceEdit()
+            }
             selectedFaceIndex = nil
         }
     }
@@ -87,8 +85,13 @@ final class WorldBrush
         return faces[index].axis
     }
     
-    init(minBounds: float3, maxBounds: float3)
+    init(origin: float3, size: float3)
     {
+        transform.position = origin
+        
+        let minBounds = float3.zero
+        let maxBounds = size
+        
         corners[0] = float3(minBounds.x, minBounds.y, minBounds.z)  // Back     Right   Bottom      0
         corners[1] = float3(maxBounds.x, minBounds.y, minBounds.z)  // Front    Right   Bottom      1
         corners[2] = float3(minBounds.x, maxBounds.y, minBounds.z)  // Back     Left    Bottom      2
@@ -107,6 +110,23 @@ final class WorldBrush
             Face(indices: [1, 0, 5, 5, 0, 4], axis: float3(0, -1, 0)),   // Right
             Face(indices: [2, 3, 6, 6, 3, 7], axis: float3(0, 1, 0)),  // Left
         ]
+    }
+    
+    // Обновить transform.position
+    private func commitFaceEdit()
+    {
+        var offset = float3()
+        
+        offset.x = corners.map({ $0.x }).min() ?? 0
+        offset.y = corners.map({ $0.y }).min() ?? 0
+        offset.z = corners.map({ $0.z }).min() ?? 0
+        
+        transform.position += offset
+        
+        for i in corners.indices
+        {
+            corners[i] -= offset
+        }
     }
     
     func selectFace(by ray: Ray)

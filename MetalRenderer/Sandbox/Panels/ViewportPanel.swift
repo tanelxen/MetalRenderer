@@ -81,10 +81,26 @@ final class ViewportPanel
         }
         else
         {
-            if let transform = guizmoTransform
+            if let brush = BrushScene.current.selected
             {
-//                renderGizmo(for: transform)
-                dragFace(at: transform)
+                if let transform = brush.selectedFaceTransform
+                {
+                    dragFace(at: transform)
+                    
+                    if ImGuiIsKeyPressedMap(Im(ImGuiKey_Escape), false)
+                    {
+                        brush.isSelected = true
+                    }
+                }
+                else
+                {
+                    renderGizmo(for: brush.transform)
+                    
+                    if ImGuiIsKeyPressedMap(Im(ImGuiKey_Escape), false)
+                    {
+                        brush.isSelected = false
+                    }
+                }
             }
             
             drawPlayPauseControl()
@@ -105,9 +121,15 @@ final class ViewportPanel
             return
         }
         
+        // Плоскость, на которую будем проецировать луч, по ней будем перемещаться
+        let normal = camera.transform.rotation.forward
+        let distance = dot(transform.position, normal)
+        let plane = Plane(normal: normal, distance: distance)
+        
         guard let start = dragOrigin, let origin = objectInitialPos
         else {
-            dragOrigin = viewport.mousePositionInWorld().origin
+            let ray = viewport.mousePositionInWorld()
+            dragOrigin = intersection(ray: ray, plane: plane)
             objectInitialPos = transform.position
             return
         }
@@ -119,12 +141,16 @@ final class ViewportPanel
         
         let axis = float3(abs(normal.x), abs(normal.y), abs(normal.z))
         
-        let end = viewport.mousePositionInWorld().origin
+        let ray = viewport.mousePositionInWorld()
+        guard let end = intersection(ray: ray, plane: plane)
+        else {
+            return
+        }
         
-        var value = dot(axis, end - start) * 1000
+        var value = dot(axis, end - start)
         
         let gridSize: Float = 16
-        value = round(value / gridSize) * gridSize
+        value = floor(value / gridSize) * gridSize
         
         transform.position = origin + value
         
@@ -192,7 +218,7 @@ final class ViewportPanel
         
         // Snapping
         let snap: Bool = true //Input.isPressed(key: .shift)
-        var snapValues: float3 = float3(repeating: 8)
+        var snapValues: float3 = float3(repeating: 16)
         
         let gizmoType: ImGuizmoType = .translate
         
@@ -212,11 +238,10 @@ final class ViewportPanel
             }
         }
         
-//        if ImGuizmoIsUsing()
-//        {
-//            transform.position = modelMatrix.columns.3.xyz
-//            BrushScene.current.brush.selectedFaceTransform = transform
-//        }
+        if ImGuizmoIsUsing()
+        {
+            transform.position = modelMatrix.columns.3.xyz
+        }
     }
     
     private func selectObject()
@@ -232,13 +257,6 @@ final class ViewportPanel
 //        Debug.shared.addLine(start: ray.origin, end: end, color: float4(0, 1, 0, 1))
         
         brush.selectFace(by: ray)
-        
-//        if let pos = brush.selectedFaceTransform?.position
-//        {
-//            print(pos)
-//        }
-        
-        guizmoTransform = brush.selectedFaceTransform
     }
     
     private func drawPlayPauseControl()

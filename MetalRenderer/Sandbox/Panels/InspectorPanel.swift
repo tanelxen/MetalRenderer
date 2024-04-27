@@ -17,11 +17,11 @@ final class InspectorPanel
         
         if let brush = BrushScene.current.selected
         {
-            let mins = brush.mins
-            let maxs = brush.maxs
+            let mins = brush.origin
+            let maxs = brush.size
             
-            ImGuiTextV("min: X(\(mins.x)) Y(\(mins.y)) Z(\(mins.z))")
-            ImGuiTextV("max: X(\(maxs.x)) Y(\(maxs.y)) Z(\(maxs.z))")
+            ImGuiTextV("origin: X(\(mins.x)) Y(\(mins.y)) Z(\(mins.z))")
+            ImGuiTextV("dims: D(\(maxs.x)) W(\(maxs.y)) H(\(maxs.z))")
         }
         
         ImGuiEnd()

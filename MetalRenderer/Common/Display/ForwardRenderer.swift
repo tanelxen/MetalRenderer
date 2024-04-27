@@ -19,11 +19,11 @@ final class ForwardRenderer
         return Engine.device.makeDepthStencilState(descriptor: descriptor)!
     }()
     
-    private var skyStencilState: MTLDepthStencilState = {
+    private var gridStencilState: MTLDepthStencilState = {
         let descriptor = MTLDepthStencilDescriptor()
         descriptor.isDepthWriteEnabled = false
-        descriptor.depthCompareFunction = .lessEqual
-        descriptor.label = "Sky"
+        descriptor.depthCompareFunction = .less
+        descriptor.label = "Grid"
         return Engine.device.makeDepthStencilState(descriptor: descriptor)!
     }()
     
@@ -68,7 +68,7 @@ final class ForwardRenderer
             case .grid:
                 encoder.setCullMode(.none)
                 encoder.setFrontFacing(.clockwise)
-                encoder.setDepthStencilState(skyStencilState)
+                encoder.setDepthStencilState(gridStencilState)
                 encoder.setRenderPipelineState(pipelineStates.simpleGrid)
         }
     }
