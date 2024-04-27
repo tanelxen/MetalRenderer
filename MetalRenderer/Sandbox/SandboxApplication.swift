@@ -42,8 +42,8 @@ final class SandboxApplication: NSObject
         
         editor = EditorLayer(view: view, sceneViewport: viewport)
         
-        viewport.camera?.transform.position = float3(-256, 0, 256)
-        viewport.camera?.transform.rotation = Rotator(pitch: 30, yaw: 0, roll: 0)
+        viewport.camera?.transform.position = float3(64, -128, 128)
+        viewport.camera?.transform.rotation = Rotator(pitch: 30, yaw: 90, roll: 0)
         
         view.delegate = self
         

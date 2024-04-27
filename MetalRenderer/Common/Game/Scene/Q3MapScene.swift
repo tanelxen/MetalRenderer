@@ -338,7 +338,7 @@ extension Q3MapScene
             let color = float4(ambient, 1.0)
             
             var modelConstants = ModelConstants(modelMatrix: modelMatrix, color: color)
-            encoder?.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
+            encoder?.setVertexBytes(&modelConstants, length: MemoryLayout<ModelConstants>.size, index: 2)
             
             entity.mesh?.renderWithEncoder(encoder!)
         }
@@ -372,7 +372,7 @@ extension Q3MapScene
         let color = float4(ambient, 1.0)
         
         var modelConstants = ModelConstants(modelMatrix: modelMatrix, color: color)
-        encoder?.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
+        encoder?.setVertexBytes(&modelConstants, length: MemoryLayout<ModelConstants>.size, index: 2)
         
         player.mesh?.renderWithEncoder(encoder!)
     }

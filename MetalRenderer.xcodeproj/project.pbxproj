@@ -290,6 +290,9 @@
 		8AB9EEF827C00C7D008C33B2 /* Barney.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Barney.swift; sourceTree = "<group>"; };
 		8AC34E422AAE54E600A6D429 /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
 		8AC34E442AAE6E7800A6D429 /* HalfLife.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = HalfLife.ttf; sourceTree = "<group>"; };
+		8ACAECEF2BDD334E00B67C19 /* Uniforms.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Uniforms.h; sourceTree = "<group>"; };
+		8ACAECF82BDD369F00B67C19 /* Sandbox-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Sandbox-Bridging-Header.h"; sourceTree = "<group>"; };
+		8ACAECF92BDD36BA00B67C19 /* Game-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Game-Bridging-Header.h"; sourceTree = "<group>"; };
 		8ACD9A472AA481F800900F4B /* Viewport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Viewport.swift; sourceTree = "<group>"; };
 		8ACD9A492AA49DD500900F4B /* SandboxApplication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SandboxApplication.swift; sourceTree = "<group>"; };
 		8ACDB0112A8FADF2005AEE19 /* imgui_impl_metal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = imgui_impl_metal.swift; sourceTree = "<group>"; };
@@ -407,6 +410,7 @@
 		8A22EAC7278FA37D00A8CD7D /* Shaders */ = {
 			isa = PBXGroup;
 			children = (
+				8ACAECEF2BDD334E00B67C19 /* Uniforms.h */,
 				8A0D272127907F0200F2D9E6 /* Common.metal */,
 				8A42053A2797B03400473A9D /* Skybox.metal */,
 				8A9C235927A4DB4100965D21 /* Basic.metal */,
@@ -453,6 +457,7 @@
 				8ACD9A492AA49DD500900F4B /* SandboxApplication.swift */,
 				8ACDB01C2A922C38005AEE19 /* EditorLayer.swift */,
 				8A27DA9A2AAE3C3C0094C9D0 /* main.swift */,
+				8ACAECF82BDD369F00B67C19 /* Sandbox-Bridging-Header.h */,
 			);
 			path = Sandbox;
 			sourceTree = "<group>";
@@ -464,6 +469,7 @@
 				8AC34E422AAE54E600A6D429 /* GameViewController.swift */,
 				8A27DA472AAE35D40094C9D0 /* GameApplication.swift */,
 				8A8D131129CBAAC300721A7D /* main.swift */,
+				8ACAECF92BDD36BA00B67C19 /* Game-Bridging-Header.h */,
 			);
 			path = Game;
 			sourceTree = "<group>";
@@ -667,6 +673,14 @@
 			attributes = {
 				LastSwiftUpdateCheck = 1250;
 				LastUpgradeCheck = 1420;
+				TargetAttributes = {
+					8A27DA492AAE39DE0094C9D0 = {
+						LastSwiftMigration = 1420;
+					};
+					8A27DAEB2AAE3E5A0094C9D0 = {
+						LastSwiftMigration = 1420;
+					};
+				};
 			};
 			buildConfigurationList = 8A56D70A278E058200D3FE2B /* Build configuration list for PBXProject "MetalRenderer" */;
 			compatibilityVersion = "Xcode 9.3";
@@ -921,7 +935,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.tanelxen.MetalRenderer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_INSTALL_OBJC_HEADER = NO;
-				SWIFT_OBJC_BRIDGING_HEADER = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "MetalRenderer/Game/Game-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_PRECOMPILE_BRIDGING_HEADER = NO;
 				SWIFT_VERSION = 5.0;
@@ -957,7 +971,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_COMPILATION_MODE = singlefile;
 				SWIFT_INSTALL_OBJC_HEADER = NO;
-				SWIFT_OBJC_BRIDGING_HEADER = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "MetalRenderer/Game/Game-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_PRECOMPILE_BRIDGING_HEADER = NO;
 				SWIFT_VERSION = 5.0;
@@ -992,7 +1006,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.tanelxen.MetalRenderer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_INSTALL_OBJC_HEADER = NO;
-				SWIFT_OBJC_BRIDGING_HEADER = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "MetalRenderer/Sandbox/Sandbox-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_PRECOMPILE_BRIDGING_HEADER = NO;
 				SWIFT_VERSION = 5.0;
@@ -1028,7 +1042,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_COMPILATION_MODE = singlefile;
 				SWIFT_INSTALL_OBJC_HEADER = NO;
-				SWIFT_OBJC_BRIDGING_HEADER = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "MetalRenderer/Sandbox/Sandbox-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_PRECOMPILE_BRIDGING_HEADER = NO;
 				SWIFT_VERSION = 5.0;

@@ -73,7 +73,7 @@ final class BrushRenderer
             
             var modelConstants = ModelConstants()
             modelConstants.color = float4(.one, 0.5)
-            encoder.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
+            encoder.setVertexBytes(&modelConstants, length: MemoryLayout<ModelConstants>.size, index: 2)
             
             encoder.setVertexBuffer(brush.vertexBuffer, offset: 0, index: 0)
             

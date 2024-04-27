@@ -101,6 +101,11 @@ final class ViewportPanel
                         brush.isSelected = false
                     }
                 }
+                
+                if ImGuiIsKeyPressedMap(Im(ImGuiKey_Backspace), false)
+                {
+                    BrushScene.current.removeSelected()
+                }
             }
             
             drawPlayPauseControl()

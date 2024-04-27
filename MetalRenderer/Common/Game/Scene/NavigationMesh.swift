@@ -35,7 +35,7 @@ final class NavigationMesh
         var modelConstants = ModelConstants()
         
         modelConstants.color = float4(0, 1, 0, 0.6)
-        encoder.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
+        encoder.setVertexBytes(&modelConstants, length: MemoryLayout<ModelConstants>.size, index: 2)
         
         encoder.drawIndexedPrimitives(type: .triangle,
                                       indexCount: unselectedIndicesCount,

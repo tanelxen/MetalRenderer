@@ -47,6 +47,14 @@ final class BrushScene
         brushes.append(brush)
     }
     
+    func removeSelected()
+    {
+        if let index = brushes.firstIndex(where: { $0.isSelected })
+        {
+            brushes.remove(at: index)
+        }
+    }
+    
     func update()
     {
         grid.update()
@@ -56,7 +64,8 @@ final class BrushScene
     {
         renderer.apply(tehnique: .grid, to: encoder)
         var modelConstants = ModelConstants()
-        encoder.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
+        modelConstants.modelMatrix = matrix_identity_float4x4
+        encoder.setVertexBytes(&modelConstants, length: MemoryLayout<ModelConstants>.size, index: 2)
         gridQuad.render(with: encoder)
         
         renderer.apply(tehnique: .basic, to: encoder)

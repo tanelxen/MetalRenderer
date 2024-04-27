@@ -30,7 +30,7 @@ final class Decals
     
     init()
     {
-        constantsBuffer = Engine.device.makeBuffer(length: ModelConstants.stride(maxCount), options: [])
+        constantsBuffer = Engine.device.makeBuffer(length: MemoryLayout<ModelConstants>.stride * maxCount)
         texture = TextureManager.shared.getTexture(for: "Assets/bullet_hole.png")
     }
     

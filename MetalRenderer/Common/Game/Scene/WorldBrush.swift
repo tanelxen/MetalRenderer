@@ -195,7 +195,7 @@ final class WorldBrush
         modelConstants.modelMatrix = transform.matrix
         
         encoder.setTriangleFillMode(.fill)
-        encoder.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
+        encoder.setVertexBytes(&modelConstants, length: MemoryLayout<ModelConstants>.size, index: 2)
         encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices.count)
         
         if edges
@@ -208,7 +208,7 @@ final class WorldBrush
             modelConstants2.modelMatrix.scale(axis: float3(repeating: 1.001))
             
             encoder.setTriangleFillMode(.lines)
-            encoder.setVertexBytes(&modelConstants2, length: ModelConstants.stride, index: 2)
+            encoder.setVertexBytes(&modelConstants2, length: MemoryLayout<ModelConstants>.size, index: 2)
             encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices.count)
             encoder.setTriangleFillMode(.fill)
         }

@@ -205,7 +205,7 @@ final class HelperCube
         modelConstants.color = float4(1, 0, 1, 0.3)
         modelConstants.modelMatrix = transform.matrix
         
-        encoder?.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
+        encoder?.setVertexBytes(&modelConstants, length: MemoryLayout<ModelConstants>.size, index: 2)
         
         encoder?.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
 

@@ -61,6 +61,8 @@ enum KeyCodes: UInt16
     case eight             = 0x1C
     case nine              = 0x19
     
+    case delete            = 0x33
+    
     //Keypad Numbers
     case keypad0           = 0x52
     case keypad1           = 0x53

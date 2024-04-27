@@ -41,7 +41,7 @@ final class ForwardRenderer
             viewUniforms.viewportSize = viewport.maxBounds - viewport.minBounds
         }
         
-        encoder.setVertexBytes(&viewUniforms, length: MemoryLayout<SceneConstants>.stride, index: 1)
+        encoder.setVertexBytes(&viewUniforms, length: MemoryLayout<SceneConstants>.size, index: 1)
         
         drawScene(scene, with: encoder)
         drawDebug(with: encoder)

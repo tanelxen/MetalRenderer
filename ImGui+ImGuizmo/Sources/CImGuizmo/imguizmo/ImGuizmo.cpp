@@ -683,11 +683,11 @@ namespace ImGuizmo
    static const float planeLimit = 0.2f;
 
    static const vec_t directionUnary[3] = { makeVect(1.f, 0.f, 0.f), makeVect(0.f, 1.f, 0.f), makeVect(0.f, 0.f, 1.f) };
-    static const ImU32 directionColor[3] = { 0xFFCC501F, 0xFF59CC59, 0xFF4040C2 };
+    static const ImU32 directionColor[3] = { 0xFF4040C2, 0xFF59CC59, 0xFFCC501F };
 //    static const ImU32 directionColor[3] = { 0xFFCC5959, 0xFF59CC59, 0xFF598FC2 };
 
    // Alpha: 100%: FF, 87%: DE, 70%: B3, 54%: 8A, 50%: 80, 38%: 61, 12%: 1F
-    static const ImU32 planeColor[3] = { 0x61CC501F, 0x6159CC59, 0x614040C2 };
+    static const ImU32 planeColor[3] = { 0x614040C2, 0x6159CC59, 0x61CC501F };
 //    static const ImU32 planeColor[3] = { 0x61CC5959, 0x6159CC59, 0x61598FC2 };
     static const ImU32 selectionColor = 0xDECCCCCC;
 //    static const ImU32 selectionColor = 0x8A1080FF;

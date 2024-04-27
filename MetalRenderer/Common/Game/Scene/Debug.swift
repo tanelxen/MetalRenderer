@@ -40,10 +40,12 @@ final class Debug
     
     init()
     {
-        cubesConstantsBuffer = Engine.device.makeBuffer(length: ModelConstants.stride(maxInstances), options: [])
-        cubesConstantsBuffer2 = Engine.device.makeBuffer(length: ModelConstants.stride(maxInstances), options: [])
+        let length = MemoryLayout<ModelConstants>.stride * maxInstances
         
-        quadsConstantsBuffer = Engine.device.makeBuffer(length: ModelConstants.stride(maxInstances), options: [])
+        cubesConstantsBuffer = Engine.device.makeBuffer(length:  length)
+        cubesConstantsBuffer2 = Engine.device.makeBuffer(length: length)
+        
+        quadsConstantsBuffer = Engine.device.makeBuffer(length: length)
     }
     
     func addLine(start: float3, end: float3, color: float4)
@@ -78,7 +80,7 @@ final class Debug
             var modelConstants = ModelConstants()
             modelConstants.color = line.color
 
-            encoder?.setVertexBytes(&modelConstants, length: ModelConstants.stride, index: 2)
+            encoder?.setVertexBytes(&modelConstants, length: MemoryLayout<ModelConstants>.size, index: 2)
 
             var vertices = [
                 BasicVertex(line.start.x, line.start.y, line.start.z, 0, 0),

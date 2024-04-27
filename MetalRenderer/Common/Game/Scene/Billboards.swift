@@ -37,7 +37,7 @@ final class Billboards
         if batches[image] == nil
         {
             let texture = TextureManager.shared.getTexture(for: image)
-            let buffer = Engine.device.makeBuffer(length: ModelConstants.stride(maxCount), options: [])
+            let buffer = Engine.device.makeBuffer(length: MemoryLayout<ModelConstants>.stride * maxCount, options: [])
             
             batches[image] = Batch(texture: texture, buffer: buffer, count: 0)
         }
