@@ -183,6 +183,8 @@
 		8AAA8F212AAF614400223D1A /* MenuViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AAA8F202AAF614400223D1A /* MenuViewController.swift */; };
 		8AC34E432AAE54E600A6D429 /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AC34E422AAE54E600A6D429 /* GameViewController.swift */; };
 		8AC34E452AAE6E7800A6D429 /* HalfLife.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8AC34E442AAE6E7800A6D429 /* HalfLife.ttf */; };
+		8AC4BE802BE1743F00EFA078 /* MTKGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AC4BE7F2BE1743F00EFA078 /* MTKGeometry.swift */; };
+		8AC4BE812BE1743F00EFA078 /* MTKGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AC4BE7F2BE1743F00EFA078 /* MTKGeometry.swift */; };
 		8AE718232AD08293000CE0E1 /* BrushRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AE718222AD08293000CE0E1 /* BrushRenderer.swift */; };
 		8AE718242AD08293000CE0E1 /* BrushRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AE718222AD08293000CE0E1 /* BrushRenderer.swift */; };
 		9F89101E2BCC312B003B65D5 /* RecastObjC in Frameworks */ = {isa = PBXBuildFile; productRef = 9F89101D2BCC312B003B65D5 /* RecastObjC */; };
@@ -290,6 +292,7 @@
 		8AB9EEF827C00C7D008C33B2 /* Barney.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Barney.swift; sourceTree = "<group>"; };
 		8AC34E422AAE54E600A6D429 /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
 		8AC34E442AAE6E7800A6D429 /* HalfLife.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = HalfLife.ttf; sourceTree = "<group>"; };
+		8AC4BE7F2BE1743F00EFA078 /* MTKGeometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTKGeometry.swift; sourceTree = "<group>"; };
 		8ACAECEF2BDD334E00B67C19 /* Uniforms.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Uniforms.h; sourceTree = "<group>"; };
 		8ACAECF82BDD369F00B67C19 /* Sandbox-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Sandbox-Bridging-Header.h"; sourceTree = "<group>"; };
 		8ACAECF92BDD36BA00B67C19 /* Game-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Game-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -380,6 +383,7 @@
 				8A0D27252790810600F2D9E6 /* Input */,
 				8A0D27232790808400F2D9E6 /* Sizeable.swift */,
 				8A56D72B278E61CD00D3FE2B /* MetalTypes.swift */,
+				8AC4BE7F2BE1743F00EFA078 /* MTKGeometry.swift */,
 				8A22EAB2278F735D00A8CD7D /* Engine.swift */,
 				8A0D272627908D5A00F2D9E6 /* GameTime.swift */,
 				8AA0652B279AB45E00492D26 /* Utils.swift */,
@@ -786,6 +790,7 @@
 				8A27DA692AAE39DE0094C9D0 /* SkeletalMeshAsset.swift in Sources */,
 				8A0C48AD2AC852A50099BEF6 /* WorldAsset.swift in Sources */,
 				8A53DEFF2AB37E5C00EC2C65 /* Decals.swift in Sources */,
+				8AC4BE812BE1743F00EFA078 /* MTKGeometry.swift in Sources */,
 				8A27DA6A2AAE39DE0094C9D0 /* SkeletalMesh.metal in Sources */,
 				8A27DA6C2AAE39DE0094C9D0 /* ResourceManager.swift in Sources */,
 				8A27DA6D2AAE39DE0094C9D0 /* StaticMesh.swift in Sources */,
@@ -878,6 +883,7 @@
 				8A27DB102AAE3E5A0094C9D0 /* Camera.swift in Sources */,
 				8A27DB112AAE3E5A0094C9D0 /* MetalTypes.swift in Sources */,
 				8A5D1BF62BD997D3007CB0FA /* InspectorPanel.swift in Sources */,
+				8AC4BE802BE1743F00EFA078 /* MTKGeometry.swift in Sources */,
 				8A27DB122AAE3E5A0094C9D0 /* Transform.swift in Sources */,
 				8A27DB132AAE3E5A0094C9D0 /* imgui_impl_osx.swift in Sources */,
 				8A808F3F2AD034C30087A084 /* WorldEntitiesAsset.swift in Sources */,

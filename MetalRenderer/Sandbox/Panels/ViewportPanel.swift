@@ -83,9 +83,9 @@ final class ViewportPanel
         {
             if let brush = BrushScene.current.selected
             {
-                if let transform = brush.selectedFaceTransform
+                if let point = brush.selectedFacePoint, let axis = brush.selectedFaceAxis
                 {
-                    dragFace(at: transform)
+                    dragFace(at: point, along: axis)
                     
                     if ImGuiIsKeyPressedMap(Im(ImGuiKey_Escape), false)
                     {
@@ -115,7 +115,7 @@ final class ViewportPanel
         ImGuiEnd()
     }
     
-    private func dragFace(at transform: Transform)
+    private func dragFace(at facePoint: float3, along axis: float3)
     {
         guard isHovered else { return }
         
@@ -127,24 +127,17 @@ final class ViewportPanel
         }
         
         // Плоскость, на которую будем проецировать луч, по ней будем перемещаться
-        let normal = camera.transform.rotation.forward
-        let distance = dot(transform.position, normal)
-        let plane = Plane(normal: normal, distance: distance)
+        let viewNormal = camera.transform.rotation.forward
+        let distance = dot(facePoint, viewNormal)
+        let plane = Plane(normal: viewNormal, distance: distance)
         
         guard let start = dragOrigin, let origin = objectInitialPos
         else {
             let ray = viewport.mousePositionInWorld()
             dragOrigin = intersection(ray: ray, plane: plane)
-            objectInitialPos = transform.position
+            objectInitialPos = facePoint
             return
         }
-        
-        guard let normal = BrushScene.current.selected?.selectedFaceNormal
-        else {
-            return
-        }
-        
-        let axis = float3(abs(normal.x), abs(normal.y), abs(normal.z))
         
         let ray = viewport.mousePositionInWorld()
         guard let end = intersection(ray: ray, plane: plane)
@@ -157,9 +150,9 @@ final class ViewportPanel
         let gridSize: Float = 16
         value = floor(value / gridSize) * gridSize
         
-        transform.position = origin + value
+        let newPos = origin + axis * value
         
-        BrushScene.current.selected?.selectedFaceTransform = transform
+        BrushScene.current.selected?.setSelectedFace(position: newPos)
     }
     
     private func startPlaying()

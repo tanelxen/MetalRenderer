@@ -76,3 +76,19 @@ fragment float4 brush_fs(VertexOut in [[ stage_in ]])
     float3 shade = float3(in.shade);
     return float4(shade, 1.0) * in.color;
 }
+
+vertex VertexOut box_vs(VertexIn       vIn       [[ stage_in ]],
+                        constant SceneConstants &viewConstants  [[ buffer(1) ]],
+                        constant ModelConstants &modelConstants [[ buffer(2) ]])
+{
+    float4x4 mvp = viewConstants.projectionMatrix * viewConstants.viewMatrix * modelConstants.modelMatrix;
+    
+    VertexOut data;
+    
+    data.position = mvp * float4(vIn.position, 1);
+    data.uv = vIn.uv;
+    data.color = modelConstants.color;
+    data.shade = shadeForNormal(vIn.normal);
+    
+    return data;
+}

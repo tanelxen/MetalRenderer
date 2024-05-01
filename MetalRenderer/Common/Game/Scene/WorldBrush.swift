@@ -17,149 +17,163 @@ final class WorldBrush
     }
     
     var size: float3 {
-        let x = corners[1].x - corners[0].x
-        let y = corners[2].y - corners[0].y
-        let z = corners[4].z - corners[0].z
-        return float3(x, y, z)
+        return transform.scale
     }
     
-    private var corners: [float3] = .init(repeating: .zero, count: 8)
-    private let faces: [Face]
+    private var planes: [Plane]
     
     private var selectedFaceIndex: Int?
     
     var isSelected = false {
         didSet {
-            if selectedFaceIndex != nil {
-                commitFaceEdit()
-            }
             selectedFaceIndex = nil
         }
     }
     
-    var selectedFaceTransform: Transform? {
+    var selectedFacePoint: float3? {
+        guard let index = selectedFaceIndex else { return nil }
         
-        get {
-            guard let index = selectedFaceIndex else { return nil }
-            
-            let face = faces[index]
-            let vertices = face.indices.map{ corners[$0] }
-            
-            let center = vertices.reduce(.zero, +) / 6 + transform.position
-            
-            let transform = Transform()
-            transform.position = center
-            
-            return transform
+        let normal = planes[index].normal
+        let distance = planes[index].distance
+        
+        var point = transform.position
+        
+        if normal.x != 0 {
+            point.x = distance
+        } else if normal.y != 0 {
+            point.y = distance
+        } else if normal.z != 0 {
+            point.z = distance
         }
         
-        set {
-            guard let trans = newValue else { return }
-            guard let index = selectedFaceIndex else { return }
-            
-            let face = faces[index]
-            let pos = trans.position - transform.position
-            
-            for i in face.indices
-            {
-                if face.axis.x != 0
-                {
-                    corners[i].x = pos.x
-                }
-                
-                if face.axis.y != 0
-                {
-                    corners[i].y = pos.y
-                }
-                
-                if face.axis.z != 0
-                {
-                    corners[i].z = pos.z
-                }
-            }
-        }
+        return point
     }
     
-    var selectedFaceNormal: float3? {
+    var selectedFaceAxis: float3? {
         guard let index = selectedFaceIndex else { return nil }
-        return faces[index].axis
+        return abs(planes[index].normal)
     }
+    
+    private let box = MTKGeometry(.box)
+    private let facePoint = MTKGeometry(.box, extents: [2, 2, 2])
     
     init(origin: float3, size: float3)
     {
-        transform.position = origin
+        transform.position = origin + size * 0.5
+        transform.scale = size
         
-        let minBounds = float3.zero
-        let maxBounds = size
-        
-        corners[0] = float3(minBounds.x, minBounds.y, minBounds.z)  // Back     Right   Bottom      0
-        corners[1] = float3(maxBounds.x, minBounds.y, minBounds.z)  // Front    Right   Bottom      1
-        corners[2] = float3(minBounds.x, maxBounds.y, minBounds.z)  // Back     Left    Bottom      2
-        corners[3] = float3(maxBounds.x, maxBounds.y, minBounds.z)  // Front    Left    Bottom      3
-
-        corners[4] = float3(minBounds.x, minBounds.y, maxBounds.z)  // Back     Right   Top         4
-        corners[5] = float3(maxBounds.x, minBounds.y, maxBounds.z)  // Front    Right   Top         5
-        corners[6] = float3(minBounds.x, maxBounds.y, maxBounds.z)  // Back     Left    Top         6
-        corners[7] = float3(maxBounds.x, maxBounds.y, maxBounds.z)  // Front    Left    Top         7
-        
-        faces = [
-            Face(indices: [4, 6, 5, 5, 6, 7], axis: float3(0, 0, 1)),   // Top
-            Face(indices: [2, 0, 3, 3, 0, 1], axis: float3(0, 0, -1)),  // Bottom
-            Face(indices: [0, 2, 4, 4, 2, 6], axis: float3(-1, 0, 0)),  // Back
-            Face(indices: [3, 1, 7, 7, 1, 5], axis: float3(1, 0, 0)),   // Front
-            Face(indices: [1, 0, 5, 5, 0, 4], axis: float3(0, -1, 0)),   // Right
-            Face(indices: [2, 3, 6, 6, 3, 7], axis: float3(0, 1, 0)),  // Left
+        planes = [
+            Plane(normal: [ 0,  0,  1], distance: 1),
+            Plane(normal: [ 0,  0, -1], distance: 1),
+            Plane(normal: [-1,  0,  0], distance: 1),
+            Plane(normal: [ 1,  0,  0], distance: 1),
+            Plane(normal: [ 0, -1,  0], distance: 1),
+            Plane(normal: [ 0,  1,  0], distance: 1)
         ]
+        
+        updatePlanesFromTransform()
     }
     
-    // Обновить transform.position
-    private func commitFaceEdit()
+    private func updatePlanesFromTransform()
     {
-        var offset = float3()
+        let halfExtents = transform.scale * 0.5
         
-        offset.x = corners.map({ $0.x }).min() ?? 0
-        offset.y = corners.map({ $0.y }).min() ?? 0
-        offset.z = corners.map({ $0.z }).min() ?? 0
-        
-        transform.position += offset
-        
-        for i in corners.indices
+        for i in planes.indices
         {
-            corners[i] -= offset
+            let normal = planes[i].normal
+            let halfDimention = normal * halfExtents
+            let point = transform.position + halfDimention
+            
+            planes[i].distance = dot(point, normal)
         }
+    }
+    
+    private func updateTransformFromPlanes()
+    {
+        let scaleX = planes[3].distance - planes[2].distance
+        let scaleY = planes[5].distance - planes[4].distance
+        let scaleZ = planes[0].distance - planes[1].distance
+        
+        let posX = planes[2].distance + scaleX * 0.5
+        let posY = planes[4].distance + scaleY * 0.5
+        let posZ = planes[1].distance + scaleZ * 0.5
+        
+        transform.position = [posX, posY, posZ]
+        transform.scale = [scaleX, scaleY, scaleZ]
+    }
+    
+    func setSelectedFace(position: float3)
+    {
+        guard let index = selectedFaceIndex else { return }
+
+        let normal = planes[index].normal
+        
+        if normal.x != 0 {
+            planes[index].distance = position.x
+        } else if normal.y != 0 {
+            planes[index].distance = position.y
+        } else if normal.z != 0 {
+            planes[index].distance = position.z
+        }
+        
+        updateTransformFromPlanes()
     }
     
     func selectFace(by ray: Ray)
     {
         selectedFaceIndex = nil
         
-        for (index, face) in faces.enumerated()
+        var start_frac: Float = -1.0
+        var end_frac: Float = 1.0
+        var closest: Int?
+        
+        let SURF_CLIP_EPSILON: Float = 0.125
+        
+//        var getout = false
+        var startout = false
+        
+        let start = ray.origin
+        let end = ray.origin + ray.direction * 1024
+        
+        for (i, plane) in planes.enumerated()
         {
-            guard dot(face.axis, ray.direction) < 0 else {
-                continue
-            }
+            let dist = plane.distance
+
+            let start_distance = dot(start, plane.normal) - dist
+            let end_distance = dot(end, plane.normal) - dist
             
-            let point1 = lineIntersectTriangle(
-                v0: corners[face.indices[0]] + transform.position,
-                v1: corners[face.indices[1]] + transform.position,
-                v2: corners[face.indices[2]] + transform.position,
-                start: ray.origin,
-                end: ray.origin + ray.direction * 1024
-            )
+            if start_distance > 0 { startout = true }
             
-            let point2 = lineIntersectTriangle(
-                v0: corners[face.indices[3]] + transform.position,
-                v1: corners[face.indices[4]] + transform.position,
-                v2: corners[face.indices[5]] + transform.position,
-                start: ray.origin,
-                end: ray.origin + ray.direction * 1024
-            )
+            // endpoint is not in solid
+//            if end_distance > 0 { getout = true }
             
-            if point1 != nil || point2 != nil
+            if (start_distance > 0 && (end_distance >= SURF_CLIP_EPSILON || end_distance >= start_distance)) { return }
+            if (start_distance <= 0 && end_distance <= 0) { continue }
+            
+            if start_distance > end_distance
             {
-                selectedFaceIndex = index
-                break
+                let frac = (start_distance - SURF_CLIP_EPSILON) / (start_distance - end_distance)
+                
+                if frac > start_frac
+                {
+                    start_frac = frac
+                    closest = i
+                }
             }
+            else // line is leaving the brush
+            {
+                let frac = (start_distance + SURF_CLIP_EPSILON) / (start_distance - end_distance)
+                
+                end_frac = min(end_frac, frac)
+            }
+        }
+        
+        // original point was inside brush
+        if !startout { return }
+        
+        if start_frac < end_frac && start_frac > -1
+        {
+            selectedFaceIndex = closest
         }
     }
     
@@ -167,93 +181,32 @@ final class WorldBrush
     {
         transform.updateModelMatrix()
         
-        if let index = selectedFaceIndex, faces.indices.contains(index)
-        {
-            let selected = faces[index]
-            drawFaces([selected], color: float4(1, 0, 0, 1), edges: false, with: encoder, to: renderer)
-            
-            var unselected = faces
-            unselected.remove(at: index)
-            drawFaces(unselected, color: float4(1, 1, 0, 1), edges: true, with: encoder, to: renderer)
-        }
-        else
-        {
-            drawFaces(self.faces, color: float4(1, 1, 0, 1), edges: true, with: encoder, to: renderer)
-        }
-    }
-    
-    private func drawFaces(_ faces: [Face], color: float4, edges: Bool, with encoder: MTLRenderCommandEncoder, to renderer: ForwardRenderer)
-    {
-        var vertices: [BrushVertex] = []
-        
-        for face in faces
-        {
-            let faceVerices = face.indices
-                .map { (corners[$0], face.axis) }
-                .map { BrushVertex($0.0, $0.1) }
-       
-            vertices.append(contentsOf: faceVerices)
-        }
-
         renderer.apply(tehnique: .brush, to: encoder)
         
-        encoder.setVertexBytes(&vertices, length: MemoryLayout<BrushVertex>.stride * vertices.count, index: 0)
-        
         var modelConstants = ModelConstants()
-        modelConstants.color = color
+        modelConstants.color = float4(1, 1, 0, 1)
         modelConstants.modelMatrix = transform.matrix
-        
-        encoder.setTriangleFillMode(.fill)
         encoder.setVertexBytes(&modelConstants, length: MemoryLayout<ModelConstants>.size, index: 2)
-        encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices.count)
-        
-//        if edges
-//        {
-//            renderer.apply(tehnique: .basic, to: encoder)
-//
-//            var modelConstants2 = ModelConstants()
-//            modelConstants2.color = isSelected ? float4(1, 0, 0, 1) : float4(0, 0, 0, 1)
-//            modelConstants2.modelMatrix = transform.matrix
-//            modelConstants2.modelMatrix.scale(axis: float3(repeating: 1.001))
-//
-//            encoder.setTriangleFillMode(.lines)
-//            encoder.setVertexBytes(&modelConstants2, length: MemoryLayout<ModelConstants>.size, index: 2)
-//            encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices.count)
-//            encoder.setTriangleFillMode(.fill)
-//        }
-    }
-    
-    struct Face
-    {
-        let indices: [Int]
-        let axis: float3
-    }
-}
 
-private struct BrushVertex
-{
-    let position: float3
-    let normal: float3
-    let uv: float2
-    
-    init(_ x: Float, _ y: Float, _ z: Float, _ u: Float, _ v: Float)
-    {
-        self.position = float3(x, y, z)
-        self.normal = .zero
-        self.uv = float2(u, v)
-    }
-    
-    init(_ position: float3)
-    {
-        self.position = position
-        self.normal = .zero
-        self.uv = .zero
-    }
-    
-    init(_ position: float3, _ normal: float3)
-    {
-        self.position = position
-        self.normal = normal
-        self.uv = .zero
+        box.render(with: encoder)
+        
+        if let i = selectedFaceIndex
+        {
+            let halfExtents = transform.scale * 0.5
+            
+            let normal = planes[i].normal
+            let halfDimention = normal * halfExtents
+            let point = transform.position + halfDimention
+            
+            let faceTransform = Transform(position: point)
+            faceTransform.updateModelMatrix()
+            
+            var modelConstants = ModelConstants()
+            modelConstants.color = float4(1, 0, 0, 1)
+            modelConstants.modelMatrix = faceTransform.matrix
+            encoder.setVertexBytes(&modelConstants, length: MemoryLayout<ModelConstants>.size, index: 2)
+
+            facePoint.render(with: encoder)
+        }
     }
 }

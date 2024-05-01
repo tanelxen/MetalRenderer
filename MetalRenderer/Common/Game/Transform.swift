@@ -9,9 +9,9 @@ import simd
 
 class Transform
 {
-    var position: float3 = .zero
-    var rotation: Rotator = .zero
-    var scale: float3 = .one
+    var position: float3
+    var rotation: Rotator
+    var scale: float3
     
     static let zero: Transform = Transform()
     
@@ -20,6 +20,13 @@ class Transform
     private var _matrix: matrix_float4x4 = matrix_identity_float4x4
     
     var matrix: matrix_float4x4 { _matrix }
+    
+    init(position: float3 = .zero, rotation: Rotator = .zero, scale: float3 = .one)
+    {
+        self.position = position
+        self.rotation = rotation
+        self.scale = scale
+    }
     
     func updateModelMatrix()
     {
