@@ -187,6 +187,8 @@
 		8AC4BE812BE1743F00EFA078 /* MTKGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AC4BE7F2BE1743F00EFA078 /* MTKGeometry.swift */; };
 		8AE718232AD08293000CE0E1 /* BrushRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AE718222AD08293000CE0E1 /* BrushRenderer.swift */; };
 		8AE718242AD08293000CE0E1 /* BrushRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AE718222AD08293000CE0E1 /* BrushRenderer.swift */; };
+		8AE8B4782BEED21100805D75 /* BrushFace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AE8B4772BEED21100805D75 /* BrushFace.swift */; };
+		8AE8B4792BEED21100805D75 /* BrushFace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AE8B4772BEED21100805D75 /* BrushFace.swift */; };
 		9F89101E2BCC312B003B65D5 /* RecastObjC in Frameworks */ = {isa = PBXBuildFile; productRef = 9F89101D2BCC312B003B65D5 /* RecastObjC */; };
 		9F8910202BCC312F003B65D5 /* DetourPathfinder in Frameworks */ = {isa = PBXBuildFile; productRef = 9F89101F2BCC312F003B65D5 /* DetourPathfinder */; };
 /* End PBXBuildFile section */
@@ -307,6 +309,7 @@
 		8AE718222AD08293000CE0E1 /* BrushRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrushRenderer.swift; sourceTree = "<group>"; };
 		8AE7F56F2946965B00CD40BE /* PlayerMovement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerMovement.swift; sourceTree = "<group>"; };
 		8AE8101829CEC08D003A681E /* pl_gun3.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = pl_gun3.wav; sourceTree = "<group>"; };
+		8AE8B4772BEED21100805D75 /* BrushFace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrushFace.swift; sourceTree = "<group>"; };
 		8AE8D0BE29D0D9F100292135 /* PipelineStates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PipelineStates.swift; sourceTree = "<group>"; };
 		8AEB11C427C146AF008FC445 /* Player.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
 		8AEB11C627C14DCA008FC445 /* Frustum.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Frustum.swift; sourceTree = "<group>"; };
@@ -544,6 +547,7 @@
 				8A53DEFD2AB37E5C00EC2C65 /* Decals.swift */,
 				8A98722C2AD4587200AAEE2C /* Billboards.swift */,
 				8A84556B2BD4527D00AA70E1 /* WorldBrush.swift */,
+				8AE8B4772BEED21100805D75 /* BrushFace.swift */,
 				8A5D1BE62BD6CC1E007CB0FA /* GridHelper.swift */,
 			);
 			path = Scene;
@@ -794,6 +798,7 @@
 				8A27DA6A2AAE39DE0094C9D0 /* SkeletalMesh.metal in Sources */,
 				8A27DA6C2AAE39DE0094C9D0 /* ResourceManager.swift in Sources */,
 				8A27DA6D2AAE39DE0094C9D0 /* StaticMesh.swift in Sources */,
+				8AE8B4792BEED21100805D75 /* BrushFace.swift in Sources */,
 				8A27DA6F2AAE39DE0094C9D0 /* Camera.swift in Sources */,
 				8A9872312AD4648900AAEE2C /* Billboards.metal in Sources */,
 				8A0C48B42AC88C200099BEF6 /* WorldStaticMesh.swift in Sources */,
@@ -832,6 +837,7 @@
 				8A27DAF32AAE3E5A0094C9D0 /* SandboxApplication.swift in Sources */,
 				8A5D1BEA2BD81705007CB0FA /* SimpleGrid.metal in Sources */,
 				8A27DAF42AAE3E5A0094C9D0 /* KeyCodes.swift in Sources */,
+				8AE8B4782BEED21100805D75 /* BrushFace.swift in Sources */,
 				8A84556C2BD4527D00AA70E1 /* WorldBrush.swift in Sources */,
 				8A05DD122ACF26140012252D /* WorldCollisionAsset+Q3BSP.swift in Sources */,
 				8A0C48AC2AC852A50099BEF6 /* WorldAsset.swift in Sources */,

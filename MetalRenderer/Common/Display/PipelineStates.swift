@@ -348,6 +348,12 @@ class PipelineStates
         descriptor.attributes[1].bufferIndex = 0
         offset += MemoryLayout<float3>.size
         
+        // Color
+        descriptor.attributes[1].offset = offset
+        descriptor.attributes[1].format = .float3
+        descriptor.attributes[1].bufferIndex = 0
+        offset += MemoryLayout<float3>.size
+        
         // UV
         descriptor.attributes[2].offset = offset
         descriptor.attributes[2].format = .float2

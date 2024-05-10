@@ -13,7 +13,8 @@ struct VertexIn
 {
     float3 position [[attribute(0)]];
     float3 normal [[attribute(1)]];
-    float2 uv [[attribute(2)]];
+    float4 color [[attribute(2)]];
+    float2 uv [[attribute(3)]];
 };
 
 struct VertexOut
@@ -63,7 +64,7 @@ vertex VertexOut brush_vs(constant VertexIn       *vertices       [[ buffer(0) ]
     
     data.position = mvp * float4(vertices[vertexID].position, 1);
     data.uv = vertices[vertexID].uv;
-    data.color = modelConstants.color;
+    data.color = vertices[vertexID].color;
     data.shade = shadeForNormal(vertices[vertexID].normal);
     
     return data;
@@ -77,7 +78,15 @@ fragment float4 brush_fs(VertexOut in [[ stage_in ]])
     return float4(shade, 1.0) * in.color;
 }
 
-vertex VertexOut box_vs(VertexIn       vIn       [[ stage_in ]],
+
+struct BoxVertexIn
+{
+    float3 position [[attribute(0)]];
+    float3 normal [[attribute(1)]];
+    float2 uv [[attribute(2)]];
+};
+
+vertex VertexOut box_vs(BoxVertexIn       vIn       [[ stage_in ]],
                         constant SceneConstants &viewConstants  [[ buffer(1) ]],
                         constant ModelConstants &modelConstants [[ buffer(2) ]])
 {

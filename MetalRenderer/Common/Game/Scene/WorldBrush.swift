@@ -21,6 +21,7 @@ final class WorldBrush
     }
     
     private var planes: [Plane]
+    private var faces: [BrushFace]
     
     private var selectedFaceIndex: Int?
     
@@ -32,21 +33,7 @@ final class WorldBrush
     
     var selectedFacePoint: float3? {
         guard let index = selectedFaceIndex else { return nil }
-        
-        let normal = planes[index].normal
-        let distance = planes[index].distance
-        
-        var point = transform.position
-        
-        if normal.x != 0 {
-            point.x = distance
-        } else if normal.y != 0 {
-            point.y = distance
-        } else if normal.z != 0 {
-            point.z = distance
-        }
-        
-        return point
+        return faces[index].center
     }
     
     var selectedFaceAxis: float3? {
@@ -71,7 +58,13 @@ final class WorldBrush
             Plane(normal: [ 0,  1,  0], distance: 1)
         ]
         
+        faces = planes.indices.map { BrushFace(planeIndex: $0) }
+        
         updatePlanesFromTransform()
+        
+        faces.forEach {
+            $0.update(from: planes)
+        }
     }
     
     private func updatePlanesFromTransform()
@@ -107,16 +100,31 @@ final class WorldBrush
         guard let index = selectedFaceIndex else { return }
 
         let normal = planes[index].normal
+        let value = position * normal
         
         if normal.x != 0 {
-            planes[index].distance = position.x
+            planes[index].distance = value.x
         } else if normal.y != 0 {
-            planes[index].distance = position.y
+            planes[index].distance = value.y
         } else if normal.z != 0 {
-            planes[index].distance = position.z
+            planes[index].distance = value.z
         }
         
-        updateTransformFromPlanes()
+//        updateTransformFromPlanes()
+        
+        faces.forEach {
+            $0.update(from: planes)
+        }
+    }
+    
+    func setSelectedPlane(distance value: Float)
+    {
+        guard let index = selectedFaceIndex else { return }
+        planes[index].distance = value
+        
+        faces.forEach {
+            $0.update(from: planes)
+        }
     }
     
     func selectFace(by ray: Ray)
@@ -183,30 +191,48 @@ final class WorldBrush
         
         renderer.apply(tehnique: .brush, to: encoder)
         
-        var modelConstants = ModelConstants()
-        modelConstants.color = float4(1, 1, 0, 1)
-        modelConstants.modelMatrix = transform.matrix
-        encoder.setVertexBytes(&modelConstants, length: MemoryLayout<ModelConstants>.size, index: 2)
-
-        box.render(with: encoder)
+        let tr = Transform()
+        tr.updateModelMatrix()
         
-        if let i = selectedFaceIndex
+        var modelConstants = ModelConstants()
+        modelConstants.color = .one
+        modelConstants.modelMatrix = tr.matrix
+        encoder.setVertexBytes(&modelConstants, length: MemoryLayout<ModelConstants>.size, index: 2)
+        
+        var vertices: [Vertex] = []
+        
+        for face in faces
         {
-            let halfExtents = transform.scale * 0.5
+            let normal = planes[face.planeIndex].normal
+            let color = face.planeIndex == selectedFaceIndex ? float4(1, 0, 0, 1) : float4(1, 1, 0, 1)
             
-            let normal = planes[i].normal
-            let halfDimention = normal * halfExtents
-            let point = transform.position + halfDimention
+            let verts = [
+                Vertex(pos: face.points[0], nor: normal, clr: color),
+                Vertex(pos: face.points[1], nor: normal, clr: color),
+                Vertex(pos: face.points[2], nor: normal, clr: color),
+                Vertex(pos: face.points[0], nor: normal, clr: color),
+                Vertex(pos: face.points[2], nor: normal, clr: color),
+                Vertex(pos: face.points[3], nor: normal, clr: color)
+            ]
             
-            let faceTransform = Transform(position: point)
-            faceTransform.updateModelMatrix()
-            
-            var modelConstants = ModelConstants()
-            modelConstants.color = float4(1, 0, 0, 1)
-            modelConstants.modelMatrix = faceTransform.matrix
-            encoder.setVertexBytes(&modelConstants, length: MemoryLayout<ModelConstants>.size, index: 2)
-
-            facePoint.render(with: encoder)
+            vertices.append(contentsOf: verts)
         }
+        
+        encoder.setVertexBytes(vertices, length: MemoryLayout<Vertex>.stride * vertices.count, index: 0)
+        encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices.count)
     }
+}
+
+private struct Vertex
+{
+    var pos: float3 = .zero
+    var nor: float3 = .zero
+    var clr: float4 = .one
+    var uv: float2 = .zero
+    
+//    init(_ x: Float, _ y: Float, _ z: Float, _ u: Float, _ v: Float)
+//    {
+//        self.pos = float3(x, y, z)
+//        self.uv = float2(u, v)
+//    }
 }
