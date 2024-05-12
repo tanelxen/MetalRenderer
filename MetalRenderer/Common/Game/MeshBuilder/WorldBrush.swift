@@ -22,6 +22,7 @@ final class WorldBrush
     
     private var planes: [Plane]
     private var faces: [BrushFace]
+    private var points: [float3] = []
     
     private var selectedFaceIndex: Int?
     
@@ -41,8 +42,9 @@ final class WorldBrush
         return abs(planes[index].normal)
     }
     
-    private let box = MTKGeometry(.box)
-    private let facePoint = MTKGeometry(.box, extents: [2, 2, 2])
+    private let facePoint = MTKGeometry(.sphere, extents: [2, 2, 2])
+    
+    var selectedEdge: (float3, float3)?
     
     init(origin: float3, size: float3)
     {
@@ -64,6 +66,11 @@ final class WorldBrush
         
         faces.forEach {
             $0.update(from: planes)
+        }
+        
+        for face in faces
+        {
+            for point = face.points
         }
     }
     
@@ -185,6 +192,44 @@ final class WorldBrush
         }
     }
     
+    func selectEdge(by ray: Ray)
+    {
+        var bestd: Float = .greatestFiniteMagnitude
+        var besti = -1
+        var bestj = -1
+        
+        for i in faces.indices
+        {
+            for j in faces[i].points.indices
+            {
+                let p1 = faces[i].points[j]
+                let p2 = faces[i].points[(j + 1) % 4]
+                let mid = (p1 + p2) * 0.5
+                
+                let d = intersect(ray: ray, point: mid, epsilon: 8, divergence: 0.01)
+                
+                if d < bestd
+                {
+                    bestd = d
+                    besti = i
+                    bestj = j
+                }
+            }
+        }
+        
+        print("face: \(besti) vertex: \(bestj)")
+        
+        if besti != -1 && bestj != -1
+        {
+            selectedEdge = (
+                faces[besti].points[bestj],
+                faces[besti].points[(bestj + 1) % 4]
+            )
+            
+            print("p1: \(selectedEdge!.0) p2: \(selectedEdge!.1)")
+        }
+    }
+    
     func render(with encoder: MTLRenderCommandEncoder, to renderer: ForwardRenderer)
     {
         transform.updateModelMatrix()
@@ -220,6 +265,28 @@ final class WorldBrush
         
         encoder.setVertexBytes(vertices, length: MemoryLayout<Vertex>.stride * vertices.count, index: 0)
         encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices.count)
+        
+        if let edge = selectedEdge
+        {
+            let tr1 = Transform(position: edge.0)
+            tr1.updateModelMatrix()
+            
+            var modelConstants1 = ModelConstants()
+            modelConstants1.color = float4(0, 0, 1, 1)
+            modelConstants1.modelMatrix = tr1.matrix
+            encoder.setVertexBytes(&modelConstants1, length: MemoryLayout<ModelConstants>.size, index: 2)
+            facePoint.render(with: encoder)
+            
+            
+            let tr2 = Transform(position: edge.1)
+            tr2.updateModelMatrix()
+            
+            var modelConstants2 = ModelConstants()
+            modelConstants2.color = float4(0, 0, 1, 1)
+            modelConstants2.modelMatrix = tr2.matrix
+            encoder.setVertexBytes(&modelConstants2, length: MemoryLayout<ModelConstants>.size, index: 2)
+            facePoint.render(with: encoder)
+        }
     }
 }
 
@@ -235,4 +302,40 @@ private struct Vertex
 //        self.pos = float3(x, y, z)
 //        self.uv = float2(u, v)
 //    }
+}
+
+private struct BasicVertex
+{
+    let pos: float3
+    let uv: float2 = .zero
+}
+
+// Got from GTKRadiant matlib
+private func intersect(ray: Ray, point: float3, epsilon: Float, divergence: Float) -> Float
+{
+    var displacement = float3()
+    var depth: Float = 0
+
+    // calc displacement of test point from ray origin
+    displacement = point - ray.origin
+    
+    // calc length of displacement vector along ray direction
+    depth = dot(displacement, ray.direction)
+    
+    if depth < 0.0 {
+        return .greatestFiniteMagnitude
+    }
+    
+    // calc position of closest point on ray to test point
+    displacement = ray.origin + ray.direction * depth
+    
+    // calc displacement of test point from closest point
+    displacement = point - displacement
+    
+    // calc length of displacement, subtract depth-dependant epsilon
+    if length(displacement) - (epsilon + ( depth * divergence )) > 0 {
+        return .greatestFiniteMagnitude
+    }
+    
+    return depth
 }

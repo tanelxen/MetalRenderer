@@ -35,7 +35,7 @@ class MTKGeometry
                 mdlMesh = MDLMesh(
                     boxWithExtent: extents,
                     segments: [1, 1, 1],
-                    inwardNormals: true,
+                    inwardNormals: false,
                     geometryType: .triangles,
                     allocator: allocator
                 )
@@ -113,7 +113,8 @@ class MTKGeometry
         // Push a debug group allowing us to identify render commands in the GPU Frame Capture tool
         encoder.pushDebugGroup("Brush")
         
-//        encoder.setCullMode(.none)
+        encoder.setCullMode(.back)
+        encoder.setFrontFacing(.clockwise)
         encoder.setRenderPipelineState(state)
         
         // Set mesh's vertex buffers

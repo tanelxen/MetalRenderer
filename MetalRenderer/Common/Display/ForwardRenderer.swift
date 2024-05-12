@@ -61,7 +61,7 @@ final class ForwardRenderer
                 
             case .brush:
                 encoder.setCullMode(.back)
-                encoder.setFrontFacing(.clockwise)
+                encoder.setFrontFacing(.counterClockwise)
                 encoder.setDepthStencilState(regularStencilState)
                 encoder.setRenderPipelineState(pipelineStates.brush)
                 

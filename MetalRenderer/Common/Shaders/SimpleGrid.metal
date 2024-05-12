@@ -31,7 +31,7 @@ vertex VertexOut simple_grid_vs(constant VertexIn       *vertices       [[ buffe
     VertexOut data;
     
     data.position = mvp * float4(vertices[vertexID].position, 1);
-    data.uv = vertices[vertexID].position.xy;
+    data.uv = vertices[vertexID].position.xz;
     
     return data;
 }

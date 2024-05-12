@@ -39,24 +39,24 @@ final class GridHelper
                     if Mouse.IsMouseButtonPressed(.left)
                     {
                         let x = min(start.x, point.x)
-                        let y = min(start.y, point.y)
+                        let z = min(start.z, point.z)
                         let width = abs(start.x - point.x) + gridSize
-                        let height = abs(start.y - point.y) + gridSize
+                        let depth = abs(start.z - point.z) + gridSize
                         
-                        cube.transform.position = float3(x, y, 0)
-                        cube.transform.scale = float3(width, height, 0)
+                        cube.transform.position = float3(x, 0, z)
+                        cube.transform.scale = float3(width, 0, depth)
                         isPlaneDrawn = true
                     }
                     else if isPlaneDrawn
                     {
                         height -= Mouse.getDY()
-                        cube.transform.scale.z = snap(value: height, step: gridSize)
+                        cube.transform.scale.y = snap(value: height, step: gridSize)
                     }
                 }
                 else
                 {
                     cube.transform.position = point
-                    cube.transform.scale = float3(gridSize, gridSize, 0)
+                    cube.transform.scale = float3(gridSize, 0, gridSize)
                     
                     if Mouse.IsMouseButtonPressed(.left)
                     {
@@ -69,7 +69,7 @@ final class GridHelper
         }
         else
         {
-            if isPlaneDrawn, cube.transform.scale.z > 0
+            if isPlaneDrawn, cube.transform.scale.y > 0
             {
                 scene?.addBrush(position: cube.transform.position, size: cube.transform.scale)
             }
@@ -92,7 +92,7 @@ final class GridHelper
     
     private func intersection(ray: Ray) -> float3?
     {
-        let normal = float3(0, 0, 1)
+        let normal = float3(0, 1, 0)
         let distance: Float = 0
         
         let dotProduct = dot(ray.direction, normal)
@@ -103,7 +103,7 @@ final class GridHelper
         
         if t < 0 { return nil }
         
-        return (ray.origin + ray.direction * t) * float3(1, 1, 0)
+        return (ray.origin + ray.direction * t) * float3(1, 0, 1)
         
 //        return round(result * 1000) / 1000
     }

@@ -60,6 +60,54 @@ extension simd_float3
 
 extension matrix_float4x4
 {
+    // MARK: - Rotate
+    init(rotationX angle: Float) {
+      let matrix = float4x4(
+        [1,           0,          0, 0],
+        [0,  cos(angle), sin(angle), 0],
+        [0, -sin(angle), cos(angle), 0],
+        [0,           0,          0, 1]
+      )
+      self = matrix
+    }
+
+    init(rotationY angle: Float) {
+      let matrix = float4x4(
+        [cos(angle), 0, -sin(angle), 0],
+        [         0, 1,           0, 0],
+        [sin(angle), 0,  cos(angle), 0],
+        [         0, 0,           0, 1]
+      )
+      self = matrix
+    }
+
+    init(rotationZ angle: Float) {
+      let matrix = float4x4(
+        [ cos(angle), sin(angle), 0, 0],
+        [-sin(angle), cos(angle), 0, 0],
+        [          0,          0, 1, 0],
+        [          0,          0, 0, 1]
+      )
+      self = matrix
+    }
+
+    init(rotation angle: float3) {
+      let rotationX = float4x4(rotationX: angle.x)
+      let rotationY = float4x4(rotationY: angle.y)
+      let rotationZ = float4x4(rotationZ: angle.z)
+      self = rotationZ * rotationY * rotationX
+    }
+    
+    init(translation: float3) {
+        let matrix = float4x4(
+            [            1,             0,             0, 0],  // column
+            [            0,             1,             0, 0],
+            [            0,             0,             1, 0],
+            [translation.x, translation.y, translation.z, 1]
+        )
+        self = matrix
+    }
+    
     mutating func translate(direction: float3)
     {
         var result = matrix_identity_float4x4
@@ -147,7 +195,7 @@ extension matrix_float4x4
         
         let x: Float = 1 / (aspectRatio * t)
         let y: Float = 1 / t
-        let z: Float = -((far + near) / (far - near))
+        let z: Float = ((far + near) / (far - near))
         let w: Float = -((2 * far * near) / (far - near))
         
         var result = matrix_identity_float4x4
@@ -155,7 +203,7 @@ extension matrix_float4x4
         result.columns = (
             float4(x,  0,  0,   0),
             float4(0,  y,  0,   0),
-            float4(0,  0,  z,  -1),
+            float4(0,  0,  z,   1),
             float4(0,  0,  w,   0)
         )
         
@@ -208,7 +256,7 @@ func testAABBPlane(min: float3, max: float3, plane: Plane) -> Bool
  */
 func lookAt(eye: float3, target: float3, up: float3) -> matrix_float4x4
 {
-    let n: float3 = normalize(eye - target)
+    let n: float3 = normalize(target - eye)
     let u: float3 = normalize(simd_cross(up, n))
     let v: float3 = simd_cross(n, u)
     

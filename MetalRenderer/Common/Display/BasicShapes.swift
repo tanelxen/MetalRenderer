@@ -144,13 +144,13 @@ final class QuadShape
         minBounds = minBounds - center
         maxBounds = maxBounds - center
         
-        minBounds.z = 0
-        maxBounds.z = 0
+        minBounds.y = 0
+        maxBounds.y = 0
         
         vertices = [
-            BasicVertex(minBounds.x, minBounds.y, maxBounds.z, 0, 1),
+            BasicVertex(minBounds.x, minBounds.y, minBounds.z, 0, 1),
             BasicVertex(minBounds.x, maxBounds.y, maxBounds.z, 0, 0),
-            BasicVertex(maxBounds.x, minBounds.y, maxBounds.z, 1, 1),
+            BasicVertex(maxBounds.x, minBounds.y, minBounds.z, 1, 1),
             BasicVertex(maxBounds.x, maxBounds.y, maxBounds.z, 1, 0)
         ]
         

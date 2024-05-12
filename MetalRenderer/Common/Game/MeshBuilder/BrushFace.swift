@@ -24,6 +24,8 @@ final class BrushFace
     var points: [float3] = []
     var numpoints = 0
     
+    var planePoints: [float3] = []
+    
     var center: float3 {
         points.reduce(.zero, +) / Float(points.count)
     }

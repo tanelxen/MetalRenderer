@@ -19,24 +19,9 @@ class Camera
     }
     
     var viewMatrix: matrix_float4x4 {
-        
-        /*
-         * quake3 uses a different coordinate system, so we use quake's matrix
-         * as identity, where x, y, z are forward, left and up
-         */
-        var matrix = matrix_float4x4([
-            float4(0, 0, -1, 0),
-            float4(-1, 0, 0, 0),
-            float4(0, 1, 0, 0),
-            float4(0, 0, 0, 1)
-        ])
-        
-        matrix.rotate(angle: -transform.rotation.pitch.radians, axis: .y_axis)
-        matrix.rotate(angle: -transform.rotation.yaw.radians, axis: .z_axis)
-        
-        matrix.translate(direction: -transform.position)
-        
-        return matrix
+        let R = transform.rotation.matrix
+        let T = float4x4(translation: transform.position)
+        return simd_mul(T, R).inverse
     }
     
     func update() { }
@@ -123,8 +108,8 @@ class DebugCamera: Camera
         
         let deltaTime = GameTime.deltaTime
         
-        transform.rotation.yaw -= Mouse.getDX() * rotateSpeed * deltaTime
-        transform.rotation.pitch += Mouse.getDY() * rotateSpeed * deltaTime
+        transform.rotation.yaw += Mouse.getDX() * rotateSpeed * deltaTime
+        transform.rotation.pitch -= Mouse.getDY() * rotateSpeed * deltaTime
         
         let forward = transform.rotation.forward
         let right = transform.rotation.right
@@ -133,22 +118,22 @@ class DebugCamera: Camera
         
         if Keyboard.isKeyPressed(.w)
         {
-            velocity = forward * (movementSpeed * deltaTime)
+            velocity += forward * (movementSpeed * deltaTime)
         }
 
         if Keyboard.isKeyPressed(.s)
         {
-            velocity = -forward * (movementSpeed * deltaTime)
+            velocity -= forward * (movementSpeed * deltaTime)
         }
 
         if Keyboard.isKeyPressed(.a)
         {
-            velocity = -right * (movementSpeed * deltaTime)
+            velocity -= right * (movementSpeed * deltaTime)
         }
 
         if Keyboard.isKeyPressed(.d)
         {
-            velocity = right * (movementSpeed * deltaTime)
+            velocity += right * (movementSpeed * deltaTime)
         }
         
         transform.position += velocity

@@ -12,7 +12,7 @@ final class BrushScene
 {
     private (set) static var current: BrushScene!
     
-    lazy var gridQuad = QuadShape(mins: float3(-4096, -4096, 0), maxs: float3(4096, 4096, 0))
+    lazy var gridQuad = QuadShape(mins: float3(-4096, 0, -4096), maxs: float3(4096, 0, 4096))
     
     var brushes: [WorldBrush] = []
     

@@ -15,8 +15,6 @@ class Transform
     
     static let zero: Transform = Transform()
     
-    var parent = matrix_identity_float4x4
-    
     private var _matrix: matrix_float4x4 = matrix_identity_float4x4
     
     var matrix: matrix_float4x4 { _matrix }
@@ -30,14 +28,10 @@ class Transform
     
     func updateModelMatrix()
     {
-        _matrix = parent
+        let R = matrix_float4x4(rotation.orientation)
+        let T = matrix_float4x4(translation: position)
         
-        _matrix.translate(direction: position)
-        
-        _matrix.rotate(angle: rotation.pitch.radians, axis: .x_axis)
-        _matrix.rotate(angle: rotation.yaw.radians, axis: .z_axis)
-        _matrix.rotate(angle: rotation.roll.radians, axis: .y_axis)
-        
+        _matrix = simd_mul(T, R)
         _matrix.scale(axis: scale)
     }
 }
