@@ -86,7 +86,7 @@ final class ViewportPanel
                 if let point = brush.selectedFacePoint, let axis = brush.selectedFaceAxis
                 {
                     dragFace(at: point, along: axis)
-                    
+
                     if ImGuiIsKeyPressedMap(Im(ImGuiKey_Escape), false)
                     {
                         brush.isSelected = true
@@ -94,8 +94,8 @@ final class ViewportPanel
                 }
                 else
                 {
-                    renderGizmo(for: brush.transform)
-                    
+//                    renderGizmo(for: brush.transform)
+
                     if ImGuiIsKeyPressedMap(Im(ImGuiKey_Escape), false)
                     {
                         brush.isSelected = false
@@ -254,6 +254,7 @@ final class ViewportPanel
 //        let end = ray.origin + ray.direction * 1024
 //        Debug.shared.addLine(start: ray.origin, end: end, color: float4(0, 1, 0, 1))
         
+//        brush.selectEdge(by: ray)
         brush.selectFace(by: ray)
     }
     

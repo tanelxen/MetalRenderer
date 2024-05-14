@@ -172,6 +172,8 @@
 		8A8B9A992BCC553800437D16 /* DetourPathfinder in Frameworks */ = {isa = PBXBuildFile; productRef = 8A8B9A982BCC553800437D16 /* DetourPathfinder */; };
 		8A9243CD2B0D460600B4766C /* SwiftZip in Frameworks */ = {isa = PBXBuildFile; productRef = 8A9243CC2B0D460600B4766C /* SwiftZip */; };
 		8A92FDE32B0FC9F100BF5A75 /* SwiftZip in Frameworks */ = {isa = PBXBuildFile; productRef = 8A92FDE22B0FC9F100BF5A75 /* SwiftZip */; };
+		8A93A7772BF2B1FE00C2F285 /* EditableMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A93A7762BF2B1FE00C2F285 /* EditableMesh.swift */; };
+		8A93A7782BF2B1FE00C2F285 /* EditableMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A93A7762BF2B1FE00C2F285 /* EditableMesh.swift */; };
 		8A98722D2AD4587200AAEE2C /* Billboards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A98722C2AD4587200AAEE2C /* Billboards.swift */; };
 		8A98722E2AD4587200AAEE2C /* Billboards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A98722C2AD4587200AAEE2C /* Billboards.swift */; };
 		8A9872302AD4648900AAEE2C /* Billboards.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8A98722F2AD4648900AAEE2C /* Billboards.metal */; };
@@ -281,6 +283,7 @@
 		8A8D130D29CB6D4800721A7D /* Assets */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Assets; sourceTree = "<group>"; };
 		8A8D131129CBAAC300721A7D /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		8A9186A02A8051E600719E55 /* Q3MapLightGrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Q3MapLightGrid.swift; sourceTree = "<group>"; };
+		8A93A7762BF2B1FE00C2F285 /* EditableMesh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditableMesh.swift; sourceTree = "<group>"; };
 		8A98722C2AD4587200AAEE2C /* Billboards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Billboards.swift; sourceTree = "<group>"; };
 		8A98722F2AD4648900AAEE2C /* Billboards.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Billboards.metal; sourceTree = "<group>"; };
 		8A9977CF29492CC400B48C70 /* Rotator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rotator.swift; sourceTree = "<group>"; };
@@ -400,6 +403,7 @@
 		8A22EABE278F87F400A8CD7D /* Game */ = {
 			isa = PBXGroup;
 			children = (
+				8A93A7752BF2B16500C2F285 /* MeshBuilder */,
 				8A6232162795DF4F00B1757C /* Scene */,
 				8A0D271B279033A100F2D9E6 /* Camera.swift */,
 				8AEB11C627C14DCA008FC445 /* Frustum.swift */,
@@ -546,8 +550,6 @@
 				8A7C70C02AB26278003FAFDD /* Particles.swift */,
 				8A53DEFD2AB37E5C00EC2C65 /* Decals.swift */,
 				8A98722C2AD4587200AAEE2C /* Billboards.swift */,
-				8A84556B2BD4527D00AA70E1 /* WorldBrush.swift */,
-				8AE8B4772BEED21100805D75 /* BrushFace.swift */,
 				8A5D1BE62BD6CC1E007CB0FA /* GridHelper.swift */,
 			);
 			path = Scene;
@@ -588,6 +590,16 @@
 				8A05DD0F2ACF25080012252D /* WorldEntitiesAsset+Q3BSP.swift */,
 			);
 			path = Importers;
+			sourceTree = "<group>";
+		};
+		8A93A7752BF2B16500C2F285 /* MeshBuilder */ = {
+			isa = PBXGroup;
+			children = (
+				8A84556B2BD4527D00AA70E1 /* WorldBrush.swift */,
+				8AE8B4772BEED21100805D75 /* BrushFace.swift */,
+				8A93A7762BF2B1FE00C2F285 /* EditableMesh.swift */,
+			);
+			path = MeshBuilder;
 			sourceTree = "<group>";
 		};
 		8AB6DE2629CBCA19005BCBB7 /* Fonts */ = {
@@ -806,6 +818,7 @@
 				8A27DA712AAE39DE0094C9D0 /* Transform.swift in Sources */,
 				8A27DA752AAE39DE0094C9D0 /* Q3MapScene.swift in Sources */,
 				8A27DA762AAE39DE0094C9D0 /* GameTime.swift in Sources */,
+				8A93A7782BF2B1FE00C2F285 /* EditableMesh.swift in Sources */,
 				8A53DEFC2AB336DE00EC2C65 /* Particles.metal in Sources */,
 				8A27DA772AAE39DE0094C9D0 /* Viewport.swift in Sources */,
 				8A27DA782AAE39DE0094C9D0 /* ForwardRenderer.swift in Sources */,
@@ -838,6 +851,7 @@
 				8A5D1BEA2BD81705007CB0FA /* SimpleGrid.metal in Sources */,
 				8A27DAF42AAE3E5A0094C9D0 /* KeyCodes.swift in Sources */,
 				8AE8B4782BEED21100805D75 /* BrushFace.swift in Sources */,
+				8A93A7772BF2B1FE00C2F285 /* EditableMesh.swift in Sources */,
 				8A84556C2BD4527D00AA70E1 /* WorldBrush.swift in Sources */,
 				8A05DD122ACF26140012252D /* WorldCollisionAsset+Q3BSP.swift in Sources */,
 				8A0C48AC2AC852A50099BEF6 /* WorldAsset.swift in Sources */,

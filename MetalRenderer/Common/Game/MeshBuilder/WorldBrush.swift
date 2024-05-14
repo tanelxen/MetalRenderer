@@ -67,11 +67,6 @@ final class WorldBrush
         faces.forEach {
             $0.update(from: planes)
         }
-        
-        for face in faces
-        {
-            for point = face.points
-        }
     }
     
     private func updatePlanesFromTransform()

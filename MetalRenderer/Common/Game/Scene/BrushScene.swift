@@ -12,11 +12,12 @@ final class BrushScene
 {
     private (set) static var current: BrushScene!
     
+    lazy var box = MTKGeometry(.box, extents: [32, 32, 32])
     lazy var gridQuad = QuadShape(mins: float3(-4096, 0, -4096), maxs: float3(4096, 0, 4096))
     
-    var brushes: [WorldBrush] = []
+    var brushes: [EditableMesh] = []
     
-    var selected: WorldBrush? {
+    var selected: EditableMesh? {
         brushes.first(where: { $0.isSelected })
     }
     
@@ -33,17 +34,10 @@ final class BrushScene
     
     func addBrush(position: float3, size: float3)
     {
-//        let start = position
-//        let end = position + size
-//
-//        let mins = min(start, end)
-//        let maxs = max(start, end)
-        
-        let brush = WorldBrush(origin: position, size: size)
+        let brush = EditableMesh(origin: position, size: size)
         brush.isSelected = true
         
         brushes.forEach { $0.isSelected = false }
-        
         brushes.append(brush)
     }
     
