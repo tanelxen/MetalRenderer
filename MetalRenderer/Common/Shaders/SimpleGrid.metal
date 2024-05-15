@@ -53,7 +53,7 @@ float4 grid(float2 uv, float scale, float intensity, bool axis)
     {
         // z axis
         if(uv.x > -1 * minimumx && uv.x < 1 * minimumx) {
-            color = float4(0.0, 1.0, 0.0, 1.0);
+            color = float4(0.0, 0.0, 1.0, 1.0);
         }
         // x axis
         if(uv.y > -1 * minimumz && uv.y < 1 * minimumz) {

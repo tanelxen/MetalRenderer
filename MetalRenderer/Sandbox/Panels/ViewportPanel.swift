@@ -92,6 +92,15 @@ final class ViewportPanel
                         brush.isSelected = true
                     }
                 }
+                else if let point = brush.selectedEdgePoint, let axis = brush.selectedEdgeAxis
+                {
+                    dragEdge(at: point, along: axis)
+
+                    if ImGuiIsKeyPressedMap(Im(ImGuiKey_Escape), false)
+                    {
+                        brush.isSelected = true
+                    }
+                }
                 else
                 {
 //                    renderGizmo(for: brush.transform)
@@ -153,6 +162,46 @@ final class ViewportPanel
         let newPos = origin + axis * value
         
         BrushScene.current.selected?.setSelectedFace(position: newPos)
+    }
+    
+    private func dragEdge(at edgePoint: float3, along axis: float3)
+    {
+        guard isHovered else { return }
+        
+        guard Mouse.IsMouseButtonPressed(.left)
+        else {
+            dragOrigin = nil
+            objectInitialPos = nil
+            return
+        }
+        
+        // Плоскость, на которую будем проецировать луч, по ней будем перемещаться
+        let viewNormal = camera.transform.rotation.forward
+        let distance = dot(edgePoint, viewNormal)
+        let plane = Plane(normal: viewNormal, distance: distance)
+        
+        guard let start = dragOrigin, let origin = objectInitialPos
+        else {
+            let ray = viewport.mousePositionInWorld()
+            dragOrigin = intersection(ray: ray, plane: plane)
+            objectInitialPos = edgePoint
+            return
+        }
+        
+        let ray = viewport.mousePositionInWorld()
+        guard let end = intersection(ray: ray, plane: plane)
+        else {
+            return
+        }
+        
+        var value = dot(axis, end - start)
+        
+        let gridSize: Float = 16
+        value = floor(value / gridSize) * gridSize
+        
+        let newPos = origin + axis * value
+        
+        BrushScene.current.selected?.setSelectedEdge(position: newPos)
     }
     
     private func startPlaying()
@@ -254,8 +303,8 @@ final class ViewportPanel
 //        let end = ray.origin + ray.direction * 1024
 //        Debug.shared.addLine(start: ray.origin, end: end, color: float4(0, 1, 0, 1))
         
-//        brush.selectEdge(by: ray)
-        brush.selectFace(by: ray)
+        brush.selectEdge(by: ray)
+//        brush.selectFace(by: ray)
     }
     
     private func drawPlayPauseControl()

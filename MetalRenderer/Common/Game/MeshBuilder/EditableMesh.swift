@@ -28,6 +28,11 @@ class HalfEdge
     
     var pair: HalfEdge!
     var next: HalfEdge!
+    var prev: HalfEdge!
+    
+    var center: float3 {
+        (vert.position + next.vert.position) * 0.5
+    }
     
     init(_ name: String = "")
     {
@@ -58,7 +63,11 @@ class Face
 
 class EditableMesh
 {
-    var isSelected = false
+    var isSelected = false {
+        didSet {
+            selectedFace = nil
+        }
+    }
     
     var selectedFacePoint: float3? {
         return selectedFace?.center
@@ -69,9 +78,21 @@ class EditableMesh
         return abs(face.plane.normal)
     }
     
+    var selectedEdgePoint: float3? {
+        return selectedEdge?.center
+    }
+    
+    var selectedEdgeAxis: float3? {
+        guard let edge = selectedEdge else { return nil }
+        return abs(edge.face.plane.normal)
+    }
+    
     private var faces: [Face] = []
     
     private var selectedFace: Face?
+    private var selectedEdge: HalfEdge?
+    
+    private let point = MTKGeometry(.box)
     
     init(origin: float3, size: float3)
     {
@@ -135,7 +156,35 @@ class EditableMesh
         }
     }
     
-    func selectEdge(by ray: Ray) { }
+    func selectEdge(by ray: Ray)
+    {
+        var bestd: Float = 8
+        var beste: HalfEdge?
+        
+        for face in faces
+        {
+            for edge in face.edges
+            {
+                let p1 = edge.vert.position
+                let p2 = edge.next.vert.position
+                
+                let d = intersect(ray: ray, lineStart: p1, lineEnd: p2)
+                
+                if d < bestd
+                {
+                    bestd = d
+                    beste = edge
+                }
+            }
+        }
+        
+        selectedEdge = beste
+        
+        if let edge = beste
+        {
+            print("\(edge.face.name).\(edge.name)")
+        }
+    }
     
     func setSelectedFace(position: float3)
     {
@@ -155,6 +204,24 @@ class EditableMesh
         
         let distance = dot(face.normal, face.verts[0].position)
         face.plane = Plane(normal: face.normal, distance: distance)
+    }
+    
+    func setSelectedEdge(position: float3)
+    {
+        guard let edge = selectedEdge else { return }
+        
+        let delta = position - edge.center
+        
+        guard length(delta) > 0 else { return }
+        
+        edge.vert.position += delta
+        edge.next.vert.position += delta
+        
+        edge.pair.vert.position += delta
+        edge.pair.next.vert.position += delta
+        
+        edge.prev.pair.vert.position += delta
+        edge.next.pair.next.vert.position += delta
     }
     
     func render(with encoder: MTLRenderCommandEncoder, to renderer: ForwardRenderer)
@@ -190,6 +257,61 @@ class EditableMesh
         
         encoder.setVertexBytes(vertices, length: MemoryLayout<Vertex>.stride * vertices.count, index: 0)
         encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices.count)
+        
+        if let edge = selectedEdge
+        {
+            drawAxis(for: edge, with: encoder)
+            drawAxis(for: edge.pair, with: encoder)
+        }
+        
+        if isSelected
+        {
+            renderer.apply(tehnique: .brush, to: encoder)
+            
+            let tr = Transform()
+            tr.updateModelMatrix()
+            
+            var modelConstants = ModelConstants()
+            modelConstants.color = .one
+            modelConstants.modelMatrix = tr.matrix
+            encoder.setVertexBytes(&modelConstants, length: MemoryLayout<ModelConstants>.size, index: 2)
+            
+            var vertices2: [Vertex] = []
+            
+            for face in faces
+            {
+                for edge in face.edges
+                {
+                    let color = edge === selectedEdge ? float4(1, 0, 0, 1) : float4(0, 0, 0, 1)
+                    
+                    vertices2.append(
+                        Vertex(pos: edge.vert.position, nor: .zero, clr: color)
+                    )
+                    
+                    vertices2.append(
+                        Vertex(pos: edge.next.vert.position, nor: .zero, clr: color)
+                    )
+                }
+            }
+            
+            encoder.setVertexBytes(vertices2, length: MemoryLayout<Vertex>.stride * vertices.count, index: 0)
+            encoder.drawPrimitives(type: .line, vertexStart: 0, vertexCount: vertices.count)
+        }
+    }
+    
+    private func drawAxis(for edge: HalfEdge, with encoder: MTLRenderCommandEncoder)
+    {
+        let pos = edge.center + edge.face.plane.normal * 8
+        let scale = float3(1, 1, 1) + abs(edge.face.plane.normal) * 15
+        let tr1 = Transform(position: pos, scale: scale)
+        tr1.updateModelMatrix()
+
+        var modelConstants1 = ModelConstants()
+        modelConstants1.color = float4(abs(edge.face.plane.normal), 1)
+        modelConstants1.modelMatrix = tr1.matrix
+        encoder.setVertexBytes(&modelConstants1, length: MemoryLayout<ModelConstants>.size, index: 2)
+
+        point.render(with: encoder)
     }
 }
 
@@ -292,18 +414,22 @@ private extension EditableMesh
         edge0.vert = face.verts[0]
         edge0.face = face
         edge0.next = edge1
+        edge0.prev = edge3
         
         edge1.vert = face.verts[1]
         edge1.face = face
         edge1.next = edge2
+        edge1.prev = edge0
         
         edge2.vert = face.verts[2]
         edge2.face = face
         edge2.next = edge3
+        edge2.prev = edge1
         
         edge3.vert = face.verts[3]
         edge3.face = face
         edge3.next = edge0
+        edge3.prev = edge2
         
         face.verts[0].edge = edge0
         face.verts[1].edge = edge1
@@ -338,4 +464,21 @@ private struct Vertex
     var nor: float3 = .zero
     var clr: float4 = .one
     var uv: float2 = .zero
+}
+
+private func intersect(ray: Ray, lineStart: float3, lineEnd: float3) -> Float
+{
+    let r1 = ray.origin
+    let r2 = ray.origin + ray.direction * 1024
+    
+    let u1 = r2 - r1
+    let u2 = lineEnd - lineStart
+    let u3 = cross(u1, u2)
+    let s = r1 - lineEnd
+    
+    if length(u3) == 0 {
+        return .greatestFiniteMagnitude
+    }
+    
+    return abs( dot(s, u3) / length(u3) )
 }
