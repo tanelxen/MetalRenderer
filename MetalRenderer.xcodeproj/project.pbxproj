@@ -187,6 +187,8 @@
 		8AC34E452AAE6E7800A6D429 /* HalfLife.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8AC34E442AAE6E7800A6D429 /* HalfLife.ttf */; };
 		8AC4BE802BE1743F00EFA078 /* MTKGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AC4BE7F2BE1743F00EFA078 /* MTKGeometry.swift */; };
 		8AC4BE812BE1743F00EFA078 /* MTKGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AC4BE7F2BE1743F00EFA078 /* MTKGeometry.swift */; };
+		8ACABF1A2BF541490037336B /* EditableMeshTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ACABF192BF541490037336B /* EditableMeshTypes.swift */; };
+		8ACABF1B2BF541490037336B /* EditableMeshTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ACABF192BF541490037336B /* EditableMeshTypes.swift */; };
 		8AE718232AD08293000CE0E1 /* BrushRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AE718222AD08293000CE0E1 /* BrushRenderer.swift */; };
 		8AE718242AD08293000CE0E1 /* BrushRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AE718222AD08293000CE0E1 /* BrushRenderer.swift */; };
 		8AE8B4782BEED21100805D75 /* BrushFace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AE8B4772BEED21100805D75 /* BrushFace.swift */; };
@@ -298,6 +300,7 @@
 		8AC34E422AAE54E600A6D429 /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
 		8AC34E442AAE6E7800A6D429 /* HalfLife.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = HalfLife.ttf; sourceTree = "<group>"; };
 		8AC4BE7F2BE1743F00EFA078 /* MTKGeometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTKGeometry.swift; sourceTree = "<group>"; };
+		8ACABF192BF541490037336B /* EditableMeshTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditableMeshTypes.swift; sourceTree = "<group>"; };
 		8ACAECEF2BDD334E00B67C19 /* Uniforms.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Uniforms.h; sourceTree = "<group>"; };
 		8ACAECF82BDD369F00B67C19 /* Sandbox-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Sandbox-Bridging-Header.h"; sourceTree = "<group>"; };
 		8ACAECF92BDD36BA00B67C19 /* Game-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Game-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -598,6 +601,7 @@
 				8A84556B2BD4527D00AA70E1 /* WorldBrush.swift */,
 				8AE8B4772BEED21100805D75 /* BrushFace.swift */,
 				8A93A7762BF2B1FE00C2F285 /* EditableMesh.swift */,
+				8ACABF192BF541490037336B /* EditableMeshTypes.swift */,
 			);
 			path = MeshBuilder;
 			sourceTree = "<group>";
@@ -801,6 +805,7 @@
 				8A27DA652AAE39DE0094C9D0 /* Waypoint.swift in Sources */,
 				8A27DA662AAE39DE0094C9D0 /* main.swift in Sources */,
 				8A5AE68C2AC0FE0400809790 /* SkeletalMeshAssetSerializer.swift in Sources */,
+				8ACABF1B2BF541490037336B /* EditableMeshTypes.swift in Sources */,
 				8A53DF382AB7B48300EC2C65 /* NavigationMesh.swift in Sources */,
 				8A27DA672AAE39DE0094C9D0 /* Frustum.swift in Sources */,
 				8A27DA692AAE39DE0094C9D0 /* SkeletalMeshAsset.swift in Sources */,
@@ -861,6 +866,7 @@
 				8A98722D2AD4587200AAEE2C /* Billboards.swift in Sources */,
 				8A27DAF72AAE3E5A0094C9D0 /* EditorLayer.swift in Sources */,
 				8A27DAF82AAE3E5A0094C9D0 /* NavigationGraph.swift in Sources */,
+				8ACABF1A2BF541490037336B /* EditableMeshTypes.swift in Sources */,
 				8A85E13E2AC5F47800923DB5 /* SkeletalMeshAsset+Valve.swift in Sources */,
 				8A27DAF92AAE3E5A0094C9D0 /* Common.metal in Sources */,
 				8A27DAFA2AAE3E5A0094C9D0 /* Barney.swift in Sources */,

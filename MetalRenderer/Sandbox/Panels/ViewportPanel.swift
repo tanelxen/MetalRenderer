@@ -91,6 +91,11 @@ final class ViewportPanel
                     {
                         brush.isSelected = true
                     }
+                    
+                    if ImGuiIsKeyPressedMap(Im(ImGuiKey_V), false)
+                    {
+                        brush.extrudeSelectedFace(to: 16)
+                    }
                 }
                 else if let point = brush.selectedEdgePoint, let axis = brush.selectedEdgeAxis
                 {
@@ -303,8 +308,8 @@ final class ViewportPanel
 //        let end = ray.origin + ray.direction * 1024
 //        Debug.shared.addLine(start: ray.origin, end: end, color: float4(0, 1, 0, 1))
         
-        brush.selectEdge(by: ray)
-//        brush.selectFace(by: ray)
+//        brush.selectEdge(by: ray)
+        brush.selectFace(by: ray)
     }
     
     private func drawPlayPauseControl()

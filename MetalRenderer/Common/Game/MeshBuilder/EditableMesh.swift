@@ -8,59 +8,6 @@
 import Metal
 import simd
 
-class Vert
-{
-    var position: float3
-    var edge: HalfEdge!
-    
-    init(_ pos: float3)
-    {
-        position = pos
-    }
-}
-
-class HalfEdge
-{
-    var name: String
-    
-    var vert: Vert!
-    var face: Face!
-    
-    var pair: HalfEdge!
-    var next: HalfEdge!
-    var prev: HalfEdge!
-    
-    var center: float3 {
-        (vert.position + next.vert.position) * 0.5
-    }
-    
-    init(_ name: String = "")
-    {
-        self.name = name
-    }
-}
-
-class Face
-{
-    var name: String
-    
-    var edges: [HalfEdge] = []
-    var verts: [Vert] = []
-    
-    var normal: float3 = .zero
-    var plane: Plane!
-    
-    var center: float3 {
-        let points = verts.map { $0.position }
-        return points.reduce(.zero, +) / Float(points.count)
-    }
-    
-    init(_ name: String = "")
-    {
-        self.name = name
-    }
-}
-
 class EditableMesh
 {
     var isSelected = false {
@@ -92,67 +39,31 @@ class EditableMesh
     private var selectedFace: Face?
     private var selectedEdge: HalfEdge?
     
+    private var vertexBuffer: MTLBuffer!
+    private var vertexBuffer2: MTLBuffer!
+    
     private let point = MTKGeometry(.box)
     
     init(origin: float3, size: float3)
     {
         populateFaces(origin: origin, size: size)
+        
+        let length = MemoryLayout<Vertex>.stride * 1024
+        vertexBuffer = Engine.device.makeBuffer(length: length)
+        vertexBuffer2 = Engine.device.makeBuffer(length: length)
     }
     
     func selectFace(by ray: Ray)
     {
         selectedFace = nil
         
-        var start_frac: Float = -1.0
-        var end_frac: Float = 1.0
-        var closest: Face?
-        
-        let SURF_CLIP_EPSILON: Float = 0.125
-        
-        var startout = false
-        
-        let start = ray.origin
-        let end = ray.origin + ray.direction * 1024
-        
         for face in faces
         {
-            let dist = face.plane.distance
-
-            let start_distance = dot(start, face.plane.normal) - dist
-            let end_distance = dot(end, face.plane.normal) - dist
-            
-            if start_distance > 0 { startout = true }
-            
-            // endpoint is not in solid
-//            if end_distance > 0 { getout = true }
-            
-            if (start_distance > 0 && (end_distance >= SURF_CLIP_EPSILON || end_distance >= start_distance)) { return }
-            if (start_distance <= 0 && end_distance <= 0) { continue }
-            
-            if start_distance > end_distance
+            if intersect(ray: ray, face: face)
             {
-                let frac = (start_distance - SURF_CLIP_EPSILON) / (start_distance - end_distance)
-                
-                if frac > start_frac
-                {
-                    start_frac = frac
-                    closest = face
-                }
+                selectedFace = face
+                break
             }
-            else // line is leaving the brush
-            {
-                let frac = (start_distance + SURF_CLIP_EPSILON) / (start_distance - end_distance)
-                
-                end_frac = min(end_frac, frac)
-            }
-        }
-        
-        // original point was inside brush
-        if !startout { return }
-        
-        if start_frac < end_frac && start_frac > -1
-        {
-            selectedFace = closest
         }
     }
     
@@ -224,6 +135,37 @@ class EditableMesh
         edge.next.pair.next.vert.position += delta
     }
     
+    func extrudeSelectedFace(to distance: Float)
+    {
+        guard let face = selectedFace else { return }
+        
+        guard distance > 0 else { return }
+        
+        let delta = face.plane.normal * distance
+        
+        for vert in face.verts
+        {
+            vert.position += delta
+        }
+        
+        for edge in face.edges
+        {
+            let newFace = Face(edge.pair.face.name + "-ext-by-" + edge.pair.name)
+            
+            newFace.normal = edge.pair.face.normal
+            newFace.verts = [
+                
+                Vert(edge.pair.vert.position),
+                Vert(edge.next.vert.position),
+                Vert(edge.vert.position),
+                Vert(edge.pair.next.vert.position)
+            ]
+            faces.append(newFace)
+        }
+        
+        recalculate()
+    }
+    
     func render(with encoder: MTLRenderCommandEncoder, to renderer: ForwardRenderer)
     {
         renderer.apply(tehnique: .brush, to: encoder)
@@ -255,8 +197,18 @@ class EditableMesh
             vertices.append(contentsOf: verts)
         }
         
-        encoder.setVertexBytes(vertices, length: MemoryLayout<Vertex>.stride * vertices.count, index: 0)
+        var pointer = vertexBuffer.contents().bindMemory(to: Vertex.self, capacity: 1024)
+        
+        for vertex in vertices
+        {
+            pointer.pointee = vertex
+            pointer = pointer.advanced(by: 1)
+        }
+        
+        encoder.setCullMode(.front)
+        encoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
         encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices.count)
+        encoder.setCullMode(.back)
         
         if let edge = selectedEdge
         {
@@ -267,35 +219,43 @@ class EditableMesh
         if isSelected
         {
             renderer.apply(tehnique: .brush, to: encoder)
-            
-            let tr = Transform()
+
+            let tr = Transform(scale: .init(repeating: 1.001))
             tr.updateModelMatrix()
-            
+
             var modelConstants = ModelConstants()
             modelConstants.color = .one
             modelConstants.modelMatrix = tr.matrix
             encoder.setVertexBytes(&modelConstants, length: MemoryLayout<ModelConstants>.size, index: 2)
-            
+
             var vertices2: [Vertex] = []
-            
+
             for face in faces
             {
                 for edge in face.edges
                 {
                     let color = edge === selectedEdge ? float4(1, 0, 0, 1) : float4(0, 0, 0, 1)
-                    
+
                     vertices2.append(
                         Vertex(pos: edge.vert.position, nor: .zero, clr: color)
                     )
-                    
+
                     vertices2.append(
                         Vertex(pos: edge.next.vert.position, nor: .zero, clr: color)
                     )
                 }
             }
-            
-            encoder.setVertexBytes(vertices2, length: MemoryLayout<Vertex>.stride * vertices.count, index: 0)
-            encoder.drawPrimitives(type: .line, vertexStart: 0, vertexCount: vertices.count)
+
+            var pointer = vertexBuffer2.contents().bindMemory(to: Vertex.self, capacity: 1024)
+
+            for vertex in vertices2
+            {
+                pointer.pointee = vertex
+                pointer = pointer.advanced(by: 1)
+            }
+
+            encoder.setVertexBuffer(vertexBuffer2, offset: 0, index: 0)
+            encoder.drawPrimitives(type: .line, vertexStart: 0, vertexCount: vertices2.count)
         }
     }
     
@@ -320,7 +280,6 @@ private extension EditableMesh
     func populateFaces(origin: float3, size: float3)
     {
         let back = Face("back")
-        back.normal = [0, 0, -1]
         back.verts = [
             Vert([0, 0, 0]),
             Vert([1, 0, 0]),
@@ -330,7 +289,6 @@ private extension EditableMesh
         faces.append(back)
         
         let front = Face("front")
-        front.normal = [0, 0, 1]
         front.verts = [
             Vert([1, 0, 1]),
             Vert([0, 0, 1]),
@@ -340,7 +298,6 @@ private extension EditableMesh
         faces.append(front)
         
         let top = Face("top")
-        top.normal = [0, 1, 0]
         top.verts = [
             Vert([0, 1, 0]),
             Vert([1, 1, 0]),
@@ -350,7 +307,6 @@ private extension EditableMesh
         faces.append(top)
         
         let bottom = Face("bottom")
-        bottom.normal = [0, -1, 0]
         bottom.verts = [
             Vert([1, 0, 0]),
             Vert([0, 0, 0]),
@@ -360,7 +316,6 @@ private extension EditableMesh
         faces.append(bottom)
         
         let right = Face("right")
-        right.normal = [1, 0, 0]
         right.verts = [
             Vert([1, 0, 0]),
             Vert([1, 0, 1]),
@@ -370,7 +325,6 @@ private extension EditableMesh
         faces.append(right)
         
         let left = Face("left")
-        left.normal = [-1, 0, 0]
         left.verts = [
             Vert([0, 0, 1]),
             Vert([0, 0, 0]),
@@ -385,9 +339,22 @@ private extension EditableMesh
             {
                 vert.position = origin + vert.position * size
             }
+        }
+        
+        recalculate()
+    }
+    
+    func recalculate()
+    {
+        for face in faces
+        {
+            let v1 = face.verts[1].position - face.verts[0].position
+            let v2 = face.verts[2].position - face.verts[0].position
+            let normal = normalize(cross(v2, v1))
             
-            let distance = dot(face.normal, face.verts[0].position)
-            face.plane = Plane(normal: face.normal, distance: distance)
+            let distance = dot(normal, face.verts[0].position)
+            face.plane = Plane(normal: normal, distance: distance)
+            face.normal = normal
         }
         
         for face in faces
@@ -481,4 +448,34 @@ private func intersect(ray: Ray, lineStart: float3, lineEnd: float3) -> Float
     }
     
     return abs( dot(s, u3) / length(u3) )
+}
+
+private func intersect(ray: Ray, face: Face) -> Bool
+{
+    let n = face.normal
+
+    if dot(n, ray.direction) > 0 {
+        return false
+    }
+    
+    let d = ray.origin - face.center
+    let t = -dot(n, d) / dot(n, ray.direction)
+    
+    if t < 0 {
+        return false
+    }
+    
+    let p = ray.origin + ray.direction * t
+    
+    let v0 = face.verts[0].position
+    let v1 = face.verts[1].position
+    let v2 = face.verts[2].position
+    let v3 = face.verts[3].position
+    
+    let e0 = cross(v1 - v0, p - v0)
+    let e1 = cross(v2 - v1, p - v1)
+    let e2 = cross(v3 - v2, p - v2)
+    let e3 = cross(v0 - v3, p - v3)
+    
+    return dot(e0, n) < 0 && dot(e1, n) < 0 && dot(e2, n) < 0 && dot(e3, n) < 0
 }
