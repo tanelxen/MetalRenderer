@@ -13,17 +13,11 @@ final class InspectorPanel
     
     func draw()
     {
-//        ImGuiBegin(name, nil, 0)
-//        
-//        if let brush = BrushScene.current.selected
-//        {
-//            let mins = brush.origin
-//            let maxs = brush.size
-//            
-//            ImGuiTextV("origin: X(\(mins.x)) Y(\(mins.y)) Z(\(mins.z))")
-//            ImGuiTextV("dims: D(\(maxs.x)) W(\(maxs.y)) H(\(maxs.z))")
-//        }
-//        
-//        ImGuiEnd()
+        ImGuiBegin(name, nil, 0)
+        defer { ImGuiEnd() }
+        
+        guard let brush = BrushScene.current.selected else { return }
+        
+        ImGuiCheckbox("Is Room", &brush.isRoom)
     }
 }

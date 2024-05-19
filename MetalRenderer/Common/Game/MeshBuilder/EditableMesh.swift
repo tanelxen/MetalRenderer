@@ -38,7 +38,9 @@ class EditableMesh
         faces.flatMap { $0.verts.map { $0.position } }
     }
     
-    private var faces: [Face] = []
+    var faces: [Face] = []
+    
+    var isRoom = false
     
     private var selectedFace: Face?
     private var selectedEdge: HalfEdge?
@@ -209,10 +211,16 @@ class EditableMesh
             pointer = pointer.advanced(by: 1)
         }
         
-//        encoder.setCullMode(.front)
+        if isRoom {
+            encoder.setCullMode(.front)
+        }
+        
         encoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
         encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices.count)
-//        encoder.setCullMode(.back)
+        
+        if isRoom {
+            encoder.setCullMode(.back)
+        }
         
         if let edge = selectedEdge
         {

@@ -161,7 +161,7 @@ final class ViewportPanel
         
         var value = dot(axis, end - start)
         
-        let gridSize: Float = 16
+        let gridSize: Float = 8
         value = floor(value / gridSize) * gridSize
         
         let newPos = origin + axis * value

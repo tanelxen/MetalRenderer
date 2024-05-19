@@ -134,22 +134,47 @@ extension BrushScene
     {
         for brush in brushes
         {
-            let shape = BulletConvexHullShape()
-            
-            for point in brush.vertices
+            if brush.isRoom
             {
-                shape.addPoint(point * q2b)
+                for face in brush.faces
+                {
+                    let shape = BulletConvexHullShape()
+                    
+                    for point in face.verts.map({ $0.position })
+                    {
+                        shape.addPoint(point * q2b)
+                    }
+                    
+                    let transform = BulletTransform()
+                    transform.setIdentity()
+                    
+                    let motionState = BulletMotionState(transform: transform)
+                    let body = BulletRigidBody(mass: 0,
+                                               motionState: motionState,
+                                               collisionShape: shape)
+                    body.friction = 0.5
+                    physicsWorld.add(rigidBody: body)
+                }
             }
-            
-            let transform = BulletTransform()
-            transform.setIdentity()
-            
-            let motionState = BulletMotionState(transform: transform)
-            let body = BulletRigidBody(mass: 0,
-                                       motionState: motionState,
-                                       collisionShape: shape)
-            body.friction = 0.5
-            physicsWorld.add(rigidBody: body)
+            else
+            {
+                let shape = BulletConvexHullShape()
+                
+                for point in brush.vertices
+                {
+                    shape.addPoint(point * q2b)
+                }
+                
+                let transform = BulletTransform()
+                transform.setIdentity()
+                
+                let motionState = BulletMotionState(transform: transform)
+                let body = BulletRigidBody(mass: 0,
+                                           motionState: motionState,
+                                           collisionShape: shape)
+                body.friction = 0.5
+                physicsWorld.add(rigidBody: body)
+            }
         }
     }
 }

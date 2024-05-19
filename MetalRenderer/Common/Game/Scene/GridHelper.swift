@@ -10,7 +10,7 @@ import simd
 
 final class GridHelper
 {
-    let gridSize: Float = 16
+    let gridSize: Float = 8
     
     private var isCreationMode = false
     private var isPlaneDrawn = false

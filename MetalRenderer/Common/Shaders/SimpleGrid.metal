@@ -66,8 +66,8 @@ float4 grid(float2 uv, float scale, float intensity, bool axis)
 
 fragment float4 simple_grid_fs(VertexOut in [[stage_in]])
 {
-    float4 main = grid(in.uv, 16, 0.1, false);
-    float4 second = grid(in.uv, 64, 0.4, true);
+    float4 main = grid(in.uv, 8, 0.1, false);
+    float4 second = grid(in.uv, 32, 0.4, true);
     
     return mix(main, second, 0.5);
 }
