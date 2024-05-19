@@ -34,6 +34,10 @@ class EditableMesh
         return abs(edge.face.plane.normal)
     }
     
+    var vertices: [float3] {
+        faces.flatMap { $0.verts.map { $0.position } }
+    }
+    
     private var faces: [Face] = []
     
     private var selectedFace: Face?
@@ -205,10 +209,10 @@ class EditableMesh
             pointer = pointer.advanced(by: 1)
         }
         
-        encoder.setCullMode(.front)
+//        encoder.setCullMode(.front)
         encoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
         encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices.count)
-        encoder.setCullMode(.back)
+//        encoder.setCullMode(.back)
         
         if let edge = selectedEdge
         {

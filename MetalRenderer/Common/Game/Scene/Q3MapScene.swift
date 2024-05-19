@@ -270,7 +270,7 @@ class Q3MapScene
         transform.position = point.position
         transform.rotation = point.rotation
         
-        player = Player(scene: self)
+//        player = Player(scene: self)
         player?.spawn(with: transform)
     }
     

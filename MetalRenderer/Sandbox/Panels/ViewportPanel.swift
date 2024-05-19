@@ -20,7 +20,7 @@ final class ViewportPanel
     private (set) var isHovered = false
     
     var isPlaying: Bool {
-        Q3MapScene.current?.isPlaying ?? false
+        BrushScene.current?.isPlaying ?? false
     }
     
     init(viewport: Viewport)
@@ -211,7 +211,7 @@ final class ViewportPanel
     
     private func startPlaying()
     {
-        guard let scene = Q3MapScene.current else { return }
+        guard let scene = BrushScene.current else { return }
         
         scene.startPlaying(in: viewport)
         
@@ -221,7 +221,7 @@ final class ViewportPanel
     
     private func stopPlaying()
     {
-        Q3MapScene.current.stopPlaying()
+        BrushScene.current.stopPlaying()
         viewport.camera = camera
         
         NSCursor.unhide()

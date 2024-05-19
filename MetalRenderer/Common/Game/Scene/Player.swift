@@ -20,9 +20,7 @@ class Player
     
     private var velocity: float3 = .zero
     
-    private weak var scene: Q3MapScene!
-    
-    private var playerMovement = PlayerMovement()
+    private weak var scene: BrushScene!
     
     private let footsteps = ["pl_step1.wav",
                              "pl_step2.wav",
@@ -32,8 +30,6 @@ class Player
     private let shootTimer: TimerManager
     
     private var bobing: Float = 0.0
-    
-    private (set) var characterController: BulletCharacterController?
     
     private (set) var motionState: BulletMotionState?
     private (set) var rigidBody: BulletRigidBody?
@@ -49,7 +45,7 @@ class Player
     
     private var pickConstraint: BulletPoint2PointConstraint?
     
-    init(scene: Q3MapScene)
+    init(scene: BrushScene)
     {
         self.scene = scene
         
@@ -57,8 +53,6 @@ class Player
         {
             self.mesh = SkeletalMesh(url: url)
         }
-        
-        playerMovement.scene = scene
         
         let shootRate = TimeInterval(mesh?.cur_anim_duration ?? 10)
         shootTimer = TimerManager(interval: shootRate)
@@ -72,20 +66,12 @@ class Player
     {
         self.transform = transform
         
-        characterController = BulletCharacterController(
-            world: scene.world,
-            pos: transform.position * q2b,
-            radius: 15 * q2b,
-            height: 28 * q2b,
-            stepHeight: 18 * q2b
-        )
-        
         setupRigidBody()
     }
     
     private func setupRigidBody()
     {
-        let shape = BulletCapsuleShape(radius: 15 * q2b, height: 28 * q2b, up: .z)
+        let shape = BulletCapsuleShape(radius: 15 * q2b, height: 28 * q2b, up: .y)
         
         let startTransform = BulletTransform()
         startTransform.setIdentity()
@@ -104,7 +90,7 @@ class Player
         body.forceActivationState(.disableDeactivation)
         body.friction = 0
         
-        scene.world.add(rigidBody: body)
+        scene.physicsWorld.add(rigidBody: body)
         
         self.motionState = motionState
         self.rigidBody = body
@@ -112,12 +98,6 @@ class Player
     
     private func setupEvents()
     {
-        playerMovement.playStepsSound = { [weak self] in
-            if let footstep = self?.footsteps.randomElement() {
-                AudioEngine.play(file: footstep)
-            }
-        }
-        
         Mouse.onLeftMouseDown = { [weak self] in
             self?.shootTimer.start { [weak self] in
                 self?.makeShoot()
@@ -128,64 +108,28 @@ class Player
             self?.shootTimer.stop()
         }
         
-        Keyboard.onKeyDown = { [weak self] key in
-            if key == .e {
-                self?.grab()
-            }
-        }
+//        Keyboard.onKeyDown = { [weak self] key in
+//            if key == .e {
+//                self?.grab()
+//            }
+//        }
     }
     
     func update()
     {
         updateInput()
-//        updateQuakeMovement()
         updateBtMovement()
-//        updateControllerMovement()
         
-        camera.transform.position = transform.position + float3(0, 0, 40)
+        camera.transform.position = transform.position + float3(0, 40, 0)
         camera.transform.rotation = transform.rotation
         
-        if let constraint = self.pickConstraint
-        {
-            let start = camera.transform.position
-            let end = start + camera.transform.rotation.forward * 96
-
-            constraint.setPivotB(end * q2b)
-        }
-    }
-    
-    private func updateQuakeMovement()
-    {
-        playerMovement.transform = transform
-        playerMovement.update()
-        
-        transform.position = playerMovement.transform.position
-    }
-    
-    // Movement based on Bullet's character controller
-    private func updateControllerMovement()
-    {
-        var forward = transform.rotation.forward
-        var right = transform.rotation.right
-        
-        forward.z = 0
-        right.z = 0
-        
-        var direction: float3 = .zero
-        direction += forward * forwardmove * 200 * q2b
-        direction += right * rightmove * 150 * q2b
-        
-        characterController?.setWalkDirection(direction * GameTime.deltaTime)
-        
-        if playerMovement.isWishJump, characterController!.isOnGround()
-        {
-            characterController!.linearVelocity += float3(0, 0, 270 * q2b)
-        }
-        
-        if let origin = characterController?.getPos()
-        {
-            transform.position = origin * b2q
-        }
+//        if let constraint = self.pickConstraint
+//        {
+//            let start = camera.transform.position
+//            let end = start + camera.transform.rotation.forward * 96
+//
+//            constraint.setPivotB(end * q2b)
+//        }
     }
     
     // Movement based on Bullet's rigid body
@@ -196,8 +140,8 @@ class Player
         var forward = transform.rotation.forward
         var right = transform.rotation.right
         
-        forward.z = 0
-        right.z = 0
+        forward.y = 0
+        right.y = 0
         
         var direction: float3 = .zero
         direction += forward * forwardmove * 200 * q2b
@@ -206,13 +150,13 @@ class Player
         let currentVel = rigidBody!.linearVelocity
         
         rigidBody?.angularFactor = .zero
-        rigidBody?.linearVelocity = float3(direction.x, direction.y, currentVel.z)
+        rigidBody?.linearVelocity = float3(direction.x, currentVel.y, direction.z)
         
-        if playerMovement.isWishJump && isGrounded
+        if isWishJump && isGrounded
         {
-            let jumpValue = currentVel.z + 150 * q2b
+            let jumpValue = currentVel.y + 150 * q2b
             
-            rigidBody?.linearVelocity = float3(direction.x, direction.y, jumpValue)
+            rigidBody?.linearVelocity = float3(direction.x, jumpValue, direction.z)
         }
         
         if let origin = motionState?.getWorldTransform().origin
@@ -227,9 +171,9 @@ class Player
         
         let slopeMaxNormalY: Float = 0.4
         
-        for i in 0 ..< scene.world.numberOfManifolds()
+        for i in 0 ..< scene.physicsWorld.numberOfManifolds()
         {
-            let contact = scene.world.manifold(by: i)
+            let contact = scene.physicsWorld.manifold(by: i)
             
             guard contact.numberOfContacts() > 0 else { continue }
             
@@ -253,7 +197,7 @@ class Player
             
             let normal = contact.contactPoint(at: 0).normalWorldOnB * sign
             
-            if dot(normal, .z_axis) > slopeMaxNormalY
+            if dot(normal, .y_axis) > slopeMaxNormalY
             {
                 isGrounded = true
                 break
@@ -262,36 +206,36 @@ class Player
         
     }
     
-    private func grab()
-    {
-        guard pickConstraint == nil else {
-            scene.world.remove(pickConstraint!)
-            pickConstraint = nil
-            return
-        }
-        
-        let start = camera.transform.position
-        let end = start + camera.transform.rotation.forward * 128
-        
-        let dynHit = scene.world.rayTestClosest(
-            from: start * q2b,
-            to: end * q2b,
-            collisionFilterGroup: 0b1111111,
-            collisionFilterMask: 0b1111111
-        )
-        
-        if dynHit.hasHits, !dynHit.node.isStaticObject
-        {
-            dynHit.node.setDeactivationEnabled(false)
-            
-            let constraint = BulletPoint2PointConstraint(nodeA: dynHit.node, pivotA: .zero)
-            
-            scene.world.add(constraint, disableCollisionsBetweenLinkedBodies: true)
-            
-            pickConstraint = constraint
-        }
-    }
-    
+//    private func grab()
+//    {
+//        guard pickConstraint == nil else {
+//            scene.world.remove(pickConstraint!)
+//            pickConstraint = nil
+//            return
+//        }
+//        
+//        let start = camera.transform.position
+//        let end = start + camera.transform.rotation.forward * 128
+//        
+//        let dynHit = scene.world.rayTestClosest(
+//            from: start * q2b,
+//            to: end * q2b,
+//            collisionFilterGroup: 0b1111111,
+//            collisionFilterMask: 0b1111111
+//        )
+//        
+//        if dynHit.hasHits, !dynHit.node.isStaticObject
+//        {
+//            dynHit.node.setDeactivationEnabled(false)
+//            
+//            let constraint = BulletPoint2PointConstraint(nodeA: dynHit.node, pivotA: .zero)
+//            
+//            scene.world.add(constraint, disableCollisionsBetweenLinkedBodies: true)
+//            
+//            pickConstraint = constraint
+//        }
+//    }
+//    
     private func makeShoot()
     {
         AudioEngine.play(file: "pl_gun3.wav")
@@ -303,70 +247,43 @@ class Player
             self.mesh?.sequenceName = "idle3"
         }
         
-        let start = camera.transform.position
-        let end = start + camera.transform.rotation.forward * 1024
+//        let start = camera.transform.position
+//        let end = start + camera.transform.rotation.forward * 1024
         
-        scene.makeShoot(start: start, end: end)
+//        scene.makeShoot(start: start, end: end)
     }
     
     private func updateInput()
     {
         let deltaTime = GameTime.deltaTime
 
-        playerMovement.forwardmove = 0
-        playerMovement.rightmove = 0
         forwardmove = 0
         rightmove = 0
         
         if Keyboard.isKeyPressed(.w)
         {
-            playerMovement.forwardmove = 1
             forwardmove = 1
         }
 
         if Keyboard.isKeyPressed(.s)
         {
-            playerMovement.forwardmove = -1
             forwardmove = -1
         }
         
         if Keyboard.isKeyPressed(.a)
         {
-            playerMovement.rightmove = -1
             rightmove = -1
         }
 
         if Keyboard.isKeyPressed(.d)
         {
-            playerMovement.rightmove = 1
             rightmove = 1
         }
         
-        if Keyboard.isKeyPressed(.leftArrow)
-        {
-            transform.rotation.yaw += rotateSpeed * deltaTime
-        }
-        
-        if Keyboard.isKeyPressed(.rightArrow)
-        {
-            transform.rotation.yaw -= rotateSpeed * deltaTime
-        }
-        
-        if Keyboard.isKeyPressed(.upArrow)
-        {
-            transform.rotation.pitch -= rotateSpeed * deltaTime
-        }
-        
-        if Keyboard.isKeyPressed(.downArrow)
-        {
-            transform.rotation.pitch += rotateSpeed * deltaTime
-        }
-        
-        playerMovement.isWishJump = Keyboard.isKeyPressed(.space)
         isWishJump = Keyboard.isKeyPressed(.space)
         
-        transform.rotation.yaw -= Mouse.getDX() * rotateSpeed * deltaTime
-        transform.rotation.pitch += Mouse.getDY() * rotateSpeed * deltaTime
+        transform.rotation.yaw += Mouse.getDX() * rotateSpeed * deltaTime
+        transform.rotation.pitch -= Mouse.getDY() * rotateSpeed * deltaTime
     }
 }
 
