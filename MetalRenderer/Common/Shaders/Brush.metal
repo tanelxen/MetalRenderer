@@ -70,12 +70,14 @@ vertex VertexOut brush_vs(constant VertexIn       *vertices       [[ buffer(0) ]
     return data;
 }
 
-//constexpr sampler sampler2d(min_filter::linear, mag_filter::linear, address::repeat);
+constexpr sampler sampler2d(min_filter::linear, mag_filter::linear, address::repeat);
 
-fragment float4 brush_fs(VertexOut in [[ stage_in ]])
+fragment float4 brush_fs(VertexOut in [[ stage_in ]], texture2d<half> albedoMap [[ texture(0) ]])
 {
+    half4 albedo = albedoMap.sample(sampler2d, in.uv);
+    
     float3 shade = float3(in.shade);
-    return float4(shade, 1.0) * in.color;
+    return float4(shade, 1.0) * float4(albedo);
 }
 
 

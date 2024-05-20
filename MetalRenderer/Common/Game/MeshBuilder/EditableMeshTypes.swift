@@ -11,6 +11,7 @@ import simd
 class Vert
 {
     var position: float3
+    var uv: float2 = .zero
     var edge: HalfEdge!
     
     init(_ pos: float3)

@@ -192,12 +192,12 @@ class EditableMesh
             let color = face === selectedFace ? float4(1, 0, 0, 1) : float4(1, 1, 0, 1)
 
             let verts = [
-                Vertex(pos: face.verts[0].position, nor: normal, clr: color),
-                Vertex(pos: face.verts[1].position, nor: normal, clr: color),
-                Vertex(pos: face.verts[2].position, nor: normal, clr: color),
-                Vertex(pos: face.verts[3].position, nor: normal, clr: color),
-                Vertex(pos: face.verts[0].position, nor: normal, clr: color),
-                Vertex(pos: face.verts[2].position, nor: normal, clr: color)
+                Vertex(pos: face.verts[0].position, nor: normal, clr: color, uv: face.verts[0].uv),
+                Vertex(pos: face.verts[1].position, nor: normal, clr: color, uv: face.verts[1].uv),
+                Vertex(pos: face.verts[2].position, nor: normal, clr: color, uv: face.verts[2].uv),
+                Vertex(pos: face.verts[3].position, nor: normal, clr: color, uv: face.verts[3].uv),
+                Vertex(pos: face.verts[0].position, nor: normal, clr: color, uv: face.verts[0].uv),
+                Vertex(pos: face.verts[2].position, nor: normal, clr: color, uv: face.verts[2].uv)
             ]
 
             vertices.append(contentsOf: verts)
@@ -216,6 +216,7 @@ class EditableMesh
         }
         
         encoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
+        encoder.setFragmentTexture(TextureManager.shared.devTexture, index: 0)
         encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices.count)
         
         if isRoom {
@@ -380,6 +381,8 @@ private extension EditableMesh
             {
                 setupPairs(for: edge)
             }
+            
+            face.updateUVs()
         }
     }
     
@@ -433,6 +436,62 @@ private extension EditableMesh
                     edge.pair = other
                 }
             }
+        }
+    }
+}
+
+private let baseaxis: [float3] = [
+    [ 0,-1, 0], [-1, 0, 0], [0, 0,-1], // floor
+    [ 0, 1, 0], [ 1, 0, 0], [0, 0,-1], // ceiling
+    [-1, 0, 0], [ 0, 0,-1], [0,-1, 0], // west wall
+    [ 1, 0, 0], [ 0, 0, 1], [0,-1, 0], // east wall
+    [ 0, 0, 1], [-1, 0, 0], [0,-1, 0], // south wall
+    [ 0, 0,-1], [ 1, 0, 0], [0,-1, 0]  // north wall
+]
+
+private extension Face
+{
+    func textureAxisFromPlane(normal: float3) -> (xv: float3, yv: float3)
+    {
+        var bestaxis: Int = 0
+        var best: Float = 0
+
+        for i in 0 ..< 6
+        {
+            let dot = dot(normal, baseaxis[i*3])
+            
+            if dot > best
+            {
+                best = dot
+                bestaxis = i
+            }
+        }
+        
+        let xv = baseaxis[bestaxis*3+1]
+        let yv = baseaxis[bestaxis*3+2]
+        
+        return (xv, yv)
+    }
+    
+    func updateUVs()
+    {
+        let (xv, yv) = textureAxisFromPlane(normal: plane.normal)
+        
+        let matrix = float4x4(
+            float4(xv.x, yv.x, plane.normal.x, 0),
+            float4(xv.y, yv.y, plane.normal.y, 0),
+            float4(xv.z, yv.z, plane.normal.z, 0),
+            float4(0, 0, -plane.distance, 1)
+        )
+        
+        for i in verts.indices
+        {
+            var projected = matrix * float4(verts[i].position, 1)
+            projected = projected / projected.w
+            projected = projected / 64
+            
+            verts[i].uv.x = projected.x
+            verts[i].uv.y = projected.y
         }
     }
 }
