@@ -123,7 +123,11 @@ final class QuadShape
     private var maxBounds: float3 = .one
     
     private var vertices: [BasicVertex] = []
-    private var verticesBuffer: MTLBuffer!
+    
+    var verticesBuffer: MTLBuffer!
+    var numVertices: Int {
+        vertices.count
+    }
     
     init()
     {

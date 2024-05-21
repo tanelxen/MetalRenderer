@@ -77,7 +77,7 @@ fragment float4 brush_fs(VertexOut in [[ stage_in ]], texture2d<half> albedoMap 
     half4 albedo = albedoMap.sample(sampler2d, in.uv);
     
     float3 shade = float3(in.shade);
-    return float4(shade, 1.0) * float4(albedo);
+    return float4(shade, 1.0) * float4(albedo) * in.color;
 }
 
 

@@ -100,17 +100,18 @@ final class SandboxApplication: NSObject
         GameTime.update()
         
         guard let viewport = self.viewport else { return }
+        guard let renderer = self.renderer else { return }
         
         scene.update()
         viewport.camera?.update()
         
-        if let commandBuffer = Engine.commandQueue.makeCommandBuffer()
+        scene.render(with: renderer)
+        
+        if viewport.renderPass != nil
         {
-            commandBuffer.label = "Scene Command Buffer"
-
-            renderer?.render(scene: scene, to: viewport, with: commandBuffer)
-            
-            commandBuffer.commit()
+            renderer.startFrame()
+            renderer.render(to: viewport)
+            renderer.endFrame()
         }
         
         editor?.draw()

@@ -27,10 +27,19 @@ final class ForwardRenderer
         return Engine.device.makeDepthStencilState(descriptor: descriptor)!
     }()
     
-    func render(scene: BrushScene, to viewport: Viewport, with commandBuffer: MTLCommandBuffer)
+    private var commandBuffer: MTLCommandBuffer!
+    private var commandEncoder: MTLRenderCommandEncoder!
+    private var items: [RenderItem] = []
+    
+    func startFrame()
     {
-        guard let pass = viewport.renderPass else { return }
-        guard let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: pass) else { return }
+        commandBuffer = Engine.commandQueue.makeCommandBuffer()
+        commandBuffer.label = "Scene Command Buffer"
+    }
+    
+    func render(to viewport: Viewport)
+    {
+        commandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: viewport.renderPass!)
         
         var viewUniforms = SceneConstants()
         
@@ -41,17 +50,54 @@ final class ForwardRenderer
             viewUniforms.viewportSize = viewport.maxBounds - viewport.minBounds
         }
         
-        encoder.setVertexBytes(&viewUniforms, length: MemoryLayout<SceneConstants>.size, index: 1)
+        commandEncoder.setVertexBytes(&viewUniforms, length: MemoryLayout<SceneConstants>.size, index: 1)
         
-        drawScene(scene, with: encoder)
-        drawDebug(with: encoder)
+        for item in items
+        {
+            apply(technique: item.technique, to: commandEncoder)
+            commandEncoder.setCullMode(item.cullMode)
+            
+            item.transform.updateModelMatrix()
+            
+            var modelConstants = ModelConstants()
+            modelConstants.color = item.tintColor
+            modelConstants.modelMatrix = item.transform.matrix
+            commandEncoder.setVertexBytes(&modelConstants, length: MemoryLayout<ModelConstants>.size, index: 2)
+            
+            commandEncoder.setVertexBuffer(item.vertexBuffer, offset: 0, index: 0)
+            commandEncoder.setFragmentTexture(item.texture, index: 0)
+            
+            if item.numIndices > 0
+            {
+                commandEncoder.drawIndexedPrimitives(type: item.primitiveType,
+                                                     indexCount: item.numIndices,
+                                                     indexType: .uint16,
+                                                     indexBuffer: item.indexBuffer,
+                                                     indexBufferOffset: 0)
+            }
+            else
+            {
+                commandEncoder.drawPrimitives(type: item.primitiveType, vertexStart: 0, vertexCount: item.numVertices)
+            }
+        }
         
-        encoder.endEncoding()
+        commandEncoder.endEncoding()
     }
     
-    func apply(tehnique: RenderTechnique, to encoder: MTLRenderCommandEncoder)
+    func add(item: RenderItem)
     {
-        switch tehnique
+        items.append(item)
+    }
+    
+    func endFrame()
+    {
+        commandBuffer.commit()
+        items.removeAll()
+    }
+    
+    func apply(technique: RenderTechnique, to encoder: MTLRenderCommandEncoder)
+    {
+        switch technique
         {
             case .basic:
                 encoder.setCullMode(.back)
@@ -73,9 +119,16 @@ final class ForwardRenderer
         }
     }
     
-    private func drawScene(_ scene: BrushScene, with encoder: MTLRenderCommandEncoder)
+    private func drawSpecial(with encoder: MTLRenderCommandEncoder)
     {
-        scene.render(with: encoder, to: self)
+//        apply(technique: .grid, to: encoder)
+//        var modelConstants = ModelConstants()
+//        modelConstants.modelMatrix = matrix_identity_float4x4
+//        encoder.setVertexBytes(&modelConstants, length: MemoryLayout<ModelConstants>.size, index: 2)
+//        gridQuad.render(with: encoder)
+        
+//        apply(technique: .basic, to: encoder)
+//        grid.render(with: encoder)
     }
     
     private func drawDebug(with encoder: MTLRenderCommandEncoder)
@@ -87,4 +140,23 @@ final class ForwardRenderer
         encoder.setRenderPipelineState(pipelineStates.basicInst)
         Debug.shared.renderInstanced(with: encoder)
     }
+}
+
+struct RenderItem
+{
+    var technique: RenderTechnique!
+    
+    var cullMode: MTLCullMode = .none
+    var transform: Transform = Transform()
+    
+    var vertexBuffer: MTLBuffer!
+    var numVertices: Int = 0
+    
+    var indexBuffer: MTLBuffer!
+    var numIndices: Int = 0
+    
+    var primitiveType: MTLPrimitiveType = .triangle
+    
+    var tintColor: float4 = .one
+    var texture: MTLTexture?
 }

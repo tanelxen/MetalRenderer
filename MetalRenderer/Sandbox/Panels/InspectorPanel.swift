@@ -18,6 +18,11 @@ final class InspectorPanel
         
         guard let brush = BrushScene.current.selected else { return }
         
-        ImGuiCheckbox("Is Room", &brush.isRoom)
+        var isRoom = brush.isRoom
+        
+        if ImGuiCheckbox("Is Room", &isRoom)
+        {
+            brush.isRoom = isRoom
+        }
     }
 }

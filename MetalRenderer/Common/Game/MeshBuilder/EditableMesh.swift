@@ -40,7 +40,15 @@ class EditableMesh
     
     var faces: [Face] = []
     
-    var isRoom = false
+    var isRoom = false {
+        didSet {
+            faces.forEach({
+                $0.plane.normal = -$0.plane.normal
+            })
+            
+            recalculateUV()
+        }
+    }
     
     private var selectedFace: Face?
     private var selectedEdge: HalfEdge?
@@ -121,6 +129,8 @@ class EditableMesh
         
         let distance = dot(face.normal, face.verts[0].position)
         face.plane = Plane(normal: face.normal, distance: distance)
+        
+        recalculateUV()
     }
     
     func setSelectedEdge(position: float3)
@@ -172,24 +182,27 @@ class EditableMesh
         recalculate()
     }
     
-    func render(with encoder: MTLRenderCommandEncoder, to renderer: ForwardRenderer)
+    func recalculateUV()
     {
-        renderer.apply(tehnique: .brush, to: encoder)
+        for face in faces
+        {
+            face.updateUVs()
+        }
+    }
+    
+    func render(with renderer: ForwardRenderer)
+    {
+        var renderItem = RenderItem(technique: .brush)
         
-        let tr = Transform()
-        tr.updateModelMatrix()
-        
-        var modelConstants = ModelConstants()
-        modelConstants.color = .one
-        modelConstants.modelMatrix = tr.matrix
-        encoder.setVertexBytes(&modelConstants, length: MemoryLayout<ModelConstants>.size, index: 2)
+        renderItem.cullMode = isRoom ? .front : .back
+        renderItem.texture = TextureManager.shared.devTexture
         
         var vertices: [Vertex] = []
         
         for face in faces
         {
             let normal = face.normal
-            let color = face === selectedFace ? float4(1, 0, 0, 1) : float4(1, 1, 0, 1)
+            let color = face === selectedFace ? float4(1, 0, 0, 1) : float4(1, 1, 1, 1)
 
             let verts = [
                 Vertex(pos: face.verts[0].position, nor: normal, clr: color, uv: face.verts[0].uv),
@@ -210,66 +223,59 @@ class EditableMesh
             pointer.pointee = vertex
             pointer = pointer.advanced(by: 1)
         }
+    
+        renderItem.vertexBuffer = vertexBuffer
+        renderItem.numVertices = vertices.count
         
-        if isRoom {
-            encoder.setCullMode(.front)
-        }
+        renderer.add(item: renderItem)
         
-        encoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
-        encoder.setFragmentTexture(TextureManager.shared.devTexture, index: 0)
-        encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices.count)
-        
-        if isRoom {
-            encoder.setCullMode(.back)
-        }
-        
-        if let edge = selectedEdge
-        {
-            drawAxis(for: edge, with: encoder)
-            drawAxis(for: edge.pair, with: encoder)
-        }
-        
-        if isSelected
-        {
-            renderer.apply(tehnique: .brush, to: encoder)
-
-            let tr = Transform(scale: .init(repeating: 1.001))
-            tr.updateModelMatrix()
-
-            var modelConstants = ModelConstants()
-            modelConstants.color = .one
-            modelConstants.modelMatrix = tr.matrix
-            encoder.setVertexBytes(&modelConstants, length: MemoryLayout<ModelConstants>.size, index: 2)
-
-            var vertices2: [Vertex] = []
-
-            for face in faces
-            {
-                for edge in face.edges
-                {
-                    let color = edge === selectedEdge ? float4(1, 0, 0, 1) : float4(0, 0, 0, 1)
-
-                    vertices2.append(
-                        Vertex(pos: edge.vert.position, nor: .zero, clr: color)
-                    )
-
-                    vertices2.append(
-                        Vertex(pos: edge.next.vert.position, nor: .zero, clr: color)
-                    )
-                }
-            }
-
-            var pointer = vertexBuffer2.contents().bindMemory(to: Vertex.self, capacity: 1024)
-
-            for vertex in vertices2
-            {
-                pointer.pointee = vertex
-                pointer = pointer.advanced(by: 1)
-            }
-
-            encoder.setVertexBuffer(vertexBuffer2, offset: 0, index: 0)
-            encoder.drawPrimitives(type: .line, vertexStart: 0, vertexCount: vertices2.count)
-        }
+//        if let edge = selectedEdge
+//        {
+//            drawAxis(for: edge, with: encoder)
+//            drawAxis(for: edge.pair, with: encoder)
+//        }
+//
+//        if isSelected
+//        {
+//            renderer.apply(technique: .brush, to: encoder)
+//
+//            let tr = Transform(scale: .init(repeating: 1.001))
+//            tr.updateModelMatrix()
+//
+//            var modelConstants = ModelConstants()
+//            modelConstants.color = .one
+//            modelConstants.modelMatrix = tr.matrix
+//            encoder.setVertexBytes(&modelConstants, length: MemoryLayout<ModelConstants>.size, index: 2)
+//
+//            var vertices2: [Vertex] = []
+//
+//            for face in faces
+//            {
+//                for edge in face.edges
+//                {
+//                    let color = edge === selectedEdge ? float4(1, 0, 0, 1) : float4(0, 0, 0, 1)
+//
+//                    vertices2.append(
+//                        Vertex(pos: edge.vert.position, nor: .zero, clr: color)
+//                    )
+//
+//                    vertices2.append(
+//                        Vertex(pos: edge.next.vert.position, nor: .zero, clr: color)
+//                    )
+//                }
+//            }
+//
+//            var pointer = vertexBuffer2.contents().bindMemory(to: Vertex.self, capacity: 1024)
+//
+//            for vertex in vertices2
+//            {
+//                pointer.pointee = vertex
+//                pointer = pointer.advanced(by: 1)
+//            }
+//
+//            encoder.setVertexBuffer(vertexBuffer2, offset: 0, index: 0)
+//            encoder.drawPrimitives(type: .line, vertexStart: 0, vertexCount: vertices2.count)
+//        }
     }
     
     private func drawAxis(for edge: HalfEdge, with encoder: MTLRenderCommandEncoder)
@@ -523,7 +529,7 @@ private func intersect(ray: Ray, lineStart: float3, lineEnd: float3) -> Float
 
 private func intersect(ray: Ray, face: Face) -> Bool
 {
-    let n = face.normal
+    let n = face.plane.normal
 
     if dot(n, ray.direction) > 0 {
         return false

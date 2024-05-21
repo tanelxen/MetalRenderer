@@ -229,7 +229,7 @@ final class WorldBrush
     {
         transform.updateModelMatrix()
         
-        renderer.apply(tehnique: .brush, to: encoder)
+        renderer.apply(technique: .brush, to: encoder)
         
         let tr = Transform()
         tr.updateModelMatrix()

@@ -13,8 +13,6 @@ final class BrushScene
 {
     private (set) static var current: BrushScene!
     
-    lazy var gridQuad = QuadShape(mins: float3(-4096, 0, -4096), maxs: float3(4096, 0, 4096))
-    
     var brushes: [EditableMesh] = []
     
     var selected: EditableMesh? {
@@ -73,20 +71,13 @@ final class BrushScene
         }
     }
     
-    func render(with encoder: MTLRenderCommandEncoder, to renderer: ForwardRenderer)
+    func render(with renderer: ForwardRenderer)
     {
-        renderer.apply(tehnique: .grid, to: encoder)
-        var modelConstants = ModelConstants()
-        modelConstants.modelMatrix = matrix_identity_float4x4
-        encoder.setVertexBytes(&modelConstants, length: MemoryLayout<ModelConstants>.size, index: 2)
-        gridQuad.render(with: encoder)
-        
-        renderer.apply(tehnique: .basic, to: encoder)
-        grid.render(with: encoder)
+        grid.render(with: renderer)
         
         for brush in brushes
         {
-            brush.render(with: encoder, to: renderer)
+            brush.render(with: renderer)
         }
     }
 }

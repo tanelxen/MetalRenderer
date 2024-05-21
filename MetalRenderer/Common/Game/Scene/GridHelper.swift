@@ -18,6 +18,8 @@ final class GridHelper
     private var startPoint: float3?
     private let cube = HelperCube()
     
+    lazy var gridQuad = QuadShape(mins: float3(-4096, 0, -4096), maxs: float3(4096, 0, 4096))
+    
     var viewport: Viewport?
     
     weak var scene: BrushScene?
@@ -80,13 +82,20 @@ final class GridHelper
         }
     }
     
-    func render(with encoder: MTLRenderCommandEncoder?)
+    func render(with renderer: ForwardRenderer)
     {
+        var renderItem = RenderItem(technique: .grid)
+        renderItem.cullMode = .none
         
+        renderItem.primitiveType = .triangleStrip
+        renderItem.vertexBuffer = gridQuad.verticesBuffer
+        renderItem.numVertices = gridQuad.numVertices
+        
+        renderer.add(item: renderItem)
         
         if isCreationMode
         {
-            cube.render(with: encoder)
+            cube.render(with: renderer)
         }
     }
     
@@ -195,25 +204,23 @@ final class HelperCube
         )
     }
     
-    func render(with encoder: MTLRenderCommandEncoder?)
+    func render(with renderer: ForwardRenderer)
     {
         guard verticesBuffer != nil else { return }
         
-        transform.updateModelMatrix()
+        var renderItem = RenderItem(technique: .basic)
+        renderItem.cullMode = .back
+        renderItem.tintColor = [1, 0, 1, 0.3]
         
-        var modelConstants = ModelConstants()
-        modelConstants.color = float4(1, 0, 1, 0.3)
-        modelConstants.modelMatrix = transform.matrix
+        renderItem.transform = transform
         
-        encoder?.setVertexBytes(&modelConstants, length: MemoryLayout<ModelConstants>.size, index: 2)
+        renderItem.primitiveType = .triangle
+        renderItem.vertexBuffer = verticesBuffer
         
-        encoder?.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
-
-        encoder?.drawIndexedPrimitives(type: .triangle,
-                                       indexCount: indicies.count,
-                                       indexType: .uint16,
-                                       indexBuffer: indiciesBuffer,
-                                       indexBufferOffset: 0)
+        renderItem.indexBuffer = indiciesBuffer
+        renderItem.numIndices = indicies.count
+        
+        renderer.add(item: renderItem)
     }
 }
 
