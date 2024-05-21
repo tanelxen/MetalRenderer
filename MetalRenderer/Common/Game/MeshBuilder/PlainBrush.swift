@@ -8,24 +8,10 @@
 import Metal
 import simd
 
-final class WorldBrush
+private let MAX_VERTS: Int = 36
+
+final class PlainBrush: EditableObject
 {
-    var transform = Transform()
-    
-    var origin: float3 {
-        transform.position
-    }
-    
-    var size: float3 {
-        return transform.scale
-    }
-    
-    private var planes: [Plane]
-    private var faces: [BrushFace]
-    private var points: [float3] = []
-    
-    private var selectedFaceIndex: Int?
-    
     var isSelected = false {
         didSet {
             selectedFaceIndex = nil
@@ -42,90 +28,65 @@ final class WorldBrush
         return abs(planes[index].normal)
     }
     
-    private let facePoint = MTKGeometry(.sphere, extents: [2, 2, 2])
+    var selectedEdgePoint: float3? {
+        return nil
+    }
+    
+    var selectedEdgeAxis: float3? {
+        return nil
+    }
+    
+    var isRoom = false
+    
+    var selectedPlane: Plane? {
+        guard let index = selectedFaceIndex else { return nil }
+        return planes[index]
+    }
     
     var selectedEdge: (float3, float3)?
     
-    init(origin: float3, size: float3)
+    var planes: [Plane]
+    private var faces: [BrushFace]
+    
+    private var selectedFaceIndex: Int?
+    
+    private var vertexBuffer: MTLBuffer!
+    
+    required init(origin: float3, size: float3)
     {
-        transform.position = origin + size * 0.5
-        transform.scale = size
-        
         planes = [
-            Plane(normal: [ 0,  0,  1], distance: 1),
             Plane(normal: [ 0,  0, -1], distance: 1),
-            Plane(normal: [-1,  0,  0], distance: 1),
+            Plane(normal: [ 0,  0,  1], distance: 1),
             Plane(normal: [ 1,  0,  0], distance: 1),
-            Plane(normal: [ 0, -1,  0], distance: 1),
-            Plane(normal: [ 0,  1,  0], distance: 1)
+            Plane(normal: [-1,  0,  0], distance: 1),
+            Plane(normal: [ 0,  1,  0], distance: 1),
+            Plane(normal: [ 0, -1,  0], distance: 1)
         ]
         
         faces = planes.indices.map { BrushFace(planeIndex: $0) }
         
-        updatePlanesFromTransform()
+        let position = origin + size * 0.5
+        updatePlanes(position: position, scale: size)
         
         faces.forEach {
             $0.update(from: planes)
         }
+        
+        let length = MemoryLayout<Vertex>.stride * MAX_VERTS
+        vertexBuffer = Engine.device.makeBuffer(length: length)
     }
     
-    private func updatePlanesFromTransform()
+    private func updatePlanes(position: float3, scale: float3)
     {
-        let halfExtents = transform.scale * 0.5
+        let halfExtents = scale * 0.5
         
         for i in planes.indices
         {
             let normal = planes[i].normal
             let halfDimention = normal * halfExtents
-            let point = transform.position + halfDimention
+            let point = position + halfDimention
             
             planes[i].distance = dot(point, normal)
-        }
-    }
-    
-    private func updateTransformFromPlanes()
-    {
-        let scaleX = planes[3].distance - planes[2].distance
-        let scaleY = planes[5].distance - planes[4].distance
-        let scaleZ = planes[0].distance - planes[1].distance
-        
-        let posX = planes[2].distance + scaleX * 0.5
-        let posY = planes[4].distance + scaleY * 0.5
-        let posZ = planes[1].distance + scaleZ * 0.5
-        
-        transform.position = [posX, posY, posZ]
-        transform.scale = [scaleX, scaleY, scaleZ]
-    }
-    
-    func setSelectedFace(position: float3)
-    {
-        guard let index = selectedFaceIndex else { return }
-
-        let normal = planes[index].normal
-        let value = position * normal
-        
-        if normal.x != 0 {
-            planes[index].distance = value.x
-        } else if normal.y != 0 {
-            planes[index].distance = value.y
-        } else if normal.z != 0 {
-            planes[index].distance = value.z
-        }
-        
-//        updateTransformFromPlanes()
-        
-        faces.forEach {
-            $0.update(from: planes)
-        }
-    }
-    
-    func setSelectedPlane(distance value: Float)
-    {
-        guard let index = selectedFaceIndex else { return }
-        planes[index].distance = value
-        
-        faces.forEach {
-            $0.update(from: planes)
         }
     }
     
@@ -225,63 +186,101 @@ final class WorldBrush
         }
     }
     
-    func render(with encoder: MTLRenderCommandEncoder, to renderer: ForwardRenderer)
+    func setSelectedFace(position: float3)
     {
-        transform.updateModelMatrix()
+        guard let index = selectedFaceIndex else { return }
+
+        let normal = planes[index].normal
+        let value = position * normal
         
-        renderer.apply(technique: .brush, to: encoder)
+        if normal.x != 0 {
+            planes[index].distance = value.x
+        } else if normal.y != 0 {
+            planes[index].distance = value.y
+        } else if normal.z != 0 {
+            planes[index].distance = value.z
+        }
         
-        let tr = Transform()
-        tr.updateModelMatrix()
+        faces.forEach {
+            $0.update(from: planes)
+        }
+    }
+    
+//    func setSelectedPlane(distance value: Float)
+//    {
+//        guard let index = selectedFaceIndex else { return }
+//        planes[index].distance = value
+//        
+//        faces.forEach {
+//            $0.update(from: planes)
+//        }
+//    }
+    
+    func setSelectedEdge(position: float3)
+    {
         
-        var modelConstants = ModelConstants()
-        modelConstants.color = .one
-        modelConstants.modelMatrix = tr.matrix
-        encoder.setVertexBytes(&modelConstants, length: MemoryLayout<ModelConstants>.size, index: 2)
+    }
+    
+    func clip(with other: PlainBrush)
+    {
+        let inverted = other.planes.map { Plane(normal: -$0.normal, distance: -$0.distance) }
+        
+        for face in faces
+        {
+            face.clip(by: inverted)
+            face.updateUVs(with: planes[face.planeIndex])
+        }
+    }
+    
+    func clip(with plane: Plane)
+    {
+        for face in faces
+        {
+            face.windingClip(by: plane)
+            face.updateUVs(with: planes[face.planeIndex])
+        }
+    }
+    
+    func render(with renderer: ForwardRenderer)
+    {
+        var renderItem = RenderItem(technique: .brush)
+        
+        renderItem.cullMode = isRoom ? .front : .back
+        renderItem.texture = TextureManager.shared.devTexture
         
         var vertices: [Vertex] = []
         
         for face in faces
         {
             let normal = planes[face.planeIndex].normal
-            let color = face.planeIndex == selectedFaceIndex ? float4(1, 0, 0, 1) : float4(1, 1, 0, 1)
+            let color = face.planeIndex == selectedFaceIndex ? float4(1, 0, 0, 1) : float4(1, 1, 1, 1)
             
+            guard face.points.count > 2 else { continue }
+
             let verts = [
-                Vertex(pos: face.points[0], nor: normal, clr: color),
-                Vertex(pos: face.points[1], nor: normal, clr: color),
-                Vertex(pos: face.points[2], nor: normal, clr: color),
-                Vertex(pos: face.points[0], nor: normal, clr: color),
-                Vertex(pos: face.points[2], nor: normal, clr: color),
-                Vertex(pos: face.points[3], nor: normal, clr: color)
+                Vertex(pos: face.points[0], nor: normal, clr: color, uv: face.uvs[0]),
+                Vertex(pos: face.points[1], nor: normal, clr: color, uv: face.uvs[1]),
+                Vertex(pos: face.points[2], nor: normal, clr: color, uv: face.uvs[2]),
+                Vertex(pos: face.points[3], nor: normal, clr: color, uv: face.uvs[3]),
+                Vertex(pos: face.points[0], nor: normal, clr: color, uv: face.uvs[0]),
+                Vertex(pos: face.points[2], nor: normal, clr: color, uv: face.uvs[2])
             ]
-            
+
             vertices.append(contentsOf: verts)
         }
         
-        encoder.setVertexBytes(vertices, length: MemoryLayout<Vertex>.stride * vertices.count, index: 0)
-        encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices.count)
+        var pointer = vertexBuffer.contents().bindMemory(to: Vertex.self, capacity: MAX_VERTS)
         
-        if let edge = selectedEdge
+        for vertex in vertices
         {
-            let tr1 = Transform(position: edge.0)
-            tr1.updateModelMatrix()
-            
-            var modelConstants1 = ModelConstants()
-            modelConstants1.color = float4(0, 0, 1, 1)
-            modelConstants1.modelMatrix = tr1.matrix
-            encoder.setVertexBytes(&modelConstants1, length: MemoryLayout<ModelConstants>.size, index: 2)
-            facePoint.render(with: encoder)
-            
-            
-            let tr2 = Transform(position: edge.1)
-            tr2.updateModelMatrix()
-            
-            var modelConstants2 = ModelConstants()
-            modelConstants2.color = float4(0, 0, 1, 1)
-            modelConstants2.modelMatrix = tr2.matrix
-            encoder.setVertexBytes(&modelConstants2, length: MemoryLayout<ModelConstants>.size, index: 2)
-            facePoint.render(with: encoder)
+            pointer.pointee = vertex
+            pointer = pointer.advanced(by: 1)
         }
+    
+        renderItem.vertexBuffer = vertexBuffer
+        renderItem.numVertices = vertices.count
+        
+        renderer.add(item: renderItem)
     }
 }
 

@@ -3303,13 +3303,13 @@ public typealias ImSpanAllocator = OpaquePointer
 	return igScrollbarEx(bb,id,axis,p_scroll_v,avail_v,contents_v,flags)
 }
 
-@inlinable @discardableResult public func ImGuiSelectable(_ label: String? = nil, _ selected: Bool, _ flags: ImGuiSelectableFlags, _ size: ImVec2) -> Bool {
+@inlinable @discardableResult public func ImGuiSelectable(_ label: String?, _ selected: Bool, _ flags: ImGuiSelectableFlags, _ size: ImVec2) -> Bool {
 	label.withOptionalCString { labelPtr in
 		return igSelectable_Bool(labelPtr,selected,flags,size)
 	}
 }
 
-@inlinable @discardableResult public func ImGuiSelectable(_ label: String? = nil, _ p_selected: UnsafeMutablePointer<Bool>!, _ flags: ImGuiSelectableFlags, _ size: ImVec2) -> Bool {
+@inlinable @discardableResult public func ImGuiSelectable(_ label: String?, _ p_selected: UnsafeMutablePointer<Bool>!, _ flags: ImGuiSelectableFlags, _ size: ImVec2) -> Bool {
 	label.withOptionalCString { labelPtr in
 		return igSelectable_BoolPtr(labelPtr,p_selected,flags,size)
 	}

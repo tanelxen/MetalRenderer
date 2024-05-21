@@ -15,6 +15,7 @@ final class SandboxApplication: NSObject
     var view: MTKView
     
     private var viewport: Viewport!
+    private var viewport2: Viewport!
     private var renderer: ForwardRenderer!
     private var scene = BrushScene()
     
@@ -40,10 +41,10 @@ final class SandboxApplication: NSObject
         viewport = Viewport()
         viewport.dpi = Float(NSScreen.main!.backingScaleFactor)
         
-        editor = EditorLayer(view: view, sceneViewport: viewport)
+        viewport2 = Viewport()
+        viewport2.dpi = Float(NSScreen.main!.backingScaleFactor)
         
-        viewport.camera?.transform.position = float3(32, 128, -128)
-        viewport.camera?.transform.rotation = Rotator(pitch: -30, yaw: 0, roll: 0)
+        editor = EditorLayer(view: view, sceneViewport: viewport, topViewport: viewport2)
         
         view.delegate = self
         
@@ -78,7 +79,7 @@ final class SandboxApplication: NSObject
     private func setupEventsMonitor()
     {
         let mask: NSEvent.EventTypeMask = [
-            .mouseMoved,
+            .mouseMoved, .scrollWheel,
             .leftMouseDown, .leftMouseUp, .leftMouseDragged,
             .rightMouseDown, .rightMouseUp, .rightMouseDragged,
             .keyDown, .keyUp, .flagsChanged
@@ -100,19 +101,28 @@ final class SandboxApplication: NSObject
         GameTime.update()
         
         guard let viewport = self.viewport else { return }
+        guard let viewport2 = self.viewport2 else { return }
         guard let renderer = self.renderer else { return }
         
         scene.update()
-        viewport.camera?.update()
-        
         scene.render(with: renderer)
+        
+        // Draw grid
+        editor?.specialDraw(with: renderer)
+        
+        renderer.startFrame()
         
         if viewport.renderPass != nil
         {
-            renderer.startFrame()
             renderer.render(to: viewport)
-            renderer.endFrame()
         }
+        
+        if viewport2.renderPass != nil
+        {
+            renderer.render(to: viewport2)
+        }
+        
+        renderer.endFrame()
         
         editor?.draw()
     }

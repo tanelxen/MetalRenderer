@@ -13,9 +13,9 @@ final class BrushScene
 {
     private (set) static var current: BrushScene!
     
-    var brushes: [EditableMesh] = []
+    var brushes: [EditableObject] = []
     
-    var selected: EditableMesh? {
+    var selected: EditableObject? {
         brushes.first(where: { $0.isSelected })
     }
     
@@ -42,11 +42,34 @@ final class BrushScene
     
     func addBrush(position: float3, size: float3)
     {
-        let brush = EditableMesh(origin: position, size: size)
+        let brush = PlainBrush(origin: position, size: size)
         brush.isSelected = true
         
         brushes.forEach { $0.isSelected = false }
         brushes.append(brush)
+    }
+    
+    func clipAllBrushes()
+    {
+        guard let cutter = selected as? PlainBrush else { return }
+//        guard let plane = cutter.selectedPlane else { return }
+        
+        for brush in brushes
+        {
+            guard brush !== cutter else { continue }
+            guard let plainBrush = brush as? PlainBrush else { continue }
+            
+            plainBrush.clip(with: cutter)
+            
+//            for brushB in brushes
+//            {
+//                guard brushA !== brushB else { continue }
+//                guard let plainBrushA = brushA as? PlainBrush else { continue }
+//                guard let plainBrushB = brushB as? PlainBrush else { continue }
+//
+//                plainBrushA.clip(with: plainBrushB)
+//            }
+        }
     }
     
     func removeSelected()
@@ -123,49 +146,49 @@ extension BrushScene
     
     private func createWorldStaticCollision()
     {
-        for brush in brushes
-        {
-            if brush.isRoom
-            {
-                for face in brush.faces
-                {
-                    let shape = BulletConvexHullShape()
-                    
-                    for point in face.verts.map({ $0.position })
-                    {
-                        shape.addPoint(point * q2b)
-                    }
-                    
-                    let transform = BulletTransform()
-                    transform.setIdentity()
-                    
-                    let motionState = BulletMotionState(transform: transform)
-                    let body = BulletRigidBody(mass: 0,
-                                               motionState: motionState,
-                                               collisionShape: shape)
-                    body.friction = 0.5
-                    physicsWorld.add(rigidBody: body)
-                }
-            }
-            else
-            {
-                let shape = BulletConvexHullShape()
-                
-                for point in brush.vertices
-                {
-                    shape.addPoint(point * q2b)
-                }
-                
-                let transform = BulletTransform()
-                transform.setIdentity()
-                
-                let motionState = BulletMotionState(transform: transform)
-                let body = BulletRigidBody(mass: 0,
-                                           motionState: motionState,
-                                           collisionShape: shape)
-                body.friction = 0.5
-                physicsWorld.add(rigidBody: body)
-            }
-        }
+//        for brush in brushes
+//        {
+//            if brush.isRoom
+//            {
+//                for face in brush.faces
+//                {
+//                    let shape = BulletConvexHullShape()
+//
+//                    for point in face.verts.map({ $0.position })
+//                    {
+//                        shape.addPoint(point * q2b)
+//                    }
+//
+//                    let transform = BulletTransform()
+//                    transform.setIdentity()
+//
+//                    let motionState = BulletMotionState(transform: transform)
+//                    let body = BulletRigidBody(mass: 0,
+//                                               motionState: motionState,
+//                                               collisionShape: shape)
+//                    body.friction = 0.5
+//                    physicsWorld.add(rigidBody: body)
+//                }
+//            }
+//            else
+//            {
+//                let shape = BulletConvexHullShape()
+//
+//                for point in brush.vertices
+//                {
+//                    shape.addPoint(point * q2b)
+//                }
+//
+//                let transform = BulletTransform()
+//                transform.setIdentity()
+//
+//                let motionState = BulletMotionState(transform: transform)
+//                let body = BulletRigidBody(mass: 0,
+//                                           motionState: motionState,
+//                                           collisionShape: shape)
+//                body.friction = 0.5
+//                physicsWorld.add(rigidBody: body)
+//            }
+//        }
     }
 }

@@ -211,11 +211,11 @@ extension matrix_float4x4
     }
     
     static func orthographic(left: Float, right: Float, bottom: Float, top: Float, near: Float, far: Float)->matrix_float4x4{
-        return float4x4 (
-            [ 2 / (right - left), 0, 0, 0 ],
-            [ 0, 2 / (top - bottom), 0, 0 ],
-            [ 0, 0, -2 / (far - near), 0 ],
-            [ 0,0,0,1 ]
+        return float4x4(
+            [2 / (right - left), 0, 0, 0],
+            [0, 2 / (top - bottom), 0, 0],
+            [0, 0, 2 / (far - near), 0],
+            [(left + right) / (left - right), (top + bottom) / (bottom - top), near / (near - far), 1]
         )
      }
     

@@ -16,6 +16,11 @@ final class InspectorPanel
         ImGuiBegin(name, nil, 0)
         defer { ImGuiEnd() }
         
+        if ImGuiButton("Clip All Brushes")
+        {
+            BrushScene.current.clipAllBrushes()
+        }
+        
         guard let brush = BrushScene.current.selected else { return }
         
         var isRoom = brush.isRoom

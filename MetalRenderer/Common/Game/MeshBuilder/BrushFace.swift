@@ -22,9 +22,10 @@ final class BrushFace
     let planeIndex: Int
     
     var points: [float3] = []
+    var uvs: [float2] = []
     var numpoints = 0
     
-    var planePoints: [float3] = []
+//    var planePoints: [float3] = []
     
     var center: float3 {
         points.reduce(.zero, +) / Float(points.count)
@@ -75,6 +76,16 @@ final class BrushFace
             
             windingClip(by: clip)
         }
+        
+        updateUVs(with: plane)
+    }
+    
+    func clip(by planes: [Plane])
+    {
+        for clip in planes
+        {
+            windingClip(by: clip)
+        }
     }
     
     /*
@@ -117,13 +128,13 @@ final class BrushFace
         numpoints = 4
     }
     
-    private func windingClip(by split: Plane)
+    func windingClip(by split: Plane)
     {
         var sides = Array<Int>.init(repeating: 0, count: MAX_POINTS)
         var dists = Array<Float>.init(repeating: 0, count: MAX_POINTS)
         var counts: [Int] = [0, 0, 0]
         
-        for i in 0 ..< numpoints
+        for i in points.indices
         {
             let dot = dot(points[i], split.normal) - split.distance
             
@@ -147,7 +158,7 @@ final class BrushFace
         
         var neww: [float3] = []
         
-        for i in 0 ..< numpoints
+        for i in points.indices
         {
             let p1 = points[i]
 
@@ -191,6 +202,51 @@ final class BrushFace
         }
         
         points = neww
+        uvs = Array<float2>.init(repeating: .zero, count: points.count)
+    }
+    
+    private func textureAxisFromPlane(normal: float3) -> (xv: float3, yv: float3)
+    {
+        var bestaxis: Int = 0
+        var best: Float = 0
+
+        for i in 0 ..< 6
+        {
+            let dot = dot(normal, baseaxis[i*3])
+            
+            if dot > best
+            {
+                best = dot
+                bestaxis = i
+            }
+        }
+        
+        let xv = baseaxis[bestaxis*3+1]
+        let yv = baseaxis[bestaxis*3+2]
+        
+        return (xv, yv)
+    }
+    
+    func updateUVs(with plane: Plane)
+    {
+        let (xv, yv) = textureAxisFromPlane(normal: plane.normal)
+        
+        let matrix = float4x4(
+            float4(xv.x, yv.x, plane.normal.x, 0),
+            float4(xv.y, yv.y, plane.normal.y, 0),
+            float4(xv.z, yv.z, plane.normal.z, 0),
+            float4(0, 0, -plane.distance, 1)
+        )
+        
+        for i in points.indices
+        {
+            var projected = matrix * float4(points[i], 1)
+            projected = projected / projected.w
+            projected = projected / 64
+            
+            uvs[i].x = projected.x
+            uvs[i].y = projected.y
+        }
     }
 }
 
@@ -214,3 +270,12 @@ private extension Plane
         return axis
     }
 }
+
+private let baseaxis: [float3] = [
+    [ 0,-1, 0], [-1, 0, 0], [0, 0,-1], // floor
+    [ 0, 1, 0], [ 1, 0, 0], [0, 0,-1], // ceiling
+    [-1, 0, 0], [ 0, 0,-1], [0,-1, 0], // west wall
+    [ 1, 0, 0], [ 0, 0, 1], [0,-1, 0], // east wall
+    [ 0, 0, 1], [-1, 0, 0], [0,-1, 0], // south wall
+    [ 0, 0,-1], [ 1, 0, 0], [0,-1, 0]  // north wall
+]

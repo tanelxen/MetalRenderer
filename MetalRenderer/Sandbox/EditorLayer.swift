@@ -15,13 +15,14 @@ final class EditorLayer
     private var iniPath = ""// ResourceManager.pathInPreferences(for: "editor.ini")
     
     private var viewportPanel: ViewportPanel!
+    private var topViewPanel: TopViewPanel!
     private var hierarchyPanel: HierarchyPanel!
     private var inspectorPanel: InspectorPanel!
     private var assetsPanel: AssetsPanel!
     
     var onLoadNewMap: ((URL)->Void)?
     
-    init(view: MTKView, sceneViewport: Viewport)
+    init(view: MTKView, sceneViewport: Viewport, topViewport: Viewport)
     {
         self.view = view
         
@@ -35,10 +36,11 @@ final class EditorLayer
         ImGui_ImplMetal_Init(Engine.device)
         
         viewportPanel = ViewportPanel(viewport: sceneViewport)
+        topViewPanel = TopViewPanel(viewport: topViewport)
         hierarchyPanel = HierarchyPanel()
         inspectorPanel = InspectorPanel()
         assetsPanel = AssetsPanel()
-        
+
         assetsPanel.onLoadNewMap = { [weak self] url in
             self?.onLoadNewMap?(url)
         }
@@ -58,7 +60,7 @@ final class EditorLayer
     {
         ImGui_ImplOSX_HandleEvent(event, view)
         
-        if viewportPanel.isHovered
+        if viewportPanel.isHovered || topViewPanel.isHovered
         {
             handleInGame(event)
         }
@@ -105,6 +107,10 @@ final class EditorLayer
             Mouse.setMousePositionChange(overallPosition: float2(posX, posY),
                                          deltaPosition: deltaChange)
         }
+        else if event.type == .scrollWheel
+        {
+            Mouse.scrollWheel(Float(event.deltaY))
+        }
         else if event.type == .leftMouseDown
         {
             Mouse.setMouseButton(0, isPressed: true)
@@ -115,6 +121,12 @@ final class EditorLayer
         }
         
         Keyboard.setKey(KeyCodes.shift.rawValue, isPressed: NSEvent.modifierFlags.contains(.shift))
+    }
+    
+    // Draw grid for viewports
+    func specialDraw(with renderer: ForwardRenderer)
+    {
+        
     }
     
     func draw()
@@ -204,7 +216,7 @@ final class EditorLayer
 
             var dock_main_id       = window_id
             var dock_right_id      = ImGuiDockBuilderSplitNode(dock_main_id, Im(ImGuiDir_Right), 0.15, nil, &dock_main_id)
-            let dock_left_id      = ImGuiDockBuilderSplitNode(dock_main_id, Im(ImGuiDir_Left), 0.18, nil, &dock_main_id)
+            let dock_left_id      = ImGuiDockBuilderSplitNode(dock_main_id, Im(ImGuiDir_Left), 0.5, nil, &dock_main_id)
             let dock_right_down_id = ImGuiDockBuilderSplitNode(dock_right_id, Im(ImGuiDir_Down), 0.6, nil, &dock_right_id)
 //            var dock_down_id       = ImGuiDockBuilderSplitNode(dock_main_id, Im(ImGuiDir_Down), 0.25, nil, &dock_main_id)
 //            var dock_down_right_id = ImGuiDockBuilderSplitNode(dock_down_id, Im(ImGuiDir_Right), 0.6, nil, &dock_down_id)
@@ -213,7 +225,7 @@ final class EditorLayer
             ImGuiDockBuilderDockWindow(hierarchyPanel.name, dock_right_id)
             ImGuiDockBuilderDockWindow(inspectorPanel.name, dock_right_down_id)
 //            ImGuiDockBuilderDockWindow("Console",    dock_down_id)
-            ImGuiDockBuilderDockWindow(assetsPanel.name, dock_left_id)
+            ImGuiDockBuilderDockWindow(topViewPanel.name, dock_left_id)
             ImGuiDockBuilderDockWindow(viewportPanel.name, dock_main_id)
 
             ImGuiDockBuilderFinish(dock_main_id)
@@ -233,8 +245,8 @@ final class EditorLayer
         hierarchyPanel.draw()
         inspectorPanel.draw()
         viewportPanel.draw()
-        
-        assetsPanel.draw()
+        topViewPanel.draw()
+//        assetsPanel.draw()
     }
     
     private func setStyles()

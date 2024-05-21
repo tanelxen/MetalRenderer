@@ -8,7 +8,7 @@
 import Metal
 import simd
 
-class EditableMesh
+final class EditableMesh: EditableObject
 {
     var isSelected = false {
         didSet {
@@ -58,7 +58,7 @@ class EditableMesh
     
     private let point = MTKGeometry(.box)
     
-    init(origin: float3, size: float3)
+    required init(origin: float3, size: float3)
     {
         populateFaces(origin: origin, size: size)
         

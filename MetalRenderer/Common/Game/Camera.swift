@@ -148,3 +148,65 @@ class DebugCamera: Camera
         _projectionMatrix = matrix_float4x4.perspective(degreesFov: 65, aspectRatio: aspectRatio, near: 0.1, far: 5000)
     }
 }
+
+class OrthoCamera: Camera
+{
+    override var projectionMatrix: matrix_float4x4 {
+        _projectionMatrix
+    }
+    
+    private var _projectionMatrix: matrix_float4x4 = matrix_identity_float4x4
+    
+    private let movementSpeed: Float = 32
+    private let zoomSpeed: Float = 2
+    
+    private var width: Float = 1
+    private var height: Float = 1
+    private var zoom: Float = 8
+    
+    override func update()
+    {
+        let deltaTime = GameTime.deltaTime
+        
+        zoom -= Mouse.getDeltaWheel() * zoomSpeed * deltaTime
+        
+        if zoom < 0.5 {
+            zoom = 0.5
+        }
+        
+        if zoom > 32 {
+            zoom = 32
+        }
+        
+        if Mouse.IsMouseButtonPressed(.right)
+        {
+            transform.position.x -= Mouse.getDX() * movementSpeed * deltaTime
+            transform.position.z += Mouse.getDY() * movementSpeed * deltaTime
+        }
+        
+        updateProjectionMatrix()
+    }
+    
+    override func updateViewport(width: Int, height: Int)
+    {
+        guard width > 0, height > 0 else { return }
+
+        self.width = Float(width)
+        self.height = Float(height)
+        
+        updateProjectionMatrix()
+    }
+    
+    private func updateProjectionMatrix()
+    {
+        let w = width / zoom
+        let h = height / zoom
+        
+        _projectionMatrix = matrix_float4x4.orthographic(left: -w,
+                                                         right: w,
+                                                         bottom: -h,
+                                                         top: h,
+                                                         near: 0.1,
+                                                         far: 1024)
+    }
+}
