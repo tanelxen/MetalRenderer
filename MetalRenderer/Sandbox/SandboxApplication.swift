@@ -114,12 +114,12 @@ final class SandboxApplication: NSObject
         
         if viewport.renderPass != nil
         {
-            renderer.render(to: viewport)
+            renderer.draw(to: viewport)
         }
         
         if viewport2.renderPass != nil
         {
-            renderer.render(to: viewport2)
+            renderer.draw(to: viewport2, fillMode: .lines)
         }
         
         renderer.endFrame()

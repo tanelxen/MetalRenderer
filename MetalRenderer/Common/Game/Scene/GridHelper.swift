@@ -84,14 +84,14 @@ final class GridHelper
     
     func render(with renderer: ForwardRenderer)
     {
-        var renderItem = RenderItem(technique: .grid)
-        renderItem.cullMode = .none
-        
-        renderItem.primitiveType = .triangleStrip
-        renderItem.vertexBuffer = gridQuad.verticesBuffer
-        renderItem.numVertices = gridQuad.numVertices
-        
-        renderer.add(item: renderItem)
+//        var renderItem = RenderItem(technique: .grid)
+//        renderItem.cullMode = .none
+//        
+//        renderItem.primitiveType = .triangleStrip
+//        renderItem.vertexBuffer = gridQuad.verticesBuffer
+//        renderItem.numVertices = gridQuad.numVertices
+//        
+//        renderer.add(item: renderItem)
         
         if isCreationMode
         {

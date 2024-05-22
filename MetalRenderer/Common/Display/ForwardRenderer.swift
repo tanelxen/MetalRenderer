@@ -37,7 +37,7 @@ final class ForwardRenderer
         commandBuffer.label = "Scene Command Buffer"
     }
     
-    func render(to viewport: Viewport)
+    func draw(to viewport: Viewport, fillMode: MTLTriangleFillMode = .fill)
     {
         commandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: viewport.renderPass!)
         
@@ -50,10 +50,27 @@ final class ForwardRenderer
             viewUniforms.viewportSize = viewport.maxBounds - viewport.minBounds
         }
         
+        switch viewport.viewType
+        {
+            case .top, .perspective:
+                viewUniforms.viewType = 0
+                
+            case .right:
+                viewUniforms.viewType = 1
+                
+            case .back:
+                viewUniforms.viewType = 2
+        }
+        
         commandEncoder.setVertexBytes(&viewUniforms, length: MemoryLayout<SceneConstants>.size, index: 1)
         
         for item in items
         {
+            guard item.allowedViews.isEmpty || item.allowedViews.contains(viewport.viewType)
+            else {
+               continue
+            }
+            
             apply(technique: item.technique, to: commandEncoder)
             commandEncoder.setCullMode(item.cullMode)
             
@@ -66,6 +83,15 @@ final class ForwardRenderer
             
             commandEncoder.setVertexBuffer(item.vertexBuffer, offset: 0, index: 0)
             commandEncoder.setFragmentTexture(item.texture, index: 0)
+            
+            if item.isSupportLineMode && fillMode == .lines
+            {
+                commandEncoder.setTriangleFillMode(.lines)
+            }
+            else
+            {
+                commandEncoder.setTriangleFillMode(.fill)
+            }
             
             if item.numIndices > 0
             {
@@ -159,4 +185,18 @@ struct RenderItem
     
     var tintColor: float4 = .one
     var texture: MTLTexture?
+    
+    var isSupportLineMode = false
+    
+    var allowedViews: Set<ViewType> = []
 }
+
+//struct AllowedViews: OptionSet
+//{
+//    static let top          = AllowedViews(rawValue: 1)    // 0001
+//    static let left         = AllowedViews(rawValue: 2)    // 0010
+//    static let front        = AllowedViews(rawValue: 4)    // 0100
+//    static let perspective  = AllowedViews(rawValue: 8)    // 1000
+//
+//    let rawValue: Int8
+//}

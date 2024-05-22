@@ -34,6 +34,10 @@ final class EditableMesh: EditableObject
         return abs(edge.face.plane.normal)
     }
     
+    var worldPosition: float3 {
+        faces.first?.verts.first?.position ?? .zero
+    }
+    
     var vertices: [float3] {
         faces.flatMap { $0.verts.map { $0.position } }
     }
@@ -149,6 +153,20 @@ final class EditableMesh: EditableObject
         
         edge.prev.pair.vert.position += delta
         edge.next.pair.next.vert.position += delta
+    }
+    
+    func setWorld(position: float3)
+    {
+        let delta = position - worldPosition
+        guard length(delta) > 1 else { return }
+        
+        for face in faces
+        {
+            for vert in face.verts
+            {
+                vert.position += delta
+            }
+        }
     }
     
     func extrudeSelectedFace(to distance: Float)

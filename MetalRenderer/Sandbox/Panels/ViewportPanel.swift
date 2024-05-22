@@ -17,7 +17,7 @@ final class ViewportPanel
     private let viewport: Viewport
     private let camera = DebugCamera()
     
-//    lazy var gridQuad = QuadShape(mins: float3(-4096, 0, -4096), maxs: float3(4096, 0, 4096))
+    lazy var gridQuad = QuadShape(mins: float3(-4096, 0, -4096), maxs: float3(4096, 0, 4096))
     
     private (set) var isHovered = false
     
@@ -29,9 +29,7 @@ final class ViewportPanel
     {
         self.viewport = viewport
         viewport.camera = camera
-        
-        camera.transform.position = float3(32, 128, -128)
-        camera.transform.rotation = Rotator(pitch: -30, yaw: 0, roll: 0)
+        viewport.viewType = .perspective
         
         BrushScene.current?.grid.viewport = viewport
     }
@@ -43,14 +41,15 @@ final class ViewportPanel
     
     func drawSpecial(with renderer: ForwardRenderer)
     {
-//        var renderItem = RenderItem(technique: .grid)
-//        renderItem.cullMode = .none
-//        
-//        renderItem.primitiveType = .triangleStrip
-//        renderItem.vertexBuffer = gridQuad.verticesBuffer
-//        renderItem.numVertices = gridQuad.numVertices
-//        
-//        renderer.add(item: renderItem)
+        var renderItem = RenderItem(technique: .grid)
+        renderItem.cullMode = .none
+        renderItem.allowedViews = [.perspective]
+        
+        renderItem.primitiveType = .triangleStrip
+        renderItem.vertexBuffer = gridQuad.verticesBuffer
+        renderItem.numVertices = gridQuad.numVertices
+        
+        renderer.add(item: renderItem)
     }
     
     func draw()

@@ -15,7 +15,7 @@ final class EditorLayer
     private var iniPath = ""// ResourceManager.pathInPreferences(for: "editor.ini")
     
     private var viewportPanel: ViewportPanel!
-    private var topViewPanel: TopViewPanel!
+    private var topViewPanel: OrthoViewPanel!
     private var hierarchyPanel: HierarchyPanel!
     private var inspectorPanel: InspectorPanel!
     private var assetsPanel: AssetsPanel!
@@ -36,7 +36,7 @@ final class EditorLayer
         ImGui_ImplMetal_Init(Engine.device)
         
         viewportPanel = ViewportPanel(viewport: sceneViewport)
-        topViewPanel = TopViewPanel(viewport: topViewport)
+        topViewPanel = OrthoViewPanel(viewport: topViewport)
         hierarchyPanel = HierarchyPanel()
         inspectorPanel = InspectorPanel()
         assetsPanel = AssetsPanel()
@@ -126,7 +126,8 @@ final class EditorLayer
     // Draw grid for viewports
     func specialDraw(with renderer: ForwardRenderer)
     {
-        
+        viewportPanel.drawSpecial(with: renderer)
+        topViewPanel.drawSpecial(with: renderer)
     }
     
     func draw()

@@ -18,6 +18,10 @@ final class PlainBrush: EditableObject
         }
     }
     
+    var worldPosition: float3 {
+        faces.first?.points.first ?? .zero
+    }
+    
     var selectedFacePoint: float3? {
         guard let index = selectedFaceIndex else { return nil }
         return faces[index].center
@@ -186,6 +190,20 @@ final class PlainBrush: EditableObject
         }
     }
     
+    func setWorld(position: float3)
+    {
+        let delta = position - worldPosition
+        guard length(delta) > 1 else { return }
+        
+        for face in faces
+        {
+            for i in face.points.indices
+            {
+                face.points[i] += delta
+            }
+        }
+    }
+    
     func setSelectedFace(position: float3)
     {
         guard let index = selectedFaceIndex else { return }
@@ -247,6 +265,7 @@ final class PlainBrush: EditableObject
         
         renderItem.cullMode = isRoom ? .front : .back
         renderItem.texture = TextureManager.shared.devTexture
+        renderItem.isSupportLineMode = true
         
         var vertices: [Vertex] = []
         

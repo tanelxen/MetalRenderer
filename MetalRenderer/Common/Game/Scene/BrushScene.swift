@@ -33,6 +33,8 @@ final class BrushScene
     private let q2b: Float = 2.54 / 100
     private let b2q: Float = 100 / 2.54
     
+    var brushType: BrushType = .plain
+    
     init()
     {
         BrushScene.current = self
@@ -42,7 +44,15 @@ final class BrushScene
     
     func addBrush(position: float3, size: float3)
     {
-        let brush = PlainBrush(origin: position, size: size)
+        let brush: EditableObject
+        
+        switch brushType {
+            case .plain:
+                brush = PlainBrush(origin: position, size: size)
+            case .mesh:
+                brush = EditableMesh(origin: position, size: size)
+        }
+        
         brush.isSelected = true
         
         brushes.forEach { $0.isSelected = false }
@@ -191,4 +201,10 @@ extension BrushScene
 //            }
 //        }
     }
+}
+
+enum BrushType: CaseIterable
+{
+    case plain
+    case mesh
 }

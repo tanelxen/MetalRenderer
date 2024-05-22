@@ -15,6 +15,7 @@ typedef struct
     matrix_float4x4 viewMatrix;
     matrix_float4x4 projectionMatrix;
     vector_float2 viewportSize;
+    int viewType;
 } SceneConstants;
 
 typedef struct

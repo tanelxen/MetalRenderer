@@ -160,6 +160,8 @@ class OrthoCamera: Camera
     private let movementSpeed: Float = 32
     private let zoomSpeed: Float = 2
     
+    private var velocity: float3 = .zero
+    
     private var width: Float = 1
     private var height: Float = 1
     private var zoom: Float = 8
@@ -178,11 +180,18 @@ class OrthoCamera: Camera
             zoom = 32
         }
         
+        let right = transform.rotation.right
+        let up = transform.rotation.up
+        
+        velocity = .zero
+        
         if Mouse.IsMouseButtonPressed(.right)
         {
-            transform.position.x -= Mouse.getDX() * movementSpeed * deltaTime
-            transform.position.z += Mouse.getDY() * movementSpeed * deltaTime
+            velocity -= right * Mouse.getDX() * (movementSpeed * deltaTime)
+            velocity += up * Mouse.getDY() * (movementSpeed * deltaTime)
         }
+        
+        transform.position += velocity
         
         updateProjectionMatrix()
     }

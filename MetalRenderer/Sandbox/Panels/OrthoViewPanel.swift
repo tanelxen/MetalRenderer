@@ -9,12 +9,14 @@ import AppKit
 import ImGui
 import simd
 
-final class TopViewPanel
+final class OrthoViewPanel
 {
-    let name = "View"
+    let name = "Ortho"
     
     private let viewport: Viewport
     private let camera = OrthoCamera()
+    
+    lazy var gridQuad = QuadShape(mins: [-4096, 0, -4096], maxs: [4096, 0, 4096])
     
     private (set) var isHovered = false
     
@@ -26,21 +28,36 @@ final class TopViewPanel
     {
         self.viewport = viewport
         viewport.camera = camera
-        
-        camera.transform.position = float3(0, 128, 0)
-        camera.transform.rotation = Rotator(pitch: -90, yaw: 0, roll: 0)
-        
-//        BrushScene.current?.grid.viewport = viewport
+        viewport.viewType = .top
     }
     
     private var dragOrigin: float3?
     private var objectInitialPos: float3?
     
-    private var currentViewType: ViewType = .top {
-        didSet {
-            camera.transform.rotation = currentViewType.rotation
-            camera.transform.position = currentViewType.position
+    func drawSpecial(with renderer: ForwardRenderer)
+    {
+        var renderItem = RenderItem(technique: .grid)
+        renderItem.cullMode = .none
+        renderItem.allowedViews = [viewport.viewType]
+        
+        renderItem.primitiveType = .triangleStrip
+        
+        renderItem.vertexBuffer = gridQuad.verticesBuffer
+        renderItem.numVertices = gridQuad.numVertices
+        
+        switch viewport.viewType
+        {
+            case .top, .perspective:
+                renderItem.transform.rotation = Rotator(pitch: 0, yaw: 0, roll: 0)
+                
+            case .right:
+                renderItem.transform.rotation = Rotator(pitch: 90, yaw: -90, roll: 0)
+                
+            case .back:
+                renderItem.transform.rotation = Rotator(pitch: 90, yaw: 0, roll: 0)
         }
+        
+        renderer.add(item: renderItem)
     }
     
     func draw()
@@ -128,12 +145,60 @@ final class TopViewPanel
         
         drawControls()
         
+        isHovered = isHovered && !ImGuiIsItemHovered(ImGuiFlag_None)
+        
         ImGuiEnd()
         
         if isHovered
         {
+            update()
             camera.update()
         }
+    }
+    
+    private func update()
+    {
+        guard let brush = BrushScene.current.selected else { return }
+        
+        guard Mouse.IsMouseButtonPressed(.left)
+        else {
+            dragOrigin = nil
+            objectInitialPos = nil
+            return
+        }
+        
+        // Плоскость, на которую будем проецировать луч, по ней будем перемещаться
+        let viewNormal = camera.transform.rotation.forward
+//        let distance = dot(facePoint, viewNormal)
+        let plane = Plane(normal: viewNormal, distance: 0)
+        
+        guard let start = dragOrigin, let origin = objectInitialPos
+        else {
+            let ray = viewport.mousePositionInWorld()
+            dragOrigin = intersection(ray: ray, plane: plane)
+            objectInitialPos = brush.worldPosition
+            return
+        }
+        
+        let ray = viewport.mousePositionInWorld()
+        guard let end = intersection(ray: ray, plane: plane)
+        else {
+            return
+        }
+        
+        var delta = end - start
+        
+        let gridSize: Float = 8
+        delta = floor(delta / gridSize) * gridSize
+        
+        let newPos = origin + delta
+        
+        brush.setWorld(position: newPos)
+    }
+    
+    private func dragObject()
+    {
+        
     }
     
     private func dragFace(at facePoint: float3, along axis: float3)
@@ -269,14 +334,14 @@ final class TopViewPanel
         ImGuiSetCursorPos(pos)
         
         ImGuiPushItemWidth(70)
-        if ImGuiBeginCombo("##ViewType", currentViewType.name, Im(ImGuiComboFlags_None))
+        if ImGuiBeginCombo("##ViewType", viewport.viewType.name, Im(ImGuiComboFlags_None))
         {
-            for item in ViewType.allCases
+            for item in [ViewType.top, ViewType.back, ViewType.right]
             {
                 let flag = Im(ImGuiSelectableFlags_SelectOnClick)
-                if ImGuiSelectable(item.name, item == currentViewType, flag, ImVec2(0, 0))
+                if ImGuiSelectable(item.name, item == viewport.viewType, flag, ImVec2(0, 0))
                 {
-                    currentViewType = item
+                    viewport.viewType = item
                 }
             }
             
@@ -286,37 +351,14 @@ final class TopViewPanel
     }
 }
 
-enum ViewType: CaseIterable
+extension ViewType
 {
-    case top
-    case left
-    case front
-    case perspective
-    
     var name: String {
         switch self {
             case .top: return "Top"
-            case .left: return "Left"
-            case .front: return "Front"
+            case .right: return "Right"
+            case .back: return "Back"
             case .perspective: return "3D"
-        }
-    }
-    
-    var rotation: Rotator {
-        switch self {
-            case .top: return Rotator(pitch: -90, yaw: 0, roll: 0)
-            case .left: return Rotator(pitch: 0, yaw: 90, roll: 0)
-            case .front: return Rotator(pitch: 0, yaw: 180, roll: 0)
-            case .perspective: return Rotator(pitch: -30, yaw: 0, roll: 0)
-        }
-    }
-    
-    var position: float3 {
-        switch self {
-            case .top: return float3(0, 128, 0)
-            case .left: return float3(-128, 0, 0)
-            case .front: return float3(0, 0, 128)
-            case .perspective: return float3(32, 128, -128)
         }
     }
 }

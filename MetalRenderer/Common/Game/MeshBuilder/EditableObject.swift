@@ -18,6 +18,8 @@ protocol EditableObject: AnyObject
     var selectedEdgePoint: float3? { get }
     var selectedEdgeAxis: float3? { get }
     
+    var worldPosition: float3 { get }
+    
     var isRoom: Bool { get set }
     
     init(origin: float3, size: float3)
@@ -25,6 +27,7 @@ protocol EditableObject: AnyObject
     func selectFace(by ray: Ray)
     func selectEdge(by ray: Ray)
     
+    func setWorld(position: float3)
     func setSelectedFace(position: float3)
     func setSelectedEdge(position: float3)
     

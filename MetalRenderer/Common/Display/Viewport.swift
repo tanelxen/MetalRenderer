@@ -26,16 +26,17 @@ final class Viewport
     private (set) var minBounds: float2 = .zero
     private (set) var maxBounds: float2 = float2(600, 600)
     
+    var viewType: ViewType = .perspective {
+        didSet {
+            camera?.transform.rotation = viewType.rotation
+            camera?.transform.position = viewType.position
+        }
+    }
+    
     // Для Retina всегда 2, для обычных - 1
     var dpi: Float = 2
     
     var texture: MTLTexture?
-    
-//    var textureRawPointer: UnsafeMutableRawPointer? {
-//        withUnsafePointer(to: &texture) { ptr in
-//            return UnsafeMutableRawPointer(mutating: ptr)
-//        }
-//    }
     
     var width: Int {
         Int(maxBounds.x - minBounds.x)
@@ -43,23 +44,6 @@ final class Viewport
     
     var height: Int {
         Int(maxBounds.y - minBounds.y)
-    }
-    
-    var orthographicMatrix: float4x4 {
-        let left: Float = 0
-        let right: Float = Float(width)
-        let top: Float = 0
-        let bottom: Float = Float(height)
-        
-        let near: Float = -1
-        let far: Float = 1
-        
-        return float4x4(
-            [2 / (right - left), 0, 0, 0],
-            [0, 2 / (top - bottom), 0, 0],
-            [0, 0, -1 / (near - far), 0],
-            [(left + right) / (left - right), (top + bottom) / (bottom - top), -far / (near - far), 1]
-        )
     }
     
     private var framebufferWidth: Int {
@@ -178,4 +162,30 @@ final class Viewport
 //
 //        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: task)
 //    }
+}
+
+enum ViewType: CaseIterable
+{
+    case top
+    case right
+    case back
+    case perspective
+    
+    var rotation: Rotator {
+        switch self {
+            case .top: return Rotator(pitch: -90, yaw: 0, roll: 0)
+            case .right: return Rotator(pitch: 0, yaw: -90, roll: 0)
+            case .back: return Rotator(pitch: 0, yaw: 0, roll: 0)
+            case .perspective: return Rotator(pitch: -30, yaw: 0, roll: 0)
+        }
+    }
+    
+    var position: float3 {
+        switch self {
+            case .top: return float3(0, 128, 0)
+            case .right: return float3(128, 0, 0)
+            case .back: return float3(0, 0, -128)
+            case .perspective: return float3(32, 128, -128)
+        }
+    }
 }
