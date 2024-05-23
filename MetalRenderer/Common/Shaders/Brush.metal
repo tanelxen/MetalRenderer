@@ -23,6 +23,7 @@ struct VertexOut
     float4 color;
     float2 uv;
     float shade [[ flat ]];
+    float pointSize [[ point_size ]];
 };
 
 constant float lightaxis[3] = {0.6f, 0.8f, 1.0f};
@@ -66,6 +67,7 @@ vertex VertexOut brush_vs(constant VertexIn       *vertices       [[ buffer(0) ]
     data.uv = vertices[vertexID].uv;
     data.color = vertices[vertexID].color;
     data.shade = shadeForNormal(vertices[vertexID].normal);
+    data.pointSize = 10;
     
     return data;
 }
@@ -74,10 +76,15 @@ constexpr sampler sampler2d(min_filter::linear, mag_filter::linear, address::rep
 
 fragment float4 brush_fs(VertexOut in [[ stage_in ]], texture2d<half> albedoMap [[ texture(0) ]])
 {
-    half4 albedo = albedoMap.sample(sampler2d, in.uv);
+    float4 albedo = in.color;
+    
+    if (!is_null_texture(albedoMap))
+    {
+        albedo = float4(albedoMap.sample(sampler2d, in.uv)) * in.color;
+    }
     
     float3 shade = float3(in.shade);
-    return float4(shade, 1.0) * float4(albedo) * in.color;
+    return float4(shade, 1.0) * float4(albedo);
 }
 
 

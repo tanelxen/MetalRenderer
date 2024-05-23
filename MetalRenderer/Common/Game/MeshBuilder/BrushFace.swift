@@ -31,6 +31,8 @@ final class BrushFace
         points.reduce(.zero, +) / Float(points.count)
     }
     
+    var isHighlighted = false
+    
     init(planeIndex: Int)
     {
         self.planeIndex = planeIndex

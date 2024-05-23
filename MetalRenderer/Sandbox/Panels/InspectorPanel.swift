@@ -45,6 +45,11 @@ final class InspectorPanel
         {
             brush.isRoom = isRoom
         }
+        
+        if !gEditorInfo.isEmpty
+        {
+            
+        }
     }
 }
 
@@ -57,3 +62,5 @@ extension BrushType
         }
     }
 }
+
+var gEditorInfo: String = ""

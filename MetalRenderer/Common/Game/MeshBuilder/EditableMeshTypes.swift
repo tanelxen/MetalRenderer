@@ -18,6 +18,11 @@ class Vert
     {
         position = pos
     }
+    
+    func isClose(to other: Vert) -> Bool
+    {
+        return length(position - other.position) < 0.1
+    }
 }
 
 class HalfEdge
@@ -35,9 +40,15 @@ class HalfEdge
         (vert.position + next.vert.position) * 0.5
     }
     
+    var isHighlighted = false
+    
     init(_ name: String = "")
     {
         self.name = name
+    }
+    
+    var fromTo: (Vert, Vert) {
+        (pair!.vert, vert)
     }
 }
 
@@ -47,8 +58,6 @@ class Face
     
     var edges: [HalfEdge] = []
     var verts: [Vert] = []
-    
-    var normal: float3 = .zero
     var plane: Plane!
     
     var center: float3 {
@@ -56,8 +65,63 @@ class Face
         return points.reduce(.zero, +) / Float(points.count)
     }
     
+    var isHighlighted = false
+    
     init(_ name: String = "")
     {
         self.name = name
+    }
+}
+
+extension Vert: Hashable
+{
+    static func == (lhs: Vert, rhs: Vert) -> Bool {
+        ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(ObjectIdentifier(self))
+    }
+}
+
+extension HalfEdge: Hashable
+{
+    static func == (lhs: HalfEdge, rhs: HalfEdge) -> Bool {
+        ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(ObjectIdentifier(self))
+    }
+}
+
+// Iterates through half-edges around the given vertex.
+// Got from https://github.com/gyk/TrivialSolutions
+class VertexEdgeIterator: IteratorProtocol
+{
+    let centerVertex: Vert
+    var currEdge: HalfEdge?
+
+    init(_ centerVertex: Vert)
+    {
+        self.centerVertex = centerVertex
+    }
+
+    func next() -> HalfEdge?
+    {
+        if currEdge == nil
+        {
+            currEdge = self.centerVertex.edge
+        }
+        else if currEdge!.fromTo == self.centerVertex.edge!.fromTo
+        {
+            return nil
+        }
+
+        defer {
+            currEdge = currEdge!.pair!.next
+        }
+        
+        return currEdge
     }
 }

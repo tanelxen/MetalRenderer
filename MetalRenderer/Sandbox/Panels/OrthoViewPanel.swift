@@ -34,6 +34,8 @@ final class OrthoViewPanel
     private var dragOrigin: float3?
     private var objectInitialPos: float3?
     
+    private var dragMode: DragMode = .none
+    
     func drawSpecial(with renderer: ForwardRenderer)
     {
         var renderItem = RenderItem(technique: .grid)
@@ -158,6 +160,72 @@ final class OrthoViewPanel
     
     private func update()
     {
+        guard let brush = BrushScene.current.selected as? EditableMesh else { return }
+        
+//        if !Mouse.IsMouseButtonPressed(.left)
+//        {
+//            dragMode = .none
+//        }
+        
+//        guard Mouse.IsMouseButtonPressed(.left) else { return }
+        
+        let ray = viewport.mousePositionInWorld()
+        
+        for face in brush.faces
+        {
+            face.isHighlighted = dragMode == .brush
+
+            if dot(face.plane.normal, ray.direction) < -0.98
+            {
+                if intersect(ray: ray, point: face.center, epsilon: 2, divergence: 0.01)
+                {
+                    face.isHighlighted = true
+                    
+                    if Mouse.IsMouseButtonPressed(.left)
+                    {
+                        dragMode = .brush
+                    }
+                }
+                else
+                {
+                    for edge in face.edges
+                    {
+//                        edge.isHighlighted = false
+                        edge.pair.face.isHighlighted = false
+                        
+                        if intersect(ray: ray, point: edge.center, epsilon: 2, divergence: 0.01)
+                        {
+//                            edge.isHighlighted = true
+                            edge.pair.face.isHighlighted = true
+                            
+                            if Mouse.IsMouseButtonPressed(.left)
+                            {
+                                brush.selectedFace = edge.pair.face
+                                dragMode = .face
+                            }
+                            
+//                            break
+                        }
+                    }
+                }
+                
+//                break
+            }
+        }
+        
+//        if dragMode == .brush
+//        {
+//            dragObject()
+//        }
+        
+        if dragMode == .face, let point = brush.selectedFacePoint, let axis = brush.selectedEdgeAxis
+        {
+            dragFace(at: point, along: axis)
+        }
+    }
+    
+    private func dragObject()
+    {
         guard let brush = BrushScene.current.selected else { return }
         
         guard Mouse.IsMouseButtonPressed(.left)
@@ -169,7 +237,6 @@ final class OrthoViewPanel
         
         // Плоскость, на которую будем проецировать луч, по ней будем перемещаться
         let viewNormal = camera.transform.rotation.forward
-//        let distance = dot(facePoint, viewNormal)
         let plane = Plane(normal: viewNormal, distance: 0)
         
         guard let start = dragOrigin, let origin = objectInitialPos
@@ -189,22 +256,15 @@ final class OrthoViewPanel
         var delta = end - start
         
         let gridSize: Float = 8
-        delta = floor(delta / gridSize) * gridSize
+        delta = floor(delta / gridSize + 0.5) * gridSize
         
         let newPos = origin + delta
         
         brush.setWorld(position: newPos)
     }
     
-    private func dragObject()
-    {
-        
-    }
-    
     private func dragFace(at facePoint: float3, along axis: float3)
     {
-        guard isHovered else { return }
-        
         guard Mouse.IsMouseButtonPressed(.left)
         else {
             dragOrigin = nil
@@ -361,4 +421,43 @@ extension ViewType
             case .perspective: return "3D"
         }
     }
+}
+
+enum DragMode
+{
+    case none
+    case brush
+    case face
+    case edge
+    case vert
+}
+
+// Got from GTKRadiant matlib
+private func intersect(ray: Ray, point: float3, epsilon: Float, divergence: Float) -> Bool
+{
+    var displacement = float3()
+    var depth: Float = 0
+
+    // calc displacement of test point from ray origin
+    displacement = point - ray.origin
+    
+    // calc length of displacement vector along ray direction
+    depth = dot(displacement, ray.direction)
+    
+    if depth < 0.0 {
+        return false
+    }
+    
+    // calc position of closest point on ray to test point
+    displacement = ray.origin + ray.direction * depth
+    
+    // calc displacement of test point from closest point
+    displacement = point - displacement
+    
+    // calc length of displacement, subtract depth-dependant epsilon
+    if length(displacement) - (epsilon + ( depth * divergence )) > 0 {
+        return false
+    }
+    
+    return true
 }

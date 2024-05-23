@@ -33,7 +33,7 @@ final class BrushScene
     private let q2b: Float = 2.54 / 100
     private let b2q: Float = 100 / 2.54
     
-    var brushType: BrushType = .plain
+    var brushType: BrushType = .mesh
     
     init()
     {

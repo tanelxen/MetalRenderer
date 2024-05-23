@@ -30,6 +30,7 @@ final class ForwardRenderer
     private var commandBuffer: MTLCommandBuffer!
     private var commandEncoder: MTLRenderCommandEncoder!
     private var items: [RenderItem] = []
+    private var lines: [Line] = []
     
     func startFrame()
     {
@@ -115,10 +116,17 @@ final class ForwardRenderer
         items.append(item)
     }
     
+    func addLine(start: float3, end: float3, viewPlane: Plane)
+    {
+        let line = Line(start: start, end: end, viewPlane: viewPlane)
+        lines.append(line)
+    }
+    
     func endFrame()
     {
         commandBuffer.commit()
         items.removeAll()
+        lines.removeAll()
     }
     
     func apply(technique: RenderTechnique, to encoder: MTLRenderCommandEncoder)
@@ -200,3 +208,10 @@ struct RenderItem
 //
 //    let rawValue: Int8
 //}
+
+private struct Line
+{
+    let start: float3
+    let end: float3
+    let viewPlane: Plane
+}

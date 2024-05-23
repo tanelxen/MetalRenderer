@@ -102,10 +102,10 @@ final class ViewportPanel
                         brush.isSelected = true
                     }
                     
-//                    if ImGuiIsKeyPressedMap(Im(ImGuiKey_V), false)
-//                    {
-//                        brush.extrudeSelectedFace(to: 16)
-//                    }
+                    if ImGuiIsKeyPressedMap(Im(ImGuiKey_V), false)
+                    {
+                        (brush as? EditableMesh)?.extrudeSelectedFace(to: 16)
+                    }
                 }
                 else if let point = brush.selectedEdgePoint, let axis = brush.selectedEdgeAxis
                 {

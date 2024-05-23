@@ -50,11 +50,12 @@ final class PlainBrush: EditableObject
     var selectedEdge: (float3, float3)?
     
     var planes: [Plane]
-    private var faces: [BrushFace]
+    var faces: [BrushFace]
     
     private var selectedFaceIndex: Int?
     
     private var vertexBuffer: MTLBuffer!
+    private var vertexBuffer2: MTLBuffer!
     
     required init(origin: float3, size: float3)
     {
@@ -78,6 +79,7 @@ final class PlainBrush: EditableObject
         
         let length = MemoryLayout<Vertex>.stride * MAX_VERTS
         vertexBuffer = Engine.device.makeBuffer(length: length)
+        vertexBuffer2 = Engine.device.makeBuffer(length: length)
     }
     
     private func updatePlanes(position: float3, scale: float3)
@@ -300,6 +302,55 @@ final class PlainBrush: EditableObject
         renderItem.numVertices = vertices.count
         
         renderer.add(item: renderItem)
+        
+        if isSelected
+        {
+            var renderItem = RenderItem(technique: .brush)
+            
+            renderItem.cullMode = .none
+            renderItem.isSupportLineMode = true
+            renderItem.primitiveType = .point
+            
+            var vertices: [Vertex] = []
+            
+            for face in faces
+            {
+                let vertClr = float4(1, 1, 1, 1)
+                let faceClr = face.isHighlighted ? float4(0, 1, 0, 1) : float4(1, 0, 1, 1)
+                let edgeClr = float4(1, 0, 0, 1)
+                
+                guard face.points.count > 2 else { continue }
+
+                let verts = [
+                    Vertex(pos: face.points[0], clr: vertClr),
+                    Vertex(pos: face.points[1], clr: vertClr),
+                    Vertex(pos: face.points[2], clr: vertClr),
+                    Vertex(pos: face.points[3], clr: vertClr),
+                    
+                    Vertex(pos: face.center, clr: faceClr),
+                    
+                    Vertex(pos: (face.points[0] + face.points[1]) * 0.5, clr: edgeClr),
+                    Vertex(pos: (face.points[1] + face.points[2]) * 0.5, clr: edgeClr),
+                    Vertex(pos: (face.points[2] + face.points[3]) * 0.5, clr: edgeClr),
+                    Vertex(pos: (face.points[3] + face.points[0]) * 0.5, clr: edgeClr)
+                ]
+
+                vertices.append(contentsOf: verts)
+            }
+            
+            var pointer = vertexBuffer2.contents().bindMemory(to: Vertex.self, capacity: MAX_VERTS)
+            
+            for vertex in vertices
+            {
+                pointer.pointee = vertex
+                pointer = pointer.advanced(by: 1)
+            }
+        
+            renderItem.vertexBuffer = vertexBuffer2
+            renderItem.numVertices = vertices.count
+            
+            renderer.add(item: renderItem)
+        }
     }
 }
 
