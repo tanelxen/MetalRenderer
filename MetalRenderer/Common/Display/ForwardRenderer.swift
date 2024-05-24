@@ -150,6 +150,11 @@ final class ForwardRenderer
                 encoder.setFrontFacing(.clockwise)
                 encoder.setDepthStencilState(gridStencilState)
                 encoder.setRenderPipelineState(pipelineStates.simpleGrid)
+                
+            case .dot:
+                encoder.setCullMode(.none)
+                encoder.setDepthStencilState(regularStencilState)
+                encoder.setRenderPipelineState(pipelineStates.dot)
         }
     }
     
@@ -198,16 +203,6 @@ struct RenderItem
     
     var allowedViews: Set<ViewType> = []
 }
-
-//struct AllowedViews: OptionSet
-//{
-//    static let top          = AllowedViews(rawValue: 1)    // 0001
-//    static let left         = AllowedViews(rawValue: 2)    // 0010
-//    static let front        = AllowedViews(rawValue: 4)    // 0100
-//    static let perspective  = AllowedViews(rawValue: 8)    // 1000
-//
-//    let rawValue: Int8
-//}
 
 private struct Line
 {

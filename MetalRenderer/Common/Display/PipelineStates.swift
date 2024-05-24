@@ -23,28 +23,30 @@ class PipelineStates
     private (set) var simpleGrid: MTLRenderPipelineState!
     
     private (set) var brush: MTLRenderPipelineState!
+    private (set) var dot: MTLRenderPipelineState!
     
     init()
     {
-        createSkyboxPipelineState()
-        createWorldMeshLightmappedPipelineState()
-        createWorldMeshVertexlitPipelineState()
-        createSkeletalMeshPipelineState()
+        skybox = createSkyboxPipelineState()
+        worldMeshLightmapped = createWorldMeshLightmappedPipelineState()
+        worldMeshVertexlit = createWorldMeshVertexlitPipelineState()
+        skeletalMesh = createSkeletalMeshPipelineState()
         
-        createBasicPipelineState()
-        createBasicInstPipelineState()
+        basic = createBasicPipelineState()
+        basicInst = createBasicInstPipelineState()
         
-        createBillboardsPipelineState()
-        createParticlesPipelineState()
+        billboards = createBillboardsPipelineState()
+        particles = createParticlesPipelineState()
         
-        createUserInterfacePipelineState()
+        userInterface = createUserInterfacePipelineState()
         
-        createSimpleGridPipelineState()
+        simpleGrid = createSimpleGridPipelineState()
         
-        createBrushPipelineState()
+        brush = createBrushPipelineState()
+        dot = createDotPipelineState()
     }
     
-    private func createSkyboxPipelineState()
+    private func createSkyboxPipelineState() -> MTLRenderPipelineState?
     {
         let descriptor = MTLRenderPipelineDescriptor()
         
@@ -56,10 +58,10 @@ class PipelineStates
 
         descriptor.label = "Skybox Pipeline State"
 
-        skybox = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
+        return try? Engine.device.makeRenderPipelineState(descriptor: descriptor)
     }
     
-    private func createWorldMeshLightmappedPipelineState()
+    private func createWorldMeshLightmappedPipelineState() -> MTLRenderPipelineState?
     {
         let descriptor = MTLRenderPipelineDescriptor()
         descriptor.colorAttachments[0].pixelFormat = Preferences.colorPixelFormat
@@ -71,10 +73,10 @@ class PipelineStates
 
         descriptor.label = "World Mesh Lightmapped Pipeline State"
 
-        worldMeshLightmapped = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
+        return try? Engine.device.makeRenderPipelineState(descriptor: descriptor)
     }
     
-    private func createWorldMeshVertexlitPipelineState()
+    private func createWorldMeshVertexlitPipelineState() -> MTLRenderPipelineState?
     {
         let descriptor = MTLRenderPipelineDescriptor()
         descriptor.colorAttachments[0].pixelFormat = Preferences.colorPixelFormat
@@ -86,10 +88,10 @@ class PipelineStates
 
         descriptor.label = "World Mesh Vertexlit Pipeline State"
 
-        worldMeshVertexlit = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
+        return try? Engine.device.makeRenderPipelineState(descriptor: descriptor)
     }
     
-    private func createSkeletalMeshPipelineState()
+    private func createSkeletalMeshPipelineState() -> MTLRenderPipelineState?
     {
         let descriptor = MTLRenderPipelineDescriptor()
         descriptor.colorAttachments[0].pixelFormat = Preferences.colorPixelFormat
@@ -101,10 +103,10 @@ class PipelineStates
 
         descriptor.label = "Skeletal Mesh Pipeline State"
 
-        skeletalMesh = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
+        return try? Engine.device.makeRenderPipelineState(descriptor: descriptor)
     }
     
-    private func createBasicPipelineState()
+    private func createBasicPipelineState() -> MTLRenderPipelineState?
     {
         let descriptor = MTLRenderPipelineDescriptor()
         
@@ -126,10 +128,10 @@ class PipelineStates
 
         descriptor.label = "Basic Render Pipeline State"
 
-        basic = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
+        return try? Engine.device.makeRenderPipelineState(descriptor: descriptor)
     }
     
-    private func createBasicInstPipelineState()
+    private func createBasicInstPipelineState() -> MTLRenderPipelineState?
     {
         let descriptor = MTLRenderPipelineDescriptor()
         
@@ -151,10 +153,10 @@ class PipelineStates
 
         descriptor.label = "Basic Instanced Render Pipeline State"
 
-        basicInst = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
+        return try? Engine.device.makeRenderPipelineState(descriptor: descriptor)
     }
     
-    private func createBillboardsPipelineState()
+    private func createBillboardsPipelineState() -> MTLRenderPipelineState?
     {
         let descriptor = MTLRenderPipelineDescriptor()
         
@@ -176,10 +178,10 @@ class PipelineStates
 
         descriptor.label = "Billboards Render Pipeline State"
 
-        billboards = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
+        return try? Engine.device.makeRenderPipelineState(descriptor: descriptor)
     }
     
-    private func createParticlesPipelineState()
+    private func createParticlesPipelineState() -> MTLRenderPipelineState?
     {
         let descriptor = MTLRenderPipelineDescriptor()
         
@@ -201,10 +203,10 @@ class PipelineStates
 
         descriptor.label = "Particles Render Pipeline State"
 
-        particles = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
+        return try? Engine.device.makeRenderPipelineState(descriptor: descriptor)
     }
     
-    private func createUserInterfacePipelineState()
+    private func createUserInterfacePipelineState() -> MTLRenderPipelineState?
     {
         let descriptor = MTLRenderPipelineDescriptor()
         
@@ -226,10 +228,10 @@ class PipelineStates
 
         descriptor.label = "UI Render Pipeline State"
 
-        userInterface = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
+        return try? Engine.device.makeRenderPipelineState(descriptor: descriptor)
     }
     
-    private func createSimpleGridPipelineState()
+    private func createSimpleGridPipelineState() -> MTLRenderPipelineState?
     {
         let descriptor = MTLRenderPipelineDescriptor()
         
@@ -251,10 +253,10 @@ class PipelineStates
 
         descriptor.label = "Simple Grid Pipeline State"
 
-        simpleGrid = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
+        return try? Engine.device.makeRenderPipelineState(descriptor: descriptor)
     }
     
-    private func createBrushPipelineState()
+    private func createBrushPipelineState() -> MTLRenderPipelineState?
     {
         let descriptor = MTLRenderPipelineDescriptor()
         
@@ -276,7 +278,23 @@ class PipelineStates
 
         descriptor.label = "Simple Grid Pipeline State"
 
-        brush = try! Engine.device.makeRenderPipelineState(descriptor: descriptor)
+        return try? Engine.device.makeRenderPipelineState(descriptor: descriptor)
+    }
+    
+    private func createDotPipelineState() -> MTLRenderPipelineState?
+    {
+        let descriptor = MTLRenderPipelineDescriptor()
+        
+        descriptor.colorAttachments[0].pixelFormat = Preferences.colorPixelFormat
+        descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
+
+        descriptor.vertexFunction = Engine.defaultLibrary.makeFunction(name: "editor_dot_vs")
+        descriptor.fragmentFunction = Engine.defaultLibrary.makeFunction(name: "editor_dot_fs")
+        descriptor.vertexDescriptor = brushVertexDescriptor()
+
+        descriptor.label = "Editor Dot Pipeline State"
+
+        return try? Engine.device.makeRenderPipelineState(descriptor: descriptor)
     }
     
     private func basicVertexDescriptor() -> MTLVertexDescriptor

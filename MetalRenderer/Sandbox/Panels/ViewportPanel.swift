@@ -19,6 +19,8 @@ final class ViewportPanel
     
     lazy var gridQuad = QuadShape(mins: float3(-4096, 0, -4096), maxs: float3(4096, 0, 4096))
     
+    lazy var utilityRenderer = MeshUtilityRenderer()
+    
     private (set) var isHovered = false
     
     var isPlaying: Bool {
@@ -34,7 +36,13 @@ final class ViewportPanel
         BrushScene.current?.grid.viewport = viewport
     }
     
-    var guizmoTransform: Transform?
+    private var gizmoType: ImGuizmoType = .translate
+    
+    private var selectionMode: SelectionMode = .object {
+        didSet {
+            BrushScene.current.selected?.isSelected = true
+        }
+    }
     
     private var dragOrigin: float3?
     private var objectInitialPos: float3?
@@ -50,6 +58,13 @@ final class ViewportPanel
         renderItem.numVertices = gridQuad.numVertices
         
         renderer.add(item: renderItem)
+        
+        if let selected = BrushScene.current.selected as? EditableMesh
+        {
+            utilityRenderer.mesh = selected
+            utilityRenderer.selectionMode = selectionMode
+            utilityRenderer.render(with: renderer)
+        }
     }
     
     func draw()
@@ -91,48 +106,11 @@ final class ViewportPanel
         }
         else
         {
-            if let brush = BrushScene.current.selected
-            {
-                if let point = brush.selectedFacePoint, let axis = brush.selectedFaceAxis
-                {
-                    dragFace(at: point, along: axis)
-
-                    if ImGuiIsKeyPressedMap(Im(ImGuiKey_Escape), false)
-                    {
-                        brush.isSelected = true
-                    }
-                    
-                    if ImGuiIsKeyPressedMap(Im(ImGuiKey_V), false)
-                    {
-                        (brush as? EditableMesh)?.extrudeSelectedFace(to: 16)
-                    }
-                }
-                else if let point = brush.selectedEdgePoint, let axis = brush.selectedEdgeAxis
-                {
-                    dragEdge(at: point, along: axis)
-
-                    if ImGuiIsKeyPressedMap(Im(ImGuiKey_Escape), false)
-                    {
-                        brush.isSelected = true
-                    }
-                }
-                else
-                {
-//                    renderGizmo(for: brush.transform)
-
-                    if ImGuiIsKeyPressedMap(Im(ImGuiKey_Escape), false)
-                    {
-                        brush.isSelected = false
-                    }
-                }
-                
-                if ImGuiIsKeyPressedMap(Im(ImGuiKey_Backspace), false)
-                {
-                    BrushScene.current.removeSelected()
-                }
-            }
+            updateOperations()
             
             drawPlayPauseControl()
+            drawGizmoControl()
+            
             isHovered = isHovered && !ImGuiIsItemHovered(ImGuiFlag_None)
         }
         
@@ -141,6 +119,64 @@ final class ViewportPanel
         if isHovered
         {
             camera.update()
+        }
+    }
+    
+    private func updateOperations()
+    {
+        guard let brush = BrushScene.current.selected as? EditableMesh else { return }
+        
+        if selectionMode == .face, let point = brush.selectedFacePoint
+        {
+            let transform = Transform(position: point)
+            if renderGizmo(for: transform)
+            {
+                brush.setSelectedFace(position: transform.position)
+            }
+            
+            if ImGuiIsKeyPressedMap(Im(ImGuiKey_Escape), false)
+            {
+                brush.isSelected = true
+            }
+            
+            if ImGuiIsKeyPressedMap(Im(ImGuiKey_Backspace), false)
+            {
+                brush.removeSelectedFace()
+            }
+        }
+        else if selectionMode == .edge, let point = brush.selectedEdgePoint
+        {
+            let transform = Transform(position: point)
+            if renderGizmo(for: transform)
+            {
+                brush.setSelectedEdge(position: transform.position)
+            }
+            
+            if ImGuiIsKeyPressedMap(Im(ImGuiKey_Escape), false)
+            {
+                brush.isSelected = true
+            }
+        }
+        else if selectionMode == .object
+        {
+            if let anchor = brush.faces.first?.verts.first?.position
+            {
+                let transform = Transform(position: anchor)
+                if renderGizmo(for: transform)
+                {
+                    brush.setWorld(position: transform.position)
+                }
+            }
+            
+            if ImGuiIsKeyPressedMap(Im(ImGuiKey_Escape), false)
+            {
+                brush.isSelected = false
+            }
+            
+            if ImGuiIsKeyPressedMap(Im(ImGuiKey_Backspace), false)
+            {
+                BrushScene.current.removeSelected()
+            }
         }
     }
     
@@ -262,7 +298,7 @@ final class ViewportPanel
         viewport.changeBounds(min: min, max: max)
     }
     
-    private func renderGizmo(for transform: Transform)
+    private func renderGizmo(for transform: Transform) -> Bool
     {
         ImGuizmoSetOrthographic(false)
         ImGuizmoSetDrawlist(nil)
@@ -285,9 +321,7 @@ final class ViewportPanel
         
         // Snapping
         let snap: Bool = true //Input.isPressed(key: .shift)
-        var snapValues: float3 = float3(repeating: 16)
-        
-        let gizmoType: ImGuizmoType = .translate
+        var snapValues: float3 = (gizmoType == .rotate) ? float3(repeating: 45.0) : float3(repeating: 8)
         
         withUnsafeBytes(of: viewMatrix) { (view: UnsafeRawBufferPointer) -> Void in
             withUnsafeBytes(of: projectionMatrix) { (project: UnsafeRawBufferPointer) -> Void in
@@ -309,22 +343,30 @@ final class ViewportPanel
         {
             transform.position = modelMatrix.columns.3.xyz
         }
+        
+        return ImGuizmoIsUsing()
     }
     
     private func selectObject()
     {
-        guard isHovered else { return }
-        guard !ImGuizmoIsUsing() else { return }
-        
         guard let brush = BrushScene.current.selected else { return }
         
         let ray = viewport.mousePositionInWorld()
         
-//        let end = ray.origin + ray.direction * 1024
-//        Debug.shared.addLine(start: ray.origin, end: end, color: float4(0, 1, 0, 1))
-        
-//        brush.selectEdge(by: ray)
-        brush.selectFace(by: ray)
+        switch selectionMode
+        {
+            case .object:
+                break
+                
+            case .vertex:
+                break
+                
+            case .face:
+                brush.selectFace(by: ray)
+                
+            case .edge:
+                brush.selectEdge(by: ray)
+        }
     }
     
     private func drawPlayPauseControl()
@@ -367,6 +409,97 @@ final class ViewportPanel
         
         ImGuiPopID()
     }
+    
+    private func drawGizmoControl()
+    {
+        let windowFlags: ImGuiWindowFlags = Im(ImGuiWindowFlags_NoDecoration) | Im(ImGuiWindowFlags_NoDocking)
+            | Im(ImGuiWindowFlags_AlwaysAutoResize) | Im(ImGuiWindowFlags_NoSavedSettings)
+            | Im(ImGuiWindowFlags_NoFocusOnAppearing) | Im(ImGuiWindowFlags_NoNav)
+        
+        ImGuiPushStyleVar(Im(ImGuiStyleVar_WindowBorderSize), 0.0)
+        
+        var viewportPos: ImVec2 = ImVec2(0, 0)
+        ImGuiGetWindowPos(&viewportPos)
+        
+        let tabBarHeight: Float = 23
+        
+        var viewportWindowSize: ImVec2 = ImVec2(0, 0)
+        ImGuiGetWindowSize(&viewportWindowSize)
+        
+        let paddingSize: Float = 8.0
+        
+        ImGuiSetNextWindowPos(ImVec2(viewportPos.x + paddingSize, viewportPos.y + tabBarHeight + paddingSize), 0, ImVec2(0, 0))
+        
+//        ImGuiBegin("GizmoControl", nil, windowFlags)
+//        drawGizmoTypeButton("\(FAIcon.handPaper)", .none)
+//        ImGuiSpacing()
+//        drawGizmoTypeButton("\(FAIcon.arrowsAlt)", .translate)
+//        ImGuiSpacing()
+//        drawGizmoTypeButton("\(FAIcon.syncAlt)", .rotate)
+//        ImGuiSpacing()
+//        drawGizmoTypeButton("\(FAIcon.expand)", .scale)
+        
+        if ImGuiBegin("SelectionMode", nil, windowFlags)
+        {
+            drawSelectionModeButton("Object", .object)
+            ImGuiSpacing()
+            drawSelectionModeButton("Face", .face)
+            ImGuiSpacing()
+            drawSelectionModeButton("Edge", .edge)
+            
+            ImGuiEnd()
+        }
+        
+        ImGuiPopStyleVar(1)
+    }
+    
+    private func drawGizmoTypeButton(_ icon: String, _ type: ImGuizmoType)
+    {
+        ImGuiPushID("GizmoTypeButton\(icon)")
+        
+        let col = gizmoType == type ? ImGuiTheme.enabled : ImGuiTheme.disabled
+        
+        ImGuiPushStyleColor(Im(ImGuiCol_Button), col)
+        ImGuiPushStyleColor(Im(ImGuiCol_ButtonHovered), col)
+        ImGuiPushStyleColor(Im(ImGuiCol_ButtonActive), col)
+        ImGuiButton(icon, ImVec2(0, 0))
+        
+        if ImGuiIsItemClicked(Im(ImGuiMouseButton_Left)) {
+            gizmoType = type
+        }
+        
+        ImGuiPopStyleColor(3)
+        
+        ImGuiPopID()
+    }
+    
+    private func drawSelectionModeButton(_ icon: String, _ mode: SelectionMode)
+    {
+        ImGuiPushID("SelectiomModeButton\(icon)")
+        
+        let col = selectionMode == mode ? ImGuiTheme.enabled : ImGuiTheme.disabled
+        
+        ImGuiPushStyleColor(Im(ImGuiCol_Button), col)
+        ImGuiPushStyleColor(Im(ImGuiCol_ButtonHovered), col)
+        ImGuiPushStyleColor(Im(ImGuiCol_ButtonActive), col)
+        ImGuiButton(icon, ImVec2(0, 0))
+        
+        if ImGuiIsItemClicked(Im(ImGuiMouseButton_Left)) {
+            selectionMode = mode
+        }
+        
+        ImGuiPopStyleColor(3)
+        
+        ImGuiPopID()
+    }
+}
+
+enum SelectionMode
+{
+    case object
+    case vertex
+    case face
+    case edge
 }
 
 private enum ImGuizmoType: Int

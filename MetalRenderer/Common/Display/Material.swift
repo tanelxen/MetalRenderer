@@ -17,4 +17,5 @@ enum RenderTechnique
     case basic
     case brush
     case grid
+    case dot
 }

@@ -140,6 +140,9 @@
 		8A53DF052AB48F4700EC2C65 /* UserInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A53DF032AB48F4700EC2C65 /* UserInterface.swift */; };
 		8A53DF372AB7B48300EC2C65 /* NavigationMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A53DF362AB7B48300EC2C65 /* NavigationMesh.swift */; };
 		8A53DF382AB7B48300EC2C65 /* NavigationMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A53DF362AB7B48300EC2C65 /* NavigationMesh.swift */; };
+		8A57092E2C00C0E900FE3EA0 /* Editor.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8A57092D2C00C0E900FE3EA0 /* Editor.metal */; };
+		8A57092F2C00C0E900FE3EA0 /* Editor.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8A57092D2C00C0E900FE3EA0 /* Editor.metal */; };
+		8A5709322C00C34500FE3EA0 /* MeshUtilityRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5709312C00C34500FE3EA0 /* MeshUtilityRenderer.swift */; };
 		8A5969062ABB2F1D00772AC9 /* Intersection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5969052ABB2F1D00772AC9 /* Intersection.swift */; };
 		8A5969072ABB2F1D00772AC9 /* Intersection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5969052ABB2F1D00772AC9 /* Intersection.swift */; };
 		8A5AE68B2AC0FE0400809790 /* SkeletalMeshAssetSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5AE68A2AC0FE0400809790 /* SkeletalMeshAssetSerializer.swift */; };
@@ -252,6 +255,8 @@
 		8A56D71E278E058400D3FE2B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8A56D71F278E058400D3FE2B /* MetalRenderer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MetalRenderer.entitlements; sourceTree = "<group>"; };
 		8A56D72B278E61CD00D3FE2B /* MetalTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalTypes.swift; sourceTree = "<group>"; };
+		8A57092D2C00C0E900FE3EA0 /* Editor.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Editor.metal; sourceTree = "<group>"; };
+		8A5709312C00C34500FE3EA0 /* MeshUtilityRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeshUtilityRenderer.swift; sourceTree = "<group>"; };
 		8A5969052ABB2F1D00772AC9 /* Intersection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Intersection.swift; sourceTree = "<group>"; };
 		8A5AE68A2AC0FE0400809790 /* SkeletalMeshAssetSerializer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkeletalMeshAssetSerializer.swift; sourceTree = "<group>"; };
 		8A5D1BE62BD6CC1E007CB0FA /* GridHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GridHelper.swift; sourceTree = "<group>"; };
@@ -441,6 +446,7 @@
 				8A98722F2AD4648900AAEE2C /* Billboards.metal */,
 				8A5D1BE92BD81705007CB0FA /* SimpleGrid.metal */,
 				8A5D1BEF2BD8A6E9007CB0FA /* Brush.metal */,
+				8A57092D2C00C0E900FE3EA0 /* Editor.metal */,
 			);
 			path = Shaders;
 			sourceTree = "<group>";
@@ -470,6 +476,7 @@
 		8A27DA992AAE3C0F0094C9D0 /* Sandbox */ = {
 			isa = PBXGroup;
 			children = (
+				8A5709302C00C2D800FE3EA0 /* Routines */,
 				8A85E13C2AC5F45400923DB5 /* Importers */,
 				8ACDB0102A8FADC0005AEE19 /* ImGUI */,
 				8A7C70B92AB0875E003FAFDD /* Panels */,
@@ -536,6 +543,14 @@
 				8A56D71F278E058400D3FE2B /* MetalRenderer.entitlements */,
 			);
 			path = "Other Files";
+			sourceTree = "<group>";
+		};
+		8A5709302C00C2D800FE3EA0 /* Routines */ = {
+			isa = PBXGroup;
+			children = (
+				8A5709312C00C34500FE3EA0 /* MeshUtilityRenderer.swift */,
+			);
+			path = Routines;
 			sourceTree = "<group>";
 		};
 		8A6232162795DF4F00B1757C /* Scene */ = {
@@ -800,6 +815,7 @@
 				8A5D1BF12BD8A6E9007CB0FA /* Brush.metal in Sources */,
 				8A5D1BE82BD6CC1E007CB0FA /* GridHelper.swift in Sources */,
 				8A27DA5E2AAE39DE0094C9D0 /* Q3MapCollision.swift in Sources */,
+				8A57092F2C00C0E900FE3EA0 /* Editor.metal in Sources */,
 				8A53DF022AB488A700EC2C65 /* UserInterface.metal in Sources */,
 				8A808F402AD034C30087A084 /* WorldEntitiesAsset.swift in Sources */,
 				8A27DA5F2AAE39DE0094C9D0 /* Player.swift in Sources */,
@@ -926,6 +942,7 @@
 				8A27DB172AAE3E5A0094C9D0 /* GameTime.swift in Sources */,
 				8A27DB182AAE3E5A0094C9D0 /* Viewport.swift in Sources */,
 				8A27DB192AAE3E5A0094C9D0 /* ForwardRenderer.swift in Sources */,
+				8A57092E2C00C0E900FE3EA0 /* Editor.metal in Sources */,
 				8A27DB1A2AAE3E5A0094C9D0 /* Sizeable.swift in Sources */,
 				8A53DEFE2AB37E5C00EC2C65 /* Decals.swift in Sources */,
 				8A27DB1B2AAE3E5A0094C9D0 /* Skybox.swift in Sources */,
@@ -936,6 +953,7 @@
 				8A27DB1E2AAE3E5A0094C9D0 /* BasicShapes.swift in Sources */,
 				8A27DB1F2AAE3E5A0094C9D0 /* ImGuiTheme.swift in Sources */,
 				8A27DB202AAE3E5A0094C9D0 /* Input.swift in Sources */,
+				8A5709322C00C34500FE3EA0 /* MeshUtilityRenderer.swift in Sources */,
 				8A27DB212AAE3E5A0094C9D0 /* WorldMesh.metal in Sources */,
 				8A27DB222AAE3E5A0094C9D0 /* Math.swift in Sources */,
 				8AD133FF2BFCC1B000F33415 /* EditableObject.swift in Sources */,

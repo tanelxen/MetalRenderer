@@ -16,4 +16,9 @@ enum FAIcon
     static let file = "\u{f15b}"
     static let cube = "\u{f1b2}"
     static let globe = "\u{f0ac}"
+    
+    static let handPaper = "\u{f256}"
+    static let arrowsAlt = "\u{f0b2}"
+    static let syncAlt = "\u{f2f1}"
+    static let expand = "\u{f065}"
 }

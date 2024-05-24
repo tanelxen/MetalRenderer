@@ -15,6 +15,7 @@ final class EditableMesh: EditableObject
     var isSelected = false {
         didSet {
             selectedFace = nil
+            selectedEdge = nil
         }
     }
     
@@ -44,6 +45,10 @@ final class EditableMesh: EditableObject
         faces.flatMap { $0.verts.map { $0.position } }
     }
     
+    var edges: [HalfEdge] {
+        faces.flatMap { $0.edges }
+    }
+    
     var faces: [Face] = []
     
     var isRoom = false {
@@ -60,7 +65,6 @@ final class EditableMesh: EditableObject
     private var selectedEdge: HalfEdge?
     
     private var vertexBuffer: MTLBuffer!
-    private var vertexBuffer2: MTLBuffer!
     
     private let point = MTKGeometry(.box)
     
@@ -70,7 +74,6 @@ final class EditableMesh: EditableObject
         
         let length = MemoryLayout<Vertex>.stride * MAX_VERTS
         vertexBuffer = Engine.device.makeBuffer(length: length)
-        vertexBuffer2 = Engine.device.makeBuffer(length: length)
     }
     
     func selectFace(by ray: Ray)
@@ -121,7 +124,7 @@ final class EditableMesh: EditableObject
     {
         guard let face = selectedFace else { return }
         
-        let delta = (position - face.center) * abs(face.plane.normal)
+        let delta = position - face.center
         
         guard length(delta) > 0 else { return }
         
@@ -140,6 +143,13 @@ final class EditableMesh: EditableObject
         recalculateUV()
     }
     
+    func removeSelectedFace()
+    {
+        faces.removeAll(where: { $0 === selectedFace })
+        selectedFace = nil
+        recalculate()
+    }
+    
     func setSelectedEdge(position: float3)
     {
         guard let edge = selectedEdge else { return }
@@ -148,14 +158,19 @@ final class EditableMesh: EditableObject
         
         guard length(delta) > 0 else { return }
         
-        edge.vert.position += delta
-        edge.next.vert.position += delta
+        for vert in [edge.vert!, edge.next.vert!]
+        {
+            let iter = VertexEdgeIterator(vert)
+            
+            while let twin = iter.next()?.vert
+            {
+                twin.position += delta
+            }
+        }
         
-        edge.pair.vert.position += delta
-        edge.pair.next.vert.position += delta
+//        face.plane.distance = dot(face.plane.normal, face.center)
         
-        edge.prev.pair.vert.position += delta
-        edge.next.pair.next.vert.position += delta
+        recalculateUV()
     }
     
     func setWorld(position: float3)
@@ -218,6 +233,12 @@ final class EditableMesh: EditableObject
         renderItem.texture = TextureManager.shared.devTexture
         renderItem.isSupportLineMode = true
         
+        // wireframe of selected meshes we draw separates with MeshUtilityRenderer
+        if isSelected
+        {
+            renderItem.allowedViews = [.perspective]
+        }
+        
         var vertices: [Vertex] = []
         
         for face in faces
@@ -254,52 +275,7 @@ final class EditableMesh: EditableObject
         
         if isSelected
         {
-            var renderItem = RenderItem(technique: .brush)
-            
-            renderItem.cullMode = .none
-            renderItem.isSupportLineMode = true
-            renderItem.primitiveType = .point
-            
-            var vertices: [Vertex] = []
-            
-            for face in faces
-            {
-                let vertClr = float4(1, 1, 1, 1)
-//                let faceClr = face.isHighlighted ? float4(0, 1, 0, 1) : float4(1, 0, 1, 1)
-                
-//                vertices.append(
-//                    Vertex(pos: face.center, clr: faceClr)
-//                )
-                
-                for vert in face.verts
-                {
-                    vertices.append(
-                        Vertex(pos: vert.position, clr: vertClr)
-                    )
-                }
-                
-//                for edge in face.edges
-//                {
-//                    let edgeClr = edge.isHighlighted ? float4(0, 1, 0, 1) : float4(1, 0, 0, 1)
-//
-//                    vertices.append(
-//                        Vertex(pos: edge.center, clr: edgeClr)
-//                    )
-//                }
-            }
-            
-            var pointer = vertexBuffer2.contents().bindMemory(to: Vertex.self, capacity: MAX_VERTS)
-            
-            for vertex in vertices
-            {
-                pointer.pointee = vertex
-                pointer = pointer.advanced(by: 1)
-            }
-        
-            renderItem.vertexBuffer = vertexBuffer2
-            renderItem.numVertices = vertices.count
-            
-            renderer.add(item: renderItem)
+
         }
     }
     
