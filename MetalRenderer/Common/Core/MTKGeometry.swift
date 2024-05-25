@@ -24,6 +24,14 @@ class MTKGeometry
         mesh.vertexCount
     }
     
+    var indexBuffer: MTLBuffer? {
+        mesh.submeshes.first?.indexBuffer.buffer
+    }
+    
+    var indexCount: Int {
+        mesh.submeshes.first?.indexCount ?? 0
+    }
+    
     init(_ type: MeshType, extents: float3 = .one)
     {
         let allocator = MTKMeshBufferAllocator(device: Engine.device)
@@ -120,7 +128,7 @@ class MTKGeometry
     func render(with encoder: MTLRenderCommandEncoder)
     {
         // Push a debug group allowing us to identify render commands in the GPU Frame Capture tool
-        encoder.pushDebugGroup("Brush")
+        encoder.pushDebugGroup("MTKGeometry")
         
         encoder.setCullMode(.back)
         encoder.setFrontFacing(.clockwise)

@@ -62,7 +62,7 @@ final class EditableMesh: EditableObject
     }
     
     var selectedFace: Face?
-    private var selectedEdge: HalfEdge?
+    var selectedEdge: HalfEdge?
     
     private var vertexBuffer: MTLBuffer!
     

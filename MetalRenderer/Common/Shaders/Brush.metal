@@ -106,7 +106,7 @@ vertex VertexOut box_vs(BoxVertexIn       vIn       [[ stage_in ]],
     data.position = mvp * float4(vIn.position, 1);
     data.uv = vIn.uv;
     data.color = modelConstants.color;
-    data.shade = shadeForNormal(vIn.normal);
+    data.shade = 1.0;
     
     return data;
 }

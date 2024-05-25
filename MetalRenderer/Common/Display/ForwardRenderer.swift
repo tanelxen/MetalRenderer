@@ -72,6 +72,19 @@ final class ForwardRenderer
                continue
             }
             
+            if let mtkMesh = item.mtkMesh
+            {
+                item.transform.updateModelMatrix()
+                
+                var modelConstants = ModelConstants()
+                modelConstants.color = item.tintColor
+                modelConstants.modelMatrix = item.transform.matrix
+                commandEncoder.setVertexBytes(&modelConstants, length: MemoryLayout<ModelConstants>.size, index: 2)
+                
+                mtkMesh.render(with: commandEncoder)
+                continue
+            }
+            
             apply(technique: item.technique, to: commandEncoder)
             commandEncoder.setCullMode(item.cullMode)
             
@@ -195,6 +208,8 @@ struct RenderItem
     var numIndices: Int = 0
     
     var primitiveType: MTLPrimitiveType = .triangle
+    
+    var mtkMesh: MTKGeometry?
     
     var tintColor: float4 = .one
     var texture: MTLTexture?

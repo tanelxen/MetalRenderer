@@ -17,6 +17,8 @@ class Transform
     
     private var _matrix: matrix_float4x4 = matrix_identity_float4x4
     
+    var parent: matrix_float4x4 = matrix_identity_float4x4
+    
     var matrix: matrix_float4x4 { _matrix }
     
     init(position: float3 = .zero, rotation: Rotator = .zero, scale: float3 = .one)
@@ -31,7 +33,7 @@ class Transform
         let R = matrix_float4x4(rotation.orientation)
         let T = matrix_float4x4(translation: position)
         
-        _matrix = simd_mul(T, R)
+        _matrix = simd_mul(T, R) * parent
         _matrix.scale(axis: scale)
     }
 }

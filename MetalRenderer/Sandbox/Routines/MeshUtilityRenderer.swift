@@ -20,6 +20,8 @@ final class MeshUtilityRenderer
     private var dotsVertexBuffer: MTLBuffer!
     private var linesVertexBuffer: MTLBuffer!
     
+    private let box = MTKGeometry(.box)
+    
     init()
     {
         let length = MemoryLayout<Vertex>.stride * MAX_VERTS
@@ -30,6 +32,7 @@ final class MeshUtilityRenderer
     func render(with renderer: ForwardRenderer)
     {
         drawEdges(with: renderer)
+        drawSelectedEdge(with: renderer)
         drawControlPoints(with: renderer)
     }
     
@@ -131,6 +134,46 @@ final class MeshUtilityRenderer
     
         renderItem.vertexBuffer = dotsVertexBuffer
         renderItem.numVertices = vertices.count
+        
+        renderer.add(item: renderItem)
+    }
+    
+    private func drawSelectedEdge(with renderer: ForwardRenderer)
+    {
+        guard let edge = self.mesh?.selectedEdge else { return }
+        
+        let p1 = edge.vert.position
+        let p2 = edge.next.vert.position
+
+        // Вычисление вектора направления
+        let direction = normalize(p2 - p1)
+
+        // Определение ортонормального базиса
+        let newY = direction
+        var arbitrary = SIMD3<Float>(1, 0, 0)
+        if abs(dot(arbitrary, newY)) > 0.99 {
+            arbitrary = SIMD3<Float>(0, 1, 0)
+        }
+        let newZ = normalize(cross(newY, arbitrary))
+        let newX = normalize(cross(newY, newZ))
+
+        // Формирование матрицы поворота
+        let rotationMatrix = float4x4(
+            SIMD4<Float>(newX.x, newY.x, newZ.x, 0),
+            SIMD4<Float>(newX.y, newY.y, newZ.y, 0),
+            SIMD4<Float>(newX.z, newY.z, newZ.z, 0),
+            SIMD4<Float>(0, 0, 0, 1)
+        )
+        
+        var renderItem = RenderItem(mtkMesh: box)
+        
+        renderItem.isSupportLineMode = false
+        renderItem.allowedViews = [.perspective]
+        renderItem.tintColor = [0, 1, 0, 1]
+        
+        renderItem.transform = Transform(position: edge.center)
+        renderItem.transform.scale = [0.5, length(p2 - p1), 0.5]
+        renderItem.transform.parent = rotationMatrix
         
         renderer.add(item: renderItem)
     }
