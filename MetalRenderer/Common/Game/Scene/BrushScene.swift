@@ -59,6 +59,21 @@ final class BrushScene
         brushes.append(brush)
     }
     
+    func copySelected()
+    {
+        guard let mesh = selected as? EditableMesh
+        else {
+            return
+        }
+        
+        let new = EditableMesh(mesh)
+        
+        mesh.isSelected = false
+        new.isSelected = true
+        
+        brushes.append(new)
+    }
+    
     func clipAllBrushes()
     {
         guard let cutter = selected as? PlainBrush else { return }
@@ -200,6 +215,47 @@ extension BrushScene
 //                physicsWorld.add(rigidBody: body)
 //            }
 //        }
+    }
+}
+
+extension BrushScene
+{
+    func openMap(_ url: URL)
+    {
+        do
+        {
+            let data = try Data(contentsOf: url)
+            
+            let decoder = JSONDecoder()
+            let meshes = try decoder.decode([EditableMesh].self, from: data)
+            
+            meshes.forEach {
+                $0.recalculate()
+                $0.setupRenderData()
+            }
+            
+            brushes = meshes
+        }
+        catch
+        {
+            print(error.localizedDescription)
+        }
+    }
+    
+    func saveMap(_ url: URL)
+    {
+        let meshes = brushes.compactMap({ $0 as? EditableMesh })
+        
+        do
+        {
+            let jsonEncoder = JSONEncoder()
+            let jsonData = try jsonEncoder.encode(meshes)
+            try jsonData.write(to: url)
+        }
+        catch
+        {
+            print(error.localizedDescription)
+        }
     }
 }
 

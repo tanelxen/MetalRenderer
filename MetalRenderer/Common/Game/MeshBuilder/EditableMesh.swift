@@ -66,12 +66,35 @@ final class EditableMesh: EditableObject
     
     private var vertexBuffer: MTLBuffer!
     
-    private let point = MTKGeometry(.box)
+    init()
+    {
+        
+    }
     
-    required init(origin: float3, size: float3)
+    init(origin: float3, size: float3)
     {
         populateFaces(origin: origin, size: size)
+        setupRenderData()
+    }
+    
+    init(_ other: EditableMesh)
+    {
+        faces = other.faces.map {
+            let face = Face($0.name)
+            
+            face.verts = $0.verts.map {
+                Vert($0.position)
+            }
+            
+            return face
+        }
         
+        recalculate()
+        setupRenderData()
+    }
+    
+    func setupRenderData()
+    {
         let length = MemoryLayout<Vertex>.stride * MAX_VERTS
         vertexBuffer = Engine.device.makeBuffer(length: length)
     }
@@ -92,7 +115,7 @@ final class EditableMesh: EditableObject
     
     func selectEdge(by ray: Ray)
     {
-        var bestd: Float = 8
+        var bestd: Float = .greatestFiniteMagnitude
         var beste: HalfEdge?
         
         for face in faces
@@ -101,8 +124,10 @@ final class EditableMesh: EditableObject
             {
                 let p1 = edge.vert.position
                 let p2 = edge.next.vert.position
+                let mid = (p1 + p2) * 0.5
                 
-                let d = intersect(ray: ray, lineStart: p1, lineEnd: p2)
+//                let (d, _) = intersect(ray: ray, lineStart: p1, lineEnd: p2)
+                let d = intersect(ray: ray, point: mid, epsilon: 8, divergence: 0.01)
                 
                 if d < bestd
                 {
@@ -167,8 +192,6 @@ final class EditableMesh: EditableObject
                 twin.position += delta
             }
         }
-        
-//        face.plane.distance = dot(face.plane.normal, face.center)
         
         recalculateUV()
     }
@@ -272,30 +295,10 @@ final class EditableMesh: EditableObject
         renderItem.numVertices = vertices.count
         
         renderer.add(item: renderItem)
-        
-        if isSelected
-        {
-
-        }
-    }
-    
-    private func drawAxis(for edge: HalfEdge, with encoder: MTLRenderCommandEncoder)
-    {
-        let pos = edge.center + edge.face.plane.normal * 8
-        let scale = float3(1, 1, 1) + abs(edge.face.plane.normal) * 15
-        let tr1 = Transform(position: pos, scale: scale)
-        tr1.updateModelMatrix()
-
-        var modelConstants1 = ModelConstants()
-        modelConstants1.color = float4(abs(edge.face.plane.normal), 1)
-        modelConstants1.modelMatrix = tr1.matrix
-        encoder.setVertexBytes(&modelConstants1, length: MemoryLayout<ModelConstants>.size, index: 2)
-
-        point.render(with: encoder)
     }
 }
 
-private extension EditableMesh
+extension EditableMesh
 {
     func populateFaces(origin: float3, size: float3)
     {
@@ -513,7 +516,38 @@ private struct Vertex
     var uv: float2 = .zero
 }
 
-private func intersect(ray: Ray, lineStart: float3, lineEnd: float3) -> Float
+// Got from GTKRadiant matlib
+private func intersect(ray: Ray, point: float3, epsilon: Float, divergence: Float) -> Float
+{
+    var displacement = float3()
+    var depth: Float = 0
+
+    // calc displacement of test point from ray origin
+    displacement = point - ray.origin
+    
+    // calc length of displacement vector along ray direction
+    depth = dot(displacement, ray.direction)
+    
+    if depth < 0.0 {
+        return .greatestFiniteMagnitude
+    }
+    
+    // calc position of closest point on ray to test point
+    displacement = ray.origin + ray.direction * depth
+    
+    // calc displacement of test point from closest point
+    displacement = point - displacement
+    
+    // calc length of displacement, subtract depth-dependant epsilon
+    if length(displacement) - (epsilon + ( depth * divergence )) > 0 {
+        return .greatestFiniteMagnitude
+    }
+    
+    return depth
+}
+
+// Find closest distance between ray and line and point on this line
+private func intersect(ray: Ray, lineStart: float3, lineEnd: float3) -> (Float, float3?)
 {
     let r1 = ray.origin
     let r2 = ray.origin + ray.direction * 1024
@@ -524,10 +558,31 @@ private func intersect(ray: Ray, lineStart: float3, lineEnd: float3) -> Float
     let s = r1 - lineEnd
     
     if length(u3) == 0 {
-        return .greatestFiniteMagnitude
+        return (.greatestFiniteMagnitude, nil)
     }
     
-    return abs( dot(s, u3) / length(u3) )
+    // Find the point on the line segment
+    let dotu1u1 = dot(u1, u1)
+    let dotu1u2 = dot(u1, u2)
+    let dotu2u2 = dot(u2, u2)
+    let dotu1s = dot(u1, s)
+    let dotu2s = dot(u2, s)
+    
+    let denominator = dotu1u1 * dotu2u2 - dotu1u2 * dotu1u2
+    let t = (dotu1u2 * dotu2s - dotu2u2 * dotu1s) / denominator
+    let u = (dotu1u1 * dotu2s - dotu1u2 * dotu1s) / denominator
+    
+    let closestPointOnLine = lineStart + u * u2
+    let closestPointOnRay = r1 + t * u1
+    
+    // Check if closestPointOnLine lies within the line segment
+    if u < 0 || u > 1 {
+        return (.greatestFiniteMagnitude, nil)
+    }
+    
+    let distance = length(closestPointOnRay - closestPointOnLine)
+    
+    return (distance, closestPointOnLine)
 }
 
 private func intersect(ray: Ray, face: Face) -> Bool

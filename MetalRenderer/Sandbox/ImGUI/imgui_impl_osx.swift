@@ -73,6 +73,8 @@ func ImGui_ImplOSX_Init(_ view: NSView) -> Bool {
         keyMap[Int(ImGuiKey_X.rawValue)]               = ImGuiKey(kVK_ANSI_X)
         keyMap[Int(ImGuiKey_Y.rawValue)]               = ImGuiKey(kVK_ANSI_Y)
         keyMap[Int(ImGuiKey_Z.rawValue)]               = ImGuiKey(kVK_ANSI_Z)
+        keyMap[Int(ImGuiKey_E.rawValue)]               = ImGuiKey(kVK_ANSI_E)
+        keyMap[Int(ImGuiKey_D.rawValue)]               = ImGuiKey(kVK_ANSI_D)
     }
     
     // Load cursors. Some of them are undocumented.

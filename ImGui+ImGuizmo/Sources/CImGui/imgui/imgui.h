@@ -1432,6 +1432,8 @@ enum ImGuiKey_
     ImGuiKey_KeyPadEnter,
     ImGuiKey_A,                 // for text edit CTRL+A: select all
     ImGuiKey_C,                 // for text edit CTRL+C: copy
+    ImGuiKey_D,
+    ImGuiKey_E,
     ImGuiKey_V,                 // for text edit CTRL+V: paste
     ImGuiKey_X,                 // for text edit CTRL+X: cut
     ImGuiKey_Y,                 // for text edit CTRL+Y: redo

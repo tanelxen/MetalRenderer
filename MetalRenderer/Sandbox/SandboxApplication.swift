@@ -76,6 +76,39 @@ final class SandboxApplication: NSObject
         }
     }
     
+    func openMap()
+    {
+        let dialog = NSOpenPanel()
+
+        dialog.title = "Open map"
+        dialog.showsResizeIndicator = true
+        dialog.showsHiddenFiles = false
+        dialog.allowsMultipleSelection = false
+        dialog.canChooseDirectories = false
+        dialog.canChooseFiles = true
+        dialog.allowedContentTypes = [.json]
+
+        if dialog.runModal() == .OK, let fileURL = dialog.url
+        {
+            BrushScene.current.openMap(fileURL)
+        }
+    }
+    
+    func saveMap()
+    {
+        let dialog = NSSavePanel()
+
+        dialog.title = "Save map"
+        dialog.showsResizeIndicator = true
+        dialog.showsHiddenFiles = false
+        dialog.allowedContentTypes = [.json]
+
+        if dialog.runModal() == .OK, let fileURL = dialog.url
+        {
+            BrushScene.current.saveMap(fileURL)
+        }
+    }
+    
     private func setupEventsMonitor()
     {
         let mask: NSEvent.EventTypeMask = [

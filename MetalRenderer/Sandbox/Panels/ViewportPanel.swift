@@ -134,6 +134,11 @@ final class ViewportPanel
                 brush.setSelectedFace(position: transform.position)
             }
             
+            if ImGuiIsKeyPressedMap(Im(ImGuiKey_E), false) && ImGuiGetIO()!.pointee.KeySuper
+            {
+                brush.extrudeSelectedFace(to: 16)
+            }
+            
             if ImGuiIsKeyPressedMap(Im(ImGuiKey_Escape), false)
             {
                 brush.isSelected = true
@@ -176,6 +181,11 @@ final class ViewportPanel
             if ImGuiIsKeyPressedMap(Im(ImGuiKey_Backspace), false)
             {
                 BrushScene.current.removeSelected()
+            }
+            
+            if ImGuiIsKeyPressedMap(Im(ImGuiKey_D), false) && ImGuiGetIO()!.pointee.KeySuper
+            {
+                BrushScene.current.copySelected()
             }
         }
     }

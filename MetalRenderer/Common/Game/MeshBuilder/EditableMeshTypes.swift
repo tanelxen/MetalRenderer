@@ -8,7 +8,7 @@
 import Metal
 import simd
 
-class Vert
+final class Vert
 {
     var position: float3
     var uv: float2 = .zero
@@ -25,7 +25,7 @@ class Vert
     }
 }
 
-class HalfEdge
+final class HalfEdge
 {
     var name: String
     
@@ -52,7 +52,7 @@ class HalfEdge
     }
 }
 
-class Face
+final class Face
 {
     var name: String
     
@@ -87,6 +87,17 @@ extension Vert: Hashable
 extension HalfEdge: Hashable
 {
     static func == (lhs: HalfEdge, rhs: HalfEdge) -> Bool {
+        ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(ObjectIdentifier(self))
+    }
+}
+
+extension Face: Hashable
+{
+    static func == (lhs: Face, rhs: Face) -> Bool {
         ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
     }
 

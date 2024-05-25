@@ -57,6 +57,13 @@ class AppDelegate: NSObject, NSApplicationDelegate
         let appName = ProcessInfo.processInfo.processName
         appMenu.submenu?.addItem(NSMenuItem(title: "About \(appName)", action: #selector(NSApplication.orderFrontStandardAboutPanel(_:)), keyEquivalent: ""))
         appMenu.submenu?.addItem(NSMenuItem(title: "Quit \(appName)", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
+        
+        let fileMenu = NSMenuItem()
+        fileMenu.submenu = NSMenu(title: "File")
+        fileMenu.submenu?.items = [
+            NSMenuItem(title: "Open map", action: #selector(openMap), keyEquivalent: ""),
+            NSMenuItem(title: "Save map", action: #selector(saveMap), keyEquivalent: "")
+        ]
 
         let settingsMenu = NSMenuItem()
         settingsMenu.submenu = NSMenu(title: "Settings")
@@ -66,6 +73,7 @@ class AppDelegate: NSObject, NSApplicationDelegate
         
         let mainMenu = NSMenu(title: "Main Menu")
         mainMenu.addItem(appMenu)
+        mainMenu.addItem(fileMenu)
         mainMenu.addItem(settingsMenu)
         
         NSApp.mainMenu = mainMenu
@@ -74,6 +82,16 @@ class AppDelegate: NSObject, NSApplicationDelegate
     @objc private func changeDir()
     {
         application?.changeWorkingDir()
+    }
+    
+    @objc private func openMap()
+    {
+        application?.openMap()
+    }
+    
+    @objc private func saveMap()
+    {
+        application?.saveMap()
     }
 }
 

@@ -635,6 +635,8 @@ typedef enum {
     ImGuiKey_KeyPadEnter,
     ImGuiKey_A,
     ImGuiKey_C,
+    ImGuiKey_D,
+    ImGuiKey_E,
     ImGuiKey_V,
     ImGuiKey_X,
     ImGuiKey_Y,
