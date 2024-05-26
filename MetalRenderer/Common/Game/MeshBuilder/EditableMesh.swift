@@ -268,15 +268,10 @@ final class EditableMesh: EditableObject
             
             let normal = face.plane.normal
             let color = face === selectedFace ? float4(1, 0, 0, 1) : float4(1, 1, 1, 1)
-
-            let verts = [
-                Vertex(pos: face.verts[0].position, nor: normal, clr: color, uv: face.verts[0].uv),
-                Vertex(pos: face.verts[1].position, nor: normal, clr: color, uv: face.verts[1].uv),
-                Vertex(pos: face.verts[2].position, nor: normal, clr: color, uv: face.verts[2].uv),
-                Vertex(pos: face.verts[3].position, nor: normal, clr: color, uv: face.verts[3].uv),
-                Vertex(pos: face.verts[0].position, nor: normal, clr: color, uv: face.verts[0].uv),
-                Vertex(pos: face.verts[2].position, nor: normal, clr: color, uv: face.verts[2].uv)
-            ]
+            
+            let verts = face.triangles.map {
+                Vertex(pos: $0.position, nor: normal, clr: color, uv: $0.uv)
+            }
 
             vertices.append(contentsOf: verts)
         }
@@ -390,6 +385,7 @@ extension EditableMesh
             }
             
             face.updateUVs()
+            face.triangulate()
         }
     }
     
