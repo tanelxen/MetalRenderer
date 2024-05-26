@@ -115,19 +115,22 @@ final class EditableMesh: EditableObject
     
     func selectEdge(by ray: Ray)
     {
-        var bestd: Float = .greatestFiniteMagnitude
+        var bestd: Float = 4
         var beste: HalfEdge?
         
         for face in faces
         {
+            guard intersect(ray: ray, face: face)
+            else {
+                continue
+            }
+            
             for edge in face.edges
             {
                 let p1 = edge.vert.position
                 let p2 = edge.next.vert.position
-                let mid = (p1 + p2) * 0.5
                 
-//                let (d, _) = intersect(ray: ray, lineStart: p1, lineEnd: p2)
-                let d = intersect(ray: ray, point: mid, epsilon: 8, divergence: 0.01)
+                let d = closestDistance(ray: ray, lineStart: p1, lineEnd: p2)
                 
                 if d < bestd
                 {
@@ -138,11 +141,6 @@ final class EditableMesh: EditableObject
         }
         
         selectedEdge = beste
-        
-        if let edge = beste
-        {
-            print("\(edge.face.name).\(edge.name)")
-        }
     }
     
     func setSelectedFace(position: float3)
@@ -546,46 +544,49 @@ private func intersect(ray: Ray, point: float3, epsilon: Float, divergence: Floa
     return depth
 }
 
-// Find closest distance between ray and line and point on this line
-private func intersect(ray: Ray, lineStart: float3, lineEnd: float3) -> (Float, float3?)
+// Find closest distance between ray and line
+func closestDistance(ray: Ray, lineStart: float3, lineEnd: float3) -> Float
 {
-    let r1 = ray.origin
-    let r2 = ray.origin + ray.direction * 1024
+    let EPS: Float = 0.1
     
-    let u1 = r2 - r1
-    let u2 = lineEnd - lineStart
-    let u3 = cross(u1, u2)
-    let s = r1 - lineEnd
+    let p1 = ray.origin
+    let p21 = ray.direction
     
-    if length(u3) == 0 {
-        return (.greatestFiniteMagnitude, nil)
+    let p3 = lineStart
+    let p4 = lineEnd
+    
+    let p13 = p1 - p3
+    let p43 = p4 - p3
+    
+    let d1343 = dot(p13, p43)
+    let d4321 = dot(p43, p21)
+    let d1321 = dot(p13, p21)
+    let d4343 = dot(p43, p43)
+    let d2121 = dot(p21, p21)
+    
+    let denom = d2121 * d4343 - d4321 * d4321
+    
+    if abs(denom) < EPS {
+        return .greatestFiniteMagnitude
     }
     
-    // Find the point on the line segment
-    let dotu1u1 = dot(u1, u1)
-    let dotu1u2 = dot(u1, u2)
-    let dotu2u2 = dot(u2, u2)
-    let dotu1s = dot(u1, s)
-    let dotu2s = dot(u2, s)
+    let numer = d1343 * d4321 - d1321 * d4343
+
+    let mua = numer / denom
+    let mub = (d1343 + d4321 * mua) / d4343
     
-    let denominator = dotu1u1 * dotu2u2 - dotu1u2 * dotu1u2
-    let t = (dotu1u2 * dotu2s - dotu2u2 * dotu1s) / denominator
-    let u = (dotu1u1 * dotu2s - dotu1u2 * dotu1s) / denominator
+    let pa = p1 + mua * p21
+    let pb = p3 + mub * p43
     
-    let closestPointOnLine = lineStart + u * u2
-    let closestPointOnRay = r1 + t * u1
-    
-    // Check if closestPointOnLine lies within the line segment
-    if u < 0 || u > 1 {
-        return (.greatestFiniteMagnitude, nil)
+    // check that find point lay on the line
+    if mub < 0 || mub > 1 {
+        return .greatestFiniteMagnitude
     }
     
-    let distance = length(closestPointOnRay - closestPointOnLine)
-    
-    return (distance, closestPointOnLine)
+    return length(pa - pb)
 }
 
-private func intersect(ray: Ray, face: Face) -> Bool
+func intersect(ray: Ray, face: Face) -> Bool
 {
     let n = face.plane.normal
 

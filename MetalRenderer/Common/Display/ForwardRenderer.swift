@@ -121,6 +121,10 @@ final class ForwardRenderer
             }
         }
         
+//        if viewport.viewType == .perspective {
+            drawDebug(with: commandEncoder)
+//        }
+        
         commandEncoder.endEncoding()
     }
     
@@ -185,8 +189,7 @@ final class ForwardRenderer
     
     private func drawDebug(with encoder: MTLRenderCommandEncoder)
     {
-        encoder.setRenderPipelineState(pipelineStates.basic)
-        
+        apply(technique: .basic, to: encoder)
         Debug.shared.render(with: encoder)
         
         encoder.setRenderPipelineState(pipelineStates.basicInst)

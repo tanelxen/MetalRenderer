@@ -188,6 +188,35 @@ final class ViewportPanel
                 BrushScene.current.copySelected()
             }
         }
+        
+        if selectionMode == .edge
+        {
+            let ray = viewport.mousePositionInWorld()
+            
+            brush.faces
+                .flatMap { $0.edges }
+                .forEach { $0.isHighlighted = false }
+            
+        faceloop: for face in brush.faces
+            {
+                guard intersect(ray: ray, face: face)
+                else {
+                    continue
+                }
+                
+                for edge in face.edges
+                {
+                    let p1 = edge.vert.position
+                    let p2 = edge.next.vert.position
+                    
+                    if closestDistance(ray: ray, lineStart: p1, lineEnd: p2) < 4
+                    {
+                        edge.isHighlighted = true
+                        break faceloop
+                    }
+                }
+            }
+        }
     }
     
     private func dragFace(at facePoint: float3, along axis: float3)

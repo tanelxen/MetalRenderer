@@ -79,6 +79,7 @@ final class Debug
         {
             var modelConstants = ModelConstants()
             modelConstants.color = line.color
+            modelConstants.modelMatrix = matrix_identity_float4x4
 
             encoder?.setVertexBytes(&modelConstants, length: MemoryLayout<ModelConstants>.size, index: 2)
 

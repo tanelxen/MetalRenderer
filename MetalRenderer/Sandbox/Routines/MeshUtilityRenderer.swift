@@ -32,8 +32,23 @@ final class MeshUtilityRenderer
     func render(with renderer: ForwardRenderer)
     {
         drawEdges(with: renderer)
-        drawSelectedEdge(with: renderer)
         drawControlPoints(with: renderer)
+        
+        if let edge = mesh?.selectedEdge
+        {
+            let p1 = edge.vert.position
+            let p2 = edge.next.vert.position
+            
+            drawThinLine(p1: p1, p2: p2, color: [1, 1, 0, 1], with: renderer)
+        }
+
+        if let edge = mesh?.edges.first(where: { $0.isHighlighted }), edge !== mesh?.selectedEdge
+        {
+            let p1 = edge.vert.position
+            let p2 = edge.next.vert.position
+            
+            drawThinLine(p1: p1, p2: p2, color: [0, 1, 0, 1], with: renderer)
+        }
     }
     
     private func drawEdges(with renderer: ForwardRenderer)
@@ -138,15 +153,12 @@ final class MeshUtilityRenderer
         renderer.add(item: renderItem)
     }
     
-    private func drawSelectedEdge(with renderer: ForwardRenderer)
+    private func drawThinLine(p1: float3, p2: float3, color: float4, with renderer: ForwardRenderer)
     {
-        guard let edge = self.mesh?.selectedEdge else { return }
-        
-        let p1 = edge.vert.position
-        let p2 = edge.next.vert.position
-
         // Вычисление вектора направления
         let direction = normalize(p2 - p1)
+        let position = (p1 + p2) * 0.5
+        let length = length(p2 - p1)
 
         // Определение ортонормального базиса
         let newY = direction
@@ -169,10 +181,10 @@ final class MeshUtilityRenderer
         
         renderItem.isSupportLineMode = false
         renderItem.allowedViews = [.perspective]
-        renderItem.tintColor = [0, 1, 0, 1]
+        renderItem.tintColor = color
         
-        renderItem.transform = Transform(position: edge.center)
-        renderItem.transform.scale = [0.5, length(p2 - p1), 0.5]
+        renderItem.transform = Transform(position: position)
+        renderItem.transform.scale = [0.5, length, 0.5]
         renderItem.transform.parent = rotationMatrix
         
         renderer.add(item: renderItem)
