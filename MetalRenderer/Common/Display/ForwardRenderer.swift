@@ -142,8 +142,8 @@ final class ForwardRenderer
     func endFrame()
     {
         commandBuffer.commit()
-        items.removeAll()
-        lines.removeAll()
+        items.removeAll(keepingCapacity: true)
+        lines.removeAll(keepingCapacity: true)
     }
     
     func apply(technique: RenderTechnique, to encoder: MTLRenderCommandEncoder)

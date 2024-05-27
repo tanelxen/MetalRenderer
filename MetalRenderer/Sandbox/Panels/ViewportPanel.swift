@@ -38,12 +38,6 @@ final class ViewportPanel
     
     private var gizmoType: ImGuizmoType = .translate
     
-    private var selectionMode: SelectionMode = .object {
-        didSet {
-            BrushScene.current.selected?.isSelected = true
-        }
-    }
-    
     private var dragOrigin: float3?
     private var objectInitialPos: float3?
     
@@ -62,7 +56,7 @@ final class ViewportPanel
         if let selected = BrushScene.current.selected as? EditableMesh
         {
             utilityRenderer.mesh = selected
-            utilityRenderer.selectionMode = selectionMode
+            utilityRenderer.selectionMode = EditorLayer.current.selectionMode
             utilityRenderer.render(with: renderer)
         }
     }
@@ -109,7 +103,7 @@ final class ViewportPanel
             updateOperations()
             
             drawPlayPauseControl()
-            drawGizmoControl()
+//            drawGizmoControl()
             
             isHovered = isHovered && !ImGuiIsItemHovered(ImGuiFlag_None)
         }
@@ -126,7 +120,7 @@ final class ViewportPanel
     {
         guard let brush = BrushScene.current.selected as? EditableMesh else { return }
         
-        if selectionMode == .face, let point = brush.selectedFacePoint
+        if EditorLayer.current.selectionMode == .face, let point = brush.selectedFacePoint
         {
             let transform = Transform(position: point)
             if renderGizmo(for: transform)
@@ -149,7 +143,7 @@ final class ViewportPanel
                 brush.removeSelectedFace()
             }
         }
-        else if selectionMode == .edge, let point = brush.selectedEdgePoint
+        else if EditorLayer.current.selectionMode == .edge, let point = brush.selectedEdgePoint
         {
             let transform = Transform(position: point)
             if renderGizmo(for: transform)
@@ -162,7 +156,7 @@ final class ViewportPanel
                 brush.isSelected = true
             }
         }
-        else if selectionMode == .object
+        else if EditorLayer.current.selectionMode == .object
         {
             if let anchor = brush.faces.first?.verts.first?.position
             {
@@ -189,7 +183,7 @@ final class ViewportPanel
             }
         }
         
-        if selectionMode == .edge
+        if EditorLayer.current.selectionMode == .edge
         {
             let ray = viewport.mousePositionInWorld()
             
@@ -392,7 +386,7 @@ final class ViewportPanel
         
         let ray = viewport.mousePositionInWorld()
         
-        switch selectionMode
+        switch EditorLayer.current.selectionMode
         {
             case .object:
                 break
@@ -514,26 +508,26 @@ final class ViewportPanel
     
     private func drawSelectionModeButton(_ icon: String, _ mode: SelectionMode)
     {
-        ImGuiPushID("SelectiomModeButton\(icon)")
-        
-        let col = selectionMode == mode ? ImGuiTheme.enabled : ImGuiTheme.disabled
-        
-        ImGuiPushStyleColor(Im(ImGuiCol_Button), col)
-        ImGuiPushStyleColor(Im(ImGuiCol_ButtonHovered), col)
-        ImGuiPushStyleColor(Im(ImGuiCol_ButtonActive), col)
-        ImGuiButton(icon, ImVec2(0, 0))
-        
-        if ImGuiIsItemClicked(Im(ImGuiMouseButton_Left)) {
-            selectionMode = mode
-        }
-        
-        ImGuiPopStyleColor(3)
-        
-        ImGuiPopID()
+//        ImGuiPushID("SelectiomModeButton\(icon)")
+//
+//        let col = selectionMode == mode ? ImGuiTheme.enabled : ImGuiTheme.disabled
+//
+//        ImGuiPushStyleColor(Im(ImGuiCol_Button), col)
+//        ImGuiPushStyleColor(Im(ImGuiCol_ButtonHovered), col)
+//        ImGuiPushStyleColor(Im(ImGuiCol_ButtonActive), col)
+//        ImGuiButton(icon, ImVec2(0, 0))
+//
+//        if ImGuiIsItemClicked(Im(ImGuiMouseButton_Left)) {
+//            selectionMode = mode
+//        }
+//
+//        ImGuiPopStyleColor(3)
+//
+//        ImGuiPopID()
     }
 }
 
-enum SelectionMode
+enum SelectionMode: String
 {
     case object
     case vertex

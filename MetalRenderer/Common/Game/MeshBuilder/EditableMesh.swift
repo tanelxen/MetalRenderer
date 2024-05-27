@@ -66,9 +66,9 @@ final class EditableMesh: EditableObject
     
     private var vertexBuffer: MTLBuffer!
     
-    init()
+    init(faces: [Face])
     {
-        
+        self.faces = faces
     }
     
     init(origin: float3, size: float3)
@@ -391,39 +391,22 @@ extension EditableMesh
     
     func populateEdges(for face: Face)
     {
-        let edge0 = HalfEdge("0")
-        let edge1 = HalfEdge("1")
-        let edge2 = HalfEdge("2")
-        let edge3 = HalfEdge("3")
+        for i in face.verts.indices
+        {
+            let edge = HalfEdge("\(i)")
+            edge.vert = face.verts[i]
+            edge.face = face
+            
+            edge.prev = face.edges.last
+            face.edges.last?.next = edge
+            
+            face.verts[i].edge = edge
+            
+            face.edges.append(edge)
+        }
         
-        edge0.vert = face.verts[0]
-        edge0.face = face
-        edge0.next = edge1
-        edge0.prev = edge3
-        
-        edge1.vert = face.verts[1]
-        edge1.face = face
-        edge1.next = edge2
-        edge1.prev = edge0
-        
-        edge2.vert = face.verts[2]
-        edge2.face = face
-        edge2.next = edge3
-        edge2.prev = edge1
-        
-        edge3.vert = face.verts[3]
-        edge3.face = face
-        edge3.next = edge0
-        edge3.prev = edge2
-        
-        face.verts[0].edge = edge0
-        face.verts[1].edge = edge1
-        face.verts[2].edge = edge2
-        face.verts[3].edge = edge3
-        
-        face.edges = [
-            edge0, edge1, edge2, edge3
-        ]
+        face.edges.last?.next = face.edges.first
+        face.edges.first?.prev = face.edges.last
     }
     
     func setupPairs(for edge: HalfEdge)

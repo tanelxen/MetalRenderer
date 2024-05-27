@@ -65,9 +65,9 @@ extension EditableMesh: Codable
     
     convenience init(from decoder: Decoder) throws
     {
-        self.init()
-        
         let values = try decoder.container(keyedBy: CodingKeys.self)
-        faces = try values.decode([Face].self, forKey: .faces)
+        let faces = try values.decode([Face].self, forKey: .faces)
+        
+        self.init(faces: faces)
     }
 }

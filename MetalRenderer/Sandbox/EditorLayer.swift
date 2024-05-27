@@ -20,7 +20,21 @@ final class EditorLayer
     private var inspectorPanel: InspectorPanel!
     private var assetsPanel: AssetsPanel!
     
+    private let toolbarSize: Float = 50
+    
+    private var objectIcon: MTLTexture!
+    private var faceIcon: MTLTexture!
+    private var edgeIcon: MTLTexture!
+    
+    var selectionMode: SelectionMode = .object {
+        didSet {
+            BrushScene.current.selected?.isSelected = true
+        }
+    }
+    
     var onLoadNewMap: ((URL)->Void)?
+    
+    static var current: EditorLayer!
     
     init(view: MTKView, sceneViewport: Viewport, topViewport: Viewport)
     {
@@ -44,6 +58,12 @@ final class EditorLayer
         assetsPanel.onLoadNewMap = { [weak self] url in
             self?.onLoadNewMap?(url)
         }
+        
+        objectIcon = TextureManager.shared.getTexture(for: "Assets/editor/toolbar_object_ic.png")
+        faceIcon  = TextureManager.shared.getTexture(for: "Assets/editor/toolbar_face_ic.png")
+        edgeIcon  = TextureManager.shared.getTexture(for: "Assets/editor/toolbar_edge_ic.png")
+        
+        EditorLayer.current = self
     }
     
     func dropFile(_ url: URL)
@@ -152,6 +172,7 @@ final class EditorLayer
         ImGuiNewFrame()
         
         drawDocker()
+        drawToolbar()
         
         ImGuiEndFrame()
         
@@ -173,13 +194,97 @@ final class EditorLayer
         commandBuffer.commit()
     }
     
+    private func drawToolbar()
+    {
+        let viewport = ImGuiGetMainViewport()!
+        ImGuiSetNextWindowPos(viewport.pointee.Pos, Im(ImGuiCond_None), ImVec2(0, 0))
+        ImGuiSetNextWindowSize(viewport.pointee.Size, Im(ImGuiCond_None))
+        ImGuiSetNextWindowViewport(viewport.pointee.ID)
+        
+        let windowFlags: ImGuiWindowFlags =
+            Im(ImGuiWindowFlags_NoDocking)              |
+//            Im(ImGuiWindowFlags_MenuBar)                |
+            Im(ImGuiWindowFlags_NoTitleBar)             |
+            Im(ImGuiWindowFlags_NoCollapse)             |
+            Im(ImGuiWindowFlags_NoResize)               |
+            Im(ImGuiWindowFlags_NoMove)                 |
+            Im(ImGuiWindowFlags_NoBringToFrontOnFocus)  |
+            Im(ImGuiWindowFlags_NoNavFocus)
+        
+        ImGuiPushStyleVar(Im(ImGuiStyleVar_WindowRounding), 0.0)
+        ImGuiPushStyleVar(Im(ImGuiStyleVar_WindowBorderSize), 0.0)
+        ImGuiPushStyleVar(Im(ImGuiStyleVar_WindowPadding), ImVec2(0, 0))
+        
+        ImGuiBegin("Toolbar", nil, windowFlags)
+        
+        ImGuiPopStyleVar(3)
+        
+        ImGuiSameLine(6, 0)
+        drawSelectionModeButton(.object)
+        ImGuiSameLine(0, 6)
+        drawSelectionModeButton(.face)
+        ImGuiSameLine(0, 6)
+        drawSelectionModeButton(.edge)
+        
+        ImGuiEnd()
+    }
+    
+    private func drawSelectionModeButton(_ mode: SelectionMode)
+    {
+        ImGuiPushID("SelectiomModeButton\(mode.rawValue)")
+        
+        let col = selectionMode == mode ? ImGuiTheme.enabled : ImVec4(0, 0, 0, 0)
+        
+        ImGuiPushStyleColor(Im(ImGuiCol_Button), col)
+        ImGuiPushStyleColor(Im(ImGuiCol_ButtonHovered), col)
+        ImGuiPushStyleColor(Im(ImGuiCol_ButtonActive), col)
+        
+        var icon: UnsafeMutableRawPointer
+        
+        switch mode
+        {
+            case .object:
+                icon = withUnsafePointer(to: &objectIcon) { ptr in
+                    return UnsafeMutableRawPointer(mutating: ptr)
+                }
+
+            case .face:
+                icon = withUnsafePointer(to: &faceIcon) { ptr in
+                    return UnsafeMutableRawPointer(mutating: ptr)
+                }
+                
+            case .edge, .vertex:
+                icon = withUnsafePointer(to: &edgeIcon) { ptr in
+                    return UnsafeMutableRawPointer(mutating: ptr)
+                }
+        }
+        
+        ImGuiImageButton(
+            icon,
+            ImVec2(32, 32),
+            ImVec2(0, 0),
+            ImVec2(1, 1),
+            0,
+            col,
+            ImVec4(1, 1, 1, 1)
+        )
+        
+        if ImGuiIsItemClicked(Im(ImGuiMouseButton_Left)) {
+            selectionMode = mode
+        }
+        
+        ImGuiPopStyleColor(3)
+        
+        ImGuiPopID()
+    }
+    
     private func drawDocker()
     {
         // We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
         // because it would be confusing to have two docking targets within each others.
         var windowFlags: ImGuiWindowFlags =
             Im(ImGuiWindowFlags_NoDocking)              |
-            Im(ImGuiWindowFlags_MenuBar)                |
+//            Im(ImGuiWindowFlags_MenuBar)                |
             Im(ImGuiWindowFlags_NoTitleBar)             |
             Im(ImGuiWindowFlags_NoCollapse)             |
             Im(ImGuiWindowFlags_NoResize)               |
@@ -188,8 +293,15 @@ final class EditorLayer
             Im(ImGuiWindowFlags_NoNavFocus)
         
         let viewport = ImGuiGetMainViewport()!
-        ImGuiSetNextWindowPos(viewport.pointee.Pos, Im(ImGuiCond_None), ImVec2(0, 0))
-        ImGuiSetNextWindowSize(viewport.pointee.Size, Im(ImGuiCond_None))
+        
+        let viewportPos = viewport.pointee.Pos
+        let viewportSize = viewport.pointee.Size
+        
+        let dockerPos = ImVec2(viewportPos.x, viewportPos.y + toolbarSize)
+        let dockerSize = ImVec2(viewportSize.x, viewportSize.y - toolbarSize)
+        
+        ImGuiSetNextWindowPos(dockerPos, Im(ImGuiCond_None), ImVec2(0, 0))
+        ImGuiSetNextWindowSize(dockerSize, Im(ImGuiCond_None))
         ImGuiSetNextWindowViewport(viewport.pointee.ID)
         
         ImGuiPushStyleVar(Im(ImGuiStyleVar_WindowRounding), 0.0)
