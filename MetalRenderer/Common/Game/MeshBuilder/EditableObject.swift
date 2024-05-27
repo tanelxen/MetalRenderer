@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Metal
 import simd
 
 protocol EditableObject: AnyObject
@@ -21,6 +22,7 @@ protocol EditableObject: AnyObject
     var worldPosition: float3 { get }
     
     var isRoom: Bool { get set }
+    var texture: String { get set }
     
     init(origin: float3, size: float3)
     

@@ -20,11 +20,14 @@ final class EditorLayer
     private var inspectorPanel: InspectorPanel!
     private var assetsPanel: AssetsPanel!
     
-    private let toolbarSize: Float = 50
+    private let toolbarSize: Float = 44
     
     private var objectIcon: MTLTexture!
     private var faceIcon: MTLTexture!
     private var edgeIcon: MTLTexture!
+    
+    var texturesArray: [TextureProxy] = []
+    var texturesDict: [String: TextureProxy] = [:]
     
     var selectionMode: SelectionMode = .object {
         didSet {
@@ -62,6 +65,29 @@ final class EditorLayer
         objectIcon = TextureManager.shared.getTexture(for: "Assets/editor/toolbar_object_ic.png")
         faceIcon  = TextureManager.shared.getTexture(for: "Assets/editor/toolbar_face_ic.png")
         edgeIcon  = TextureManager.shared.getTexture(for: "Assets/editor/toolbar_edge_ic.png")
+        
+        texturesArray = [
+            TextureProxy(path: "Assets/altdev/altdev_generic01.png"),
+            TextureProxy(path: "Assets/altdev/altdev_generic02.png"),
+            TextureProxy(path: "Assets/altdev/altdev_generic03.png"),
+            TextureProxy(path: "Assets/altdev/altdev_generic04.png"),
+            TextureProxy(path: "Assets/altdev/altdev_generic05.png"),
+            TextureProxy(path: "Assets/altdev/altdev_generic06.png"),
+            TextureProxy(path: "Assets/altdev/altdev_generic07.png"),
+            TextureProxy(path: "Assets/altdev/altdev_generic08.png"),
+            TextureProxy(path: "Assets/altdev/altdev_generic09.png"),
+            TextureProxy(path: "Assets/altdev/altdev_generic10.png"),
+            TextureProxy(path: "Assets/altdev/altdev_generic11.png"),
+            TextureProxy(path: "Assets/altdev/altdev_generic12.png"),
+            TextureProxy(path: "Assets/altdev/altdev_generic13.png"),
+            TextureProxy(path: "Assets/altdev/altdev_generic14.png"),
+            TextureProxy(path: "Assets/altdev/altdev_generic15.png"),
+            TextureProxy(path: "Assets/altdev/altdev_generic16.png")
+        ]
+        
+        texturesArray.forEach {
+            texturesDict[$0.name] = $0
+        }
         
         EditorLayer.current = self
     }
@@ -213,7 +239,7 @@ final class EditorLayer
         
         ImGuiPushStyleVar(Im(ImGuiStyleVar_WindowRounding), 0.0)
         ImGuiPushStyleVar(Im(ImGuiStyleVar_WindowBorderSize), 0.0)
-        ImGuiPushStyleVar(Im(ImGuiStyleVar_WindowPadding), ImVec2(0, 0))
+        ImGuiPushStyleVar(Im(ImGuiStyleVar_WindowPadding), ImVec2(6, 6))
         
         ImGuiBegin("Toolbar", nil, windowFlags)
         
@@ -466,5 +492,26 @@ private extension EditorLayer
         Self.config.MergeMode = true
         ImFontAtlas_AddFontFromFileTTF(io.pointee.Fonts, fontRegularIcon, iconScaledFontSize * largeScale, &Self.config, &Self.iconRanges)
         ImFontAtlas_AddFontFromFileTTF(io.pointee.Fonts, fontBrandsIcon, iconScaledFontSize * largeScale, &Self.config, &Self.iconRanges)
+    }
+}
+
+final class TextureProxy
+{
+    let name: String
+    let path: String
+    
+    var texture: MTLTexture?
+    
+    var ptr: UnsafeMutableRawPointer {
+        withUnsafePointer(to: &texture) { ptr in
+            return UnsafeMutableRawPointer(mutating: ptr)
+        }
+    }
+    
+    init(path: String)
+    {
+        self.path = path
+        self.name = URL(string: path)!.lastPathComponent
+        self.texture = TextureManager.shared.getTexture(for: path)
     }
 }

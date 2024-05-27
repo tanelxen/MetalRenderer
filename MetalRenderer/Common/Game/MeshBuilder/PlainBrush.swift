@@ -42,6 +42,8 @@ final class PlainBrush: EditableObject
     
     var isRoom = false
     
+    var texture: String = ""
+    
     var selectedPlane: Plane? {
         guard let index = selectedFaceIndex else { return nil }
         return planes[index]

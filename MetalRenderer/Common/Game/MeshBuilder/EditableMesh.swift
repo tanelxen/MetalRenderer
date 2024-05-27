@@ -61,6 +61,8 @@ final class EditableMesh: EditableObject
         }
     }
     
+    var texture: String = ""
+    
     var selectedFace: Face?
     var selectedEdge: HalfEdge?
     
@@ -251,7 +253,7 @@ final class EditableMesh: EditableObject
         var renderItem = RenderItem(technique: .brush)
         
         renderItem.cullMode = isRoom ? .front : .back
-        renderItem.texture = TextureManager.shared.devTexture
+        renderItem.texture = EditorLayer.current.texturesDict[texture]?.texture ?? TextureManager.shared.devTexture
         renderItem.isSupportLineMode = true
         
         // wireframe of selected meshes we draw separates with MeshUtilityRenderer
