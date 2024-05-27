@@ -393,6 +393,8 @@ extension EditableMesh
     
     func populateEdges(for face: Face)
     {
+        face.edges.removeAll(keepingCapacity: true)
+        
         for i in face.verts.indices
         {
             let edge = HalfEdge("\(i)")
