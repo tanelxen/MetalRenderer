@@ -29,12 +29,16 @@ final class OrthoViewPanel
         self.viewport = viewport
         viewport.camera = camera
         viewport.viewType = .top
+        
+        self.tool = ObjectTransformTool(viewport: viewport)
     }
     
     private var dragOrigin: float3?
     private var objectInitialPos: float3?
     
     private var dragMode: DragMode = .none
+    
+    private var tool: ObjectTransformTool
     
     func drawSpecial(with renderer: ForwardRenderer)
     {
@@ -60,6 +64,8 @@ final class OrthoViewPanel
         }
         
         renderer.add(item: renderItem)
+        
+        tool.draw(with: renderer)
     }
     
     func draw()
@@ -87,64 +93,6 @@ final class OrthoViewPanel
         
         isHovered = ImGuiIsItemHovered(ImGuiFlag_None)
         
-//        if ImGuiIsItemClicked(Im(ImGuiMouseButton_Left)) && Keyboard.isKeyPressed(.shift)
-//        {
-//            selectObject()
-//        }
-//
-//        if isPlaying
-//        {
-//            if ImGuiIsKeyPressedMap(Im(ImGuiKey_Escape), false)
-//            {
-//                stopPlaying()
-//            }
-//        }
-//        else
-//        {
-//            if let brush = BrushScene.current.selected
-//            {
-//                if let point = brush.selectedFacePoint, let axis = brush.selectedFaceAxis
-//                {
-//                    dragFace(at: point, along: axis)
-//
-//                    if ImGuiIsKeyPressedMap(Im(ImGuiKey_Escape), false)
-//                    {
-//                        brush.isSelected = true
-//                    }
-//
-////                    if ImGuiIsKeyPressedMap(Im(ImGuiKey_V), false)
-////                    {
-////                        brush.extrudeSelectedFace(to: 16)
-////                    }
-//                }
-//                else if let point = brush.selectedEdgePoint, let axis = brush.selectedEdgeAxis
-//                {
-//                    dragEdge(at: point, along: axis)
-//
-//                    if ImGuiIsKeyPressedMap(Im(ImGuiKey_Escape), false)
-//                    {
-//                        brush.isSelected = true
-//                    }
-//                }
-//                else
-//                {
-////                    renderGizmo(for: brush.transform)
-//
-//                    if ImGuiIsKeyPressedMap(Im(ImGuiKey_Escape), false)
-//                    {
-//                        brush.isSelected = false
-//                    }
-//                }
-//
-//                if ImGuiIsKeyPressedMap(Im(ImGuiKey_Backspace), false)
-//                {
-//                    BrushScene.current.removeSelected()
-//                }
-//            }
-//
-//            isHovered = isHovered && !ImGuiIsItemHovered(ImGuiFlag_None)
-//        }
-        
         drawControls()
         
         isHovered = isHovered && !ImGuiIsItemHovered(ImGuiFlag_None)
@@ -160,68 +108,8 @@ final class OrthoViewPanel
     
     private func update()
     {
-        guard let brush = BrushScene.current.selected as? EditableMesh else { return }
-        
-//        if !Mouse.IsMouseButtonPressed(.left)
-//        {
-//            dragMode = .none
-//        }
-        
-//        guard Mouse.IsMouseButtonPressed(.left) else { return }
-        
-        let ray = viewport.mousePositionInWorld()
-        
-        for face in brush.faces
-        {
-            face.isHighlighted = dragMode == .brush
-
-            if dot(face.plane.normal, ray.direction) < -0.98
-            {
-                if intersect(ray: ray, point: face.center, epsilon: 2, divergence: 0.01)
-                {
-                    face.isHighlighted = true
-                    
-                    if Mouse.IsMouseButtonPressed(.left)
-                    {
-                        dragMode = .brush
-                    }
-                }
-                else
-                {
-                    for edge in face.edges
-                    {
-//                        edge.isHighlighted = false
-                        edge.pair.face.isHighlighted = false
-                        
-                        if intersect(ray: ray, point: edge.center, epsilon: 2, divergence: 0.01)
-                        {
-//                            edge.isHighlighted = true
-                            edge.pair.face.isHighlighted = true
-                            
-                            if Mouse.IsMouseButtonPressed(.left)
-                            {
-                                brush.selectedFace = edge.pair.face
-                                dragMode = .face
-                            }
-                            
-//                            break
-                        }
-                    }
-                }
-                
-//                break
-            }
-        }
-        
-//        if dragMode == .brush
-//        {
-//            dragObject()
-//        }
-        
-        if dragMode == .face, let point = brush.selectedFacePoint, let axis = brush.selectedEdgeAxis
-        {
-            dragFace(at: point, along: axis)
-        }
+        tool.mesh = BrushScene.current.selected as? EditableMesh
+        tool.update()
     }
     
     private func dragObject()

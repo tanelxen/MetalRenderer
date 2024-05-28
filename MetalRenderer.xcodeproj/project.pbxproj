@@ -145,6 +145,7 @@
 		8A5709322C00C34500FE3EA0 /* MeshUtilityRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5709312C00C34500FE3EA0 /* MeshUtilityRenderer.swift */; };
 		8A5709342C020A2100FE3EA0 /* EditableMesh+Codable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5709332C020A2100FE3EA0 /* EditableMesh+Codable.swift */; };
 		8A5709352C020A2100FE3EA0 /* EditableMesh+Codable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5709332C020A2100FE3EA0 /* EditableMesh+Codable.swift */; };
+		8A57093B2C061F6300FE3EA0 /* ObjectTransformTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A57093A2C061F6300FE3EA0 /* ObjectTransformTool.swift */; };
 		8A5969062ABB2F1D00772AC9 /* Intersection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5969052ABB2F1D00772AC9 /* Intersection.swift */; };
 		8A5969072ABB2F1D00772AC9 /* Intersection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5969052ABB2F1D00772AC9 /* Intersection.swift */; };
 		8A5AE68B2AC0FE0400809790 /* SkeletalMeshAssetSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5AE68A2AC0FE0400809790 /* SkeletalMeshAssetSerializer.swift */; };
@@ -260,6 +261,7 @@
 		8A57092D2C00C0E900FE3EA0 /* Editor.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Editor.metal; sourceTree = "<group>"; };
 		8A5709312C00C34500FE3EA0 /* MeshUtilityRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeshUtilityRenderer.swift; sourceTree = "<group>"; };
 		8A5709332C020A2100FE3EA0 /* EditableMesh+Codable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EditableMesh+Codable.swift"; sourceTree = "<group>"; };
+		8A57093A2C061F6300FE3EA0 /* ObjectTransformTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectTransformTool.swift; sourceTree = "<group>"; };
 		8A5969052ABB2F1D00772AC9 /* Intersection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Intersection.swift; sourceTree = "<group>"; };
 		8A5AE68A2AC0FE0400809790 /* SkeletalMeshAssetSerializer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkeletalMeshAssetSerializer.swift; sourceTree = "<group>"; };
 		8A5D1BE62BD6CC1E007CB0FA /* GridHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GridHelper.swift; sourceTree = "<group>"; };
@@ -479,6 +481,7 @@
 		8A27DA992AAE3C0F0094C9D0 /* Sandbox */ = {
 			isa = PBXGroup;
 			children = (
+				8A5709392C061F3000FE3EA0 /* Tools */,
 				8A5709302C00C2D800FE3EA0 /* Routines */,
 				8A85E13C2AC5F45400923DB5 /* Importers */,
 				8ACDB0102A8FADC0005AEE19 /* ImGUI */,
@@ -554,6 +557,14 @@
 				8A5709312C00C34500FE3EA0 /* MeshUtilityRenderer.swift */,
 			);
 			path = Routines;
+			sourceTree = "<group>";
+		};
+		8A5709392C061F3000FE3EA0 /* Tools */ = {
+			isa = PBXGroup;
+			children = (
+				8A57093A2C061F6300FE3EA0 /* ObjectTransformTool.swift */,
+			);
+			path = Tools;
 			sourceTree = "<group>";
 		};
 		8A6232162795DF4F00B1757C /* Scene */ = {
@@ -899,6 +910,7 @@
 				8ACABF1A2BF541490037336B /* EditableMeshTypes.swift in Sources */,
 				8A85E13E2AC5F47800923DB5 /* SkeletalMeshAsset+Valve.swift in Sources */,
 				8A27DAF92AAE3E5A0094C9D0 /* Common.metal in Sources */,
+				8A57093B2C061F6300FE3EA0 /* ObjectTransformTool.swift in Sources */,
 				8A27DAFA2AAE3E5A0094C9D0 /* Barney.swift in Sources */,
 				8A27DAFB2AAE3E5A0094C9D0 /* AudioEngine.swift in Sources */,
 				8A27DAFC2AAE3E5A0094C9D0 /* Debug.swift in Sources */,

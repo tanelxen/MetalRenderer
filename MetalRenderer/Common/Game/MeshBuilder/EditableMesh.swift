@@ -63,6 +63,8 @@ final class EditableMesh: EditableObject
     
     var texture: String = ""
     
+    var center: float3 = .zero
+    
     var selectedFace: Face?
     var selectedEdge: HalfEdge?
     
@@ -389,6 +391,8 @@ extension EditableMesh
             face.updateUVs()
             face.triangulate()
         }
+        
+        center = faces.map({ $0.center }).reduce(.zero, +) / Float(faces.count)
     }
     
     func populateEdges(for face: Face)
