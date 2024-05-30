@@ -188,4 +188,12 @@ enum ViewType: CaseIterable
             case .perspective: return float3(32, 128, -128)
         }
     }
+    
+    var normal: float3 {
+        switch self {
+            case .top, .perspective: return float3(0, 1, 0)
+            case .right: return float3(1, 0, 0)
+            case .back: return float3(0, 0, -1)
+        }
+    }
 }

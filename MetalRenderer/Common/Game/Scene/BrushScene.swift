@@ -19,12 +19,6 @@ final class BrushScene
         brushes.first(where: { $0.isSelected })
     }
     
-    lazy var grid: GridHelper = {
-        let helper = GridHelper()
-        helper.scene = self
-        return helper
-    }()
-    
     let physicsWorld = BulletWorld()
     var player: Player?
     
@@ -107,11 +101,6 @@ final class BrushScene
     
     func update()
     {
-        if !isPlaying
-        {
-            grid.update()
-        }
-        
         if isPlaying
         {
             player?.update()
@@ -121,8 +110,6 @@ final class BrushScene
     
     func render(with renderer: ForwardRenderer)
     {
-        grid.render(with: renderer)
-        
         for brush in brushes
         {
             brush.render(with: renderer)

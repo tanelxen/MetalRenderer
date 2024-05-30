@@ -12,7 +12,7 @@ import simd
 // Манипуляция над объектом выделенным мешем.
 // При клике внутри области и драге - перемешение меша
 // При клике вне области и драге - перемещение ближайшей грани
-final class ObjectTransformTool
+final class BoundsTool2D
 {
     private let viewport: Viewport
     var mesh: EditableMesh?

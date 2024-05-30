@@ -17,6 +17,8 @@ final class ViewportPanel
     private let viewport: Viewport
     private let camera = DebugCamera()
     
+    private let blockTool: BlockTool3D
+    
     lazy var gridQuad = QuadShape(mins: float3(-4096, 0, -4096), maxs: float3(4096, 0, 4096))
     
     lazy var utilityRenderer = MeshUtilityRenderer()
@@ -33,7 +35,7 @@ final class ViewportPanel
         viewport.camera = camera
         viewport.viewType = .perspective
         
-        BrushScene.current?.grid.viewport = viewport
+        blockTool = BlockTool3D(viewport: viewport)
     }
     
     private var gizmoType: ImGuizmoType = .translate
@@ -59,6 +61,8 @@ final class ViewportPanel
             utilityRenderer.selectionMode = EditorLayer.current.selectionMode
             utilityRenderer.render(with: renderer)
         }
+        
+        blockTool.draw(with: renderer)
     }
     
     func draw()
@@ -112,6 +116,7 @@ final class ViewportPanel
         
         if isHovered
         {
+            blockTool.update()
             camera.update()
         }
     }

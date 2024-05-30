@@ -145,13 +145,13 @@
 		8A5709322C00C34500FE3EA0 /* MeshUtilityRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5709312C00C34500FE3EA0 /* MeshUtilityRenderer.swift */; };
 		8A5709342C020A2100FE3EA0 /* EditableMesh+Codable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5709332C020A2100FE3EA0 /* EditableMesh+Codable.swift */; };
 		8A5709352C020A2100FE3EA0 /* EditableMesh+Codable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5709332C020A2100FE3EA0 /* EditableMesh+Codable.swift */; };
-		8A57093B2C061F6300FE3EA0 /* ObjectTransformTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A57093A2C061F6300FE3EA0 /* ObjectTransformTool.swift */; };
+		8A57093B2C061F6300FE3EA0 /* BoundsTool2D.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A57093A2C061F6300FE3EA0 /* BoundsTool2D.swift */; };
+		8A57093D2C09313400FE3EA0 /* BlockTool3D.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A57093C2C09313400FE3EA0 /* BlockTool3D.swift */; };
+		8A57093F2C095EA000FE3EA0 /* BlockTool2D.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A57093E2C095EA000FE3EA0 /* BlockTool2D.swift */; };
 		8A5969062ABB2F1D00772AC9 /* Intersection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5969052ABB2F1D00772AC9 /* Intersection.swift */; };
 		8A5969072ABB2F1D00772AC9 /* Intersection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5969052ABB2F1D00772AC9 /* Intersection.swift */; };
 		8A5AE68B2AC0FE0400809790 /* SkeletalMeshAssetSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5AE68A2AC0FE0400809790 /* SkeletalMeshAssetSerializer.swift */; };
 		8A5AE68C2AC0FE0400809790 /* SkeletalMeshAssetSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5AE68A2AC0FE0400809790 /* SkeletalMeshAssetSerializer.swift */; };
-		8A5D1BE72BD6CC1E007CB0FA /* GridHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5D1BE62BD6CC1E007CB0FA /* GridHelper.swift */; };
-		8A5D1BE82BD6CC1E007CB0FA /* GridHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5D1BE62BD6CC1E007CB0FA /* GridHelper.swift */; };
 		8A5D1BEA2BD81705007CB0FA /* SimpleGrid.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8A5D1BE92BD81705007CB0FA /* SimpleGrid.metal */; };
 		8A5D1BF02BD8A6E9007CB0FA /* Brush.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8A5D1BEF2BD8A6E9007CB0FA /* Brush.metal */; };
 		8A5D1BF12BD8A6E9007CB0FA /* Brush.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8A5D1BEF2BD8A6E9007CB0FA /* Brush.metal */; };
@@ -261,10 +261,11 @@
 		8A57092D2C00C0E900FE3EA0 /* Editor.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Editor.metal; sourceTree = "<group>"; };
 		8A5709312C00C34500FE3EA0 /* MeshUtilityRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeshUtilityRenderer.swift; sourceTree = "<group>"; };
 		8A5709332C020A2100FE3EA0 /* EditableMesh+Codable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EditableMesh+Codable.swift"; sourceTree = "<group>"; };
-		8A57093A2C061F6300FE3EA0 /* ObjectTransformTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectTransformTool.swift; sourceTree = "<group>"; };
+		8A57093A2C061F6300FE3EA0 /* BoundsTool2D.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoundsTool2D.swift; sourceTree = "<group>"; };
+		8A57093C2C09313400FE3EA0 /* BlockTool3D.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockTool3D.swift; sourceTree = "<group>"; };
+		8A57093E2C095EA000FE3EA0 /* BlockTool2D.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockTool2D.swift; sourceTree = "<group>"; };
 		8A5969052ABB2F1D00772AC9 /* Intersection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Intersection.swift; sourceTree = "<group>"; };
 		8A5AE68A2AC0FE0400809790 /* SkeletalMeshAssetSerializer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkeletalMeshAssetSerializer.swift; sourceTree = "<group>"; };
-		8A5D1BE62BD6CC1E007CB0FA /* GridHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GridHelper.swift; sourceTree = "<group>"; };
 		8A5D1BE92BD81705007CB0FA /* SimpleGrid.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = SimpleGrid.metal; sourceTree = "<group>"; };
 		8A5D1BEF2BD8A6E9007CB0FA /* Brush.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Brush.metal; sourceTree = "<group>"; };
 		8A5D1BF22BD92C53007CB0FA /* Material.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Material.swift; sourceTree = "<group>"; };
@@ -562,7 +563,9 @@
 		8A5709392C061F3000FE3EA0 /* Tools */ = {
 			isa = PBXGroup;
 			children = (
-				8A57093A2C061F6300FE3EA0 /* ObjectTransformTool.swift */,
+				8A57093A2C061F6300FE3EA0 /* BoundsTool2D.swift */,
+				8A57093C2C09313400FE3EA0 /* BlockTool3D.swift */,
+				8A57093E2C095EA000FE3EA0 /* BlockTool2D.swift */,
 			);
 			path = Tools;
 			sourceTree = "<group>";
@@ -587,7 +590,6 @@
 				8A7C70C02AB26278003FAFDD /* Particles.swift */,
 				8A53DEFD2AB37E5C00EC2C65 /* Decals.swift */,
 				8A98722C2AD4587200AAEE2C /* Billboards.swift */,
-				8A5D1BE62BD6CC1E007CB0FA /* GridHelper.swift */,
 			);
 			path = Scene;
 			sourceTree = "<group>";
@@ -828,7 +830,6 @@
 				8A27DA5C2AAE39DE0094C9D0 /* Basic.metal in Sources */,
 				8A27DA5D2AAE39DE0094C9D0 /* PlayerMovement.swift in Sources */,
 				8A5D1BF12BD8A6E9007CB0FA /* Brush.metal in Sources */,
-				8A5D1BE82BD6CC1E007CB0FA /* GridHelper.swift in Sources */,
 				8A27DA5E2AAE39DE0094C9D0 /* Q3MapCollision.swift in Sources */,
 				8A57092F2C00C0E900FE3EA0 /* Editor.metal in Sources */,
 				8A53DF022AB488A700EC2C65 /* UserInterface.metal in Sources */,
@@ -910,7 +911,7 @@
 				8ACABF1A2BF541490037336B /* EditableMeshTypes.swift in Sources */,
 				8A85E13E2AC5F47800923DB5 /* SkeletalMeshAsset+Valve.swift in Sources */,
 				8A27DAF92AAE3E5A0094C9D0 /* Common.metal in Sources */,
-				8A57093B2C061F6300FE3EA0 /* ObjectTransformTool.swift in Sources */,
+				8A57093B2C061F6300FE3EA0 /* BoundsTool2D.swift in Sources */,
 				8A27DAFA2AAE3E5A0094C9D0 /* Barney.swift in Sources */,
 				8A27DAFB2AAE3E5A0094C9D0 /* AudioEngine.swift in Sources */,
 				8A27DAFC2AAE3E5A0094C9D0 /* Debug.swift in Sources */,
@@ -925,7 +926,6 @@
 				8A27DB032AAE3E5A0094C9D0 /* StaticMesh.metal in Sources */,
 				8A27DB042AAE3E5A0094C9D0 /* Utils.swift in Sources */,
 				8AE718232AD08293000CE0E1 /* BrushRenderer.swift in Sources */,
-				8A5D1BE72BD6CC1E007CB0FA /* GridHelper.swift in Sources */,
 				8A27DB062AAE3E5A0094C9D0 /* Skybox.metal in Sources */,
 				8A05DD102ACF25080012252D /* WorldEntitiesAsset+Q3BSP.swift in Sources */,
 				8A3E5C812B10DA160043EA29 /* BrushCollision.swift in Sources */,
@@ -966,6 +966,7 @@
 				8A27DB1B2AAE3E5A0094C9D0 /* Skybox.swift in Sources */,
 				8A27DB1C2AAE3E5A0094C9D0 /* PipelineStates.swift in Sources */,
 				8A808F392AD034290087A084 /* WorldStaticMeshAsset.swift in Sources */,
+				8A57093F2C095EA000FE3EA0 /* BlockTool2D.swift in Sources */,
 				8A27DB1D2AAE3E5A0094C9D0 /* TextureManager.swift in Sources */,
 				8A8DE1AE2BFD57160019FA47 /* OrthoViewPanel.swift in Sources */,
 				8A27DB1E2AAE3E5A0094C9D0 /* BasicShapes.swift in Sources */,
@@ -979,6 +980,7 @@
 				8A53DF042AB48F4700EC2C65 /* UserInterface.swift in Sources */,
 				8A9872302AD4648900AAEE2C /* Billboards.metal in Sources */,
 				8A27DB242AAE3E5A0094C9D0 /* ImGui+Extra.swift in Sources */,
+				8A57093D2C09313400FE3EA0 /* BlockTool3D.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
