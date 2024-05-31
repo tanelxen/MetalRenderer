@@ -9,10 +9,11 @@ import Foundation
 import Metal
 import simd
 
-// Манипуляция над объектом выделенным мешем.
-// При клике внутри области и драге - перемешение меша
-// При клике вне области и драге - перемещение ближайшей грани
-final class BoundsTool2D
+/*
+ Drag mesh faces along normals
+ In 2D tap inside mesh allows drag entire mesh
+ */
+final class BoundsTool
 {
     private let viewport: Viewport
     var mesh: EditableMesh?
@@ -22,14 +23,12 @@ final class BoundsTool2D
     
     private var dragType: DragType = .none
     
-    private var dotsVertexBuffer: MTLBuffer!
+    // For render edges
+    private let box = MTKGeometry(.box)
     
     init(viewport: Viewport)
     {
         self.viewport = viewport
-        
-        let length = MemoryLayout<Vertex>.stride * MAX_VERTS
-        dotsVertexBuffer = Engine.device.makeBuffer(length: length)
     }
     
     func update()
@@ -116,23 +115,64 @@ final class BoundsTool2D
         }
         else
         {
-            if let d = distance(ray: ray, point: mesh.center), d < 16
+            if viewport.viewType == .perspective
             {
-                dragOrigin = point
-                dragType = .mesh(mesh)
+                var bestd: Float = .greatestFiniteMagnitude
+                var bestf: Face?
+                
+                for face in mesh.faces
+                {
+                    if dot(ray.direction, face.plane.normal) < 0
+                    {
+                        if intersect(ray: ray, face: face)
+                        {
+                            bestf = face
+                            break
+                        }
+                        else
+                        {
+                            continue
+                        }
+                    }
+    
+                    if let point = intersection(ray: ray, plane: face.plane)
+                    {
+                        let d = length(point - ray.origin)
+    
+                        if d < bestd
+                        {
+                            bestd = d
+                            bestf = face
+                        }
+                    }
+                }
+                
+                if let face = bestf
+                {
+                    dragType = .face(face)
+                    dragOrigin = point
+                }
             }
             else
             {
+                guard let rayPoint = closestPoint(on: ray, to: mesh.center)
+                else {
+                    return
+                }
+                
+                dragOrigin = point
+                dragType = .mesh(mesh)
+                
+                // Perpendicular ray to center of mesh from point on mouse ray
+                let rayToOrigin = Ray(
+                    origin: rayPoint,
+                    direction: normalize(mesh.center - rayPoint)
+                )
+                
                 for face in mesh.faces
                 {
-                    guard abs(dot(face.plane.normal, ray.direction)) < 0.01
-                    else {
-                        continue
-                    }
-                    
-                    if let d = distance(ray: ray, point: face.center), d < 16
+                    if intersect(ray: rayToOrigin, face: face)
                     {
-                        dragOrigin = point
                         dragType = .face(face)
                         break
                     }
@@ -143,8 +183,6 @@ final class BoundsTool2D
     
     func draw(with renderer: ForwardRenderer)
     {
-        var vertices: [Vertex] = []
-        
         switch dragType
         {
             case .none:
@@ -153,33 +191,44 @@ final class BoundsTool2D
             case .mesh(let mesh):
                 for face in mesh.faces
                 {
-                    vertices.append(
-                        Vertex(pos: face.center, clr: [0, 1, 0, 1])
-                    )
+                    for edge in face.edges
+                    {
+                        let p1 = edge.vert.position
+                        let p2 = edge.next.vert.position
+                        drawEdge(p1: p1, p2: p2, color: [1, 1, 0, 1], with: renderer)
+                    }
                 }
                 
             case .face(let face):
-                vertices.append(
-                    Vertex(pos: face.center, clr: [0, 1, 0, 1])
-                )
+                for edge in face.edges
+                {
+                    let p1 = edge.vert.position
+                    let p2 = edge.next.vert.position
+                    drawEdge(p1: p1, p2: p2, color: [1, 1, 0, 1], with: renderer)
+                }
         }
-        
-        var renderItem = RenderItem(technique: .dot)
-        
-        renderItem.cullMode = .none
-        renderItem.isSupportLineMode = true
-        renderItem.primitiveType = .point
-        
-        var pointer = dotsVertexBuffer.contents().bindMemory(to: Vertex.self, capacity: MAX_VERTS)
-        
-        for vertex in vertices
-        {
-            pointer.pointee = vertex
-            pointer = pointer.advanced(by: 1)
-        }
+    }
     
-        renderItem.vertexBuffer = dotsVertexBuffer
-        renderItem.numVertices = vertices.count
+    private func drawEdge(p1: float3, p2: float3, color: float4, with renderer: ForwardRenderer)
+    {
+        let boxMainAxis = float3(0, 1, 0)
+        
+        let direction = normalize(p2 - p1)
+        let position = (p1 + p2) * 0.5
+        let length = length(p2 - p1)
+        
+        // Orient Y-axis of box along edge
+        let q = simd_quatf(from: boxMainAxis, to: direction)
+        let matrix = float4x4(q)
+        
+        var renderItem = RenderItem(mtkMesh: box)
+        
+        renderItem.isSupportLineMode = false
+        renderItem.tintColor = color
+        
+        renderItem.transform = Transform(position: position)
+        renderItem.transform.scale = [0.5, length, 0.5]
+        renderItem.transform.parent = matrix
         
         renderer.add(item: renderItem)
     }
@@ -205,6 +254,21 @@ private func distance(ray: Ray, point: float3) -> Float?
     let e = ray.origin + ray.direction * t
     
     return length(e - point)
+}
+
+private func closestPoint(on ray: Ray, to point: float3) -> float3?
+{
+    let v = point - ray.origin
+    
+    let t = dot(v, ray.direction)
+    
+    guard t >= 0 else {
+        return nil
+    }
+    
+    let e = ray.origin + ray.direction * t
+    
+    return e
 }
 
 private struct Vertex

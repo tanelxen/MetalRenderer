@@ -68,27 +68,28 @@ final class BrushScene
         brushes.append(new)
     }
     
-    func clipAllBrushes()
+    func select(by ray: Ray)
     {
-        guard let cutter = selected as? PlainBrush else { return }
-//        guard let plane = cutter.selectedPlane else { return }
+        // Brutforce approach
+        // TODO: rewrite with AABB
         
-        for brush in brushes
+        var bestd: Float = .greatestFiniteMagnitude
+        var closest: EditableMesh?
+        
+        for mesh in brushes.compactMap({ $0 as? EditableMesh })
         {
-            guard brush !== cutter else { continue }
-            guard let plainBrush = brush as? PlainBrush else { continue }
+            mesh.isSelected = false
             
-            plainBrush.clip(with: cutter)
+            let d = intersect(ray: ray, mesh: mesh)
             
-//            for brushB in brushes
-//            {
-//                guard brushA !== brushB else { continue }
-//                guard let plainBrushA = brushA as? PlainBrush else { continue }
-//                guard let plainBrushB = brushB as? PlainBrush else { continue }
-//
-//                plainBrushA.clip(with: plainBrushB)
-//            }
+            if d < bestd
+            {
+                closest = mesh
+                bestd = d
+            }
         }
+        
+        closest?.isSelected = true
     }
     
     func removeSelected()

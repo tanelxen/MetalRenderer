@@ -22,6 +22,9 @@ final class BlockTool3D
     private var height: Float = 0
     private var startPoint: float3?
     
+    private var downMouseTimestemp: Date?
+    private var downMousePos: float2?
+    
     // Projection plane
     private var plane: Plane {
         Plane(normal: viewport.viewType.normal, distance: 0)
@@ -35,65 +38,95 @@ final class BlockTool3D
     
     func update()
     {
-        let ray = viewport.mousePositionInWorld()
-        
-        guard var point = intersection(ray: ray, plane: plane)
-        else {
-            return
-        }
-        
-        // Sometimes we get coordinates little bit less zero
-        point = round(point * 10) / 10
-        
-        point = floor(point / gridSize) * gridSize
-        
-        isCreationMode = Keyboard.isKeyPressed(.c)
-        
-        if isCreationMode
+        if Mouse.IsMouseButtonPressed(.left) && Keyboard.isKeyPressed(.shift)
         {
-            if let start = startPoint
+            if downMousePos == nil
             {
-                if Mouse.IsMouseButtonPressed(.left)
-                {
-                    let x = min(start.x, point.x)
-                    let z = min(start.z, point.z)
-                    let width = abs(start.x - point.x) + gridSize
-                    let depth = abs(start.z - point.z) + gridSize
-                    
-                    cube.transform.position = float3(x, 0, z)
-                    cube.transform.scale = float3(width, 0, depth)
-                    isPlaneDrawn = true
-                }
-                else if isPlaneDrawn
-                {
-                    height -= Mouse.getDY()
-                    cube.transform.scale.y = floor(height / gridSize) * gridSize
-                }
-            }
-            else
-            {
-                cube.transform.position = point
-                cube.transform.scale = float3(gridSize, gridSize, gridSize)
-                
-                if Mouse.IsMouseButtonPressed(.left)
-                {
-                    startPoint = point
-                    isPlaneDrawn = false
-                    height = gridSize
-                }
+                downMousePos = Mouse.getMouseWindowPosition()
+                downMouseTimestemp = Date()
             }
         }
         else
         {
-            if isPlaneDrawn, cube.transform.scale.y > 0
+            if let oldPos = downMousePos, let timestemp = downMouseTimestemp
             {
-                BrushScene.current.addBrush(position: cube.transform.position, size: cube.transform.scale)
+                let newPos = Mouse.getMouseWindowPosition()
+                let delta = length(newPos - oldPos)
+                
+                let timeInterval = Date().timeIntervalSince(timestemp)
+                
+                if timeInterval < 0.3, delta < gridSize * 0.5
+                {
+                    print("Select click")
+                    
+                    let ray = viewport.mousePositionInWorld()
+                    BrushScene.current.select(by: ray)
+                }
+                
+                downMouseTimestemp = nil
+                downMousePos = nil
             }
-            
-            startPoint = nil
-            isPlaneDrawn = false
-            height = gridSize
         }
+        
+//        let ray = viewport.mousePositionInWorld()
+//
+//        guard var point = intersection(ray: ray, plane: plane)
+//        else {
+//            return
+//        }
+//
+//        // Sometimes we get coordinates little bit less zero
+//        point = round(point * 10) / 10
+//
+//        point = floor(point / gridSize) * gridSize
+//
+//        isCreationMode = Keyboard.isKeyPressed(.c)
+//
+//        if isCreationMode
+//        {
+//            if let start = startPoint
+//            {
+//                if Mouse.IsMouseButtonPressed(.left)
+//                {
+//                    let x = min(start.x, point.x)
+//                    let z = min(start.z, point.z)
+//                    let width = abs(start.x - point.x) + gridSize
+//                    let depth = abs(start.z - point.z) + gridSize
+//
+//                    cube.transform.position = float3(x, 0, z)
+//                    cube.transform.scale = float3(width, 0, depth)
+//                    isPlaneDrawn = true
+//                }
+//                else if isPlaneDrawn
+//                {
+//                    height -= Mouse.getDY()
+//                    cube.transform.scale.y = floor(height / gridSize) * gridSize
+//                }
+//            }
+//            else
+//            {
+//                cube.transform.position = point
+//                cube.transform.scale = float3(gridSize, gridSize, gridSize)
+//
+//                if Mouse.IsMouseButtonPressed(.left)
+//                {
+//                    startPoint = point
+//                    isPlaneDrawn = false
+//                    height = gridSize
+//                }
+//            }
+//        }
+//        else
+//        {
+//            if isPlaneDrawn, cube.transform.scale.y > 0
+//            {
+//                BrushScene.current.addBrush(position: cube.transform.position, size: cube.transform.scale)
+//            }
+//
+//            startPoint = nil
+//            isPlaneDrawn = false
+//            height = gridSize
+//        }
     }
     
     func draw(with renderer: ForwardRenderer)

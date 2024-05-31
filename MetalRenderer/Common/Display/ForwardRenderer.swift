@@ -27,6 +27,14 @@ final class ForwardRenderer
         return Engine.device.makeDepthStencilState(descriptor: descriptor)!
     }()
     
+    private var noneStencilState: MTLDepthStencilState = {
+        let descriptor = MTLDepthStencilDescriptor()
+        descriptor.isDepthWriteEnabled = false
+        descriptor.depthCompareFunction = .always
+        descriptor.label = "Always"
+        return Engine.device.makeDepthStencilState(descriptor: descriptor)!
+    }()
+    
     private var commandBuffer: MTLCommandBuffer!
     private var commandEncoder: MTLRenderCommandEncoder!
     private var items: [RenderItem] = []
@@ -80,7 +88,7 @@ final class ForwardRenderer
                 modelConstants.color = item.tintColor
                 modelConstants.modelMatrix = item.transform.matrix
                 commandEncoder.setVertexBytes(&modelConstants, length: MemoryLayout<ModelConstants>.size, index: 2)
-                
+                commandEncoder.setTriangleFillMode(.fill)
                 mtkMesh.render(with: commandEncoder)
                 continue
             }
@@ -170,21 +178,9 @@ final class ForwardRenderer
                 
             case .dot:
                 encoder.setCullMode(.none)
-                encoder.setDepthStencilState(regularStencilState)
+                encoder.setDepthStencilState(noneStencilState)
                 encoder.setRenderPipelineState(pipelineStates.dot)
         }
-    }
-    
-    private func drawSpecial(with encoder: MTLRenderCommandEncoder)
-    {
-//        apply(technique: .grid, to: encoder)
-//        var modelConstants = ModelConstants()
-//        modelConstants.modelMatrix = matrix_identity_float4x4
-//        encoder.setVertexBytes(&modelConstants, length: MemoryLayout<ModelConstants>.size, index: 2)
-//        gridQuad.render(with: encoder)
-        
-//        apply(technique: .basic, to: encoder)
-//        grid.render(with: encoder)
     }
     
     private func drawDebug(with encoder: MTLRenderCommandEncoder)

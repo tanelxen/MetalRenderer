@@ -19,6 +19,9 @@ final class BlockTool2D
     
     private var startPoint: float3?
     
+    private var downMouseTimestemp: Date?
+    private var downMousePos: float2?
+    
     // Projection plane
     private var plane: Plane {
         Plane(normal: viewport.viewType.normal, distance: 0)
@@ -32,6 +35,36 @@ final class BlockTool2D
     
     func update()
     {
+        if Mouse.IsMouseButtonPressed(.left) && Keyboard.isKeyPressed(.shift)
+        {
+            if downMousePos == nil
+            {
+                downMousePos = Mouse.getMouseWindowPosition()
+                downMouseTimestemp = Date()
+            }
+        }
+        else
+        {
+            if let oldPos = downMousePos, let timestemp = downMouseTimestemp
+            {
+                let newPos = Mouse.getMouseWindowPosition()
+                let delta = length(newPos - oldPos)
+                
+                let timeInterval = Date().timeIntervalSince(timestemp)
+                
+                if timeInterval < 0.3, delta < gridSize * 0.5
+                {
+                    print("Select click")
+                    
+                    let ray = viewport.mousePositionInWorld()
+                    BrushScene.current.select(by: ray)
+                }
+                
+                downMouseTimestemp = nil
+                downMousePos = nil
+            }
+        }
+        
         guard Mouse.IsMouseButtonPressed(.left) && Keyboard.isKeyPressed(.c)
         else {
             if startPoint != nil
@@ -39,19 +72,19 @@ final class BlockTool2D
                 BrushScene.current.addBrush(position: cube.transform.position, size: cube.transform.scale)
                 startPoint = nil
             }
-            
+
             return
         }
-        
+
         let ray = viewport.mousePositionInWorld()
-        
+
         guard var point = intersection(ray: ray, plane: plane)
         else {
             return
         }
-        
+
         point = floor(point / gridSize) * gridSize
-        
+
         if let start = startPoint
         {
             if Mouse.IsMouseButtonPressed(.left)
@@ -59,11 +92,11 @@ final class BlockTool2D
                 let x = min(start.x, point.x)
                 let y = min(start.y, point.y)
                 let z = min(start.z, point.z)
-                
+
                 let width = abs(start.x - point.x) + gridSize
                 let height = abs(start.y - point.y) + gridSize
                 let depth = abs(start.z - point.z) + gridSize
-                
+
                 cube.transform.position = float3(x, y, z)
                 cube.transform.scale = float3(width, height, depth)
             }
@@ -72,7 +105,7 @@ final class BlockTool2D
         {
             cube.transform.position = point
             cube.transform.scale = float3(gridSize, gridSize, gridSize)
-            
+
             startPoint = point
         }
     }
@@ -183,3 +216,8 @@ private final class Cube
     }
 }
 
+private enum Mode
+{
+    case select
+    case create
+}

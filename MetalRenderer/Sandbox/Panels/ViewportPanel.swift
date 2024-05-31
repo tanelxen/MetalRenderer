@@ -17,6 +17,7 @@ final class ViewportPanel
     private let viewport: Viewport
     private let camera = DebugCamera()
     
+    private var boundsTool: BoundsTool
     private let blockTool: BlockTool3D
     
     lazy var gridQuad = QuadShape(mins: float3(-4096, 0, -4096), maxs: float3(4096, 0, 4096))
@@ -35,6 +36,7 @@ final class ViewportPanel
         viewport.camera = camera
         viewport.viewType = .perspective
         
+        boundsTool = BoundsTool(viewport: viewport)
         blockTool = BlockTool3D(viewport: viewport)
     }
     
@@ -62,6 +64,7 @@ final class ViewportPanel
             utilityRenderer.render(with: renderer)
         }
         
+        boundsTool.draw(with: renderer)
         blockTool.draw(with: renderer)
     }
     
@@ -116,7 +119,13 @@ final class ViewportPanel
         
         if isHovered
         {
-            blockTool.update()
+            boundsTool.mesh = BrushScene.current.selected as? EditableMesh
+            boundsTool.update()
+            
+            if EditorLayer.current.selectionMode == .object {
+                blockTool.update()
+            }
+            
             camera.update()
         }
     }
