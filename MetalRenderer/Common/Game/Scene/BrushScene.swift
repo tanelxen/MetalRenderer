@@ -15,6 +15,8 @@ final class BrushScene
     
     var brushes: [EditableObject] = []
     
+    var infoPlayerStart = InfoPlayerStart()
+    
     var selected: EditableObject? {
         brushes.first(where: { $0.isSelected })
     }
@@ -115,6 +117,11 @@ final class BrushScene
         {
             brush.render(with: renderer)
         }
+        
+        if !isPlaying
+        {
+            infoPlayerStart.render(with: renderer)
+        }
     }
 }
 
@@ -150,8 +157,8 @@ extension BrushScene
 //        guard let point = spawnPoints.first else { return }
         
         let transform = Transform()
-        transform.position = float3(0, 56, 0)
-        transform.rotation = .zero
+        transform.position = infoPlayerStart.transform.position
+        transform.rotation = infoPlayerStart.transform.rotation
         
         player = Player(scene: self)
         player?.spawn(with: transform)
@@ -159,50 +166,50 @@ extension BrushScene
     
     private func createWorldStaticCollision()
     {
-//        for brush in brushes
-//        {
-//            if brush.isRoom
-//            {
-//                for face in brush.faces
-//                {
-//                    let shape = BulletConvexHullShape()
-//
-//                    for point in face.verts.map({ $0.position })
-//                    {
-//                        shape.addPoint(point * q2b)
-//                    }
-//
-//                    let transform = BulletTransform()
-//                    transform.setIdentity()
-//
-//                    let motionState = BulletMotionState(transform: transform)
-//                    let body = BulletRigidBody(mass: 0,
-//                                               motionState: motionState,
-//                                               collisionShape: shape)
-//                    body.friction = 0.5
-//                    physicsWorld.add(rigidBody: body)
-//                }
-//            }
-//            else
-//            {
-//                let shape = BulletConvexHullShape()
-//
-//                for point in brush.vertices
-//                {
-//                    shape.addPoint(point * q2b)
-//                }
-//
-//                let transform = BulletTransform()
-//                transform.setIdentity()
-//
-//                let motionState = BulletMotionState(transform: transform)
-//                let body = BulletRigidBody(mass: 0,
-//                                           motionState: motionState,
-//                                           collisionShape: shape)
-//                body.friction = 0.5
-//                physicsWorld.add(rigidBody: body)
-//            }
-//        }
+        for brush in brushes.compactMap({ $0 as? EditableMesh })
+        {
+            if brush.isRoom
+            {
+                for face in brush.faces
+                {
+                    let shape = BulletConvexHullShape()
+
+                    for point in face.verts.map({ $0.position })
+                    {
+                        shape.addPoint(point * q2b)
+                    }
+
+                    let transform = BulletTransform()
+                    transform.setIdentity()
+
+                    let motionState = BulletMotionState(transform: transform)
+                    let body = BulletRigidBody(mass: 0,
+                                               motionState: motionState,
+                                               collisionShape: shape)
+                    body.friction = 0.5
+                    physicsWorld.add(rigidBody: body)
+                }
+            }
+            else
+            {
+                let shape = BulletConvexHullShape()
+
+                for point in brush.vertices
+                {
+                    shape.addPoint(point * q2b)
+                }
+
+                let transform = BulletTransform()
+                transform.setIdentity()
+
+                let motionState = BulletMotionState(transform: transform)
+                let body = BulletRigidBody(mass: 0,
+                                           motionState: motionState,
+                                           collisionShape: shape)
+                body.friction = 0.5
+                physicsWorld.add(rigidBody: body)
+            }
+        }
     }
 }
 

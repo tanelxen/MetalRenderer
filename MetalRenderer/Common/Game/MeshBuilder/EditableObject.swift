@@ -9,10 +9,8 @@ import Foundation
 import Metal
 import simd
 
-protocol EditableObject: AnyObject
+protocol EditableObject: Entity, AnyObject
 {
-    var isSelected: Bool { get set }
-    
     var selectedFacePoint: float3? { get }
     var selectedFaceAxis: float3? { get }
     
@@ -32,6 +30,4 @@ protocol EditableObject: AnyObject
     func setWorld(position: float3)
     func setSelectedFace(position: float3)
     func setSelectedEdge(position: float3)
-    
-    func render(with renderer: ForwardRenderer)
 }

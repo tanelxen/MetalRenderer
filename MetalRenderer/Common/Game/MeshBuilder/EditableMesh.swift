@@ -12,6 +12,8 @@ private let MAX_VERTS: Int = 1024
 
 final class EditableMesh: EditableObject
 {
+    var transform: Transform = Transform()
+    
     var isSelected = false {
         didSet {
             selectedFace = nil

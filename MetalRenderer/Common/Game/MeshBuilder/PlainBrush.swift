@@ -12,6 +12,8 @@ private let MAX_VERTS: Int = 36
 
 final class PlainBrush: EditableObject
 {
+    var transform: Transform = Transform()
+    
     var isSelected = false {
         didSet {
             selectedFaceIndex = nil

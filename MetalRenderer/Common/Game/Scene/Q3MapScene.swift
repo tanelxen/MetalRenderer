@@ -337,7 +337,7 @@ extension Q3MapScene
             let ambient = lightGrid?.ambient(at: entity.transform.position) ?? float3(1, 1, 1)
             let color = float4(ambient, 1.0)
             
-            var modelConstants = ModelConstants(modelMatrix: modelMatrix, color: color)
+            var modelConstants = ModelConstants(modelMatrix: modelMatrix, color: color, useFlatShading: 0)
             encoder?.setVertexBytes(&modelConstants, length: MemoryLayout<ModelConstants>.size, index: 2)
             
             entity.mesh?.renderWithEncoder(encoder!)
@@ -371,7 +371,7 @@ extension Q3MapScene
         let ambient = lightGrid?.ambient(at: transform.position) ?? float3(1, 1, 1)
         let color = float4(ambient, 1.0)
         
-        var modelConstants = ModelConstants(modelMatrix: modelMatrix, color: color)
+        var modelConstants = ModelConstants(modelMatrix: modelMatrix, color: color, useFlatShading: 0)
         encoder?.setVertexBytes(&modelConstants, length: MemoryLayout<ModelConstants>.size, index: 2)
         
         player.mesh?.renderWithEncoder(encoder!)

@@ -22,6 +22,7 @@ typedef struct
 {
     matrix_float4x4 modelMatrix;
     vector_float4 color;
+    int useFlatShading;
 } ModelConstants;
 
 #endif /* Uniforms_h */

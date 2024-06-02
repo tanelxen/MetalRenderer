@@ -15,6 +15,8 @@ final class HierarchyPanel
     {
         ImGuiBegin(name, nil, 0)
         
+        drawPlayerStart()
+        
         for (i, brush) in BrushScene.current.brushes.enumerated()
         {
             drawBrush(brush, index: i)
@@ -47,6 +49,32 @@ final class HierarchyPanel
                     BrushScene.current.brushes[j].isSelected = j == index
                 }
             }
+        }
+
+        if opened
+        {
+            ImGuiTreePop()
+        }
+
+        ImGuiPopStyleVar(2)  // ItemSpacing & FramePadding
+    }
+    
+    private func drawPlayerStart()
+    {
+        let entity = BrushScene.current.infoPlayerStart
+        
+        ImGuiPushStyleVar(Im(ImGuiStyleVar_ItemSpacing), ImVec2(8, 6))
+        ImGuiPushStyleVar(Im(ImGuiStyleVar_FramePadding), ImVec2(1, 3))
+
+        var flags = Im(ImGuiTreeNodeFlags_Leaf) | Im(ImGuiTreeNodeFlags_Bullet)
+
+        flags |= (entity.isSelected) ? Im(ImGuiTreeNodeFlags_Selected) : 0
+
+        let opened = ImGuiTreeNodeEx("Info Player Start", flags)
+
+        if ImGuiIsItemClicked(Im(ImGuiMouseButton_Left))
+        {
+            entity.isSelected.toggle()
         }
 
         if opened

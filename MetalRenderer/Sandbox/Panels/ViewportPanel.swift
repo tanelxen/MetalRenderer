@@ -132,6 +132,19 @@ final class ViewportPanel
     
     private func updateOperations()
     {
+        if BrushScene.current.infoPlayerStart.isSelected
+        {
+            let entity = BrushScene.current.infoPlayerStart
+            let transform = Transform(position: entity.transform.position)
+            
+            if renderGizmo(for: transform)
+            {
+                entity.transform.position = transform.position
+            }
+            
+            return
+        }
+        
         guard let brush = BrushScene.current.selected as? EditableMesh else { return }
         
         if EditorLayer.current.selectionMode == .face, let point = brush.selectedFacePoint
@@ -172,14 +185,14 @@ final class ViewportPanel
         }
         else if EditorLayer.current.selectionMode == .object
         {
-            if let anchor = brush.faces.first?.verts.first?.position
-            {
-                let transform = Transform(position: anchor)
-                if renderGizmo(for: transform)
-                {
-                    brush.setWorld(position: transform.position)
-                }
-            }
+//            if let anchor = brush.faces.first?.verts.first?.position
+//            {
+//                let transform = Transform(position: anchor)
+//                if renderGizmo(for: transform)
+//                {
+//                    brush.setWorld(position: transform.position)
+//                }
+//            }
             
             if ImGuiIsKeyPressedMap(Im(ImGuiKey_Escape), false)
             {

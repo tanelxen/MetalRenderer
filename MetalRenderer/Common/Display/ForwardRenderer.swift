@@ -87,8 +87,10 @@ final class ForwardRenderer
                 var modelConstants = ModelConstants()
                 modelConstants.color = item.tintColor
                 modelConstants.modelMatrix = item.transform.matrix
-                commandEncoder.setVertexBytes(&modelConstants, length: MemoryLayout<ModelConstants>.size, index: 2)
+                modelConstants.useFlatShading = 1
+                commandEncoder.setVertexBytes(&modelConstants, length: MemoryLayout<ModelConstants>.stride, index: 2)
                 commandEncoder.setTriangleFillMode(.fill)
+                commandEncoder.setFragmentTexture(item.texture, index: 0)
                 mtkMesh.render(with: commandEncoder)
                 continue
             }
@@ -101,7 +103,8 @@ final class ForwardRenderer
             var modelConstants = ModelConstants()
             modelConstants.color = item.tintColor
             modelConstants.modelMatrix = item.transform.matrix
-            commandEncoder.setVertexBytes(&modelConstants, length: MemoryLayout<ModelConstants>.size, index: 2)
+            modelConstants.useFlatShading = 1
+            commandEncoder.setVertexBytes(&modelConstants, length: MemoryLayout<ModelConstants>.stride, index: 2)
             
             commandEncoder.setVertexBuffer(item.vertexBuffer, offset: 0, index: 0)
             commandEncoder.setFragmentTexture(item.texture, index: 0)
