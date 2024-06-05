@@ -79,7 +79,7 @@ final class EditableMesh: EditableObject
     
     init(origin: float3, size: float3)
     {
-        populateFaces(origin: origin, size: size)
+        populateCubeFaces(origin: origin, size: size)
         setupRenderData()
     }
     
@@ -174,9 +174,11 @@ final class EditableMesh: EditableObject
     
     func removeSelectedFace()
     {
-        faces.removeAll(where: { $0 === selectedFace })
+//        faces.removeAll(where: { $0 === selectedFace })
+        selectedFace?.isGhost = true
+        selectedFace?.triangles = []
         selectedFace = nil
-        recalculate()
+//        recalculate()
     }
     
     func setSelectedEdge(position: float3)
@@ -222,24 +224,94 @@ final class EditableMesh: EditableObject
         
         let delta = face.plane.normal * distance
         
+        // Make face copy with offset along normal
+        
+        let newFace = Face(face.name + "-extruded")
+        
         for vert in face.verts
         {
-            vert.position += delta
+            newFace.verts.append(
+                Vert(vert.position + delta)
+            )
         }
+        
+        faces.append(newFace)
+        
+        // Fill the gaps
         
         for edge in face.edges
         {
-            let newFace = Face(edge.pair.face.name + "-ext-by-" + edge.pair.name)
+            let newFace = Face("bridge" + face.name + "-to-extruded" + "-by-edge-" + edge.name)
             
-            newFace.plane = edge.pair.face.plane
             newFace.verts = [
-                Vert(edge.pair.vert.position),
-                Vert(edge.next.vert.position),
                 Vert(edge.vert.position),
-                Vert(edge.pair.next.vert.position)
+                Vert(edge.next.vert.position),
+                Vert(edge.next.vert.position + delta),
+                Vert(edge.vert.position + delta)
             ]
             faces.append(newFace)
         }
+        
+        // Remove original face
+        faces.removeAll(where: { $0 === face })
+        selectedFace = newFace
+        
+        recalculate()
+    }
+    
+    func splitSelectedFace()
+    {
+        guard let face = selectedFace else { return }
+        
+        let p1 = face.edges[0].center
+        let p2 = face.edges[2].center
+//        let dir = normalize(p2 - p1)
+//
+//        var splitterNormal = cross(face.plane.normal, dir)
+//        splitterNormal = normalize(splitterNormal)
+        
+        let newFace1 = Face(face.name + "-splitted-left")
+        newFace1.verts = [
+            Vert(face.verts[0].position),
+            Vert(p1),
+            Vert(p2),
+            Vert(face.verts[3].position)
+        ]
+        faces.append(newFace1)
+        
+        let newFace2 = Face(face.name + "-splitted-right")
+        newFace2.verts = [
+            Vert(p1),
+            Vert(face.verts[1].position),
+            Vert(face.verts[2].position),
+            Vert(p2)
+        ]
+        faces.append(newFace2)
+        
+//        if let index = face.edges[0].pair.face.verts.firstIndex(of: face.edges[0].pair.vert)
+//        {
+//            face.edges[0].pair.face.verts.insert(Vert(p1), at: index)
+//        }
+        
+//        if let index = face.edges[2].pair.face.verts.firstIndex(of: face.edges[2].pair.vert)
+//        {
+//            face.edges[2].pair.face.verts.insert(Vert(p2), at: index)
+//        }
+        
+//        for vert in face.verts
+//        {
+//            newFace1.verts.append(
+//                Vert(vert.position)
+//            )
+//
+//            newFace2.verts.append(
+//                Vert(vert.position)
+//            )
+//        }
+        
+        // Remove original face
+        faces.removeAll(where: { $0 === face })
+        selectedFace = nil
         
         recalculate()
     }
@@ -299,7 +371,7 @@ final class EditableMesh: EditableObject
 
 extension EditableMesh
 {
-    func populateFaces(origin: float3, size: float3)
+    func populateCubeFaces(origin: float3, size: float3)
     {
         let back = Face("back")
         back.verts = [
@@ -390,8 +462,15 @@ extension EditableMesh
                 setupPairs(for: edge)
             }
             
-            face.updateUVs()
-            face.triangulate()
+            if face.isGhost
+            {
+                face.triangles.removeAll()
+            }
+            else
+            {
+                face.updateUVs()
+                face.triangulate()
+            }
         }
         
         center = faces.map({ $0.center }).reduce(.zero, +) / Float(faces.count)

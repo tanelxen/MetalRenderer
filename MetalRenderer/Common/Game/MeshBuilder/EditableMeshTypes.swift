@@ -47,8 +47,8 @@ final class HalfEdge
         self.name = name
     }
     
-    var fromTo: (Vert, Vert) {
-        (pair!.vert, vert)
+    var fromTo: (Vert, Vert?) {
+        (vert, pair?.vert)
     }
 }
 
@@ -66,6 +66,7 @@ final class Face
     }
     
     var isHighlighted = false
+    var isGhost = false
     
     var triangles: [Vert] = []
     
@@ -131,13 +132,13 @@ final class Face
         self.name = name
     }
     
-    private func isConvex(_ a: float3, _ b: float3, _ c: float3) -> Bool
-    {
-        let ab = b - a
-        let bc = c - b
-        let crossProduct = cross(ab, bc)
-        return crossProduct.x > 0 || crossProduct.y > 0 || crossProduct.z > 0
-    }
+//    private func isConvex(_ a: float3, _ b: float3, _ c: float3) -> Bool
+//    {
+//        let ab = b - a
+//        let bc = c - b
+//        let crossProduct = cross(ab, bc)
+//        return crossProduct.x > 0 || crossProduct.y > 0 || crossProduct.z > 0
+//    }
     
     private func isPointInTriangle(vertices: [Vert], a: float3, b: float3, c: float3) -> Bool {
         for vertex in vertices {
@@ -207,27 +208,43 @@ class VertexEdgeIterator: IteratorProtocol
 {
     let centerVertex: Vert
     var currEdge: HalfEdge?
+    var started: Bool
 
     init(_ centerVertex: Vert)
     {
         self.centerVertex = centerVertex
+        self.started = false
+        
     }
 
     func next() -> HalfEdge?
     {
-        if currEdge == nil
+        // If it's the first call to next()
+        if !started
         {
             currEdge = self.centerVertex.edge
+            started = true
+            return currEdge
         }
-        else if currEdge!.fromTo == self.centerVertex.edge!.fromTo
+
+        // Check if we've completed a full loop
+        if currEdge?.pair?.next == self.centerVertex.edge
         {
             return nil
         }
 
-        defer {
-            currEdge = currEdge!.pair!.next
+        // Move to the next edge, handling the case where the pair may be nil
+        if let pair = currEdge?.pair
+        {
+            currEdge = pair.next
         }
-        
+        else
+        {
+            // If there is no pair, stop iteration
+            currEdge = nil
+            return nil
+        }
+
         return currEdge
     }
 }

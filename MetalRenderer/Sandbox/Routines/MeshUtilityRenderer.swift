@@ -32,7 +32,7 @@ final class MeshUtilityRenderer
     func render(with renderer: ForwardRenderer)
     {
         drawEdges(with: renderer)
-        drawControlPoints(with: renderer)
+//        drawControlPoints(with: renderer)
         
         if let edge = mesh?.selectedEdge
         {
@@ -65,7 +65,7 @@ final class MeshUtilityRenderer
         
         for face in mesh.faces
         {
-            let vertClr = float4(1, 1, 1, 1)
+            let vertClr = float4(0, 1, 0, 1)
             
             vertices.append(contentsOf: [
                 Vertex(pos: face.verts[0].position, clr: vertClr),

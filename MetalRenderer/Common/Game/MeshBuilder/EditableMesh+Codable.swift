@@ -31,7 +31,7 @@ extension Vert: Codable
 extension Face: Codable
 {
     private enum CodingKeys: String, CodingKey {
-        case name, verts
+        case name, verts, isGhost
     }
     
     func encode(to encoder: Encoder) throws
@@ -39,6 +39,7 @@ extension Face: Codable
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(name, forKey: .name)
         try container.encode(verts, forKey: .verts)
+        try container.encode(isGhost, forKey: .isGhost)
     }
     
     convenience init(from decoder: Decoder) throws
@@ -48,19 +49,25 @@ extension Face: Codable
         let values = try decoder.container(keyedBy: CodingKeys.self)
         name = try values.decode(String.self, forKey: .name)
         verts = try values.decode([Vert].self, forKey: .verts)
+        
+        if let isGhost = try? values.decode(Bool.self, forKey: .isGhost)
+        {
+            self.isGhost = isGhost
+        }
     }
 }
 
 extension EditableMesh: Codable
 {
     private enum CodingKeys: String, CodingKey {
-        case faces
+        case faces, isRoom
     }
     
     func encode(to encoder: Encoder) throws
     {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(faces, forKey: .faces)
+        try container.encode(isRoom, forKey: .isRoom)
     }
     
     convenience init(from decoder: Decoder) throws
@@ -69,5 +76,10 @@ extension EditableMesh: Codable
         let faces = try values.decode([Face].self, forKey: .faces)
         
         self.init(faces: faces)
+        
+        if let isRoom = try? values.decode(Bool.self, forKey: .isRoom)
+        {
+            self.isRoom = isRoom
+        }
     }
 }

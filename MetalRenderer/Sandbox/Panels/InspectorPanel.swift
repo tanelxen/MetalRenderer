@@ -49,6 +49,14 @@ final class InspectorPanel
             
             ImGuiEndCombo()
         }
+        
+        if brush.selectedFacePoint != nil
+        {
+            if ImGuiButton("Split face")
+            {
+                (brush as? EditableMesh)?.splitSelectedFace()
+            }
+        }
     }
 }
 

@@ -111,11 +111,11 @@ final class OrthoViewPanel
     
     private func update()
     {
-        boundsTool.mesh = BrushScene.current.selected as? EditableMesh
-        boundsTool.update()
-        
         if EditorLayer.current.selectionMode == .object {
             blockTool.update()
+            
+            boundsTool.mesh = BrushScene.current.selected as? EditableMesh
+            boundsTool.update()
         }
     }
     

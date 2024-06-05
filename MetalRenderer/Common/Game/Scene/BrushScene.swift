@@ -172,6 +172,8 @@ extension BrushScene
             {
                 for face in brush.faces
                 {
+                    guard !face.isGhost else { continue }
+                            
                     let shape = BulletConvexHullShape()
 
                     for point in face.verts.map({ $0.position })
