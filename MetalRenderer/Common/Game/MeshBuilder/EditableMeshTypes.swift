@@ -8,11 +8,23 @@
 import Metal
 import simd
 
+final class VertPosition
+{
+    var value: float3
+    
+    init(_ pos: float3)
+    {
+        value = pos
+    }
+}
+
 final class Vert
 {
     var position: float3
     var uv: float2 = .zero
     var edge: HalfEdge!
+    
+    var neighbours: Set<Vert> = []
     
     init(_ pos: float3)
     {
@@ -97,7 +109,7 @@ final class Face
                 let currentVertex = vertices[i]
                 let nextVertex = vertices[nextIndex]
                 
-                let convex = true// isConvex(prevVertex.position, currentVertex.position, nextVertex.position)
+                let convex = isConvex(prevVertex.position, currentVertex.position, nextVertex.position)
                 let inTriangle = isPointInTriangle(vertices: vertices, a: prevVertex.position, b: currentVertex.position, c: nextVertex.position)
                 
                 if convex && !inTriangle {
@@ -132,13 +144,19 @@ final class Face
         self.name = name
     }
     
-//    private func isConvex(_ a: float3, _ b: float3, _ c: float3) -> Bool
-//    {
-//        let ab = b - a
-//        let bc = c - b
-//        let crossProduct = cross(ab, bc)
-//        return crossProduct.x > 0 || crossProduct.y > 0 || crossProduct.z > 0
-//    }
+    private func isConvex(_ prev: float3, _ curr: float3, _ next: float3) -> Bool
+    {
+        let a = next - curr
+        let b = prev - curr
+        
+        let crossProduct = SIMD3<Float>(
+            a.y * b.z - a.z * b.y,
+            a.z * b.x - a.x * b.z,
+            a.x * b.y - a.y * b.x
+        )
+        
+        return dot(crossProduct, curr - prev) >= 0
+    }
     
     private func isPointInTriangle(vertices: [Vert], a: float3, b: float3, c: float3) -> Bool {
         for vertex in vertices {

@@ -159,9 +159,16 @@ final class EditableMesh: EditableObject
         
         for vert in face.verts
         {
-            let iter = VertexEdgeIterator(vert)
+//            let iter = VertexEdgeIterator(vert)
+//
+//            while let twin = iter.next()?.vert
+//            {
+//                twin.position += delta
+//            }
             
-            while let twin = iter.next()?.vert
+            vert.position += delta
+            
+            for twin in vert.neighbours
             {
                 twin.position += delta
             }
@@ -174,9 +181,16 @@ final class EditableMesh: EditableObject
     
     func removeSelectedFace()
     {
-//        faces.removeAll(where: { $0 === selectedFace })
-        selectedFace?.isGhost = true
-        selectedFace?.triangles = []
+        faces.removeAll(where: { $0 === selectedFace })
+        
+        selectedFace?.verts.forEach {
+            for other in $0.neighbours {
+                other.neighbours.remove($0)
+            }
+        }
+        
+//        selectedFace?.isGhost = true
+//        selectedFace?.triangles = []
         selectedFace = nil
 //        recalculate()
     }
@@ -191,9 +205,16 @@ final class EditableMesh: EditableObject
         
         for vert in [edge.vert!, edge.next.vert!]
         {
-            let iter = VertexEdgeIterator(vert)
+//            let iter = VertexEdgeIterator(vert)
+//
+//            while let twin = iter.next()?.vert
+//            {
+//                twin.position += delta
+//            }
             
-            while let twin = iter.next()?.vert
+            vert.position += delta
+            
+            for twin in vert.neighbours
             {
                 twin.position += delta
             }
@@ -288,26 +309,17 @@ final class EditableMesh: EditableObject
         ]
         faces.append(newFace2)
         
-//        if let index = face.edges[0].pair.face.verts.firstIndex(of: face.edges[0].pair.vert)
-//        {
-//            face.edges[0].pair.face.verts.insert(Vert(p1), at: index)
-//        }
+        // split bottom edge
+        if let pair = face.edges[0].pair
+        {
+            pair.face.verts.insert(Vert(p1), at: 3)
+        }
         
-//        if let index = face.edges[2].pair.face.verts.firstIndex(of: face.edges[2].pair.vert)
-//        {
-//            face.edges[2].pair.face.verts.insert(Vert(p2), at: index)
-//        }
-        
-//        for vert in face.verts
-//        {
-//            newFace1.verts.append(
-//                Vert(vert.position)
-//            )
-//
-//            newFace2.verts.append(
-//                Vert(vert.position)
-//            )
-//        }
+        // split top edge
+        if let pair = face.edges[2].pair
+        {
+            pair.face.verts.insert(Vert(p2), at: 3)
+        }
         
         // Remove original face
         faces.removeAll(where: { $0 === face })
@@ -462,6 +474,11 @@ extension EditableMesh
                 setupPairs(for: edge)
             }
             
+            for vert in face.verts
+            {
+                setupNeighbours(for: vert)
+            }
+            
             if face.isGhost
             {
                 face.triangles.removeAll()
@@ -513,6 +530,26 @@ extension EditableMesh
                 {
                     edge.pair = other
                 }
+            }
+        }
+    }
+    
+    func setupNeighbours(for vert: Vert)
+    {
+        for face in faces
+        {
+            guard face !== vert.edge.face else { continue }
+            
+            for other in face.verts
+            {
+                if vert.isClose(to: other) {
+                    vert.neighbours.insert(other)
+                }
+            }
+            
+            // Vertex can't have more than 5 neighbours
+            if vert.neighbours.count == 5 {
+                break
             }
         }
     }

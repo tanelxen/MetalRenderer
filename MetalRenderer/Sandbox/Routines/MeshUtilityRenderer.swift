@@ -67,16 +67,13 @@ final class MeshUtilityRenderer
         {
             let vertClr = float4(0, 1, 0, 1)
             
-            vertices.append(contentsOf: [
-                Vertex(pos: face.verts[0].position, clr: vertClr),
-                Vertex(pos: face.verts[1].position, clr: vertClr),
-                Vertex(pos: face.verts[1].position, clr: vertClr),
-                Vertex(pos: face.verts[2].position, clr: vertClr),
-                Vertex(pos: face.verts[2].position, clr: vertClr),
-                Vertex(pos: face.verts[3].position, clr: vertClr),
-                Vertex(pos: face.verts[3].position, clr: vertClr),
-                Vertex(pos: face.verts[0].position, clr: vertClr)
-            ])
+            for edge in face.edges
+            {
+                vertices.append(contentsOf: [
+                    Vertex(pos: edge.vert.position, clr: vertClr),
+                    Vertex(pos: edge.next.vert.position, clr: vertClr)
+                ])
+            }
         }
         
         var pointer = linesVertexBuffer.contents().bindMemory(to: Vertex.self, capacity: MAX_VERTS)
