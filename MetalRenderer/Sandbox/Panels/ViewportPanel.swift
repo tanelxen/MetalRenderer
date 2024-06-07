@@ -132,9 +132,8 @@ final class ViewportPanel
     
     private func updateOperations()
     {
-        if BrushScene.current.infoPlayerStart.isSelected
+        if let entity = BrushScene.current.infoPlayerStart, entity.isSelected
         {
-            let entity = BrushScene.current.infoPlayerStart
             let transform = Transform(position: entity.transform.position)
             
             if renderGizmo(for: transform)

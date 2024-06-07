@@ -22,6 +22,13 @@ final class HierarchyPanel
             drawBrush(brush, index: i)
         }
         
+        // Right-click: Pop-up for creation
+        if ImGuiBeginPopupContextWindow(nil, Im(ImGuiPopupFlags_MouseButtonRight))
+        {
+            drawEntityCreationMenu()
+            ImGuiEndPopup()
+        }
+        
         ImGuiEnd()
     }
     
@@ -61,7 +68,10 @@ final class HierarchyPanel
     
     private func drawPlayerStart()
     {
-        let entity = BrushScene.current.infoPlayerStart
+        guard let entity = BrushScene.current.infoPlayerStart
+        else {
+            return
+        }
         
         ImGuiPushStyleVar(Im(ImGuiStyleVar_ItemSpacing), ImVec2(8, 6))
         ImGuiPushStyleVar(Im(ImGuiStyleVar_FramePadding), ImVec2(1, 3))
@@ -83,5 +93,16 @@ final class HierarchyPanel
         }
 
         ImGuiPopStyleVar(2)  // ItemSpacing & FramePadding
+    }
+    
+    private func drawEntityCreationMenu()
+    {
+        if ImGuiMenuItem("\(FAIcon.cube) Info Player Start", nil, false, true)
+        {
+            let entity = InfoPlayerStart()
+            entity.transform.position.y = 28
+            
+            BrushScene.current.infoPlayerStart = entity
+        }
     }
 }

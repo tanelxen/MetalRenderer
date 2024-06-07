@@ -15,7 +15,7 @@ final class BrushScene
     
     var brushes: [EditableObject] = []
     
-    var infoPlayerStart = InfoPlayerStart()
+    var infoPlayerStart: InfoPlayerStart?
     
     var selected: EditableObject? {
         brushes.first(where: { $0.isSelected })
@@ -94,6 +94,35 @@ final class BrushScene
         closest?.isSelected = true
     }
     
+    /*
+     Return point on nearest mesh
+     */
+    func point(at ray: Ray) -> float3?
+    {
+        var bestd: Float = .greatestFiniteMagnitude
+        var closest: EditableMesh?
+        
+        for mesh in brushes.compactMap({ $0 as? EditableMesh })
+        {
+            mesh.isSelected = false
+            
+            let d = intersect(ray: ray, mesh: mesh)
+            
+            if d < bestd
+            {
+                closest = mesh
+                bestd = d
+            }
+        }
+        
+        if closest != nil
+        {
+            return ray.origin + ray.direction * bestd
+        }
+        
+        return nil
+    }
+    
     func removeSelected()
     {
         if let index = brushes.firstIndex(where: { $0.isSelected })
@@ -120,7 +149,7 @@ final class BrushScene
         
         if !isPlaying
         {
-            infoPlayerStart.render(with: renderer)
+            infoPlayerStart?.render(with: renderer)
         }
     }
 }
@@ -136,7 +165,7 @@ extension BrushScene
         createWorldStaticCollision()
         spawnPlayer()
         
-        if let camera = self.player?.camera
+        if let camera = player?.camera
         {
             viewport.camera = camera
         }
@@ -154,11 +183,11 @@ extension BrushScene
     
     private func spawnPlayer()
     {
-//        guard let point = spawnPoints.first else { return }
+        guard let info = infoPlayerStart else { return }
         
         let transform = Transform()
-        transform.position = infoPlayerStart.transform.position
-        transform.rotation = infoPlayerStart.transform.rotation
+        transform.position = info.transform.position
+        transform.rotation = info.transform.rotation
         
         player = Player(scene: self)
         player?.spawn(with: transform)
@@ -217,6 +246,18 @@ extension BrushScene
 
 extension BrushScene
 {
+    private struct BrushSceneModel: Codable
+    {
+        let playerStart: InfoPlayerStartModel?
+        let meshes: [EditableMesh]
+    }
+    
+    private struct InfoPlayerStartModel: Codable
+    {
+        let position: float3
+        let yaw: Float
+    }
+    
     func openMap(_ url: URL)
     {
         do
@@ -224,14 +265,23 @@ extension BrushScene
             let data = try Data(contentsOf: url)
             
             let decoder = JSONDecoder()
-            let meshes = try decoder.decode([EditableMesh].self, from: data)
+            let model = try decoder.decode(BrushSceneModel.self, from: data)
             
-            meshes.forEach {
+            if let playerStart = model.playerStart
+            {
+                let info = InfoPlayerStart()
+                info.transform.position = playerStart.position
+                info.transform.rotation.yaw = playerStart.yaw
+                
+                self.infoPlayerStart = info
+            }
+            
+            model.meshes.forEach {
                 $0.recalculate()
                 $0.setupRenderData()
             }
             
-            brushes = meshes
+            self.brushes = model.meshes
         }
         catch
         {
@@ -241,12 +291,27 @@ extension BrushScene
     
     func saveMap(_ url: URL)
     {
+        var playerStart: InfoPlayerStartModel?
+        
+        if let info = infoPlayerStart
+        {
+            playerStart = InfoPlayerStartModel(
+                position: info.transform.position,
+                yaw: info.transform.rotation.yaw
+            )
+        }
+        
         let meshes = brushes.compactMap({ $0 as? EditableMesh })
+        
+        let model = BrushSceneModel(
+            playerStart: playerStart,
+            meshes: meshes
+        )
         
         do
         {
             let jsonEncoder = JSONEncoder()
-            let jsonData = try jsonEncoder.encode(meshes)
+            let jsonData = try jsonEncoder.encode(model)
             try jsonData.write(to: url)
         }
         catch

@@ -20,6 +20,8 @@ final class OrthoViewPanel
     
     private (set) var isHovered = false
     
+    private let gridSize: Float = 8
+    
     var isPlaying: Bool {
         BrushScene.current?.isPlaying ?? false
     }
@@ -96,6 +98,15 @@ final class OrthoViewPanel
         
         isHovered = ImGuiIsItemHovered(ImGuiFlag_None)
         
+        // Right-click: Pop-up for creation
+        if ImGuiBeginPopupContextWindow(nil, Im(ImGuiPopupFlags_MouseButtonRight))
+        {
+            let ray = viewport.mousePositionInWorld()
+            
+            drawEntityCreationMenu(with: ray)
+            ImGuiEndPopup()
+        }
+        
         drawControls()
         
         isHovered = isHovered && !ImGuiIsItemHovered(ImGuiFlag_None)
@@ -149,8 +160,6 @@ final class OrthoViewPanel
         }
         
         var delta = end - start
-        
-        let gridSize: Float = 8
         delta = floor(delta / gridSize + 0.5) * gridSize
         
         let newPos = origin + delta
@@ -187,8 +196,6 @@ final class OrthoViewPanel
         }
         
         var value = dot(axis, end - start)
-        
-        let gridSize: Float = 8
         value = floor(value / gridSize) * gridSize
         
         let newPos = origin + axis * value
@@ -227,8 +234,6 @@ final class OrthoViewPanel
         }
         
         var value = dot(axis, end - start)
-        
-        let gridSize: Float = 16
         value = floor(value / gridSize) * gridSize
         
         let newPos = origin + axis * value
@@ -303,6 +308,40 @@ final class OrthoViewPanel
             ImGuiEndCombo()
         }
         ImGuiPopItemWidth()
+    }
+    
+    private func drawEntityCreationMenu(with ray: Ray)
+    {
+        if ImGuiMenuItem("\(FAIcon.cube) Info Player Start", nil, false, true)
+        {
+            let viewNormal = camera.transform.rotation.forward
+            let plane = Plane(normal: viewNormal, distance: 0)
+            
+            var point = BrushScene.current.point(at: ray) ?? intersection(ray: ray, plane: plane) ?? .zero
+            
+            point = floor(point / gridSize + 0.5) * gridSize
+            
+            let entity = InfoPlayerStart()
+            entity.transform.position = point + [0, 28, 0]
+            
+            BrushScene.current.infoPlayerStart = entity
+        }
+        
+//        if ImGuiBeginMenu("\(FAIcon.lightbulb) Create Lights", true) {
+//            if ImGuiMenuItem("Directional Light", nil, false, true) {
+//                scene.createSceneLight(type: .dirLight)
+//            }
+//            if ImGuiMenuItem("Point Light", nil, false, true) {
+//                scene.createSceneLight(type: .pointLight)
+//            }
+//            if ImGuiMenuItem("Spot Light", nil, false, true) {
+//                scene.createSceneLight(type: .spotLight)
+//            }
+//            if ImGuiMenuItem("Ambient Light", nil, false, true) {
+//                scene.createSceneLight(type: .ambientLight)
+//            }
+//            ImGuiEndMenu()
+//        }
     }
 }
 
