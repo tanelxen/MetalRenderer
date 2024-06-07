@@ -215,7 +215,7 @@ class OrthoCamera: Camera
                                                          right: w,
                                                          bottom: -h,
                                                          top: h,
-                                                         near: 0.1,
-                                                         far: 1024)
+                                                         near: 0,
+                                                         far: 65000)
     }
 }

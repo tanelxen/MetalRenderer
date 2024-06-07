@@ -182,9 +182,9 @@ enum ViewType: CaseIterable
     
     var position: float3 {
         switch self {
-            case .top: return float3(0, 128, 0)
-            case .right: return float3(128, 0, 0)
-            case .back: return float3(0, 0, -128)
+            case .top: return float3(0, 32000, 0)
+            case .right: return float3(32000, 0, 0)
+            case .back: return float3(0, 0, -32000)
             case .perspective: return float3(32, 128, -128)
         }
     }
