@@ -8,7 +8,7 @@
 import Metal
 import simd
 
-private let MAX_VERTS: Int = 1024
+//private let MAX_VERTS: Int = 3
 
 final class EditableMesh: EditableObject
 {
@@ -101,7 +101,7 @@ final class EditableMesh: EditableObject
     
     func setupRenderData()
     {
-        let length = MemoryLayout<Vertex>.stride * MAX_VERTS
+        let length = MemoryLayout<Vertex>.stride * 36
         vertexBuffer = Engine.device.makeBuffer(length: length)
     }
     
@@ -176,7 +176,10 @@ final class EditableMesh: EditableObject
         
         face.plane.distance = dot(face.plane.normal, face.center)
         
-        recalculateUV()
+        for edge in face.edges
+        {
+            edge.pair?.face.updateUVs()
+        }
     }
     
     func removeSelectedFace()
@@ -189,10 +192,7 @@ final class EditableMesh: EditableObject
             }
         }
         
-//        selectedFace?.isGhost = true
-//        selectedFace?.triangles = []
         selectedFace = nil
-//        recalculate()
     }
     
     func setSelectedEdge(position: float3)
@@ -205,13 +205,6 @@ final class EditableMesh: EditableObject
         
         for vert in [edge.vert!, edge.next.vert!]
         {
-//            let iter = VertexEdgeIterator(vert)
-//
-//            while let twin = iter.next()?.vert
-//            {
-//                twin.position += delta
-//            }
-            
             vert.position += delta
             
             for twin in vert.neighbours
@@ -366,13 +359,7 @@ final class EditableMesh: EditableObject
             vertices.append(contentsOf: verts)
         }
         
-        var pointer = vertexBuffer.contents().bindMemory(to: Vertex.self, capacity: MAX_VERTS)
-        
-        for vertex in vertices
-        {
-            pointer.pointee = vertex
-            pointer = pointer.advanced(by: 1)
-        }
+        vertexBuffer.contents().copyMemory(from: vertices, byteCount: MemoryLayout<Vertex>.stride * vertices.count)
     
         renderItem.vertexBuffer = vertexBuffer
         renderItem.numVertices = vertices.count
@@ -564,9 +551,9 @@ private let baseaxis: [float3] = [
     [ 0, 0,-1], [ 1, 0, 0], [0,-1, 0]  // north wall
 ]
 
-private extension Face
+extension Face
 {
-    func textureAxisFromPlane(normal: float3) -> (xv: float3, yv: float3)
+    private func textureAxisFromPlane(normal: float3) -> (xv: float3, yv: float3)
     {
         var bestaxis: Int = 0
         var best: Float = 0
@@ -603,10 +590,14 @@ private extension Face
         {
             var projected = matrix * float4(verts[i].position, 1)
             projected = projected / projected.w
-            projected = projected / 64
             
-            verts[i].uv.x = projected.x
-            verts[i].uv.y = projected.y
+            var uv = float2(projected.x, projected.y)
+            
+            uv += uvOffset
+            uv *= uvScale
+            uv /= texSize
+            
+            verts[i].uv = uv
         }
     }
 }

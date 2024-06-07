@@ -159,6 +159,7 @@
 		8A5D1BF42BD92C53007CB0FA /* Material.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5D1BF22BD92C53007CB0FA /* Material.swift */; };
 		8A5D1BF62BD997D3007CB0FA /* InspectorPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5D1BF52BD997D3007CB0FA /* InspectorPanel.swift */; };
 		8A5D1BF72BD997D3007CB0FA /* InspectorPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5D1BF52BD997D3007CB0FA /* InspectorPanel.swift */; };
+		8A6739292C12B6F100D8C7D8 /* DrawControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A6739282C12B6F100D8C7D8 /* DrawControls.swift */; };
 		8A7C39772C0D0CC500E47925 /* Entity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A7C39762C0D0CC500E47925 /* Entity.swift */; };
 		8A7C39782C0D0CC500E47925 /* Entity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A7C39762C0D0CC500E47925 /* Entity.swift */; };
 		8A7C70B62AAFA7D3003FAFDD /* ImGui in Frameworks */ = {isa = PBXBuildFile; productRef = 8A7C70B52AAFA7D3003FAFDD /* ImGui */; };
@@ -278,6 +279,7 @@
 		8A5EDFE327B9CB4C007166E4 /* StaticMesh.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = StaticMesh.metal; sourceTree = "<group>"; };
 		8A5EDFED27BC1BB3007166E4 /* SkeletalMesh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkeletalMesh.swift; sourceTree = "<group>"; };
 		8A5EDFEF27BC205B007166E4 /* SkeletalMesh.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = SkeletalMesh.metal; sourceTree = "<group>"; };
+		8A6739282C12B6F100D8C7D8 /* DrawControls.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DrawControls.swift; sourceTree = "<group>"; };
 		8A6E035129CDDA1500609C3A /* halflife2.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = halflife2.ttf; sourceTree = "<group>"; };
 		8A6E036529CE3BA300609C3A /* Half-Life13.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "Half-Life13.mp3"; sourceTree = "<group>"; };
 		8A6E036629CE3BA300609C3A /* pl_step1.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = pl_step1.wav; sourceTree = "<group>"; };
@@ -621,6 +623,7 @@
 				8A3C60192AAB94E000BE835E /* HierarchyPanel.swift */,
 				8A5D1BF52BD997D3007CB0FA /* InspectorPanel.swift */,
 				8A7C70BA2AB09169003FAFDD /* AssetsPanel.swift */,
+				8A6739282C12B6F100D8C7D8 /* DrawControls.swift */,
 			);
 			path = Panels;
 			sourceTree = "<group>";
@@ -967,6 +970,7 @@
 				8A27DB182AAE3E5A0094C9D0 /* Viewport.swift in Sources */,
 				8A27DB192AAE3E5A0094C9D0 /* ForwardRenderer.swift in Sources */,
 				8A57092E2C00C0E900FE3EA0 /* Editor.metal in Sources */,
+				8A6739292C12B6F100D8C7D8 /* DrawControls.swift in Sources */,
 				8A27DB1A2AAE3E5A0094C9D0 /* Sizeable.swift in Sources */,
 				8A53DEFE2AB37E5C00EC2C65 /* Decals.swift in Sources */,
 				8A27DB1B2AAE3E5A0094C9D0 /* Skybox.swift in Sources */,

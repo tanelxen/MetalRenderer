@@ -77,6 +77,10 @@ final class Face
         return points.reduce(.zero, +) / Float(points.count)
     }
     
+    var texSize: float2 = [64, 64]
+    var uvOffset: float2 = .zero
+    var uvScale: float2 = .one
+    
     var isHighlighted = false
     var isGhost = false
     

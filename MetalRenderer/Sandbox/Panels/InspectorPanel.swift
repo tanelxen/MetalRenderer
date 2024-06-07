@@ -50,12 +50,16 @@ final class InspectorPanel
             ImGuiEndCombo()
         }
         
-        if brush.selectedFacePoint != nil
+        if let mesh = brush as? EditableMesh, let face = mesh.selectedFace
         {
             if ImGuiButton("Split face")
             {
-                (brush as? EditableMesh)?.splitSelectedFace()
+                mesh.splitSelectedFace()
             }
+            
+            drawControlFloat2("Offset", &face.uvOffset)
+            drawControlFloat2("Scale", &face.uvScale)
+            face.updateUVs()
         }
     }
 }
