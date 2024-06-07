@@ -708,17 +708,19 @@ func intersect(ray: Ray, face: Face) -> Bool
     
     let p = ray.origin + ray.direction * t
     
-    let v0 = face.verts[0].position
-    let v1 = face.verts[1].position
-    let v2 = face.verts[2].position
-    let v3 = face.verts[3].position
+    var inside = true
     
-    let e0 = cross(v1 - v0, p - v0)
-    let e1 = cross(v2 - v1, p - v1)
-    let e2 = cross(v3 - v2, p - v2)
-    let e3 = cross(v0 - v3, p - v3)
+    for edge in face.edges
+    {
+        let v0 = edge.vert.position
+        let v1 = edge.next.vert.position
+        
+        let e = cross(v1 - v0, p - v0)
+        
+        inside = inside && dot(e, n) < 0
+    }
     
-    return dot(e0, n) < 0 && dot(e1, n) < 0 && dot(e2, n) < 0 && dot(e3, n) < 0
+    return inside
 }
 
 func intersectDistance(ray: Ray, face: Face) -> Float
