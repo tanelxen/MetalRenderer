@@ -10,7 +10,7 @@ import simd
 
 //private let MAX_VERTS: Int = 3
 
-final class EditableMesh: EditableObject
+final class EditableMesh: Entity
 {
     var transform: Transform = Transform()
     

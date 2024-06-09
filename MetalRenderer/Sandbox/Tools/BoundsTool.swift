@@ -241,21 +241,6 @@ private enum DragType
     case face(_ face: Face)
 }
 
-private func distance(ray: Ray, point: float3) -> Float?
-{
-    let v = point - ray.origin
-    
-    let t = dot(v, ray.direction)
-    
-    guard t >= 0 else {
-        return nil
-    }
-    
-    let e = ray.origin + ray.direction * t
-    
-    return length(e - point)
-}
-
 private func closestPoint(on ray: Ray, to point: float3) -> float3?
 {
     let v = point - ray.origin
@@ -270,11 +255,3 @@ private func closestPoint(on ray: Ray, to point: float3) -> float3?
     
     return e
 }
-
-private struct Vertex
-{
-    var pos: float3 = .zero
-    var clr: float4 = .one
-}
-
-private let MAX_VERTS: Int = 16

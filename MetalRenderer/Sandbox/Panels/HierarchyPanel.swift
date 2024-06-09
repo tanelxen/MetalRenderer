@@ -32,7 +32,7 @@ final class HierarchyPanel
         ImGuiEnd()
     }
     
-    private func drawBrush(_ brush: EditableObject, index: Int)
+    private func drawBrush(_ brush: EditableMesh, index: Int)
     {
         ImGuiPushStyleVar(Im(ImGuiStyleVar_ItemSpacing), ImVec2(8, 6))
         ImGuiPushStyleVar(Im(ImGuiStyleVar_FramePadding), ImVec2(1, 3))

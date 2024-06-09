@@ -8,16 +8,6 @@
 import Metal
 import simd
 
-final class VertPosition
-{
-    var value: float3
-    
-    init(_ pos: float3)
-    {
-        value = pos
-    }
-}
-
 final class Vert
 {
     var position: float3

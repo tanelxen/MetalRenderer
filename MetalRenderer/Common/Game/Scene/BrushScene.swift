@@ -13,11 +13,11 @@ final class BrushScene
 {
     private (set) static var current: BrushScene!
     
-    var brushes: [EditableObject] = []
+    var brushes: [EditableMesh] = []
     
     var infoPlayerStart: InfoPlayerStart?
     
-    var selected: EditableObject? {
+    var selected: EditableMesh? {
         brushes.first(where: { $0.isSelected })
     }
     
@@ -29,8 +29,6 @@ final class BrushScene
     private let q2b: Float = 2.54 / 100
     private let b2q: Float = 100 / 2.54
     
-    var brushType: BrushType = .mesh
-    
     init()
     {
         BrushScene.current = self
@@ -40,14 +38,7 @@ final class BrushScene
     
     func addBrush(position: float3, size: float3)
     {
-        let brush: EditableObject
-        
-        switch brushType {
-            case .plain:
-                brush = PlainBrush(origin: position, size: size)
-            case .mesh:
-                brush = EditableMesh(origin: position, size: size)
-        }
+        let brush = EditableMesh(origin: position, size: size)
         
         brush.isSelected = true
         
@@ -57,7 +48,7 @@ final class BrushScene
     
     func copySelected()
     {
-        guard let mesh = selected as? EditableMesh
+        guard let mesh = self.selected
         else {
             return
         }
@@ -78,7 +69,7 @@ final class BrushScene
         var bestd: Float = .greatestFiniteMagnitude
         var closest: EditableMesh?
         
-        for mesh in brushes.compactMap({ $0 as? EditableMesh })
+        for mesh in brushes
         {
             mesh.isSelected = false
             
@@ -102,7 +93,7 @@ final class BrushScene
         var bestd: Float = .greatestFiniteMagnitude
         var closest: EditableMesh?
         
-        for mesh in brushes.compactMap({ $0 as? EditableMesh })
+        for mesh in brushes
         {
             mesh.isSelected = false
             
@@ -195,7 +186,7 @@ extension BrushScene
     
     private func createWorldStaticCollision()
     {
-        for brush in brushes.compactMap({ $0 as? EditableMesh })
+        for brush in brushes
         {
             if brush.isRoom
             {
@@ -301,11 +292,9 @@ extension BrushScene
             )
         }
         
-        let meshes = brushes.compactMap({ $0 as? EditableMesh })
-        
         let model = BrushSceneModel(
             playerStart: playerStart,
-            meshes: meshes
+            meshes: brushes
         )
         
         do
@@ -319,10 +308,4 @@ extension BrushScene
             print(error.localizedDescription)
         }
     }
-}
-
-enum BrushType: CaseIterable
-{
-    case plain
-    case mesh
 }

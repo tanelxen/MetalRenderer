@@ -119,7 +119,8 @@ final class ViewportPanel
         
         if isHovered
         {
-            if EditorLayer.current.selectionMode == .object {
+            if EditorLayer.current.selectionMode == .object
+            {
                 blockTool.update()
                 
                 boundsTool.mesh = BrushScene.current.selected as? EditableMesh
