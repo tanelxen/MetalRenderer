@@ -32,7 +32,7 @@ final class OrthoViewPanel
         viewport.camera = camera
         viewport.viewType = .top
         
-        boundsTool = BoundsTool(viewport: viewport)
+        boundsTool = BrushBoundsTool(viewport: viewport)
         blockTool = BlockTool2D(viewport: viewport)
     }
     
@@ -41,7 +41,7 @@ final class OrthoViewPanel
     
     private var dragMode: DragMode = .none
     
-    private var boundsTool: BoundsTool
+    private var boundsTool: BrushBoundsTool
     private let blockTool: BlockTool2D
     
     func drawSpecial(with renderer: ForwardRenderer)
@@ -125,7 +125,7 @@ final class OrthoViewPanel
         if EditorLayer.current.selectionMode == .object {
             blockTool.update()
             
-            boundsTool.mesh = BrushScene.current.selected as? EditableMesh
+            boundsTool.mesh = BrushScene.current.selected as? PlainBrush
             boundsTool.update()
         }
     }

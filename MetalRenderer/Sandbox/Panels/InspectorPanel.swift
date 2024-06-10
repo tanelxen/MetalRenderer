@@ -61,6 +61,14 @@ final class InspectorPanel
             drawControlFloat2("Scale", &face.uvScale)
             face.updateUVs()
         }
+        
+        if let brush = brush as? PlainBrush
+        {
+            if ImGuiButton("Clip")
+            {
+                BrushScene.current.clip(brush)
+            }
+        }
     }
 }
 

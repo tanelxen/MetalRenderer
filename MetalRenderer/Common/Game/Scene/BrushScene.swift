@@ -29,7 +29,7 @@ final class BrushScene
     private let q2b: Float = 2.54 / 100
     private let b2q: Float = 100 / 2.54
     
-    var brushType: BrushType = .mesh
+    var brushType: BrushType = .plain
     
     init()
     {
@@ -152,6 +152,18 @@ final class BrushScene
             infoPlayerStart?.render(with: renderer)
         }
     }
+    
+    func clip(_ brush: PlainBrush)
+    {
+        brush.updateWinding()
+        
+        for other in brushes.compactMap({ $0 as? PlainBrush })
+        {
+            guard other !== brush else { continue }
+            
+            brush.clip(with: other)
+        }
+    }
 }
 
 extension BrushScene
@@ -250,6 +262,7 @@ extension BrushScene
     {
         let playerStart: InfoPlayerStartModel?
         let meshes: [EditableMesh]
+        let brushes: [PlainBrush]
     }
     
     private struct InfoPlayerStartModel: Codable
@@ -281,7 +294,12 @@ extension BrushScene
                 $0.setupRenderData()
             }
             
-            self.brushes = model.meshes
+            model.brushes.forEach {
+                $0.updateWinding()
+                $0.setupRenderData()
+            }
+            
+            self.brushes = model.meshes + model.brushes
         }
         catch
         {
@@ -302,10 +320,12 @@ extension BrushScene
         }
         
         let meshes = brushes.compactMap({ $0 as? EditableMesh })
+        let brushes = brushes.compactMap({ $0 as? PlainBrush })
         
         let model = BrushSceneModel(
             playerStart: playerStart,
-            meshes: meshes
+            meshes: meshes,
+            brushes: brushes
         )
         
         do

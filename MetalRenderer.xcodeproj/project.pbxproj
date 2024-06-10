@@ -188,6 +188,8 @@
 		8A98722E2AD4587200AAEE2C /* Billboards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A98722C2AD4587200AAEE2C /* Billboards.swift */; };
 		8A9872302AD4648900AAEE2C /* Billboards.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8A98722F2AD4648900AAEE2C /* Billboards.metal */; };
 		8A9872312AD4648900AAEE2C /* Billboards.metal in Sources */ = {isa = PBXBuildFile; fileRef = 8A98722F2AD4648900AAEE2C /* Billboards.metal */; };
+		8A9922212C15DC24005A3568 /* BrushBoundsTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A9922202C15DC24005A3568 /* BrushBoundsTool.swift */; };
+		8A9922232C163063005A3568 /* PlainBrush+Codable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A9922222C163063005A3568 /* PlainBrush+Codable.swift */; };
 		8A9C2E4E2ABA5FFD007E96AA /* donthurtem.wav in Resources */ = {isa = PBXBuildFile; fileRef = 8A9C2E4D2ABA5FFD007E96AA /* donthurtem.wav */; };
 		8A9C2E4F2ABA5FFD007E96AA /* donthurtem.wav in Resources */ = {isa = PBXBuildFile; fileRef = 8A9C2E4D2ABA5FFD007E96AA /* donthurtem.wav */; };
 		8A9C2E512ABA6047007E96AA /* leavealone.wav in Resources */ = {isa = PBXBuildFile; fileRef = 8A9C2E502ABA6046007E96AA /* leavealone.wav */; };
@@ -308,6 +310,8 @@
 		8A93A7762BF2B1FE00C2F285 /* EditableMesh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditableMesh.swift; sourceTree = "<group>"; };
 		8A98722C2AD4587200AAEE2C /* Billboards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Billboards.swift; sourceTree = "<group>"; };
 		8A98722F2AD4648900AAEE2C /* Billboards.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Billboards.metal; sourceTree = "<group>"; };
+		8A9922202C15DC24005A3568 /* BrushBoundsTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrushBoundsTool.swift; sourceTree = "<group>"; };
+		8A9922222C163063005A3568 /* PlainBrush+Codable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PlainBrush+Codable.swift"; sourceTree = "<group>"; };
 		8A9977CF29492CC400B48C70 /* Rotator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rotator.swift; sourceTree = "<group>"; };
 		8A9C235927A4DB4100965D21 /* Basic.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Basic.metal; sourceTree = "<group>"; };
 		8A9C2E4D2ABA5FFD007E96AA /* donthurtem.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = donthurtem.wav; sourceTree = "<group>"; };
@@ -569,6 +573,7 @@
 			isa = PBXGroup;
 			children = (
 				8A57093A2C061F6300FE3EA0 /* BoundsTool.swift */,
+				8A9922202C15DC24005A3568 /* BrushBoundsTool.swift */,
 				8A57093C2C09313400FE3EA0 /* BlockTool3D.swift */,
 				8A57093E2C095EA000FE3EA0 /* BlockTool2D.swift */,
 			);
@@ -648,6 +653,7 @@
 				8A93A7762BF2B1FE00C2F285 /* EditableMesh.swift */,
 				8ACABF192BF541490037336B /* EditableMeshTypes.swift */,
 				8A5709332C020A2100FE3EA0 /* EditableMesh+Codable.swift */,
+				8A9922222C163063005A3568 /* PlainBrush+Codable.swift */,
 			);
 			path = MeshBuilder;
 			sourceTree = "<group>";
@@ -943,6 +949,7 @@
 				8A0C48B62AC9A9DA0099BEF6 /* WorldStaticMeshAsset+Q3BSP.swift in Sources */,
 				8A84556F2BD5F4C400AA70E1 /* BrushScene.swift in Sources */,
 				8A5D1BF02BD8A6E9007CB0FA /* Brush.metal in Sources */,
+				8A9922232C163063005A3568 /* PlainBrush+Codable.swift in Sources */,
 				8A27DB082AAE3E5A0094C9D0 /* Frustum.swift in Sources */,
 				8A7C70BB2AB09169003FAFDD /* AssetsPanel.swift in Sources */,
 				8A27DB092AAE3E5A0094C9D0 /* imgui_impl_metal.swift in Sources */,
@@ -978,6 +985,7 @@
 				8A808F392AD034290087A084 /* WorldStaticMeshAsset.swift in Sources */,
 				8A57093F2C095EA000FE3EA0 /* BlockTool2D.swift in Sources */,
 				8A27DB1D2AAE3E5A0094C9D0 /* TextureManager.swift in Sources */,
+				8A9922212C15DC24005A3568 /* BrushBoundsTool.swift in Sources */,
 				8A8DE1AE2BFD57160019FA47 /* OrthoViewPanel.swift in Sources */,
 				8A27DB1E2AAE3E5A0094C9D0 /* BasicShapes.swift in Sources */,
 				8A27DB1F2AAE3E5A0094C9D0 /* ImGuiTheme.swift in Sources */,
