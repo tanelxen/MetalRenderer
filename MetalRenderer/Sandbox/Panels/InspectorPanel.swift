@@ -16,6 +16,11 @@ final class InspectorPanel
         ImGuiBegin(name, nil, 0)
         defer { ImGuiEnd() }
         
+        if ImGuiButton("Update CSG")
+        {
+            BrushScene.current.updateCSG()
+        }
+        
         guard let brush = BrushScene.current.selected else { return }
         
         var isRoom = brush.isRoom
@@ -60,14 +65,6 @@ final class InspectorPanel
             drawControlFloat2("Offset", &face.uvOffset)
             drawControlFloat2("Scale", &face.uvScale)
             face.updateUVs()
-        }
-        
-        if let brush = brush as? PlainBrush
-        {
-            if ImGuiButton("Clip")
-            {
-                BrushScene.current.clip(brush)
-            }
         }
     }
 }

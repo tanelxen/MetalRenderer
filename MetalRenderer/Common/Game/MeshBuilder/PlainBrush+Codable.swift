@@ -10,7 +10,7 @@ import Foundation
 extension PlainBrush: Codable
 {
     private enum CodingKeys: String, CodingKey {
-        case planes, isRoom
+        case planes, isRoom, texture
     }
     
     func encode(to encoder: Encoder) throws
@@ -18,6 +18,7 @@ extension PlainBrush: Codable
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(planes, forKey: .planes)
         try container.encode(isRoom, forKey: .isRoom)
+        try container.encode(texture, forKey: .texture)
     }
     
     convenience init(from decoder: Decoder) throws
@@ -31,6 +32,11 @@ extension PlainBrush: Codable
         if let isRoom = try? values.decode(Bool.self, forKey: .isRoom)
         {
             self.isRoom = isRoom
+        }
+        
+        if let texture = try? values.decode(String.self, forKey: .texture)
+        {
+            self.texture = texture
         }
     }
 }

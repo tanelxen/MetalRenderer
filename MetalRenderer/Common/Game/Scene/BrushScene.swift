@@ -153,15 +153,21 @@ final class BrushScene
         }
     }
     
-    func clip(_ brush: PlainBrush)
+    func updateCSG()
     {
-        brush.updateWinding()
+        let csg = brushes.compactMap({ $0 as? PlainBrush })
         
-        for other in brushes.compactMap({ $0 as? PlainBrush })
+        csg.forEach {
+            $0.updateWinding()
+        }
+        
+        for a in csg
         {
-            guard other !== brush else { continue }
-            
-            brush.clip(with: other)
+            for b in csg
+            {
+                guard a !== b else { continue }
+                a.clip(with: b)
+            }
         }
     }
 }
@@ -253,6 +259,29 @@ extension BrushScene
                 physicsWorld.add(rigidBody: body)
             }
         }
+        
+        for brush in brushes.compactMap({ $0 as? PlainBrush })
+        {
+            for poly in brush.faces.flatMap({ $0.polys })
+            {
+                let shape = BulletConvexHullShape()
+
+                for point in poly.points
+                {
+                    shape.addPoint(point * q2b)
+                }
+
+                let transform = BulletTransform()
+                transform.setIdentity()
+
+                let motionState = BulletMotionState(transform: transform)
+                let body = BulletRigidBody(mass: 0,
+                                           motionState: motionState,
+                                           collisionShape: shape)
+                body.friction = 0.5
+                physicsWorld.add(rigidBody: body)
+            }
+        }
     }
 }
 
@@ -295,11 +324,13 @@ extension BrushScene
             }
             
             model.brushes.forEach {
-                $0.updateWinding()
+//                $0.updateWinding()
                 $0.setupRenderData()
             }
             
             self.brushes = model.meshes + model.brushes
+            
+            updateCSG()
         }
         catch
         {

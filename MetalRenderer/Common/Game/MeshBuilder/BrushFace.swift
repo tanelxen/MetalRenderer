@@ -23,19 +23,11 @@ final class BrushPoly
     
     var points: [float3] = []
     var uvs: [float2] = []
-//    var normal: float3 = .zero
     
     init(points: [float3])
     {
         self.points = points
         self.uvs = Array<float2>.init(repeating: .zero, count: points.count)
-        
-//        if points.count > 2
-//        {
-//            let v1 = points[1] - points[0]
-//            let v2 = points[2] - points[0]
-//            self.normal = normalize(cross(v2, v1))
-//        }
     }
     
     func updateUV()

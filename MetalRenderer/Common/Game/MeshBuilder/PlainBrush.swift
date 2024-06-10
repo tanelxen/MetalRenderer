@@ -40,8 +40,8 @@ final class PlainBrush: EditableObject
     
     private var selectedFaceIndex: Int?
     
-    private var vertexBuffer: MTLBuffer!
-    private var vertexBuffer2: MTLBuffer!
+    private var polysVertexBuffer: MTLBuffer!
+    private var edgesVertexBuffer: MTLBuffer!
     
     init(planes: [Plane])
     {
@@ -71,9 +71,9 @@ final class PlainBrush: EditableObject
     
     func setupRenderData()
     {
-        let length = MemoryLayout<Vertex>.stride * 128
-        vertexBuffer = Engine.device.makeBuffer(length: length)
-        vertexBuffer2 = Engine.device.makeBuffer(length: length)
+        let stride = MemoryLayout<Vertex>.stride
+        polysVertexBuffer = Engine.device.makeBuffer(length: stride * 256)
+        edgesVertexBuffer = Engine.device.makeBuffer(length: stride * 24)
     }
     
     private func updatePlanes(position: float3, scale: float3)
@@ -133,7 +133,7 @@ final class PlainBrush: EditableObject
             var renderItem = RenderItem(technique: .brush)
             
             renderItem.cullMode = isRoom ? .front : .back
-            renderItem.texture = TextureManager.shared.devTexture
+            renderItem.texture = EditorLayer.current.texturesDict[texture]?.texture ?? TextureManager.shared.devTexture
             renderItem.isSupportLineMode = false
             
             var vertices: [Vertex] = []
@@ -149,20 +149,29 @@ final class PlainBrush: EditableObject
                 {
                     guard poly.points.count > 3 else { continue }
                     
-                    vertices.append(contentsOf: [
-                        Vertex(pos: poly.points[0], nor: normal, clr: color, uv: poly.uvs[0]),
-                        Vertex(pos: poly.points[1], nor: normal, clr: color, uv: poly.uvs[1]),
-                        Vertex(pos: poly.points[2], nor: normal, clr: color, uv: poly.uvs[2]),
-                        Vertex(pos: poly.points[3], nor: normal, clr: color, uv: poly.uvs[3]),
-                        Vertex(pos: poly.points[0], nor: normal, clr: color, uv: poly.uvs[0]),
-                        Vertex(pos: poly.points[2], nor: normal, clr: color, uv: poly.uvs[2])
-                    ])
+                    if poly.points.count > 2
+                    {
+                        vertices.append(contentsOf: [
+                            Vertex(pos: poly.points[0], nor: normal, clr: color, uv: poly.uvs[0]),
+                            Vertex(pos: poly.points[1], nor: normal, clr: color, uv: poly.uvs[1]),
+                            Vertex(pos: poly.points[2], nor: normal, clr: color, uv: poly.uvs[2])
+                        ])
+                    }
+                    
+                    if poly.points.count > 3
+                    {
+                        vertices.append(contentsOf: [
+                            Vertex(pos: poly.points[3], nor: normal, clr: color, uv: poly.uvs[3]),
+                            Vertex(pos: poly.points[0], nor: normal, clr: color, uv: poly.uvs[0]),
+                            Vertex(pos: poly.points[2], nor: normal, clr: color, uv: poly.uvs[2])
+                        ])
+                    }
                 }
             }
             
-            vertexBuffer.contents().copyMemory(from: vertices, byteCount: MemoryLayout<Vertex>.stride * vertices.count)
+            polysVertexBuffer.contents().copyMemory(from: vertices, byteCount: MemoryLayout<Vertex>.stride * vertices.count)
             
-            renderItem.vertexBuffer = vertexBuffer
+            renderItem.vertexBuffer = polysVertexBuffer
             renderItem.numVertices = vertices.count
             renderItem.allowedViews = [.perspective]
             
@@ -172,7 +181,7 @@ final class PlainBrush: EditableObject
         do
         {
             var renderItem = RenderItem(technique: .brush)
-            renderItem.allowedViews = [.top, .back, .right]
+//            renderItem.allowedViews = [.top, .back, .right]
             
             var vertices: [Vertex] = []
             
@@ -196,10 +205,10 @@ final class PlainBrush: EditableObject
                 }
             }
             
-            vertexBuffer2.contents().copyMemory(from: vertices, byteCount: MemoryLayout<Vertex>.stride * vertices.count)
+            edgesVertexBuffer.contents().copyMemory(from: vertices, byteCount: MemoryLayout<Vertex>.stride * vertices.count)
             
             renderItem.primitiveType = .line
-            renderItem.vertexBuffer = vertexBuffer2
+            renderItem.vertexBuffer = edgesVertexBuffer
             renderItem.numVertices = vertices.count
             
             renderer.add(item: renderItem)
@@ -213,46 +222,4 @@ private struct Vertex
     var nor: float3 = .zero
     var clr: float4 = .one
     var uv: float2 = .zero
-    
-//    init(_ x: Float, _ y: Float, _ z: Float, _ u: Float, _ v: Float)
-//    {
-//        self.pos = float3(x, y, z)
-//        self.uv = float2(u, v)
-//    }
-}
-
-private struct BasicVertex
-{
-    let pos: float3
-    let uv: float2 = .zero
-}
-
-// Got from GTKRadiant matlib
-private func intersect(ray: Ray, point: float3, epsilon: Float, divergence: Float) -> Float
-{
-    var displacement = float3()
-    var depth: Float = 0
-
-    // calc displacement of test point from ray origin
-    displacement = point - ray.origin
-    
-    // calc length of displacement vector along ray direction
-    depth = dot(displacement, ray.direction)
-    
-    if depth < 0.0 {
-        return .greatestFiniteMagnitude
-    }
-    
-    // calc position of closest point on ray to test point
-    displacement = ray.origin + ray.direction * depth
-    
-    // calc displacement of test point from closest point
-    displacement = point - displacement
-    
-    // calc length of displacement, subtract depth-dependant epsilon
-    if length(displacement) - (epsilon + ( depth * divergence )) > 0 {
-        return .greatestFiniteMagnitude
-    }
-    
-    return depth
 }
