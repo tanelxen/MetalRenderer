@@ -38,6 +38,24 @@ final class BrushPoly
 //        }
     }
     
+    func updateUV()
+    {
+        guard let matrix = face?.textureMatrix
+        else {
+            return
+        }
+        
+        for i in points.indices
+        {
+            var projected = matrix * float4(points[i], 1)
+            projected = projected / projected.w
+            projected = projected / 64
+            
+            uvs[i].x = projected.x
+            uvs[i].y = projected.y
+        }
+    }
+    
     func check(against plane: Plane) -> Category
     {
         var iFront: Int = 0
@@ -210,6 +228,8 @@ final class BrushFace
     
     var isHighlighted = false
     
+    var textureMatrix: float4x4 = matrix_identity_float4x4
+    
     init(planeIndex: Int)
     {
         self.planeIndex = planeIndex
@@ -256,7 +276,11 @@ final class BrushFace
             windingClip(by: clip)
         }
         
-        updateUVs(with: plane)
+        textureMatrix = projectionMatrix(for: plane)
+        
+        polys.forEach {
+            $0.updateUV()
+        }
     }
     
     func clip(with other: PlainBrush)
@@ -267,6 +291,10 @@ final class BrushFace
         {
             let fragments = carve(poly: poly, planes: other.planes, index: 0)
             result.append(contentsOf: fragments)
+        }
+        
+        result.forEach {
+            $0.updateUV()
         }
         
         self.polys = result
@@ -414,29 +442,16 @@ final class BrushFace
         return (xv, yv)
     }
     
-    func updateUVs(with plane: Plane)
+    func projectionMatrix(for plane: Plane) -> float4x4
     {
         let (xv, yv) = textureAxisFromPlane(normal: plane.normal)
         
-        let matrix = float4x4(
+        return float4x4(
             float4(xv.x, yv.x, plane.normal.x, 0),
             float4(xv.y, yv.y, plane.normal.y, 0),
             float4(xv.z, yv.z, plane.normal.z, 0),
             float4(0, 0, -plane.distance, 1)
         )
-        
-        for i in polys.indices
-        {
-            for j in polys[i].points.indices
-            {
-                var projected = matrix * float4(polys[i].points[j], 1)
-                projected = projected / projected.w
-                projected = projected / 64
-                
-                polys[i].uvs[j].x = projected.x
-                polys[i].uvs[j].y = projected.y
-            }
-        }
     }
 }
 
