@@ -12,14 +12,6 @@ class PipelineStates
     private (set) var basic: MTLRenderPipelineState!
     private (set) var basicInst: MTLRenderPipelineState!
     
-    private (set) var skybox: MTLRenderPipelineState!
-    private (set) var worldMeshLightmapped: MTLRenderPipelineState!
-    private (set) var worldMeshVertexlit: MTLRenderPipelineState!
-    private (set) var skeletalMesh: MTLRenderPipelineState!
-    private (set) var billboards: MTLRenderPipelineState!
-    private (set) var particles: MTLRenderPipelineState!
-    private (set) var userInterface: MTLRenderPipelineState!
-    
     private (set) var simpleGrid: MTLRenderPipelineState!
     
     private (set) var brush: MTLRenderPipelineState!
@@ -27,83 +19,13 @@ class PipelineStates
     
     init()
     {
-        skybox = createSkyboxPipelineState()
-        worldMeshLightmapped = createWorldMeshLightmappedPipelineState()
-        worldMeshVertexlit = createWorldMeshVertexlitPipelineState()
-        skeletalMesh = createSkeletalMeshPipelineState()
-        
         basic = createBasicPipelineState()
         basicInst = createBasicInstPipelineState()
-        
-        billboards = createBillboardsPipelineState()
-        particles = createParticlesPipelineState()
-        
-        userInterface = createUserInterfacePipelineState()
-        
+
         simpleGrid = createSimpleGridPipelineState()
         
         brush = createBrushPipelineState()
         dot = createDotPipelineState()
-    }
-    
-    private func createSkyboxPipelineState() -> MTLRenderPipelineState?
-    {
-        let descriptor = MTLRenderPipelineDescriptor()
-        
-        descriptor.colorAttachments[0].pixelFormat = Preferences.colorPixelFormat
-        descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
-
-        descriptor.vertexFunction = Engine.defaultLibrary.makeFunction(name: "skybox_vertex_shader")
-        descriptor.fragmentFunction = Engine.defaultLibrary.makeFunction(name: "skybox_fragment_shader")
-
-        descriptor.label = "Skybox Pipeline State"
-
-        return try? Engine.device.makeRenderPipelineState(descriptor: descriptor)
-    }
-    
-    private func createWorldMeshLightmappedPipelineState() -> MTLRenderPipelineState?
-    {
-        let descriptor = MTLRenderPipelineDescriptor()
-        descriptor.colorAttachments[0].pixelFormat = Preferences.colorPixelFormat
-        descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
-
-        descriptor.vertexFunction = Engine.defaultLibrary.makeFunction(name: "world_mesh_vs")
-        descriptor.fragmentFunction = Engine.defaultLibrary.makeFunction(name: "world_mesh_lightmapped_fs")
-        descriptor.vertexDescriptor = WorldStaticMesh.vertexDescriptor()
-
-        descriptor.label = "World Mesh Lightmapped Pipeline State"
-
-        return try? Engine.device.makeRenderPipelineState(descriptor: descriptor)
-    }
-    
-    private func createWorldMeshVertexlitPipelineState() -> MTLRenderPipelineState?
-    {
-        let descriptor = MTLRenderPipelineDescriptor()
-        descriptor.colorAttachments[0].pixelFormat = Preferences.colorPixelFormat
-        descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
-
-        descriptor.vertexFunction = Engine.defaultLibrary.makeFunction(name: "world_mesh_vs")
-        descriptor.fragmentFunction = Engine.defaultLibrary.makeFunction(name: "world_mesh_vertexlit_fs")
-        descriptor.vertexDescriptor = WorldStaticMesh.vertexDescriptor()
-
-        descriptor.label = "World Mesh Vertexlit Pipeline State"
-
-        return try? Engine.device.makeRenderPipelineState(descriptor: descriptor)
-    }
-    
-    private func createSkeletalMeshPipelineState() -> MTLRenderPipelineState?
-    {
-        let descriptor = MTLRenderPipelineDescriptor()
-        descriptor.colorAttachments[0].pixelFormat = Preferences.colorPixelFormat
-        descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
-
-        descriptor.vertexFunction = Engine.defaultLibrary.makeFunction(name: "skeletal_mesh_vs")
-        descriptor.fragmentFunction = Engine.defaultLibrary.makeFunction(name: "skeletal_mesh_fs")
-        descriptor.vertexDescriptor = SkeletalMesh.vertexDescriptor()
-
-        descriptor.label = "Skeletal Mesh Pipeline State"
-
-        return try? Engine.device.makeRenderPipelineState(descriptor: descriptor)
     }
     
     private func createBasicPipelineState() -> MTLRenderPipelineState?
@@ -152,81 +74,6 @@ class PipelineStates
         descriptor.vertexDescriptor = basicVertexDescriptor()
 
         descriptor.label = "Basic Instanced Render Pipeline State"
-
-        return try? Engine.device.makeRenderPipelineState(descriptor: descriptor)
-    }
-    
-    private func createBillboardsPipelineState() -> MTLRenderPipelineState?
-    {
-        let descriptor = MTLRenderPipelineDescriptor()
-        
-        descriptor.colorAttachments[0].pixelFormat = Preferences.colorPixelFormat
-        
-        descriptor.colorAttachments[0].isBlendingEnabled = true
-        descriptor.colorAttachments[0].rgbBlendOperation = .add
-        descriptor.colorAttachments[0].alphaBlendOperation = .add
-        descriptor.colorAttachments[0].sourceRGBBlendFactor = .sourceAlpha
-        descriptor.colorAttachments[0].sourceAlphaBlendFactor = .one
-        descriptor.colorAttachments[0].destinationRGBBlendFactor = .oneMinusSourceAlpha
-        descriptor.colorAttachments[0].destinationAlphaBlendFactor = .oneMinusSourceAlpha
-        
-        descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
-
-        descriptor.vertexFunction = Engine.defaultLibrary.makeFunction(name: "billboard_vs")
-        descriptor.fragmentFunction = Engine.defaultLibrary.makeFunction(name: "billboard_fs")
-        descriptor.vertexDescriptor = particleVertexDescriptor()
-
-        descriptor.label = "Billboards Render Pipeline State"
-
-        return try? Engine.device.makeRenderPipelineState(descriptor: descriptor)
-    }
-    
-    private func createParticlesPipelineState() -> MTLRenderPipelineState?
-    {
-        let descriptor = MTLRenderPipelineDescriptor()
-        
-        descriptor.colorAttachments[0].pixelFormat = Preferences.colorPixelFormat
-        
-        descriptor.colorAttachments[0].isBlendingEnabled = true
-        descriptor.colorAttachments[0].rgbBlendOperation = .add
-        descriptor.colorAttachments[0].alphaBlendOperation = .add
-        descriptor.colorAttachments[0].sourceRGBBlendFactor = .sourceAlpha
-        descriptor.colorAttachments[0].sourceAlphaBlendFactor = .one
-        descriptor.colorAttachments[0].destinationRGBBlendFactor = .oneMinusSourceAlpha
-        descriptor.colorAttachments[0].destinationAlphaBlendFactor = .oneMinusSourceAlpha
-        
-        descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
-
-        descriptor.vertexFunction = Engine.defaultLibrary.makeFunction(name: "particle_vs")
-        descriptor.fragmentFunction = Engine.defaultLibrary.makeFunction(name: "particle_fs")
-        descriptor.vertexDescriptor = particleVertexDescriptor()
-
-        descriptor.label = "Particles Render Pipeline State"
-
-        return try? Engine.device.makeRenderPipelineState(descriptor: descriptor)
-    }
-    
-    private func createUserInterfacePipelineState() -> MTLRenderPipelineState?
-    {
-        let descriptor = MTLRenderPipelineDescriptor()
-        
-        descriptor.colorAttachments[0].pixelFormat = Preferences.colorPixelFormat
-        
-        descriptor.colorAttachments[0].isBlendingEnabled = true
-        descriptor.colorAttachments[0].rgbBlendOperation = .add
-        descriptor.colorAttachments[0].alphaBlendOperation = .add
-        descriptor.colorAttachments[0].sourceRGBBlendFactor = .sourceAlpha
-        descriptor.colorAttachments[0].sourceAlphaBlendFactor = .one
-        descriptor.colorAttachments[0].destinationRGBBlendFactor = .oneMinusSourceAlpha
-        descriptor.colorAttachments[0].destinationAlphaBlendFactor = .oneMinusSourceAlpha
-        
-        descriptor.depthAttachmentPixelFormat = Preferences.depthStencilPixelFormat
-
-        descriptor.vertexFunction = Engine.defaultLibrary.makeFunction(name: "user_interface_vs")
-        descriptor.fragmentFunction = Engine.defaultLibrary.makeFunction(name: "user_interface_fs")
-        descriptor.vertexDescriptor = basicVertexDescriptor()
-
-        descriptor.label = "UI Render Pipeline State"
 
         return try? Engine.device.makeRenderPipelineState(descriptor: descriptor)
     }

@@ -5,16 +5,7 @@
       location = "group:MetalRenderer.xcodeproj">
    </FileRef>
    <FileRef
-      location = "group:GoldSrc MDL Importer">
-   </FileRef>
-   <FileRef
-      location = "group:Quake3 BSP Importer">
-   </FileRef>
-   <FileRef
       location = "group:ImGui+ImGuizmo">
-   </FileRef>
-   <FileRef
-      location = "group:SwiftRecast">
    </FileRef>
    <FileRef
       location = "group:SwiftBullet">

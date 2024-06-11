@@ -13,11 +13,11 @@ final class BrushScene
 {
     private (set) static var current: BrushScene!
     
-    var brushes: [EditableObject] = []
+    var brushes: [Brush] = []
     
     var infoPlayerStart: InfoPlayerStart?
     
-    var selected: EditableObject? {
+    var selected: Brush? {
         brushes.first(where: { $0.isSelected })
     }
     
@@ -40,14 +40,7 @@ final class BrushScene
     
     func addBrush(position: float3, size: float3)
     {
-        let brush: EditableObject
-        
-        switch brushType {
-            case .plain:
-                brush = PlainBrush(origin: position, size: size)
-            case .mesh:
-                brush = EditableMesh(origin: position, size: size)
-        }
+        let brush = Brush(origin: position, size: size)
         
         brush.isSelected = true
         
@@ -57,17 +50,17 @@ final class BrushScene
     
     func copySelected()
     {
-        guard let mesh = selected as? EditableMesh
-        else {
-            return
-        }
-        
-        let new = EditableMesh(mesh)
-        
-        mesh.isSelected = false
-        new.isSelected = true
-        
-        brushes.append(new)
+//        guard let mesh = selected as? EditableMesh
+//        else {
+//            return
+//        }
+//
+//        let new = EditableMesh(mesh)
+//
+//        mesh.isSelected = false
+//        new.isSelected = true
+//
+//        brushes.append(new)
     }
     
     func select(by ray: Ray)
@@ -75,23 +68,23 @@ final class BrushScene
         // Brutforce approach
         // TODO: rewrite with AABB
         
-        var bestd: Float = .greatestFiniteMagnitude
-        var closest: EditableMesh?
-        
-        for mesh in brushes.compactMap({ $0 as? EditableMesh })
-        {
-            mesh.isSelected = false
-            
-            let d = intersect(ray: ray, mesh: mesh)
-            
-            if d < bestd
-            {
-                closest = mesh
-                bestd = d
-            }
-        }
-        
-        closest?.isSelected = true
+//        var bestd: Float = .greatestFiniteMagnitude
+//        var closest: EditableMesh?
+//
+//        for mesh in brushes.compactMap({ $0 as? EditableMesh })
+//        {
+//            mesh.isSelected = false
+//
+//            let d = intersect(ray: ray, mesh: mesh)
+//
+//            if d < bestd
+//            {
+//                closest = mesh
+//                bestd = d
+//            }
+//        }
+//
+//        closest?.isSelected = true
     }
     
     /*
@@ -99,26 +92,26 @@ final class BrushScene
      */
     func point(at ray: Ray) -> float3?
     {
-        var bestd: Float = .greatestFiniteMagnitude
-        var closest: EditableMesh?
-        
-        for mesh in brushes.compactMap({ $0 as? EditableMesh })
-        {
-            mesh.isSelected = false
-            
-            let d = intersect(ray: ray, mesh: mesh)
-            
-            if d < bestd
-            {
-                closest = mesh
-                bestd = d
-            }
-        }
-        
-        if closest != nil
-        {
-            return ray.origin + ray.direction * bestd
-        }
+//        var bestd: Float = .greatestFiniteMagnitude
+//        var closest: EditableMesh?
+//
+//        for mesh in brushes.compactMap({ $0 as? EditableMesh })
+//        {
+//            mesh.isSelected = false
+//
+//            let d = intersect(ray: ray, mesh: mesh)
+//
+//            if d < bestd
+//            {
+//                closest = mesh
+//                bestd = d
+//            }
+//        }
+//
+//        if closest != nil
+//        {
+//            return ray.origin + ray.direction * bestd
+//        }
         
         return nil
     }
@@ -155,7 +148,7 @@ final class BrushScene
     
     func updateCSG()
     {
-        let csg = brushes.compactMap({ $0 as? PlainBrush })
+        let csg = brushes.compactMap({ $0 as? Brush })
         
         csg.forEach {
             $0.updateWinding()
@@ -213,54 +206,7 @@ extension BrushScene
     
     private func createWorldStaticCollision()
     {
-        for brush in brushes.compactMap({ $0 as? EditableMesh })
-        {
-            if brush.isRoom
-            {
-                for face in brush.faces
-                {
-                    guard !face.isGhost else { continue }
-                            
-                    let shape = BulletConvexHullShape()
-
-                    for point in face.verts.map({ $0.position })
-                    {
-                        shape.addPoint(point * q2b)
-                    }
-
-                    let transform = BulletTransform()
-                    transform.setIdentity()
-
-                    let motionState = BulletMotionState(transform: transform)
-                    let body = BulletRigidBody(mass: 0,
-                                               motionState: motionState,
-                                               collisionShape: shape)
-                    body.friction = 0.5
-                    physicsWorld.add(rigidBody: body)
-                }
-            }
-            else
-            {
-                let shape = BulletConvexHullShape()
-
-                for point in brush.vertices
-                {
-                    shape.addPoint(point * q2b)
-                }
-
-                let transform = BulletTransform()
-                transform.setIdentity()
-
-                let motionState = BulletMotionState(transform: transform)
-                let body = BulletRigidBody(mass: 0,
-                                           motionState: motionState,
-                                           collisionShape: shape)
-                body.friction = 0.5
-                physicsWorld.add(rigidBody: body)
-            }
-        }
-        
-        for brush in brushes.compactMap({ $0 as? PlainBrush })
+        for brush in brushes
         {
             for poly in brush.faces.flatMap({ $0.polys })
             {
@@ -290,8 +236,7 @@ extension BrushScene
     private struct BrushSceneModel: Codable
     {
         let playerStart: InfoPlayerStartModel?
-        let meshes: [EditableMesh]
-        let brushes: [PlainBrush]
+        let brushes: [Brush]
     }
     
     private struct InfoPlayerStartModel: Codable
@@ -318,17 +263,11 @@ extension BrushScene
                 self.infoPlayerStart = info
             }
             
-            model.meshes.forEach {
-                $0.recalculate()
-                $0.setupRenderData()
-            }
-            
             model.brushes.forEach {
-//                $0.updateWinding()
                 $0.setupRenderData()
             }
             
-            self.brushes = model.meshes + model.brushes
+            self.brushes = model.brushes
             
             updateCSG()
         }
@@ -350,12 +289,8 @@ extension BrushScene
             )
         }
         
-        let meshes = brushes.compactMap({ $0 as? EditableMesh })
-        let brushes = brushes.compactMap({ $0 as? PlainBrush })
-        
         let model = BrushSceneModel(
             playerStart: playerStart,
-            meshes: meshes,
             brushes: brushes
         )
         

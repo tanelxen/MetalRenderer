@@ -18,7 +18,6 @@ final class EditorLayer
     private var topViewPanel: OrthoViewPanel!
     private var hierarchyPanel: HierarchyPanel!
     private var inspectorPanel: InspectorPanel!
-    private var assetsPanel: AssetsPanel!
     
     private let toolbarSize: Float = 44
     
@@ -56,11 +55,6 @@ final class EditorLayer
         topViewPanel = OrthoViewPanel(viewport: topViewport)
         hierarchyPanel = HierarchyPanel()
         inspectorPanel = InspectorPanel()
-        assetsPanel = AssetsPanel()
-
-        assetsPanel.onLoadNewMap = { [weak self] url in
-            self?.onLoadNewMap?(url)
-        }
         
         objectIcon = TextureManager.shared.getTexture(for: "Assets/editor/toolbar_object_ic.png")
         faceIcon  = TextureManager.shared.getTexture(for: "Assets/editor/toolbar_face_ic.png")
@@ -94,12 +88,6 @@ final class EditorLayer
     
     func dropFile(_ url: URL)
     {
-        assetsPanel.dropFile(url)
-    }
-    
-    func updateWorkingDir()
-    {
-        assetsPanel.updateWorkingDir()
     }
     
     func handleEvent(_ event: NSEvent)
@@ -514,4 +502,12 @@ final class TextureProxy
         self.name = URL(string: path)!.lastPathComponent
         self.texture = TextureManager.shared.getTexture(for: path)
     }
+}
+
+enum SelectionMode: String
+{
+    case object
+    case vertex
+    case face
+    case edge
 }

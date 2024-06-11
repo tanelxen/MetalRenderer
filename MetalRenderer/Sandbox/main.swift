@@ -64,24 +64,12 @@ class AppDelegate: NSObject, NSApplicationDelegate
             NSMenuItem(title: "Open map", action: #selector(openMap), keyEquivalent: ""),
             NSMenuItem(title: "Save map", action: #selector(saveMap), keyEquivalent: "")
         ]
-
-        let settingsMenu = NSMenuItem()
-        settingsMenu.submenu = NSMenu(title: "Settings")
-        settingsMenu.submenu?.items = [
-            NSMenuItem(title: "Change working directory", action: #selector(changeDir), keyEquivalent: "")
-        ]
         
         let mainMenu = NSMenu(title: "Main Menu")
         mainMenu.addItem(appMenu)
         mainMenu.addItem(fileMenu)
-        mainMenu.addItem(settingsMenu)
         
         NSApp.mainMenu = mainMenu
-    }
-    
-    @objc private func changeDir()
-    {
-        application?.changeWorkingDir()
     }
     
     @objc private func openMap()

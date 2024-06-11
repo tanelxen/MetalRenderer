@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension PlainBrush: Codable
+extension Brush: Codable
 {
     private enum CodingKeys: String, CodingKey {
         case planes, isRoom, texture

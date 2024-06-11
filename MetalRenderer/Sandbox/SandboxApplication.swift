@@ -9,6 +9,7 @@ import Foundation
 import ApplicationServices
 import MetalKit
 import ImGui
+import UniformTypeIdentifiers
 
 final class SandboxApplication: NSObject
 {
@@ -49,8 +50,6 @@ final class SandboxApplication: NSObject
         view.delegate = self
         
         setupEventsMonitor()
-        
-        AudioEngine.start()
     }
     
     func dropFile(_ url: URL)
@@ -72,7 +71,7 @@ final class SandboxApplication: NSObject
         if dialog.runModal() == .OK, let workingDirURL = dialog.url
         {
             UserDefaults.standard.set(workingDirURL, forKey: "workingDir")
-            editor?.updateWorkingDir()
+//            editor?.updateWorkingDir()
         }
     }
     

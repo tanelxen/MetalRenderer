@@ -1,8 +1,8 @@
 //
-//  ObjectTool.swift
+//  BrushBoundsTool.swift
 //  Sandbox
 //
-//  Created by Fedor Artemenkov on 28.05.2024.
+//  Created by Fedor Artemenkov on 09.06.2024.
 //
 
 import Foundation
@@ -16,7 +16,7 @@ import simd
 final class BoundsTool
 {
     private let viewport: Viewport
-    var mesh: EditableMesh?
+    var mesh: Brush?
     
     private var gridSize: Float = 8
     private var dragOrigin: float3?
@@ -42,15 +42,25 @@ final class BoundsTool
             {
                 case .none:
                     return
-                    
+
                 case .mesh(let mesh):
                     for face in mesh.faces
                     {
-                        face.plane.distance = dot(face.plane.normal, face.center)
+                        let normal = mesh.planes[face.planeIndex].normal
+                        mesh.planes[face.planeIndex].distance = dot(normal, face.center)
                     }
                     
+                    mesh.faces.forEach {
+                        $0.update(from: mesh.planes)
+                    }
+
                 case .face(let face):
-                    face.plane.distance = dot(face.plane.normal, face.center)
+                    let normal = mesh.planes[face.planeIndex].normal
+                    mesh.planes[face.planeIndex].distance = dot(normal, face.center)
+                    
+                    mesh.faces.forEach {
+                        $0.update(from: mesh.planes)
+                    }
             }
             
             mesh.center = mesh.faces.map({ $0.center }).reduce(.zero, +) / Float(mesh.faces.count)
@@ -78,7 +88,8 @@ final class BoundsTool
             // We don't want to shear face
             if case let .face(face) = dragType
             {
-                delta = delta * abs(face.plane.normal)
+                let normal = mesh.planes[face.planeIndex].normal
+                delta = delta * abs(normal)
             }
             
             guard length(delta) > 0 else { return }
@@ -91,69 +102,26 @@ final class BoundsTool
                 case .mesh(let mesh):
                     for face in mesh.faces
                     {
-                        for vert in face.verts
+                        for i in face.points.indices
                         {
-                            vert.position += delta
+                            face.points[i] += delta
                         }
                     }
                     
                 case .face(let face):
-                    for vert in face.verts
+                    for i in face.points.indices
                     {
-                        let iter = VertexEdgeIterator(vert)
-                        
-                        while let twin = iter.next()?.vert
-                        {
-                            twin.position += delta
-                        }
+                        face.points[i] += delta
                     }
                     
-                    mesh.recalculateUV()
+//                    mesh.recalculateUV()
             }
             
             self.dragOrigin = dragOrigin + delta
         }
         else
         {
-            if viewport.viewType == .perspective
-            {
-                var bestd: Float = .greatestFiniteMagnitude
-                var bestf: Face?
-                
-                for face in mesh.faces
-                {
-                    if dot(ray.direction, face.plane.normal) < 0
-                    {
-                        if intersect(ray: ray, face: face)
-                        {
-                            bestf = face
-                            break
-                        }
-                        else
-                        {
-                            continue
-                        }
-                    }
-    
-                    if let point = intersection(ray: ray, plane: face.plane)
-                    {
-                        let d = length(point - ray.origin)
-    
-                        if d < bestd
-                        {
-                            bestd = d
-                            bestf = face
-                        }
-                    }
-                }
-                
-                if let face = bestf
-                {
-                    dragType = .face(face)
-                    dragOrigin = point
-                }
-            }
-            else
+            if viewport.viewType != .perspective
             {
                 guard let rayPoint = closestPoint(on: ray, to: mesh.center)
                 else {
@@ -168,7 +136,7 @@ final class BoundsTool
                     origin: rayPoint,
                     direction: normalize(mesh.center - rayPoint)
                 )
-                
+
                 for face in mesh.faces
                 {
                     if intersect(ray: rayToOrigin, face: face)
@@ -191,19 +159,19 @@ final class BoundsTool
             case .mesh(let mesh):
                 for face in mesh.faces
                 {
-                    for edge in face.edges
+                    for i in face.points.indices
                     {
-                        let p1 = edge.vert.position
-                        let p2 = edge.next.vert.position
+                        let p1 = face.points[i]
+                        let p2 = face.points[(i + 1) % face.points.count]
                         drawEdge(p1: p1, p2: p2, color: [1, 1, 0, 1], with: renderer)
                     }
                 }
                 
             case .face(let face):
-                for edge in face.edges
+                for i in face.points.indices
                 {
-                    let p1 = edge.vert.position
-                    let p2 = edge.next.vert.position
+                    let p1 = face.points[i]
+                    let p2 = face.points[(i + 1) % face.points.count]
                     drawEdge(p1: p1, p2: p2, color: [1, 1, 0, 1], with: renderer)
                 }
         }
@@ -237,23 +205,40 @@ final class BoundsTool
 private enum DragType
 {
     case none
-    case mesh(_ mesh: EditableMesh)
-    case face(_ face: Face)
+    case mesh(_ mesh: Brush)
+    case face(_ face: BrushFace)
 }
 
-private func distance(ray: Ray, point: float3) -> Float?
+private func intersect(ray: Ray, face: BrushFace) -> Bool
 {
-    let v = point - ray.origin
-    
-    let t = dot(v, ray.direction)
-    
-    guard t >= 0 else {
-        return nil
+    let n = face.plane.normal
+
+    if dot(n, ray.direction) > 0 {
+        return false
     }
     
-    let e = ray.origin + ray.direction * t
+    let d = ray.origin - face.center
+    let t = -dot(n, d) / dot(n, ray.direction)
     
-    return length(e - point)
+    if t < 0 {
+        return false
+    }
+    
+    let p = ray.origin + ray.direction * t
+    
+    var inside = true
+    
+    for i in face.points.indices
+    {
+        let v0 = face.points[i]
+        let v1 = face.points[(i + 1) % face.points.count]
+        
+        let e = cross(v1 - v0, p - v0)
+        
+        inside = inside && dot(e, n) < 0
+    }
+    
+    return inside
 }
 
 private func closestPoint(on ray: Ray, to point: float3) -> float3?
@@ -271,10 +256,3 @@ private func closestPoint(on ray: Ray, to point: float3) -> float3?
     return e
 }
 
-private struct Vertex
-{
-    var pos: float3 = .zero
-    var clr: float4 = .one
-}
-
-private let MAX_VERTS: Int = 16

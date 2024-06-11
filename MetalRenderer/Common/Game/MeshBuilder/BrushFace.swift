@@ -275,7 +275,7 @@ final class BrushFace
         }
     }
     
-    func clip(with other: PlainBrush)
+    func clip(with other: Brush)
     {
         var result: [BrushPoly] = []
         

@@ -35,35 +35,35 @@ final class BlockTool2D
     
     func update()
     {
-        if Mouse.IsMouseButtonPressed(.left) && Keyboard.isKeyPressed(.shift)
-        {
-            if downMousePos == nil
-            {
-                downMousePos = Mouse.getMouseWindowPosition()
-                downMouseTimestemp = Date()
-            }
-        }
-        else
-        {
-            if let oldPos = downMousePos, let timestemp = downMouseTimestemp
-            {
-                let newPos = Mouse.getMouseWindowPosition()
-                let delta = length(newPos - oldPos)
-                
-                let timeInterval = Date().timeIntervalSince(timestemp)
-                
-                if timeInterval < 0.3, delta < gridSize * 0.5
-                {
-                    print("Select click")
-                    
-                    let ray = viewport.mousePositionInWorld()
-                    BrushScene.current.select(by: ray)
-                }
-                
-                downMouseTimestemp = nil
-                downMousePos = nil
-            }
-        }
+//        if Mouse.IsMouseButtonPressed(.left) && Keyboard.isKeyPressed(.shift)
+//        {
+//            if downMousePos == nil
+//            {
+//                downMousePos = Mouse.getMouseWindowPosition()
+//                downMouseTimestemp = Date()
+//            }
+//        }
+//        else
+//        {
+//            if let oldPos = downMousePos, let timestemp = downMouseTimestemp
+//            {
+//                let newPos = Mouse.getMouseWindowPosition()
+//                let delta = length(newPos - oldPos)
+//
+//                let timeInterval = Date().timeIntervalSince(timestemp)
+//
+//                if timeInterval < 0.3, delta < gridSize * 0.5
+//                {
+//                    print("Select click")
+//
+//                    let ray = viewport.mousePositionInWorld()
+//                    BrushScene.current.select(by: ray)
+//                }
+//
+//                downMouseTimestemp = nil
+//                downMousePos = nil
+//            }
+//        }
         
         guard Mouse.IsMouseButtonPressed(.left) && Keyboard.isKeyPressed(.c)
         else {

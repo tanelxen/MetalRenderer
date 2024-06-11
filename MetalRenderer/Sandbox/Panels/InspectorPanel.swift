@@ -54,27 +54,5 @@ final class InspectorPanel
             
             ImGuiEndCombo()
         }
-        
-        if let mesh = brush as? EditableMesh, let face = mesh.selectedFace
-        {
-            if ImGuiButton("Split face")
-            {
-                mesh.splitSelectedFace()
-            }
-            
-            drawControlFloat2("Offset", &face.uvOffset)
-            drawControlFloat2("Scale", &face.uvScale)
-            face.updateUVs()
-        }
-    }
-}
-
-extension BrushType
-{
-    var name: String {
-        switch self {
-            case .plain: return "Plain"
-            case .mesh: return "Mesh"
-        }
     }
 }

@@ -12,8 +12,6 @@ import SwiftBullet
 class Player
 {
     var transform = Transform()
-    var mesh: SkeletalMesh?
-    
     let camera = PlayerCamera()
     
     private var rotateSpeed: Float = 30.0
@@ -21,15 +19,6 @@ class Player
     private var velocity: float3 = .zero
     
     private weak var scene: BrushScene!
-    
-    private let footsteps = ["pl_step1.wav",
-                             "pl_step2.wav",
-                             "pl_step3.wav",
-                             "pl_step4.wav"]
-    
-    private let shootTimer: TimerManager
-    
-    private var bobing: Float = 0.0
     
     private (set) var motionState: BulletMotionState?
     private (set) var rigidBody: BulletRigidBody?
@@ -48,18 +37,6 @@ class Player
     init(scene: BrushScene)
     {
         self.scene = scene
-        
-        if let url = ResourceManager.getURL(for: "Assets/models/v_9mmhandgun/mesh.skl")
-        {
-            self.mesh = SkeletalMesh(url: url)
-        }
-        
-        let shootRate = TimeInterval(mesh?.cur_anim_duration ?? 10)
-        shootTimer = TimerManager(interval: shootRate)
-        
-        mesh?.sequenceName = "idle3"
-        
-        setupEvents()
     }
     
     func spawn(with transform: Transform)
@@ -96,25 +73,6 @@ class Player
         self.rigidBody = body
     }
     
-    private func setupEvents()
-    {
-        Mouse.onLeftMouseDown = { [weak self] in
-            self?.shootTimer.start { [weak self] in
-                self?.makeShoot()
-            }
-        }
-
-        Mouse.onLeftMouseUp = { [weak self] in
-            self?.shootTimer.stop()
-        }
-        
-//        Keyboard.onKeyDown = { [weak self] key in
-//            if key == .e {
-//                self?.grab()
-//            }
-//        }
-    }
-    
     func update()
     {
         updateInput()
@@ -122,14 +80,6 @@ class Player
         
         camera.transform.position = transform.position + float3(0, 40, 0)
         camera.transform.rotation = transform.rotation
-        
-//        if let constraint = self.pickConstraint
-//        {
-//            let start = camera.transform.position
-//            let end = start + camera.transform.rotation.forward * 96
-//
-//            constraint.setPivotB(end * q2b)
-//        }
     }
     
     // Movement based on Bullet's rigid body
@@ -206,53 +156,6 @@ class Player
         
     }
     
-//    private func grab()
-//    {
-//        guard pickConstraint == nil else {
-//            scene.world.remove(pickConstraint!)
-//            pickConstraint = nil
-//            return
-//        }
-//        
-//        let start = camera.transform.position
-//        let end = start + camera.transform.rotation.forward * 128
-//        
-//        let dynHit = scene.world.rayTestClosest(
-//            from: start * q2b,
-//            to: end * q2b,
-//            collisionFilterGroup: 0b1111111,
-//            collisionFilterMask: 0b1111111
-//        )
-//        
-//        if dynHit.hasHits, !dynHit.node.isStaticObject
-//        {
-//            dynHit.node.setDeactivationEnabled(false)
-//            
-//            let constraint = BulletPoint2PointConstraint(nodeA: dynHit.node, pivotA: .zero)
-//            
-//            scene.world.add(constraint, disableCollisionsBetweenLinkedBodies: true)
-//            
-//            pickConstraint = constraint
-//        }
-//    }
-//    
-    private func makeShoot()
-    {
-        AudioEngine.play(file: "pl_gun3.wav")
-        
-        mesh?.sequenceName = "shoot"
-        let duration = Double(mesh?.cur_anim_duration ?? 0)
-
-        Timer.scheduledTimer(withTimeInterval: duration, repeats: false) { timer in
-            self.mesh?.sequenceName = "idle3"
-        }
-        
-//        let start = camera.transform.position
-//        let end = start + camera.transform.rotation.forward * 1024
-        
-//        scene.makeShoot(start: start, end: end)
-    }
-    
     private func updateInput()
     {
         let deltaTime = GameTime.deltaTime
@@ -284,41 +187,5 @@ class Player
         
         transform.rotation.yaw += Mouse.getDX() * rotateSpeed * deltaTime
         transform.rotation.pitch -= Mouse.getDY() * rotateSpeed * deltaTime
-    }
-}
-
-class TimerManager
-{
-    private var timer: Timer?
-    private var lastEventTime = Date.distantFuture
-    private var interval: TimeInterval
-    
-    init(interval: TimeInterval) {
-        self.interval = interval
-    }
-    
-    func start(action: @escaping () -> Void)
-    {
-        let now = Date()
-        if abs(lastEventTime.timeIntervalSince(now)) < interval
-        {
-            // Время ещё не вышло, ждём следующего запуска таймера
-            return
-        }
-        
-        // Создаем новое событие
-        action()
-        lastEventTime = now
-        
-        timer?.invalidate()
-        timer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { [weak self] _ in
-            self?.start(action: action)
-        }
-    }
-    
-    func stop()
-    {
-        timer?.invalidate()
-        timer = nil
     }
 }

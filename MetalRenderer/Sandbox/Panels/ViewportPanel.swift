@@ -17,12 +17,9 @@ final class ViewportPanel
     private let viewport: Viewport
     private let camera = DebugCamera()
     
-    private var boundsTool: BoundsTool
     private let blockTool: BlockTool3D
     
     lazy var gridQuad = QuadShape(mins: float3(-4096, 0, -4096), maxs: float3(4096, 0, 4096))
-    
-    lazy var utilityRenderer = MeshUtilityRenderer()
     
     private (set) var isHovered = false
     
@@ -36,35 +33,26 @@ final class ViewportPanel
         viewport.camera = camera
         viewport.viewType = .perspective
         
-        boundsTool = BoundsTool(viewport: viewport)
         blockTool = BlockTool3D(viewport: viewport)
     }
     
     private var gizmoType: ImGuizmoType = .translate
     
-    private var dragOrigin: float3?
-    private var objectInitialPos: float3?
-    
     func drawSpecial(with renderer: ForwardRenderer)
     {
-        var renderItem = RenderItem(technique: .grid)
-        renderItem.cullMode = .none
-        renderItem.allowedViews = [.perspective]
-        
-        renderItem.primitiveType = .triangleStrip
-        renderItem.vertexBuffer = gridQuad.verticesBuffer
-        renderItem.numVertices = gridQuad.numVertices
-        
-        renderer.add(item: renderItem)
-        
-        if let selected = BrushScene.current.selected as? EditableMesh
+        if !isPlaying
         {
-            utilityRenderer.mesh = selected
-            utilityRenderer.selectionMode = EditorLayer.current.selectionMode
-            utilityRenderer.render(with: renderer)
+            var renderItem = RenderItem(technique: .grid)
+            renderItem.cullMode = .none
+            renderItem.allowedViews = [.perspective]
+            
+            renderItem.primitiveType = .triangleStrip
+            renderItem.vertexBuffer = gridQuad.verticesBuffer
+            renderItem.numVertices = gridQuad.numVertices
+            
+            renderer.add(item: renderItem)
         }
         
-        boundsTool.draw(with: renderer)
         blockTool.draw(with: renderer)
     }
     
@@ -93,11 +81,6 @@ final class ViewportPanel
         
         isHovered = ImGuiIsItemHovered(ImGuiFlag_None)
         
-        if ImGuiIsItemClicked(Im(ImGuiMouseButton_Left)) && Keyboard.isKeyPressed(.shift)
-        {
-            selectObject()
-        }
-        
         if isPlaying
         {
             if ImGuiIsKeyPressedMap(Im(ImGuiKey_Escape), false)
@@ -110,7 +93,6 @@ final class ViewportPanel
             updateOperations()
             
             drawPlayPauseControl()
-//            drawGizmoControl()
             
             isHovered = isHovered && !ImGuiIsItemHovered(ImGuiFlag_None)
         }
@@ -121,9 +103,6 @@ final class ViewportPanel
         {
             if EditorLayer.current.selectionMode == .object {
                 blockTool.update()
-                
-                boundsTool.mesh = BrushScene.current.selected as? EditableMesh
-                boundsTool.update()
             }
             
             camera.update()
@@ -143,180 +122,6 @@ final class ViewportPanel
             
             return
         }
-        
-        guard let brush = BrushScene.current.selected as? EditableMesh else { return }
-        
-        if EditorLayer.current.selectionMode == .face, let point = brush.selectedFacePoint
-        {
-            let transform = Transform(position: point)
-            if renderGizmo(for: transform)
-            {
-                brush.setSelectedFace(position: transform.position)
-            }
-            
-            if ImGuiIsKeyPressedMap(Im(ImGuiKey_E), false) && ImGuiGetIO()!.pointee.KeySuper
-            {
-                brush.extrudeSelectedFace(to: 16)
-            }
-            
-            if ImGuiIsKeyPressedMap(Im(ImGuiKey_Escape), false)
-            {
-                brush.isSelected = true
-            }
-            
-            if ImGuiIsKeyPressedMap(Im(ImGuiKey_Backspace), false)
-            {
-                brush.removeSelectedFace()
-            }
-        }
-        else if EditorLayer.current.selectionMode == .edge, let point = brush.selectedEdgePoint
-        {
-            let transform = Transform(position: point)
-            if renderGizmo(for: transform)
-            {
-                brush.setSelectedEdge(position: transform.position)
-            }
-            
-            if ImGuiIsKeyPressedMap(Im(ImGuiKey_Escape), false)
-            {
-                brush.isSelected = true
-            }
-        }
-        else if EditorLayer.current.selectionMode == .object
-        {
-//            if let anchor = brush.faces.first?.verts.first?.position
-//            {
-//                let transform = Transform(position: anchor)
-//                if renderGizmo(for: transform)
-//                {
-//                    brush.setWorld(position: transform.position)
-//                }
-//            }
-            
-            if ImGuiIsKeyPressedMap(Im(ImGuiKey_Escape), false)
-            {
-                brush.isSelected = false
-            }
-            
-            if ImGuiIsKeyPressedMap(Im(ImGuiKey_Backspace), false)
-            {
-                BrushScene.current.removeSelected()
-            }
-            
-            if ImGuiIsKeyPressedMap(Im(ImGuiKey_D), false) && ImGuiGetIO()!.pointee.KeySuper
-            {
-                BrushScene.current.copySelected()
-            }
-        }
-        
-        if EditorLayer.current.selectionMode == .edge
-        {
-            let ray = viewport.mousePositionInWorld()
-            
-            brush.faces
-                .flatMap { $0.edges }
-                .forEach { $0.isHighlighted = false }
-            
-        faceloop: for face in brush.faces
-            {
-                guard intersect(ray: ray, face: face)
-                else {
-                    continue
-                }
-                
-                for edge in face.edges
-                {
-                    let p1 = edge.vert.position
-                    let p2 = edge.next.vert.position
-                    
-                    if closestDistance(ray: ray, lineStart: p1, lineEnd: p2) < 4
-                    {
-                        edge.isHighlighted = true
-                        break faceloop
-                    }
-                }
-            }
-        }
-    }
-    
-    private func dragFace(at facePoint: float3, along axis: float3)
-    {
-        guard isHovered else { return }
-        
-        guard Mouse.IsMouseButtonPressed(.left)
-        else {
-            dragOrigin = nil
-            objectInitialPos = nil
-            return
-        }
-        
-        // Плоскость, на которую будем проецировать луч, по ней будем перемещаться
-        let viewNormal = camera.transform.rotation.forward
-        let distance = dot(facePoint, viewNormal)
-        let plane = Plane(normal: viewNormal, distance: distance)
-        
-        guard let start = dragOrigin, let origin = objectInitialPos
-        else {
-            let ray = viewport.mousePositionInWorld()
-            dragOrigin = intersection(ray: ray, plane: plane)
-            objectInitialPos = facePoint
-            return
-        }
-        
-        let ray = viewport.mousePositionInWorld()
-        guard let end = intersection(ray: ray, plane: plane)
-        else {
-            return
-        }
-        
-        var value = dot(axis, end - start)
-        
-        let gridSize: Float = 8
-        value = floor(value / gridSize) * gridSize
-        
-        let newPos = origin + axis * value
-        
-        BrushScene.current.selected?.setSelectedFace(position: newPos)
-    }
-    
-    private func dragEdge(at edgePoint: float3, along axis: float3)
-    {
-        guard isHovered else { return }
-        
-        guard Mouse.IsMouseButtonPressed(.left)
-        else {
-            dragOrigin = nil
-            objectInitialPos = nil
-            return
-        }
-        
-        // Плоскость, на которую будем проецировать луч, по ней будем перемещаться
-        let viewNormal = camera.transform.rotation.forward
-        let distance = dot(edgePoint, viewNormal)
-        let plane = Plane(normal: viewNormal, distance: distance)
-        
-        guard let start = dragOrigin, let origin = objectInitialPos
-        else {
-            let ray = viewport.mousePositionInWorld()
-            dragOrigin = intersection(ray: ray, plane: plane)
-            objectInitialPos = edgePoint
-            return
-        }
-        
-        let ray = viewport.mousePositionInWorld()
-        guard let end = intersection(ray: ray, plane: plane)
-        else {
-            return
-        }
-        
-        var value = dot(axis, end - start)
-        
-        let gridSize: Float = 16
-        value = floor(value / gridSize) * gridSize
-        
-        let newPos = origin + axis * value
-        
-        BrushScene.current.selected?.setSelectedEdge(position: newPos)
     }
     
     private func startPlaying()
@@ -406,28 +211,6 @@ final class ViewportPanel
         return ImGuizmoIsUsing()
     }
     
-    private func selectObject()
-    {
-        guard let brush = BrushScene.current.selected else { return }
-        
-        let ray = viewport.mousePositionInWorld()
-        
-        switch EditorLayer.current.selectionMode
-        {
-            case .object:
-                break
-                
-            case .vertex:
-                break
-                
-            case .face:
-                brush.selectFace(by: ray)
-                
-            case .edge:
-                brush.selectEdge(by: ray)
-        }
-    }
-    
     private func drawPlayPauseControl()
     {
         var viewportMinRegion = ImVec2()
@@ -468,97 +251,6 @@ final class ViewportPanel
         
         ImGuiPopID()
     }
-    
-    private func drawGizmoControl()
-    {
-        let windowFlags: ImGuiWindowFlags = Im(ImGuiWindowFlags_NoDecoration) | Im(ImGuiWindowFlags_NoDocking)
-            | Im(ImGuiWindowFlags_AlwaysAutoResize) | Im(ImGuiWindowFlags_NoSavedSettings)
-            | Im(ImGuiWindowFlags_NoFocusOnAppearing) | Im(ImGuiWindowFlags_NoNav)
-        
-        ImGuiPushStyleVar(Im(ImGuiStyleVar_WindowBorderSize), 0.0)
-        
-        var viewportPos: ImVec2 = ImVec2(0, 0)
-        ImGuiGetWindowPos(&viewportPos)
-        
-        let tabBarHeight: Float = 23
-        
-        var viewportWindowSize: ImVec2 = ImVec2(0, 0)
-        ImGuiGetWindowSize(&viewportWindowSize)
-        
-        let paddingSize: Float = 8.0
-        
-        ImGuiSetNextWindowPos(ImVec2(viewportPos.x + paddingSize, viewportPos.y + tabBarHeight + paddingSize), 0, ImVec2(0, 0))
-        
-//        ImGuiBegin("GizmoControl", nil, windowFlags)
-//        drawGizmoTypeButton("\(FAIcon.handPaper)", .none)
-//        ImGuiSpacing()
-//        drawGizmoTypeButton("\(FAIcon.arrowsAlt)", .translate)
-//        ImGuiSpacing()
-//        drawGizmoTypeButton("\(FAIcon.syncAlt)", .rotate)
-//        ImGuiSpacing()
-//        drawGizmoTypeButton("\(FAIcon.expand)", .scale)
-        
-        if ImGuiBegin("SelectionMode", nil, windowFlags)
-        {
-            drawSelectionModeButton("Object", .object)
-            ImGuiSpacing()
-            drawSelectionModeButton("Face", .face)
-            ImGuiSpacing()
-            drawSelectionModeButton("Edge", .edge)
-            
-            ImGuiEnd()
-        }
-        
-        ImGuiPopStyleVar(1)
-    }
-    
-    private func drawGizmoTypeButton(_ icon: String, _ type: ImGuizmoType)
-    {
-        ImGuiPushID("GizmoTypeButton\(icon)")
-        
-        let col = gizmoType == type ? ImGuiTheme.enabled : ImGuiTheme.disabled
-        
-        ImGuiPushStyleColor(Im(ImGuiCol_Button), col)
-        ImGuiPushStyleColor(Im(ImGuiCol_ButtonHovered), col)
-        ImGuiPushStyleColor(Im(ImGuiCol_ButtonActive), col)
-        ImGuiButton(icon, ImVec2(0, 0))
-        
-        if ImGuiIsItemClicked(Im(ImGuiMouseButton_Left)) {
-            gizmoType = type
-        }
-        
-        ImGuiPopStyleColor(3)
-        
-        ImGuiPopID()
-    }
-    
-    private func drawSelectionModeButton(_ icon: String, _ mode: SelectionMode)
-    {
-//        ImGuiPushID("SelectiomModeButton\(icon)")
-//
-//        let col = selectionMode == mode ? ImGuiTheme.enabled : ImGuiTheme.disabled
-//
-//        ImGuiPushStyleColor(Im(ImGuiCol_Button), col)
-//        ImGuiPushStyleColor(Im(ImGuiCol_ButtonHovered), col)
-//        ImGuiPushStyleColor(Im(ImGuiCol_ButtonActive), col)
-//        ImGuiButton(icon, ImVec2(0, 0))
-//
-//        if ImGuiIsItemClicked(Im(ImGuiMouseButton_Left)) {
-//            selectionMode = mode
-//        }
-//
-//        ImGuiPopStyleColor(3)
-//
-//        ImGuiPopID()
-    }
-}
-
-enum SelectionMode: String
-{
-    case object
-    case vertex
-    case face
-    case edge
 }
 
 private enum ImGuizmoType: Int

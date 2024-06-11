@@ -8,7 +8,7 @@
 import Metal
 import simd
 
-final class PlainBrush: EditableObject
+final class Brush: Entity
 {
     var transform: Transform = Transform()
     
@@ -18,14 +18,14 @@ final class PlainBrush: EditableObject
         }
     }
     
-    var worldPosition: float3 {
-        faces.first?.points.first ?? .zero
-    }
-    
-    var selectedFacePoint: float3?
-    var selectedFaceAxis: float3?
-    var selectedEdgePoint: float3?
-    var selectedEdgeAxis: float3?
+//    var worldPosition: float3 {
+//        faces.first?.points.first ?? .zero
+//    }
+//    
+//    var selectedFacePoint: float3?
+//    var selectedFaceAxis: float3?
+//    var selectedEdgePoint: float3?
+//    var selectedEdgeAxis: float3?
     
     var isRoom = false
     
@@ -118,7 +118,7 @@ final class PlainBrush: EditableObject
         
     }
     
-    func clip(with other: PlainBrush)
+    func clip(with other: Brush)
     {
         for face in faces
         {
