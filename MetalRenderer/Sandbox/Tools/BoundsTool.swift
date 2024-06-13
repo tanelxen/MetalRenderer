@@ -149,7 +149,7 @@ final class BoundsTool
         }
     }
     
-    func draw(with renderer: ForwardRenderer)
+    func draw(with renderer: Renderer)
     {
         switch dragType
         {
@@ -177,7 +177,7 @@ final class BoundsTool
         }
     }
     
-    private func drawEdge(p1: float3, p2: float3, color: float4, with renderer: ForwardRenderer)
+    private func drawEdge(p1: float3, p2: float3, color: float4, with renderer: Renderer)
     {
         let boxMainAxis = float3(0, 1, 0)
         

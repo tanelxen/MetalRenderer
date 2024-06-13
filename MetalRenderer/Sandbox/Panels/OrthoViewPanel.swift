@@ -22,7 +22,7 @@ final class OrthoViewPanel
     private let gridSize: Float = 8
     
     var isPlaying: Bool {
-        BrushScene.current?.isPlaying ?? false
+        World.current?.isPlaying ?? false
     }
     
     init(viewport: Viewport)
@@ -38,7 +38,7 @@ final class OrthoViewPanel
     private var boundsTool: BoundsTool
     private let blockTool: BlockTool2D
     
-    func drawSpecial(with renderer: ForwardRenderer)
+    func drawSpecial(with renderer: Renderer)
     {
         var renderItem = RenderItem(technique: .grid)
         renderItem.cullMode = .none
@@ -116,12 +116,14 @@ final class OrthoViewPanel
     
     private func update()
     {
-        if EditorLayer.current.selectionMode == .object
+        switch EditorLayer.current.toolMode
         {
-            blockTool.update()
-            
-            boundsTool.mesh = BrushScene.current.selected as? Brush
-            boundsTool.update()
+            case .brush:
+                blockTool.update()
+                
+            case .resize:
+                boundsTool.mesh = World.current.selected
+                boundsTool.update()
         }
     }
     
@@ -186,14 +188,14 @@ final class OrthoViewPanel
             let viewNormal = camera.transform.rotation.forward
             let plane = Plane(normal: viewNormal, distance: 0)
             
-            var point = BrushScene.current.point(at: ray) ?? intersection(ray: ray, plane: plane) ?? .zero
+            var point = World.current.point(at: ray) ?? intersection(ray: ray, plane: plane) ?? .zero
             
             point = floor(point / gridSize + 0.5) * gridSize
             
             let entity = InfoPlayerStart()
             entity.transform.position = point + [0, 28, 0]
             
-            BrushScene.current.infoPlayerStart = entity
+            World.current.infoPlayerStart = entity
         }
     }
 }

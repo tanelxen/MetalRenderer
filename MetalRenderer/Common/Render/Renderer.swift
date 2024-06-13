@@ -7,7 +7,7 @@
 
 import MetalKit
 
-final class ForwardRenderer
+final class Renderer
 {
     private var pipelineStates: PipelineStates! = PipelineStates()
     
@@ -38,7 +38,6 @@ final class ForwardRenderer
     private var commandBuffer: MTLCommandBuffer!
     private var commandEncoder: MTLRenderCommandEncoder!
     private var items: [RenderItem] = []
-    private var lines: [Line] = []
     
     func startFrame()
     {
@@ -132,9 +131,7 @@ final class ForwardRenderer
             }
         }
         
-//        if viewport.viewType == .perspective {
-            drawDebug(with: commandEncoder)
-//        }
+        drawDebug(with: commandEncoder)
         
         commandEncoder.endEncoding()
     }
@@ -144,17 +141,10 @@ final class ForwardRenderer
         items.append(item)
     }
     
-    func addLine(start: float3, end: float3, viewPlane: Plane)
-    {
-        let line = Line(start: start, end: end, viewPlane: viewPlane)
-        lines.append(line)
-    }
-    
     func endFrame()
     {
         commandBuffer.commit()
         items.removeAll(keepingCapacity: true)
-        lines.removeAll(keepingCapacity: true)
     }
     
     func apply(technique: RenderTechnique, to encoder: MTLRenderCommandEncoder)
@@ -221,9 +211,10 @@ struct RenderItem
     var allowedViews: Set<ViewType> = []
 }
 
-private struct Line
+enum RenderTechnique
 {
-    let start: float3
-    let end: float3
-    let viewPlane: Plane
+    case basic
+    case brush
+    case grid
+    case dot
 }

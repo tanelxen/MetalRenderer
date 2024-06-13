@@ -21,16 +21,15 @@ final class EditorLayer
     
     private let toolbarSize: Float = 44
     
-    private var objectIcon: MTLTexture!
-    private var faceIcon: MTLTexture!
-    private var edgeIcon: MTLTexture!
+    private var brushIcon: MTLTexture!
+    private var resizeIcon: MTLTexture!
     
     var texturesArray: [TextureProxy] = []
     var texturesDict: [String: TextureProxy] = [:]
     
-    var selectionMode: SelectionMode = .object {
+    var toolMode: ToolMode = .brush {
         didSet {
-            BrushScene.current.selected?.isSelected = true
+            World.current.selected?.isSelected = true
         }
     }
     
@@ -56,9 +55,8 @@ final class EditorLayer
         hierarchyPanel = HierarchyPanel()
         inspectorPanel = InspectorPanel()
         
-        objectIcon = TextureManager.shared.getTexture(for: "Assets/editor/toolbar_object_ic.png")
-        faceIcon  = TextureManager.shared.getTexture(for: "Assets/editor/toolbar_face_ic.png")
-        edgeIcon  = TextureManager.shared.getTexture(for: "Assets/editor/toolbar_edge_ic.png")
+        brushIcon = TextureManager.shared.getTexture(for: "Assets/editor/toolbar_brush_ic.png")
+        resizeIcon  = TextureManager.shared.getTexture(for: "Assets/editor/toolbar_resize_ic.png")
         
         texturesArray = [
             TextureProxy(path: "Assets/altdev/altdev_generic01.png"),
@@ -158,7 +156,7 @@ final class EditorLayer
     }
     
     // Draw grid for viewports
-    func specialDraw(with renderer: ForwardRenderer)
+    func specialDraw(with renderer: Renderer)
     {
         viewportPanel.drawSpecial(with: renderer)
         topViewPanel.drawSpecial(with: renderer)
@@ -234,20 +232,18 @@ final class EditorLayer
         ImGuiPopStyleVar(3)
         
         ImGuiSameLine(6, 0)
-        drawSelectionModeButton(.object)
+        drawToolModeButton(.brush)
         ImGuiSameLine(0, 6)
-        drawSelectionModeButton(.face)
-        ImGuiSameLine(0, 6)
-        drawSelectionModeButton(.edge)
+        drawToolModeButton(.resize)
         
         ImGuiEnd()
     }
     
-    private func drawSelectionModeButton(_ mode: SelectionMode)
+    private func drawToolModeButton(_ mode: ToolMode)
     {
-        ImGuiPushID("SelectiomModeButton\(mode.rawValue)")
+        ImGuiPushID("ToolModeButton\(mode.rawValue)")
         
-        let col = selectionMode == mode ? ImGuiTheme.enabled : ImVec4(0, 0, 0, 0)
+        let col = toolMode == mode ? ImGuiTheme.enabled : ImVec4(0, 0, 0, 0)
         
         ImGuiPushStyleColor(Im(ImGuiCol_Button), col)
         ImGuiPushStyleColor(Im(ImGuiCol_ButtonHovered), col)
@@ -257,18 +253,13 @@ final class EditorLayer
         
         switch mode
         {
-            case .object:
-                icon = withUnsafePointer(to: &objectIcon) { ptr in
+            case .brush:
+                icon = withUnsafePointer(to: &brushIcon) { ptr in
                     return UnsafeMutableRawPointer(mutating: ptr)
                 }
 
-            case .face:
-                icon = withUnsafePointer(to: &faceIcon) { ptr in
-                    return UnsafeMutableRawPointer(mutating: ptr)
-                }
-                
-            case .edge, .vertex:
-                icon = withUnsafePointer(to: &edgeIcon) { ptr in
+            case .resize:
+                icon = withUnsafePointer(to: &resizeIcon) { ptr in
                     return UnsafeMutableRawPointer(mutating: ptr)
                 }
         }
@@ -284,7 +275,7 @@ final class EditorLayer
         )
         
         if ImGuiIsItemClicked(Im(ImGuiMouseButton_Left)) {
-            selectionMode = mode
+            toolMode = mode
         }
         
         ImGuiPopStyleColor(3)
@@ -504,10 +495,8 @@ final class TextureProxy
     }
 }
 
-enum SelectionMode: String
+enum ToolMode: String
 {
-    case object
-    case vertex
-    case face
-    case edge
+    case brush
+    case resize
 }

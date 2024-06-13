@@ -13,7 +13,7 @@ class MTKGeometry
     private let mesh: MTKMesh
     
     enum MeshType {
-        case box, plane, sphere
+        case box, boxWired, sphere
     }
     
     var vertexBuffer: MTLBuffer? {
@@ -48,11 +48,12 @@ class MTKGeometry
                     allocator: allocator
                 )
                 
-            case .plane:
+            case .boxWired:
                 mdlMesh = MDLMesh(
-                    planeWithExtent: extents,
-                    segments: [1, 1],
-                    geometryType: .triangles,
+                    boxWithExtent: extents,
+                    segments: [1, 1, 1],
+                    inwardNormals: false,
+                    geometryType: .lines,
                     allocator: allocator
                 )
                 

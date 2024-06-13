@@ -9,9 +9,9 @@ import Foundation
 import MetalKit
 import SwiftBullet
 
-final class BrushScene
+final class World
 {
-    private (set) static var current: BrushScene!
+    private (set) static var current: World!
     
     var brushes: [Brush] = []
     
@@ -33,7 +33,7 @@ final class BrushScene
     
     init()
     {
-        BrushScene.current = self
+        World.current = self
         
         physicsWorld.gravity = vector3(0, -800 * q2b, 0)
     }
@@ -41,10 +41,6 @@ final class BrushScene
     func addBrush(position: float3, size: float3)
     {
         let brush = Brush(origin: position, size: size)
-        
-        brush.isSelected = true
-        
-        brushes.forEach { $0.isSelected = false }
         brushes.append(brush)
     }
     
@@ -133,7 +129,7 @@ final class BrushScene
         }
     }
     
-    func render(with renderer: ForwardRenderer)
+    func render(with renderer: Renderer)
     {
         for brush in brushes
         {
@@ -148,15 +144,13 @@ final class BrushScene
     
     func updateCSG()
     {
-        let csg = brushes.compactMap({ $0 as? Brush })
-        
-        csg.forEach {
+        brushes.forEach {
             $0.updateWinding()
         }
         
-        for a in csg
+        for a in brushes
         {
-            for b in csg
+            for b in brushes
             {
                 guard a !== b else { continue }
                 a.clip(with: b)
@@ -165,7 +159,7 @@ final class BrushScene
     }
 }
 
-extension BrushScene
+extension World
 {
     func startPlaying(in viewport: Viewport)
     {
@@ -231,7 +225,7 @@ extension BrushScene
     }
 }
 
-extension BrushScene
+extension World
 {
     private struct BrushSceneModel: Codable
     {

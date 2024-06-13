@@ -126,7 +126,7 @@ final class Brush: Entity
         }
     }
     
-    func render(with renderer: ForwardRenderer)
+    func render(with renderer: Renderer)
     {
         do
         {

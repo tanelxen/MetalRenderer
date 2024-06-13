@@ -12,18 +12,18 @@ import simd
 final class BlockTool3D
 {
     private let viewport: Viewport
-    private let cube = Cube()
+    
+    private let transform = Transform()
+    private let previewShape = MTKGeometry(.boxWired)
     
     private var gridSize: Float = 8
-    private var dragOrigin: float3?
-    
-    private var isCreationMode = false
-    private var isPlaneDrawn = false
-    private var height: Float = 0
-    private var startPoint: float3?
     
     private var downMouseTimestemp: Date?
-    private var downMousePos: float2?
+    
+    private var isStartedDraw = false
+    private var isPlaneDrawn = false
+    private var startPoint: float3?
+    private var startPoint2: float3?
     
     // Projection plane
     private var plane: Plane {
@@ -33,204 +33,145 @@ final class BlockTool3D
     init(viewport: Viewport)
     {
         self.viewport = viewport
-        
     }
     
     func update()
     {
-        if Mouse.IsMouseButtonPressed(.left) && Keyboard.isKeyPressed(.shift)
+        if Keyboard.isKeyPressed(.escape)
         {
-            if downMousePos == nil
+            reset()
+            return
+        }
+        
+        if Mouse.IsMouseButtonPressed(.left)
+        {
+            downMouseTimestemp = Date()
+        }
+        else if let timestemp = downMouseTimestemp
+        {
+            let timeInterval = Date().timeIntervalSince(timestemp)
+            
+            if timeInterval < 0.2
             {
-                downMousePos = Mouse.getMouseWindowPosition()
-                downMouseTimestemp = Date()
+                processClick()
+            }
+            
+            downMouseTimestemp = nil
+        }
+        
+        // Update preview size
+        if isStartedDraw, let start = startPoint
+        {
+            let ray = viewport.mousePositionInWorld()
+            
+            if isPlaneDrawn, let start = startPoint2
+            {
+                let normal = viewport.camera!.transform.rotation.forward
+                let distance = dot(normal, start)
+                let plane2 = Plane(normal: normal, distance: distance)
+                
+                guard var point = intersection(ray: ray, plane: plane2)
+                else {
+                    return
+                }
+                
+                point = floor(point / gridSize) * gridSize
+                
+                let y = min(start.y, point.y)
+                let height = abs(start.y - point.y) + gridSize
+                
+//                height -= Mouse.getDY()
+//                transform.scale.y = floor(height / gridSize) * gridSize
+                
+                transform.position.y = y
+                transform.scale.y = height
+            }
+            else
+            {
+                guard var point = intersection(ray: ray, plane: plane)
+                else {
+                    return
+                }
+                
+                point = floor(point / gridSize) * gridSize
+                
+                let x = min(start.x, point.x)
+//                let y = min(start.y, point.y)
+                let z = min(start.z, point.z)
+                
+                let width = abs(start.x - point.x) + gridSize
+//                let height = abs(start.y - point.y) + gridSize
+                let depth = abs(start.z - point.z) + gridSize
+                
+                transform.position = float3(x, 0, z)
+                transform.scale = float3(width, 0, depth)
+            }
+        }
+    }
+    
+    func draw(with renderer: Renderer)
+    {
+        if isStartedDraw
+        {
+            var renderItem = RenderItem(mtkMesh: previewShape)
+
+            renderItem.tintColor = [1, 1, 1, 1]
+            renderItem.isSupportLineMode = false
+
+            renderItem.transform.position = transform.position + transform.scale * 0.5
+            renderItem.transform.scale = transform.scale
+
+            renderer.add(item: renderItem)
+        }
+    }
+    
+    func reset()
+    {
+        downMouseTimestemp = nil
+        isStartedDraw = false
+        isPlaneDrawn = false
+        startPoint = nil
+        startPoint2 = nil
+    }
+    
+    private func processClick()
+    {
+        if isStartedDraw
+        {
+            // Finish drawing
+            if isPlaneDrawn
+            {
+                World.current.addBrush(position: transform.position, size: transform.scale)
+                reset()
+            }
+            else
+            {
+                isPlaneDrawn = true
+                
+                let ray = viewport.mousePositionInWorld()
+                
+                guard let point = intersection(ray: ray, plane: plane)
+                else {
+                    return
+                }
+                
+                startPoint2 = floor(point / gridSize) * gridSize
             }
         }
         else
         {
-            if let oldPos = downMousePos, let timestemp = downMouseTimestemp
+            let ray = viewport.mousePositionInWorld()
+            
+            if var point = intersection(ray: ray, plane: plane)
             {
-                let newPos = Mouse.getMouseWindowPosition()
-                let delta = length(newPos - oldPos)
+                point = floor(point / gridSize) * gridSize
                 
-                let timeInterval = Date().timeIntervalSince(timestemp)
+                transform.position = point
+                transform.scale = float3(gridSize, gridSize, gridSize)
                 
-                if timeInterval < 0.3, delta < gridSize * 0.5
-                {
-                    print("Select click")
-                    
-                    let ray = viewport.mousePositionInWorld()
-                    BrushScene.current.select(by: ray)
-                }
-                
-                downMouseTimestemp = nil
-                downMousePos = nil
+                startPoint = point
+                isStartedDraw = true
             }
         }
-        
-//        let ray = viewport.mousePositionInWorld()
-//
-//        guard var point = intersection(ray: ray, plane: plane)
-//        else {
-//            return
-//        }
-//
-//        // Sometimes we get coordinates little bit less zero
-//        point = round(point * 10) / 10
-//
-//        point = floor(point / gridSize) * gridSize
-//
-//        isCreationMode = Keyboard.isKeyPressed(.c)
-//
-//        if isCreationMode
-//        {
-//            if let start = startPoint
-//            {
-//                if Mouse.IsMouseButtonPressed(.left)
-//                {
-//                    let x = min(start.x, point.x)
-//                    let z = min(start.z, point.z)
-//                    let width = abs(start.x - point.x) + gridSize
-//                    let depth = abs(start.z - point.z) + gridSize
-//
-//                    cube.transform.position = float3(x, 0, z)
-//                    cube.transform.scale = float3(width, 0, depth)
-//                    isPlaneDrawn = true
-//                }
-//                else if isPlaneDrawn
-//                {
-//                    height -= Mouse.getDY()
-//                    cube.transform.scale.y = floor(height / gridSize) * gridSize
-//                }
-//            }
-//            else
-//            {
-//                cube.transform.position = point
-//                cube.transform.scale = float3(gridSize, gridSize, gridSize)
-//
-//                if Mouse.IsMouseButtonPressed(.left)
-//                {
-//                    startPoint = point
-//                    isPlaneDrawn = false
-//                    height = gridSize
-//                }
-//            }
-//        }
-//        else
-//        {
-//            if isPlaneDrawn, cube.transform.scale.y > 0
-//            {
-//                BrushScene.current.addBrush(position: cube.transform.position, size: cube.transform.scale)
-//            }
-//
-//            startPoint = nil
-//            isPlaneDrawn = false
-//            height = gridSize
-//        }
-    }
-    
-    func draw(with renderer: ForwardRenderer)
-    {
-        if isCreationMode
-        {
-            cube.render(with: renderer)
-        }
-    }
-}
-
-private struct BasicVertex
-{
-    let pos: float3
-    let uv: float2 = .zero
-    
-    init(_ x: Float, _ y: Float, _ z: Float)
-    {
-        self.pos = float3(x, y, z)
-    }
-}
-
-private final class Cube
-{
-    private var minBounds: float3 = .zero
-    private var maxBounds: float3 = .one
-    
-    private var vertices: [BasicVertex] = []
-    private var indicies: [UInt16] = []
-    
-    private var verticesBuffer: MTLBuffer!
-    private var indiciesBuffer: MTLBuffer!
-    
-    let transform = Transform()
-
-    init()
-    {
-        vertices = [
-            BasicVertex(minBounds.x, minBounds.y, minBounds.z),  // Back     Right   Bottom      0
-            BasicVertex(maxBounds.x, minBounds.y, minBounds.z),  // Front    Right   Bottom      1
-            BasicVertex(minBounds.x, maxBounds.y, minBounds.z),  // Back     Left    Bottom      2
-            BasicVertex(maxBounds.x, maxBounds.y, minBounds.z),  // Front    Left    Bottom      3
-            
-            BasicVertex(minBounds.x, minBounds.y, maxBounds.z),  // Back     Right   Top         4
-            BasicVertex(maxBounds.x, minBounds.y, maxBounds.z),  // Front    Right   Top         5
-            BasicVertex(minBounds.x, maxBounds.y, maxBounds.z),  // Back     Left    Top         6
-            BasicVertex(maxBounds.x, maxBounds.y, maxBounds.z)   // Front    Left    Top         7
-        ]
-        
-        indicies = [
-            //Top
-            4, 6, 5,
-            5, 6, 7,
-            
-            //Bottom
-            2, 0, 3,
-            3, 0, 1,
-            
-            //Back
-            0, 2, 4,
-            4, 2, 6,
-            
-            //Front
-            3, 1, 7,
-            7, 1, 5,
-            
-            //Right
-            1, 0, 5,
-            5, 0, 4,
-            
-            //Left
-            2, 3, 6,
-            6, 3, 7,
-        ]
-        
-        verticesBuffer = Engine.device.makeBuffer(
-            bytes: vertices,
-            length: MemoryLayout<BasicVertex>.stride * vertices.count,
-            options: []
-        )
-        
-        indiciesBuffer = Engine.device.makeBuffer(
-            bytes: indicies,
-            length: MemoryLayout<UInt16>.size * indicies.count,
-            options: []
-        )
-    }
-    
-    func render(with renderer: ForwardRenderer)
-    {
-        guard verticesBuffer != nil else { return }
-        
-        var renderItem = RenderItem(technique: .basic)
-        renderItem.cullMode = .back
-        renderItem.tintColor = [1, 0, 1, 0.3]
-        
-        renderItem.transform = transform
-        
-        renderItem.primitiveType = .triangle
-        renderItem.vertexBuffer = verticesBuffer
-        
-        renderItem.indexBuffer = indiciesBuffer
-        renderItem.numIndices = indicies.count
-        
-        renderer.add(item: renderItem)
     }
 }

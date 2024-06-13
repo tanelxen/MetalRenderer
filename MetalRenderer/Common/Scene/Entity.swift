@@ -10,7 +10,7 @@ protocol Entity: AnyObject
     var isSelected: Bool { get set }
     var transform: Transform { get set }
     
-    func render(with renderer: ForwardRenderer)
+    func render(with renderer: Renderer)
 }
 
 class InfoPlayerStart: Entity
@@ -21,7 +21,7 @@ class InfoPlayerStart: Entity
     private lazy var box = MTKGeometry(.box, extents: [32, 56, 32])
     private lazy var arrow = MTKGeometry(.box, extents: [1, 8, 1])
     
-    func render(with renderer: ForwardRenderer)
+    func render(with renderer: Renderer)
     {
         var renderItem = RenderItem(mtkMesh: box)
         

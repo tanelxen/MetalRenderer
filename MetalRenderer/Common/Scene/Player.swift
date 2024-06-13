@@ -18,7 +18,7 @@ class Player
     
     private var velocity: float3 = .zero
     
-    private weak var scene: BrushScene!
+    private weak var scene: World!
     
     private (set) var motionState: BulletMotionState?
     private (set) var rigidBody: BulletRigidBody?
@@ -34,7 +34,7 @@ class Player
     
     private var pickConstraint: BulletPoint2PointConstraint?
     
-    init(scene: BrushScene)
+    init(scene: World)
     {
         self.scene = scene
     }

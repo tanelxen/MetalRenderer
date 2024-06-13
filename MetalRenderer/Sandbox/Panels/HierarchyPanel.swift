@@ -17,7 +17,7 @@ final class HierarchyPanel
         
         drawPlayerStart()
         
-        for (i, brush) in BrushScene.current.brushes.enumerated()
+        for (i, brush) in World.current.brushes.enumerated()
         {
             drawBrush(brush, index: i)
         }
@@ -51,9 +51,9 @@ final class HierarchyPanel
             }
             else
             {
-                for j in BrushScene.current.brushes.indices
+                for j in World.current.brushes.indices
                 {
-                    BrushScene.current.brushes[j].isSelected = j == index
+                    World.current.brushes[j].isSelected = j == index
                 }
             }
         }
@@ -68,7 +68,7 @@ final class HierarchyPanel
     
     private func drawPlayerStart()
     {
-        guard let entity = BrushScene.current.infoPlayerStart
+        guard let entity = World.current.infoPlayerStart
         else {
             return
         }
@@ -102,7 +102,7 @@ final class HierarchyPanel
             let entity = InfoPlayerStart()
             entity.transform.position.y = 28
             
-            BrushScene.current.infoPlayerStart = entity
+            World.current.infoPlayerStart = entity
         }
     }
 }

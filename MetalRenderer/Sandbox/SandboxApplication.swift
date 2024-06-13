@@ -17,8 +17,8 @@ final class SandboxApplication: NSObject
     
     private var viewport: Viewport!
     private var viewport2: Viewport!
-    private var renderer: ForwardRenderer!
-    private var scene = BrushScene()
+    private var renderer: Renderer!
+    private var scene = World()
     
     private var editor: EditorLayer?
     
@@ -37,7 +37,7 @@ final class SandboxApplication: NSObject
         
         Engine.ignite(device: view.device!)
         
-        renderer = ForwardRenderer()
+        renderer = Renderer()
         
         viewport = Viewport()
         viewport.dpi = Float(NSScreen.main!.backingScaleFactor)
@@ -89,7 +89,7 @@ final class SandboxApplication: NSObject
 
         if dialog.runModal() == .OK, let fileURL = dialog.url
         {
-            BrushScene.current.openMap(fileURL)
+            World.current.openMap(fileURL)
         }
     }
     
@@ -104,7 +104,7 @@ final class SandboxApplication: NSObject
 
         if dialog.runModal() == .OK, let fileURL = dialog.url
         {
-            BrushScene.current.saveMap(fileURL)
+            World.current.saveMap(fileURL)
         }
     }
     

@@ -18,10 +18,10 @@ final class InspectorPanel
         
         if ImGuiButton("Update CSG")
         {
-            BrushScene.current.updateCSG()
+            World.current.updateCSG()
         }
         
-        guard let brush = BrushScene.current.selected else { return }
+        guard let brush = World.current.selected else { return }
         
         var isRoom = brush.isRoom
         

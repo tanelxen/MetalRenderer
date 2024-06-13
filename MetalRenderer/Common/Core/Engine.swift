@@ -6,6 +6,7 @@
 //
 
 import MetalKit
+import simd
 
 enum Engine
 {
@@ -26,3 +27,7 @@ enum Preferences
     static let colorPixelFormat: MTLPixelFormat = .bgra8Unorm_srgb
     static let depthStencilPixelFormat: MTLPixelFormat = .depth32Float
 }
+
+typealias float2 = SIMD2<Float>
+typealias float3 = SIMD3<Float>
+typealias float4 = SIMD4<Float>

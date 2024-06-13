@@ -24,7 +24,7 @@ final class ViewportPanel
     private (set) var isHovered = false
     
     var isPlaying: Bool {
-        BrushScene.current?.isPlaying ?? false
+        World.current?.isPlaying ?? false
     }
     
     init(viewport: Viewport)
@@ -38,7 +38,7 @@ final class ViewportPanel
     
     private var gizmoType: ImGuizmoType = .translate
     
-    func drawSpecial(with renderer: ForwardRenderer)
+    func drawSpecial(with renderer: Renderer)
     {
         if !isPlaying
         {
@@ -101,8 +101,13 @@ final class ViewportPanel
         
         if isHovered
         {
-            if EditorLayer.current.selectionMode == .object {
-                blockTool.update()
+            switch EditorLayer.current.toolMode
+            {
+                case .brush:
+                    blockTool.update()
+                    
+                case .resize:
+                     break
             }
             
             camera.update()
@@ -111,7 +116,7 @@ final class ViewportPanel
     
     private func updateOperations()
     {
-        if let entity = BrushScene.current.infoPlayerStart, entity.isSelected
+        if let entity = World.current.infoPlayerStart, entity.isSelected
         {
             let transform = Transform(position: entity.transform.position)
             
@@ -122,11 +127,21 @@ final class ViewportPanel
             
             return
         }
+        
+        if Keyboard.isKeyPressed(.escape)
+        {
+            World.current.selected?.isSelected = false
+        }
+        
+        if Keyboard.isKeyPressed(.delete)
+        {
+            World.current.removeSelected()
+        }
     }
     
     private func startPlaying()
     {
-        guard let scene = BrushScene.current else { return }
+        guard let scene = World.current else { return }
         
         scene.startPlaying(in: viewport)
         
@@ -136,7 +151,7 @@ final class ViewportPanel
     
     private func stopPlaying()
     {
-        BrushScene.current.stopPlaying()
+        World.current.stopPlaying()
         viewport.camera = camera
         
         NSCursor.unhide()
