@@ -16,10 +16,6 @@ extension Float
     var degrees: Float {
         return self * 180.0 / Float.pi
     }
-    
-    static var randomNormalized: Float {
-        Float(arc4random()) / Float(UINT32_MAX)
-    }
 }
 
 extension float3
@@ -27,13 +23,6 @@ extension float3
     static let x_axis = float3(1, 0, 0)
     static let y_axis = float3(0, 1, 0)
     static let z_axis = float3(0, 0, 1)
-}
-
-extension float4
-{
-    static var randomColor: float4 {
-        float4(.randomNormalized, .randomNormalized, .randomNormalized, 1.0)
-    }
 }
 
 extension simd_float3
@@ -44,12 +33,6 @@ extension simd_float3
         let result = lhs * simd_float4(rhs.x, rhs.y, rhs.z, 1)
         return simd_float3(result.x/result.w, result.y/result.w, result.z/result.w)
     }
-    
-//    static func * (lhs: simd_float4x4, rhs: simd_float3) -> simd_float3
-//    {
-//        let result = lhs * simd_float4(rhs.x, rhs.y, rhs.z, 1)
-//        return simd_float3(result.x, result.y, result.z)
-//    }
     
     func translate(_ matrix: inout simd_float4x4) -> simd_float3
     {

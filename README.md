@@ -21,10 +21,12 @@ Features:
 ## PREVIEW
 ![sandbox run mode](https://github.com/tanelxen/MetalRenderer/assets/14359330/a250ff78-26f6-4284-a62f-20dbdd3feaa2)
 
+## THIS REPOSITORY IS ABANDONED
+It was funny to try make it all with Swift. But I constantly encountered the difficulties this language bring. I got tired of struggling with Swift and decided to continue developing in C++ and OpenGL.
+
 ## NOTE
 At this moment the code doesn't look good because I'm experimenting with some techniques and trying to find out better way.
 Don't take it as production ready game engine. It's just my playground. However, I seek to stay code quite straightforward and understandable.
-Later I'm going to refactor all of that. And then perhaps it will be useful for someone.
 
 Better to run Sandbox first time. While first running Sandbox asks you to locate 'Working Dir'. In this case you'll have to choose directory 'WorkingDir' at directory with project. After that Game should work fine. You always can change 'Working Dir' via Settings menu in the toolbar.
 
@@ -36,17 +38,7 @@ Keep in mind that paths to skeletal mesh assets are hardcoded in the code. Sandb
 
 Repository uses Git LFS.
 
-## IN PRORESS
-- 🚧 Brush based geometry creation inside editor
-
-## TODO
-- [ ] Brush creation inside Sandbox
-- [ ] Animation system
-- [ ] Player and AI controllers
-- [ ] Support Half-Life 2 models and maps
-- [ ] GPU driven particle system
-- [ ] Material system
-- [ ] Rendering UI (besides crosshair)
-- [ ] Improve audio engine
-- [ ] Rewrite Sandbox in Qt
-- [ ] ⚠️ Refactoring all this stuff ⚠️
+## ANOTHER BRANCHES
+- spatial-partition branch contains structures and algorithms for collision detection: aabb-tree, octree and spation hash grid. And the last one works much faster than bsp.
+- brush-drawing brunch contains some code for half-edge mesh editing.
+- csg branch contains level editing code: drawing brushes, csg-operations, applying textures.
